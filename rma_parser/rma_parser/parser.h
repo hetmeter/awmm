@@ -23,6 +23,11 @@
 #include <list>
 #endif
 
+#ifndef __VECTOR_INCLUDED__
+#define __VECTOR_INCLUDED__
+#include <vector>
+#endif
+
 #ifndef __PARSERTOKEN_H_INCLUDED__
 #define __PARSERTOKEN_H_INCLUDED__
 #include "parserToken.h"
@@ -31,6 +36,25 @@
 using namespace std;
 
 const char DESCRIPTION_RULE_SEPARATOR = '\t';
+const string WHITESPACES = " \t\r\n";
+
+struct wordList
+{
+	vector<string> words;
+
+	void parseString(string input)
+	{
+		if (input != "")
+		{
+			char currentWhitespace;
+			bool parsingWhitespace;
+			string currentWord = "";
+
+			// left off here
+		}
+	}
+};
+typedef struct wordList wordList;
 
 string parse(string lexerPath)
 {
@@ -111,4 +135,20 @@ string parse(string lexerPath)
 	}
 
 	return result;
+}
+
+bool isWhitespace(char c)
+{
+	int ctr = 0;
+	char currentChar = WHITESPACES[ctr];
+
+	while (currentChar != '\0')
+	{
+		if (currentChar == c)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
