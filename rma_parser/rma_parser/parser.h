@@ -23,23 +23,16 @@
 #include <list>
 #endif
 
+#ifndef __PARSERTOKEN_H_INCLUDED__
+#define __PARSERTOKEN_H_INCLUDED__
+#include "parserToken.h"
+#endif
+
 using namespace std;
-
-struct lexerToken
-{
-	string description;
-	string rule;
-
-	string ToString()
-	{
-		return "token " + description + " implements " + rule;
-	}
-};
-typedef struct lexerToken lexerToken;
 
 const char DESCRIPTION_RULE_SEPARATOR = '\t';
 
-string parseLexer(string lexerPath)
+string parse(string lexerPath)
 {
 	//load the text file and put it into a single string:
 	ifstream lexerFile(lexerPath);
@@ -49,13 +42,13 @@ string parseLexer(string lexerPath)
 
 	lexerFile.close();
 
-	list<lexerToken> tokens;
+	list<parserToken> tokens;
 	int lexerStringCharCounter = 0;
 	string currentDescription = "";
 	string currentRule = "";
 	bool parsingDescription = true;
 	char currentChar = lexerString[lexerStringCharCounter];
-	lexerToken* currentToken;
+	parserToken* currentToken;
 
 	while (true)
 	{
@@ -80,7 +73,7 @@ string parseLexer(string lexerPath)
 			}
 			else if (currentChar == '\n' || currentChar == '\0')
 			{
-				currentToken = new lexerToken;
+				currentToken = new parserToken;
 				currentToken->description = currentDescription;
 				currentToken->rule = currentRule;
 

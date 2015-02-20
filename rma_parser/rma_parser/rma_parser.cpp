@@ -13,25 +13,25 @@
 #include <string>
 #endif
 
-#ifndef __LEXER_H_INCLUDED__
-#define __LEXER_H_INCLUDED__
-#include "lexer.h"
+#ifndef __PARSER_H_INCLUDED__
+#define __PARSER_H_INCLUDED__
+#include "parser.h"
 #endif
 
 using namespace std;
 
 int main(int argc, char** argv)
 {
-	string lexerPath;
+	string rulesPath;
 	string outputPath;
 
 	if (argc > 1)
 	{
-		lexerPath = argv[1];
+		rulesPath = argv[1];
 	}
 	else
 	{
-		cout << "No lexer path specified\n";
+		cout << "No rule file path specified\n";
 		return 1;
 	}
 
@@ -45,9 +45,9 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	cout << lexerPath << '\n';
+	cout << rulesPath << '\n';
 
-	string parsedLexer = parseLexer(lexerPath);
+	string parsedLexer = parse(rulesPath);
 
 	ofstream out(outputPath);
 	out << parsedLexer;
