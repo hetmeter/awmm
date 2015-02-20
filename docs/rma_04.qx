@@ -1,0 +1,15 @@
+header
+{
+#include <cstdlib>
+}
+
+mode ONE_AND_ONLY
+{
+	<<EOF>>					=>	QUEX_TKN_TERMINATION;
+	
+	[ \t\r\n]+				=>	{ }
+	"beginit"				=>	QUEX_TKN_BEGINIT_KEYWORD;
+	"endinit"				=>	QUEX_TKN_ENDINIT_KEYWORD;
+	[0-9]+					=>	QUEX_TKN_INTEGER(number = atoi((char*)Lexeme));
+	[_a-zA-Z][0-9a-zA-Z]*	=>	QUEX_TKN_IDENTIFIER(Lexeme);
+}
