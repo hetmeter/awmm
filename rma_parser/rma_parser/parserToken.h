@@ -7,12 +7,12 @@ using namespace std;
 
 struct parserToken
 {
-	string description;
+	string tag;
 	string rule;
 
-	string ToString()
+	string toString()
 	{
-		return "Parser token " + description + " implements " + rule;
+		return "Parser token " + tag + " implements " + rule;
 	}
 };
 typedef struct parserToken parserToken;

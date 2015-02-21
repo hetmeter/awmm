@@ -38,32 +38,128 @@ using namespace std;
 const char DESCRIPTION_RULE_SEPARATOR = '\t';
 const string WHITESPACES = " \t\r\n";
 
+bool isWhitespace(char c)
+{
+	int ctr = 0;
+	char currentChar = WHITESPACES[ctr];
+
+	while (currentChar != '\0')
+	{
+		if (currentChar == c)
+		{
+			return true;
+		}
+
+		ctr++;
+		currentChar = WHITESPACES[ctr];
+	}
+
+	return false;
+}
+
 struct wordList
 {
 	vector<string> words;
+	int wordCount = 0;
+
+	void appendWord(string word)
+	{
+		//cout << "\t\t\t" << word << "\n";
+		words.push_back(word);
+		wordCount++;
+	}
 
 	void parseString(string input)
 	{
 		if (input != "")
 		{
-			char currentWhitespace;
-			bool parsingWhitespace;
 			string currentWord = "";
+			int ctr = 0;
+			char currentChar = input[ctr];
+			//bool parsingWhitespace = isWhitespace(currentChar);
+			//char currentWhitespace = parsingWhitespace ? currentChar : '\0';
+			bool parsingWhitespace = false;
+			bool currentCharIsWhitespace = isWhitespace(currentChar);
+			char currentWhitespace = '\0';
 
-			// left off here
+			while (currentChar != '\0')
+			{
+				//cout << "Parsing " << currentChar << "\n";
+
+				if (parsingWhitespace)
+				{
+					if (currentCharIsWhitespace && currentChar == currentWhitespace)
+					{
+						//cout << "\tAdding " << currentChar << " to current word\n";
+						currentWord += currentChar;
+						//cout << "\t\t" << currentWord << "\n";
+					}
+					else if (currentCharIsWhitespace && currentChar != currentWhitespace)
+					{
+						//cout << "\t\tAdding " << currentWord << " to list\n";
+						appendWord(currentWord);
+						//cout << "\tAdding " << currentChar << " to current word\n";
+						currentWord = string(1, currentChar);
+					}
+					else
+					{
+						//cout << "\t\tAdding " << currentWord << " to list\n";
+						appendWord(currentWord);
+						//cout << "\tAdding " << currentChar << " to current word\n";
+						currentWord = string(1, currentChar);
+						parsingWhitespace = false;
+					}
+				}
+				else
+				{
+					if (currentCharIsWhitespace)
+					{
+						//cout << "\t\tAdding " << currentWord << " to list\n";
+						appendWord(currentWord);
+						//cout << "\tAdding " << currentChar << " to current word\n";
+						currentWord = string(1, currentChar);
+						parsingWhitespace = true;
+					}
+					else
+					{
+						//cout << "\tAdding " << currentChar << " to current word\n";
+						currentWord += currentChar;
+						//cout << "\t\t" << currentWord << "\n";
+					}
+				}
+
+				ctr++;
+				currentChar = input[ctr];
+				currentCharIsWhitespace = isWhitespace(currentChar);
+			}
 		}
+	}
+
+	string toString()
+	{
+		string result = "";
+
+		for (int ctr = 0; ctr < wordCount; ctr++)
+		{
+			result += words[ctr] + "\n";
+		}
+
+		return result;
+	}
+
+	void applyRule(parserToken token)
+	{
+		// left off here
 	}
 };
 typedef struct wordList wordList;
 
-string parse(string lexerPath)
+string parse(string lexerPath, string inputPath)
 {
-	//load the text file and put it into a single string:
 	ifstream lexerFile(lexerPath);
-	stringstream buffer;
-	buffer << lexerFile.rdbuf();
-	string lexerString = buffer.str();
-
+	stringstream lexerBuffer;
+	lexerBuffer << lexerFile.rdbuf();
+	string lexerString = lexerBuffer.str();
 	lexerFile.close();
 
 	list<parserToken> tokens;
@@ -76,7 +172,7 @@ string parse(string lexerPath)
 
 	while (true)
 	{
-		cout << "Parsing " << currentChar << "\n";
+		//cout << "Parsing " << currentChar << "\n";
 
 		if (parsingDescription)
 		{
@@ -98,7 +194,7 @@ string parse(string lexerPath)
 			else if (currentChar == '\n' || currentChar == '\0')
 			{
 				currentToken = new parserToken;
-				currentToken->description = currentDescription;
+				currentToken->tag = currentDescription;
 				currentToken->rule = currentRule;
 
 				currentDescription = "";
@@ -123,32 +219,26 @@ string parse(string lexerPath)
 		currentChar = lexerString[lexerStringCharCounter];
 	}
 
-	string result = "";
-	int numberOfTokens = tokens.size();
+	ifstream inputFile(inputPath);
+	stringstream inputBuffer;
+	inputBuffer << inputFile.rdbuf();
+	string result = inputBuffer.str();
+	//string result = "";
+	inputFile.close();
 
-	while (!tokens.empty())
-	{
-		cout << "tokens.size() = " << tokens.size() << "\n";
+	//int numberOfTokens = tokens.size();
 
-		result.append(tokens.front().ToString() + "\n");
-		tokens.pop_front();
-	}
+	//while (!tokens.empty())
+	//{
+	//	//cout << "tokens.size() = " << tokens.size() << "\n";
+
+	//	result.append(tokens.front().ToString() + "\n");
+	//	tokens.pop_front();
+	//}
+
+	wordList inputWordList;
+	inputWordList.parseString(result);
+	result = inputWordList.toString();
 
 	return result;
-}
-
-bool isWhitespace(char c)
-{
-	int ctr = 0;
-	char currentChar = WHITESPACES[ctr];
-
-	while (currentChar != '\0')
-	{
-		if (currentChar == c)
-		{
-			return true;
-		}
-	}
-
-	return false;
 }

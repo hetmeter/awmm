@@ -23,6 +23,7 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	string rulesPath;
+	string inputPath;
 	string outputPath;
 
 	if (argc > 1)
@@ -37,7 +38,17 @@ int main(int argc, char** argv)
 
 	if (argc > 2)
 	{
-		outputPath = argv[2];
+		inputPath = argv[2];
+	}
+	else
+	{
+		cout << "No input path specified\n";
+		return 1;
+	}
+
+	if (argc > 3)
+	{
+		outputPath = argv[3];
 	}
 	else
 	{
@@ -47,7 +58,7 @@ int main(int argc, char** argv)
 
 	cout << rulesPath << '\n';
 
-	string parsedLexer = parse(rulesPath);
+	string parsedLexer = parse(rulesPath, inputPath);
 
 	ofstream out(outputPath);
 	out << parsedLexer;
