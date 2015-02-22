@@ -28,131 +28,27 @@
 #include <vector>
 #endif
 
+#ifndef __ALGORITHM_INCLUDED__
+#define __ALGORITHM_INCLUDED__
+#include <algorithm>
+#endif
+
 #ifndef __PARSERTOKEN_H_INCLUDED__
 #define __PARSERTOKEN_H_INCLUDED__
 #include "parserToken.h"
 #endif
 
+#ifndef __WORDLIST_H_INCLUDED__
+#define __WORDLIST_H_INCLUDED__
+#include "wordList.h"
+#endif
+
+#ifndef __DISJUNCTIVEPREDICATES_H_INCLUDED__
+#define __DISJUNCTIVEPREDICATES_H_INCLUDED__
+#include "disjunctivePredicates.h"
+#endif
+
 using namespace std;
-
-const char DESCRIPTION_RULE_SEPARATOR = '\t';
-const string WHITESPACES = " \t\r\n";
-
-bool isWhitespace(char c)
-{
-	int ctr = 0;
-	char currentChar = WHITESPACES[ctr];
-
-	while (currentChar != '\0')
-	{
-		if (currentChar == c)
-		{
-			return true;
-		}
-
-		ctr++;
-		currentChar = WHITESPACES[ctr];
-	}
-
-	return false;
-}
-
-struct wordList
-{
-	vector<string> words;
-	int wordCount = 0;
-
-	void appendWord(string word)
-	{
-		//cout << "\t\t\t" << word << "\n";
-		words.push_back(word);
-		wordCount++;
-	}
-
-	void parseString(string input)
-	{
-		if (input != "")
-		{
-			string currentWord = "";
-			int ctr = 0;
-			char currentChar = input[ctr];
-			//bool parsingWhitespace = isWhitespace(currentChar);
-			//char currentWhitespace = parsingWhitespace ? currentChar : '\0';
-			bool parsingWhitespace = false;
-			bool currentCharIsWhitespace = isWhitespace(currentChar);
-			char currentWhitespace = '\0';
-
-			while (currentChar != '\0')
-			{
-				//cout << "Parsing " << currentChar << "\n";
-
-				if (parsingWhitespace)
-				{
-					if (currentCharIsWhitespace && currentChar == currentWhitespace)
-					{
-						//cout << "\tAdding " << currentChar << " to current word\n";
-						currentWord += currentChar;
-						//cout << "\t\t" << currentWord << "\n";
-					}
-					else if (currentCharIsWhitespace && currentChar != currentWhitespace)
-					{
-						//cout << "\t\tAdding " << currentWord << " to list\n";
-						appendWord(currentWord);
-						//cout << "\tAdding " << currentChar << " to current word\n";
-						currentWord = string(1, currentChar);
-					}
-					else
-					{
-						//cout << "\t\tAdding " << currentWord << " to list\n";
-						appendWord(currentWord);
-						//cout << "\tAdding " << currentChar << " to current word\n";
-						currentWord = string(1, currentChar);
-						parsingWhitespace = false;
-					}
-				}
-				else
-				{
-					if (currentCharIsWhitespace)
-					{
-						//cout << "\t\tAdding " << currentWord << " to list\n";
-						appendWord(currentWord);
-						//cout << "\tAdding " << currentChar << " to current word\n";
-						currentWord = string(1, currentChar);
-						parsingWhitespace = true;
-					}
-					else
-					{
-						//cout << "\tAdding " << currentChar << " to current word\n";
-						currentWord += currentChar;
-						//cout << "\t\t" << currentWord << "\n";
-					}
-				}
-
-				ctr++;
-				currentChar = input[ctr];
-				currentCharIsWhitespace = isWhitespace(currentChar);
-			}
-		}
-	}
-
-	string toString()
-	{
-		string result = "";
-
-		for (int ctr = 0; ctr < wordCount; ctr++)
-		{
-			result += words[ctr] + "\n";
-		}
-
-		return result;
-	}
-
-	void applyRule(parserToken token)
-	{
-		// left off here
-	}
-};
-typedef struct wordList wordList;
 
 string parse(string lexerPath, string inputPath)
 {
@@ -162,7 +58,7 @@ string parse(string lexerPath, string inputPath)
 	string lexerString = lexerBuffer.str();
 	lexerFile.close();
 
-	list<parserToken> tokens;
+	vector<parserToken> tokens;
 	int lexerStringCharCounter = 0;
 	string currentDescription = "";
 	string currentRule = "";
@@ -219,12 +115,12 @@ string parse(string lexerPath, string inputPath)
 		currentChar = lexerString[lexerStringCharCounter];
 	}
 
-	ifstream inputFile(inputPath);
-	stringstream inputBuffer;
-	inputBuffer << inputFile.rdbuf();
-	string result = inputBuffer.str();
-	//string result = "";
-	inputFile.close();
+	//ifstream inputFile(inputPath);
+	//stringstream inputBuffer;
+	//inputBuffer << inputFile.rdbuf();
+	//string result = inputBuffer.str();
+	////string result = "";
+	//inputFile.close();
 
 	//int numberOfTokens = tokens.size();
 
@@ -236,9 +132,17 @@ string parse(string lexerPath, string inputPath)
 	//	tokens.pop_front();
 	//}
 
-	wordList inputWordList;
-	inputWordList.parseString(result);
-	result = inputWordList.toString();
+	//wordList inputWordList;
+	//inputWordList.parseString(result);
+	//result = inputWordList.toString();
+
+	disjunctivePredicates rules;
+	int numberOfTokens = tokens.size();
+	for (int ctr = 0; ctr < numberOfTokens; ctr++)
+	{
+		rules.parsePredicates(tokens[ctr].rule);
+	}
+	string result = rules.toString();
 
 	return result;
 }
