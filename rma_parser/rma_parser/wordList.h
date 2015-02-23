@@ -47,66 +47,38 @@ struct wordList
 
 	void parseString(string input)
 	{
-		if (input != "")
+		cout << "Parsing \"" << input << "\" for a wordList...\n";
+
+		string temp = "";
+		int ctr = 0;
+		char currentChar = input[ctr];
+		bool charIsWhitespace = isWhitespace(currentChar);
+		bool lastCharWasWhitespace = isWhitespace(currentChar);
+
+		while (currentChar != '\0')
 		{
-			string currentWord = "";
-			int ctr = 0;
-			char currentChar = input[ctr];
-			//bool parsingWhitespace = isWhitespace(currentChar);
-			//char currentWhitespace = parsingWhitespace ? currentChar : '\0';
-			bool parsingWhitespace = false;
-			bool currentCharIsWhitespace = isWhitespace(currentChar);
-			char currentWhitespace = '\0';
-
-			while (currentChar != '\0')
+			if (lastCharWasWhitespace == charIsWhitespace)	// Non-whitespace continuing
 			{
-				//cout << "Parsing " << currentChar << "\n";
+				temp += currentChar;
+			}
+			else
+			{
+				cout << "\tAppending \"" << temp << "\"\n";
 
-				if (parsingWhitespace)
-				{
-					if (currentCharIsWhitespace && currentChar == currentWhitespace)
-					{
-						//cout << "\tAdding " << currentChar << " to current word\n";
-						currentWord += currentChar;
-						//cout << "\t\t" << currentWord << "\n";
-					}
-					else if (currentCharIsWhitespace && currentChar != currentWhitespace)
-					{
-						//cout << "\t\tAdding " << currentWord << " to list\n";
-						appendWord(currentWord);
-						//cout << "\tAdding " << currentChar << " to current word\n";
-						currentWord = string(1, currentChar);
-					}
-					else
-					{
-						//cout << "\t\tAdding " << currentWord << " to list\n";
-						appendWord(currentWord);
-						//cout << "\tAdding " << currentChar << " to current word\n";
-						currentWord = string(1, currentChar);
-						parsingWhitespace = false;
-					}
-				}
-				else
-				{
-					if (currentCharIsWhitespace)
-					{
-						//cout << "\t\tAdding " << currentWord << " to list\n";
-						appendWord(currentWord);
-						//cout << "\tAdding " << currentChar << " to current word\n";
-						currentWord = string(1, currentChar);
-						parsingWhitespace = true;
-					}
-					else
-					{
-						//cout << "\tAdding " << currentChar << " to current word\n";
-						currentWord += currentChar;
-						//cout << "\t\t" << currentWord << "\n";
-					}
-				}
+				appendWord(temp);
+				temp = string(1, currentChar);
+			}
 
-				ctr++;
-				currentChar = input[ctr];
-				currentCharIsWhitespace = isWhitespace(currentChar);
+			lastCharWasWhitespace = isWhitespace(currentChar);
+			ctr++;
+			currentChar = input[ctr];
+			charIsWhitespace = isWhitespace(currentChar);
+
+			if (currentChar == '\0')
+			{
+				cout << "\tAppending \"" << temp << "\"\n";
+
+				appendWord(temp);
 			}
 		}
 	}
@@ -143,11 +115,6 @@ struct wordList
 		}
 
 		//cout << "Finished pruning\n";
-	}
-
-	void applyRule(parserToken token)
-	{
-		// left off here
 	}
 };
 typedef struct wordList wordList;

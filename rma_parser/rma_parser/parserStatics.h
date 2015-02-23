@@ -19,6 +19,8 @@ bool isWhitespace(char c)
 	{
 		if (currentChar == c)
 		{
+			//cout << "\t'" << c << "' is a whitespace character\n";
+
 			return true;
 		}
 

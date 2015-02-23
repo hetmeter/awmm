@@ -60,60 +60,98 @@ string parse(string lexerPath, string inputPath)
 
 	vector<parserToken> tokens;
 	int lexerStringCharCounter = 0;
-	string currentDescription = "";
-	string currentRule = "";
+	//string currentDescription = "";
+	//string currentRule = "";
+	string currentLexerLine = "";
 	bool parsingDescription = true;
 	char currentChar = lexerString[lexerStringCharCounter];
 	parserToken* currentToken;
 
-	while (true)
+	while (currentChar != '\0')
 	{
-		//cout << "Parsing " << currentChar << "\n";
-
-		if (parsingDescription)
+		if (currentChar != '\r')
 		{
-			if (currentChar != DESCRIPTION_RULE_SEPARATOR)
-			{
-				currentDescription += currentChar;
-			}
-			else
-			{
-				parsingDescription = false;
-			}
-		}
-		else
-		{
-			if (currentChar == '\r')
-			{
-				// ignore \r
-			}
-			else if (currentChar == '\n' || currentChar == '\0')
+			if (currentChar == '\n')
 			{
 				currentToken = new parserToken;
-				currentToken->tag = currentDescription;
-				currentToken->rule = currentRule;
+				(*currentToken).initialize(currentLexerLine);
 
-				currentDescription = "";
-				currentRule = "";
-
-				tokens.push_back(*currentToken);
-
-				if (currentChar == '\0')
+				if ((*currentToken).isInitialized())
 				{
-					break;
+					tokens.push_back(*currentToken);
 				}
 
-				parsingDescription = true;
+				currentLexerLine = "";
 			}
 			else
 			{
-				currentRule += currentChar;
+				currentLexerLine += currentChar;
 			}
 		}
 
 		lexerStringCharCounter++;
 		currentChar = lexerString[lexerStringCharCounter];
+
+		if (currentChar == '\0')
+		{
+			currentToken = new parserToken;
+			(*currentToken).initialize(currentLexerLine);
+
+			if ((*currentToken).isInitialized())
+			{
+				tokens.push_back(*currentToken);
+			}
+		}
 	}
+
+	//while (true)
+	//{
+	//	//cout << "Parsing " << currentChar << "\n";
+
+	//	if (parsingDescription)
+	//	{
+	//		if (currentChar != DESCRIPTION_RULE_SEPARATOR)
+	//		{
+	//			currentDescription += currentChar;
+	//		}
+	//		else
+	//		{
+	//			parsingDescription = false;
+	//		}
+	//	}
+	//	else
+	//	{
+	//		if (currentChar == '\r')
+	//		{
+	//			// ignore \r
+	//		}
+	//		else if (currentChar == '\n' || currentChar == '\0')
+	//		{
+	//			currentToken = new parserToken;
+	//			currentToken->tag = currentDescription;
+	//			currentToken->rule = currentRule;
+
+	//			currentDescription = "";
+	//			currentRule = "";
+
+	//			tokens.push_back(*currentToken);
+
+	//			if (currentChar == '\0')
+	//			{
+	//				break;
+	//			}
+
+	//			parsingDescription = true;
+	//		}
+	//		else
+	//		{
+	//			currentRule += currentChar;
+	//		}
+	//	}
+
+	//	lexerStringCharCounter++;
+	//	currentChar = lexerString[lexerStringCharCounter];
+	//}
 
 	//ifstream inputFile(inputPath);
 	//stringstream inputBuffer;
@@ -136,13 +174,22 @@ string parse(string lexerPath, string inputPath)
 	//inputWordList.parseString(result);
 	//result = inputWordList.toString();
 
-	disjunctivePredicates rules;
+	//disjunctivePredicates rules;
+	//int numberOfTokens = tokens.size();
+	//for (int ctr = 0; ctr < numberOfTokens; ctr++)
+	//{
+	//	//cout << tokens[ctr].rule << "\n";
+	//	rules.parsePredicates(tokens[ctr].rule);
+	//}
+	//string result = rules.toString();
+
+	string result = "";
 	int numberOfTokens = tokens.size();
+
 	for (int ctr = 0; ctr < numberOfTokens; ctr++)
 	{
-		rules.parsePredicates(tokens[ctr].rule);
+		result += tokens[ctr].toString() + "\n";
 	}
-	string result = rules.toString();
 
 	return result;
 }

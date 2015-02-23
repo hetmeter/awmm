@@ -21,6 +21,8 @@ struct disjunctivePredicates
 		int orPosition;
 		string normalizedRule = normalize(rule);
 
+		//cout << "Parsing " << normalizedRule << ":\n";
+
 		if ((orPosition = normalizedRule.find(OR_OPERATOR)) != string::npos)
 		{
 			parsePredicates(normalizedRule.substr(0, orPosition));
