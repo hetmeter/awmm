@@ -185,6 +185,7 @@ string parse(string lexerPath, string inputPath)
 
 	string result = "";
 	int numberOfTokens = tokens.size();
+	cout << "Number of tokens: " << numberOfTokens << "\n";
 
 	for (int ctr = 0; ctr < numberOfTokens; ctr++)
 	{

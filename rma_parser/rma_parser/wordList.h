@@ -47,7 +47,7 @@ struct wordList
 
 	void parseString(string input)
 	{
-		cout << "Parsing \"" << input << "\" for a wordList...\n";
+		//cout << "Parsing \"" << input << "\" for a wordList...\n";
 
 		string temp = "";
 		int ctr = 0;
@@ -63,7 +63,7 @@ struct wordList
 			}
 			else
 			{
-				cout << "\tAppending \"" << temp << "\"\n";
+				//cout << "\tAppending \"" << temp << "\"\n";
 
 				appendWord(temp);
 				temp = string(1, currentChar);
@@ -76,7 +76,7 @@ struct wordList
 
 			if (currentChar == '\0')
 			{
-				cout << "\tAppending \"" << temp << "\"\n";
+				//cout << "\tAppending \"" << temp << "\"\n";
 
 				appendWord(temp);
 			}
@@ -85,12 +85,21 @@ struct wordList
 
 	string toString()
 	{
-		string result = "";
+		string result = "wordList { ";
 
 		for (int ctr = 0; ctr < wordCount; ctr++)
 		{
-			result += words[ctr] + "\n";
+			result += "\"" + words[ctr] + "\"";
+
+			if (ctr < wordCount - 1)
+			{
+				result += ",";
+			}
+
+			result += " ";
 		}
+
+		result += "}";
 
 		return result;
 	}
