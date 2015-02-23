@@ -11,8 +11,12 @@ const string WHITESPACES = " \t\r\n";
 const string WHITESPACES_WITHOUT_SPACE = "\t\r\n";
 const string IDENTIFIER_RULE = "[identifier]";
 const string NUMBER_RULE = "[number]";
+const string WHITESPACE_RULE = "[whitespace]";
+const string IGNORE_TAG = "{IGNORE}";
+const string WILDCARD_TAG = "{WILDCARD}";
+const string ACCEPTING_STATE_TAG = "{ACCEPTING_STATE}";
 
-const enum CharacterType { WHITESPACE, ALPHANUMERIC_OR_SQUARE_BRACKET, OTHER };
+const enum CharacterType { WHITESPACE, ALPHANUMERIC_OR_BRACKET, OTHER };
 
 bool isWhitespace(char c)
 {
@@ -35,10 +39,25 @@ bool isWhitespace(char c)
 	return false;
 }
 
-bool isAlphanumericOrSquareBracket(char c)
+bool isWhitespace(string s)
+{
+	int sLength = s.length();
+
+	for (int ctr = 0; ctr < sLength; ctr++)
+	{
+		if (!isWhitespace(s.at(ctr)))
+		{
+			return false;
+		}
+	}
+
+	return sLength > 0;
+}
+
+bool isAlphanumericOrBracket(char c)
 {
 	int cValue = (int)c;
-	return (cValue >= 48 && cValue <= 57) || (cValue >= 65 && cValue <= 91) || (cValue == 93) || (cValue >= 97 && cValue <= 122);
+	return (cValue >= 48 && cValue <= 57) || (cValue >= 65 && cValue <= 91) || (cValue == 93) || (cValue == 95) || (cValue >= 97 && cValue <= 123 || (cValue == 125));
 }
 
 bool isNumber(char c)
@@ -73,9 +92,9 @@ CharacterType getType(char c)
 	{
 		return WHITESPACE;
 	}
-	else if (isAlphanumericOrSquareBracket(c))
+	else if (isAlphanumericOrBracket(c))
 	{
-		return ALPHANUMERIC_OR_SQUARE_BRACKET;
+		return ALPHANUMERIC_OR_BRACKET;
 	}
 	else
 	{
@@ -140,7 +159,7 @@ bool isIdentifier(string s)
 		{
 			for (int ctr = 0; ctr < sLength; ctr++)
 			{
-				if (!isAlphanumericOrSquareBracket(s.at(ctr)) || s.at(ctr) == '[' || s.at(ctr) == ']')
+				if (!isAlphanumericOrBracket(s.at(ctr)) || s.at(ctr) == '[' || s.at(ctr) == ']' || s.at(ctr) == '{' || s.at(ctr) == '}')
 				{
 					return false;
 				}
@@ -151,4 +170,13 @@ bool isIdentifier(string s)
 	}
 
 	return false;
+}
+
+bool isMatch(string s, string rule)
+{
+	return (s == rule) ||
+		(rule == IDENTIFIER_RULE && isIdentifier(s)) ||
+		(rule == NUMBER_RULE && isNumber(s)) ||
+		(rule == WHITESPACE_RULE && isWhitespace(s) ||
+		(rule == WILDCARD_TAG));
 }

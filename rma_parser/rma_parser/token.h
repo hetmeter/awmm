@@ -32,7 +32,7 @@ struct token
 		{
 			currentWordList = new wordList;
 			currentWordList->parseString(normalizedInputRule);
-			currentWordList->prune();
+			currentWordList->collapse();
 			rule.push_back(*currentWordList);
 		}
 		else
@@ -41,7 +41,7 @@ struct token
 			{
 				currentWordList = new wordList;
 				currentWordList->parseString(normalizedInputRule.substr(0, orIndex));
-				currentWordList->prune();
+				currentWordList->collapse();
 				rule.push_back(*currentWordList);
 
 				normalizedInputRule = ((int)normalizedInputRule.length()) > orIndex + 1 ? normalizedInputRule.substr(orIndex + 1, string::npos) : "";
@@ -51,7 +51,7 @@ struct token
 				{
 					currentWordList = new wordList;
 					currentWordList->parseString(normalizedInputRule);
-					currentWordList->prune();
+					currentWordList->collapse();
 					rule.push_back(*currentWordList);
 				}
 			}

@@ -94,7 +94,7 @@ string parse(string lexerPath, string parserPath, string inputPath)
 	cout << "Lexer tokens:\n";
 	for (int ctr = 0; ctr < numberOfLexerTokens; ctr++)
 	{
-		cout << "Lexer token " << ctr << ": " << lexerTokens[ctr].toString() << "\n";
+		cout << "Lexer token " << ctr << ": " << lexerTokens.at(ctr).toString() << "\n";
 	}
 	cout << "\n";
 
@@ -103,7 +103,7 @@ string parse(string lexerPath, string parserPath, string inputPath)
 	cout << "Parser tokens:\n";
 	for (int ctr = 0; ctr < numberOfParserTokens; ctr++)
 	{
-		cout << "Parser token " << ctr << ": " << parserTokens[ctr].toString() << "\n";
+		cout << "Parser token " << ctr << ": " << parserTokens.at(ctr).toString() << "\n";
 	}
 	cout << "\n";
 
@@ -111,7 +111,29 @@ string parse(string lexerPath, string parserPath, string inputPath)
 
 	for (int ctr = 0; ctr < numberOfLexerTokens; ctr++)
 	{
-		lexerTokens[ctr].applyToWordList(&_inputContent);
+		lexerTokens.at(ctr).applyToWordList(&_inputContent);
+	}
+
+	int oldHashCode = _inputContent.hashCode() + 1;
+	int secondaryOldHashCode;
+	while (_inputContent.hashCode() != oldHashCode)
+	{
+		oldHashCode = _inputContent.hashCode();
+
+		for (int ctr = 0; ctr < numberOfParserTokens; ctr++)
+		{
+			if (parserTokens.at(ctr).tag != ACCEPTING_STATE_TAG)
+			{
+				secondaryOldHashCode = _inputContent.hashCode() + 1;
+
+				while (_inputContent.hashCode() != secondaryOldHashCode)
+				{
+					secondaryOldHashCode = _inputContent.hashCode();
+
+					parserTokens.at(ctr).applyToWordList(&_inputContent);
+				}
+			}
+		}
 	}
 
 	result = _inputContent.toString();

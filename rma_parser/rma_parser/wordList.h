@@ -22,32 +22,33 @@ using namespace std;
 
 struct wordList
 {
+private: int _hashCode = -1;
+
+public:
 	vector<string> words;
 	int wordCount = 0;
 
 	void appendWord(string word)
 	{
-		//cout << "\t\t\t" << word << "\n";
 		words.push_back(word);
 		wordCount++;
+		_hashCode = -1;
 	}
 
 	void insertWord(string word, int position)
 	{
 		words.insert(words.begin() + position, word);
 		wordCount++;
+		_hashCode = -1;
 	}
 
 	void removeWord(int position)
 	{
 		if (position < wordCount && position >= 0)
 		{
-			//cout << "\t\t---\n\t\tremoveWord(" << position << "):\n" << toString() << "\n";
-
 			words.erase(words.begin() + position);
 			wordCount--;
-
-			//cout << "\t\tremoveWord(" << position << ") done.\n" << toString() << "\n\t\t---\n";
+			_hashCode = -1;
 		}
 	}
 
@@ -106,26 +107,16 @@ struct wordList
 		return result;
 	}
 
-	void prune()
+	void collapse()
 	{
-		int ctr = 0;
-
-		//cout << "Pruning:\n" << toString() << "---\n";
-
-		while (ctr < wordCount)
+		for (int ctr = 0; ctr < wordCount; ctr++)
 		{
-			if (words[ctr].find_first_not_of(WHITESPACES) == string::npos)
+			if (words.at(ctr).find_first_not_of(WHITESPACES) == string::npos)
 			{
-				//cout << "Preparing to remove: \"" << words[ctr] << "\"\n";
-
 				removeWord(ctr);
 				ctr--;
 			}
-
-			ctr++;
 		}
-
-		//cout << "Finished pruning\n";
 	}
 
 	void applyReplacement(string replacement, string replacee)
@@ -153,6 +144,49 @@ struct wordList
 					insertWord(replacement, ctr);
 				}
 			}
+			else if (replacee == WHITESPACE_RULE)	// special case: whitespace
+			{
+				if (isWhitespace(words.at(ctr)))
+				{
+					removeWord(ctr);
+					insertWord(replacement, ctr);
+				}
+			}
+		}
+	}
+
+	void applyReplacement(string replacement, wordList replacee)
+	{
+		int wordsInSequence = replacee.wordCount;
+		int matchesSoFar = 0;
+
+		for (int ctr = 0; ctr < wordCount; ctr++)
+		{
+			if (isMatch(words.at(ctr), replacee.words.at(matchesSoFar)))
+			{
+				matchesSoFar++;
+			}
+			else
+			{
+				matchesSoFar = 0;
+			}
+
+			if (matchesSoFar == wordsInSequence)
+			{
+				ctr = ctr - (wordsInSequence - 1);
+
+				for (int subctr = 0; subctr < wordsInSequence; subctr++)
+				{
+					removeWord(ctr);
+				}
+
+				if (replacement != IGNORE_TAG)
+				{
+					insertWord(replacement, ctr);
+				}
+
+				matchesSoFar = 0;
+			}
 		}
 	}
 
@@ -162,11 +196,33 @@ struct wordList
 
 		for (int ctr = 0; ctr < ruleCount; ctr++)
 		{
-			for (int subctr = 0; subctr < rule.at(ctr).wordCount; subctr++)
+			applyReplacement(replacement, rule.at(ctr));
+		}
+	}
+
+	int hashCode()
+	{
+		if (_hashCode == -1)
+		{
+			hash<string> stringHash;
+
+			for (int ctr = 0; ctr < wordCount; ctr++)
 			{
-				applyReplacement(replacement, rule.at(ctr).words.at(subctr));
+				_hashCode = _hashCode ^ stringHash(words.at(ctr));
 			}
 		}
+
+		return _hashCode;
+
+		/*hash<string> stringHash;
+		_hashCode = -1;
+
+		for (int ctr = 0; ctr < wordCount; ctr++)
+		{
+			_hashCode = _hashCode ^ stringHash(words.at(ctr));
+		}
+
+		return _hashCode;*/
 	}
 };
 typedef struct wordList wordList;
