@@ -79,10 +79,9 @@
     <ClCompile Include="rma_parser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="disjunctivePredicates.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="parserStatics.h" />
-    <ClInclude Include="parserToken.h" />
+    <ClInclude Include="token.h" />
     <ClInclude Include="wordList.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

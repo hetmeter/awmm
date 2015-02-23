@@ -33,9 +33,9 @@
 #include <algorithm>
 #endif
 
-#ifndef __PARSERTOKEN_H_INCLUDED__
-#define __PARSERTOKEN_H_INCLUDED__
-#include "parserToken.h"
+#ifndef __TOKEN_H_INCLUDED__
+#define __TOKEN_H_INCLUDED__
+#include "token.h"
 #endif
 
 #ifndef __WORDLIST_H_INCLUDED__
@@ -43,154 +43,78 @@
 #include "wordList.h"
 #endif
 
-#ifndef __DISJUNCTIVEPREDICATES_H_INCLUDED__
-#define __DISJUNCTIVEPREDICATES_H_INCLUDED__
-#include "disjunctivePredicates.h"
-#endif
-
 using namespace std;
 
-string parse(string lexerPath, string inputPath)
+wordList _inputContent;
+
+vector<token> initializeTokensFromFile(string path)
 {
-	ifstream lexerFile(lexerPath);
-	stringstream lexerBuffer;
-	lexerBuffer << lexerFile.rdbuf();
-	string lexerString = lexerBuffer.str();
-	lexerFile.close();
+	vector<token> result;
 
-	vector<parserToken> tokens;
-	int lexerStringCharCounter = 0;
-	//string currentDescription = "";
-	//string currentRule = "";
-	string currentLexerLine = "";
-	bool parsingDescription = true;
-	char currentChar = lexerString[lexerStringCharCounter];
-	parserToken* currentToken;
+	ifstream ruleFile(path);
+	string line;
+	token* currentToken;
 
-	while (currentChar != '\0')
+	while (getline(ruleFile, line))
 	{
-		if (currentChar != '\r')
+		currentToken = new token;
+		currentToken->initialize(line);
+
+		if (currentToken->isInitialized())
 		{
-			if (currentChar == '\n')
-			{
-				currentToken = new parserToken;
-				(*currentToken).initialize(currentLexerLine);
-
-				if ((*currentToken).isInitialized())
-				{
-					tokens.push_back(*currentToken);
-				}
-
-				currentLexerLine = "";
-			}
-			else
-			{
-				currentLexerLine += currentChar;
-			}
-		}
-
-		lexerStringCharCounter++;
-		currentChar = lexerString[lexerStringCharCounter];
-
-		if (currentChar == '\0')
-		{
-			currentToken = new parserToken;
-			(*currentToken).initialize(currentLexerLine);
-
-			if ((*currentToken).isInitialized())
-			{
-				tokens.push_back(*currentToken);
-			}
+			result.push_back(*currentToken);
 		}
 	}
 
-	//while (true)
-	//{
-	//	//cout << "Parsing " << currentChar << "\n";
+	return result;
+}
 
-	//	if (parsingDescription)
-	//	{
-	//		if (currentChar != DESCRIPTION_RULE_SEPARATOR)
-	//		{
-	//			currentDescription += currentChar;
-	//		}
-	//		else
-	//		{
-	//			parsingDescription = false;
-	//		}
-	//	}
-	//	else
-	//	{
-	//		if (currentChar == '\r')
-	//		{
-	//			// ignore \r
-	//		}
-	//		else if (currentChar == '\n' || currentChar == '\0')
-	//		{
-	//			currentToken = new parserToken;
-	//			currentToken->tag = currentDescription;
-	//			currentToken->rule = currentRule;
+void initializeInputFromFile(string path)
+{
+	ifstream inputFile(path);
+	stringstream buffer;
+	buffer << inputFile.rdbuf();
+	string inputString = buffer.str();
+	inputFile.close();
 
-	//			currentDescription = "";
-	//			currentRule = "";
+	_inputContent.parseString(inputString);
+}
 
-	//			tokens.push_back(*currentToken);
+string parse(string lexerPath, string parserPath, string inputPath)
+{
+	vector<token> lexerTokens = initializeTokensFromFile(lexerPath);
+	vector<token> parserTokens = initializeTokensFromFile(parserPath);
 
-	//			if (currentChar == '\0')
-	//			{
-	//				break;
-	//			}
-
-	//			parsingDescription = true;
-	//		}
-	//		else
-	//		{
-	//			currentRule += currentChar;
-	//		}
-	//	}
-
-	//	lexerStringCharCounter++;
-	//	currentChar = lexerString[lexerStringCharCounter];
-	//}
-
-	//ifstream inputFile(inputPath);
-	//stringstream inputBuffer;
-	//inputBuffer << inputFile.rdbuf();
-	//string result = inputBuffer.str();
-	////string result = "";
-	//inputFile.close();
-
-	//int numberOfTokens = tokens.size();
-
-	//while (!tokens.empty())
-	//{
-	//	//cout << "tokens.size() = " << tokens.size() << "\n";
-
-	//	result.append(tokens.front().ToString() + "\n");
-	//	tokens.pop_front();
-	//}
-
-	//wordList inputWordList;
-	//inputWordList.parseString(result);
-	//result = inputWordList.toString();
-
-	//disjunctivePredicates rules;
-	//int numberOfTokens = tokens.size();
-	//for (int ctr = 0; ctr < numberOfTokens; ctr++)
-	//{
-	//	//cout << tokens[ctr].rule << "\n";
-	//	rules.parsePredicates(tokens[ctr].rule);
-	//}
-	//string result = rules.toString();
+	initializeInputFromFile(inputPath);
 
 	string result = "";
-	int numberOfTokens = tokens.size();
-	cout << "Number of tokens: " << numberOfTokens << "\n";
 
-	for (int ctr = 0; ctr < numberOfTokens; ctr++)
+	int numberOfLexerTokens = lexerTokens.size();
+	cout << "Number of lexer tokens: " << numberOfLexerTokens << "\n\n";
+	cout << "Lexer tokens:\n";
+	for (int ctr = 0; ctr < numberOfLexerTokens; ctr++)
 	{
-		result += tokens[ctr].toString() + "\n";
+		cout << "Lexer token " << ctr << ": " << lexerTokens[ctr].toString() << "\n";
 	}
+	cout << "\n";
+
+	int numberOfParserTokens = parserTokens.size();
+	cout << "Number of parser tokens: " << numberOfParserTokens << "\n\n";
+	cout << "Parser tokens:\n";
+	for (int ctr = 0; ctr < numberOfParserTokens; ctr++)
+	{
+		cout << "Parser token " << ctr << ": " << parserTokens[ctr].toString() << "\n";
+	}
+	cout << "\n";
+
+	cout << "Input content:\n" << _inputContent.toString() << "\n\n";
+
+	for (int ctr = 0; ctr < numberOfLexerTokens; ctr++)
+	{
+		lexerTokens[ctr].applyToWordList(&_inputContent);
+	}
+
+	result = _inputContent.toString();
 
 	return result;
 }

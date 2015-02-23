@@ -8,9 +8,9 @@
 #include <string>
 #endif
 
-#ifndef __PARSERTOKEN_H_INCLUDED__
-#define __PARSERTOKEN_H_INCLUDED__
-#include "parserToken.h"
+#ifndef __TOKEN_H_INCLUDED__
+#define __TOKEN_H_INCLUDED__
+#include "token.h"
 #endif
 
 #ifndef __PARSERSTATICS_H_INCLUDED__
@@ -32,6 +32,12 @@ struct wordList
 		wordCount++;
 	}
 
+	void insertWord(string word, int position)
+	{
+		words.insert(words.begin() + position, word);
+		wordCount++;
+	}
+
 	void removeWord(int position)
 	{
 		if (position < wordCount && position >= 0)
@@ -47,40 +53,36 @@ struct wordList
 
 	void parseString(string input)
 	{
-		//cout << "Parsing \"" << input << "\" for a wordList...\n";
-
+		int inputLength = input.length();
 		string temp = "";
-		int ctr = 0;
-		char currentChar = input[ctr];
-		bool charIsWhitespace = isWhitespace(currentChar);
-		bool lastCharWasWhitespace = isWhitespace(currentChar);
+		char currentChar;
+		CharacterType currentCharType;
+		CharacterType lastCharType;
 
-		while (currentChar != '\0')
+		if (inputLength > 0)
 		{
-			if (lastCharWasWhitespace == charIsWhitespace)	// Non-whitespace continuing
+			lastCharType = getType(input.at(0));
+		}
+
+		for (int ctr = 0; ctr < inputLength; ctr++)
+		{
+			currentChar = input.at(ctr);
+			currentCharType = getType(currentChar);
+
+			if (lastCharType == currentCharType && currentCharType != OTHER)
 			{
 				temp += currentChar;
 			}
 			else
 			{
-				//cout << "\tAppending \"" << temp << "\"\n";
-
 				appendWord(temp);
 				temp = string(1, currentChar);
 			}
 
-			lastCharWasWhitespace = isWhitespace(currentChar);
-			ctr++;
-			currentChar = input[ctr];
-			charIsWhitespace = isWhitespace(currentChar);
-
-			if (currentChar == '\0')
-			{
-				//cout << "\tAppending \"" << temp << "\"\n";
-
-				appendWord(temp);
-			}
+			lastCharType = getType(currentChar);
 		}
+
+		appendWord(temp);
 	}
 
 	string toString()
@@ -124,6 +126,47 @@ struct wordList
 		}
 
 		//cout << "Finished pruning\n";
+	}
+
+	void applyReplacement(string replacement, string replacee)
+	{
+		for (int ctr = 0; ctr < wordCount; ctr++)
+		{
+			if (words.at(ctr) == replacee)
+			{
+				removeWord(ctr);
+				insertWord(replacement, ctr);
+			}
+			else if (replacee == IDENTIFIER_RULE)	// special case: identifier
+			{
+				if (isIdentifier(words.at(ctr)))
+				{
+					removeWord(ctr);
+					insertWord(replacement, ctr);
+				}
+			}
+			else if (replacee == NUMBER_RULE)	// special case: number
+			{
+				if (isNumber(words.at(ctr)))
+				{
+					removeWord(ctr);
+					insertWord(replacement, ctr);
+				}
+			}
+		}
+	}
+
+	void applyAllReplacements(string replacement, vector<wordList> rule)
+	{
+		int ruleCount = rule.size();
+
+		for (int ctr = 0; ctr < ruleCount; ctr++)
+		{
+			for (int subctr = 0; subctr < rule.at(ctr).wordCount; subctr++)
+			{
+				applyReplacement(replacement, rule.at(ctr).words.at(subctr));
+			}
+		}
 	}
 };
 typedef struct wordList wordList;

@@ -6,9 +6,13 @@
 using namespace std;
 
 const char DESCRIPTION_RULE_SEPARATOR = '\t';
-const char OR_OPERATOR = '|';
+const char OR_OPERATOR = '`';
 const string WHITESPACES = " \t\r\n";
 const string WHITESPACES_WITHOUT_SPACE = "\t\r\n";
+const string IDENTIFIER_RULE = "[identifier]";
+const string NUMBER_RULE = "[number]";
+
+const enum CharacterType { WHITESPACE, ALPHANUMERIC_OR_SQUARE_BRACKET, OTHER };
 
 bool isWhitespace(char c)
 {
@@ -29,6 +33,54 @@ bool isWhitespace(char c)
 	}
 
 	return false;
+}
+
+bool isAlphanumericOrSquareBracket(char c)
+{
+	int cValue = (int)c;
+	return (cValue >= 48 && cValue <= 57) || (cValue >= 65 && cValue <= 91) || (cValue == 93) || (cValue >= 97 && cValue <= 122);
+}
+
+bool isNumber(char c)
+{
+	return (int)c >= 48 && (int)c <= 57;
+}
+
+bool isNumber(string s)
+{
+	int sLength = s.length();
+
+	for (int ctr = 0; ctr < sLength; ctr++)
+	{
+		if (!isNumber(s.at(ctr)))
+		{
+			return false;
+		}
+	}
+
+	return sLength > 0;
+}
+
+bool isStartOfIdentifier(char c)
+{
+	int cValue = (int)c;
+	return (cValue == '_') || (cValue >= 65 && cValue <= 90) || (cValue >= 97 && cValue <= 122);
+}
+
+CharacterType getType(char c)
+{
+	if (isWhitespace(c))
+	{
+		return WHITESPACE;
+	}
+	else if (isAlphanumericOrSquareBracket(c))
+	{
+		return ALPHANUMERIC_OR_SQUARE_BRACKET;
+	}
+	else
+	{
+		return OTHER;
+	}
 }
 
 string normalize(string s)
@@ -77,4 +129,26 @@ string normalize(string s)
 	//cout << "\t\t\t\t[" << result << "]\n";
 
 	return result;
+}
+
+bool isIdentifier(string s)
+{
+	int sLength = s.length();
+	if (sLength > 0)
+	{
+		if (isStartOfIdentifier(s.at(0)))
+		{
+			for (int ctr = 0; ctr < sLength; ctr++)
+			{
+				if (!isAlphanumericOrSquareBracket(s.at(ctr)) || s.at(ctr) == '[' || s.at(ctr) == ']')
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+	}
+
+	return false;
 }

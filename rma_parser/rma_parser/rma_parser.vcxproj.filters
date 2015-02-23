@@ -23,16 +23,13 @@
     <ClInclude Include="parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="parserToken.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="wordList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="parserStatics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="disjunctivePredicates.h">
+    <ClInclude Include="token.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

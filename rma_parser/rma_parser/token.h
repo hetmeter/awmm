@@ -10,19 +10,7 @@
 
 using namespace std;
 
-//struct parserToken
-//{
-//	string tag;
-//	string rule;
-//
-//	string toString()
-//	{
-//		return "Parser token " + tag + " implements " + rule;
-//	}
-//};
-//typedef struct parserToken parserToken;
-
-struct parserToken
+struct token
 {
 	string tag;
 	vector<wordList> rule;
@@ -31,7 +19,7 @@ struct parserToken
 	{
 		tag = inputTag;
 
-		//cout << "Initializing parserToken with inputTag = \"" << inputTag << "\", inputRule = \"" << inputRule << "\"...\n";
+		//cout << "Initializing token with inputTag = \"" << inputTag << "\", inputRule = \"" << inputRule << "\"...\n";
 
 		string normalizedInputRule = normalize(inputRule);
 
@@ -95,7 +83,7 @@ struct parserToken
 
 	string toString()
 	{
-		string result = "parserToken " + tag + " {\n";
+		string result = "token " + tag + " {\n";
 		int numberOfRules = rule.size();
 
 		for (int ctr = 0; ctr < numberOfRules; ctr++)
@@ -107,5 +95,10 @@ struct parserToken
 
 		return result;
 	}
+
+	void applyToWordList(wordList* wl)
+	{
+		wl->applyAllReplacements(tag, rule);
+	}
 };
-typedef struct parserToken parserToken;
+typedef struct token token;

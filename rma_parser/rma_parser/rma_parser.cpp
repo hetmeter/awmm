@@ -22,23 +22,34 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-	string rulesPath;
+	string lexerPath;
+	string parserPath;
 	string inputPath;
 	string outputPath;
 
 	if (argc > 1)
 	{
-		rulesPath = argv[1];
+		lexerPath = argv[1];
 	}
 	else
 	{
-		cout << "No rule file path specified\n";
+		cout << "No lexer rules file path specified\n";
 		return 1;
 	}
 
 	if (argc > 2)
 	{
-		inputPath = argv[2];
+		parserPath = argv[2];
+	}
+	else
+	{
+		cout << "No parser rules file path specified\n";
+		return 1;
+	}
+
+	if (argc > 3)
+	{
+		inputPath = argv[3];
 	}
 	else
 	{
@@ -46,9 +57,9 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	if (argc > 3)
+	if (argc > 4)
 	{
-		outputPath = argv[3];
+		outputPath = argv[4];
 	}
 	else
 	{
@@ -56,9 +67,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	cout << rulesPath << '\n';
-
-	string parsedLexer = parse(rulesPath, inputPath);
+	string parsedLexer = parse(lexerPath, parserPath, inputPath);
 
 	ofstream out(outputPath);
 	out << parsedLexer;
