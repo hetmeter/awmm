@@ -114,25 +114,26 @@ string parse(string lexerPath, string parserPath, string inputPath)
 		lexerTokens.at(ctr).applyToWordList(&_inputContent);
 	}
 
-	int oldHashCode = _inputContent.hashCode() + 1;
-	int secondaryOldHashCode;
-	while (_inputContent.hashCode() != oldHashCode)
+	string oldInputContent = "";
+	string secondaryOldInputContent = "";
+	while (_inputContent.toString().compare(oldInputContent) != 0)
 	{
-		oldHashCode = _inputContent.hashCode();
+		oldInputContent = _inputContent.toString();
 
 		for (int ctr = 0; ctr < numberOfParserTokens; ctr++)
 		{
 			if (parserTokens.at(ctr).tag != ACCEPTING_STATE_TAG)
 			{
-				secondaryOldHashCode = _inputContent.hashCode() + 1;
-
-				while (_inputContent.hashCode() != secondaryOldHashCode)
-				{
-					secondaryOldHashCode = _inputContent.hashCode();
-
-					parserTokens.at(ctr).applyToWordList(&_inputContent);
-				}
+				parserTokens.at(ctr).applyToWordList(&_inputContent);
 			}
+		}
+	}
+
+	for (int ctr = 0; ctr < numberOfParserTokens; ctr++)
+	{
+		if (parserTokens.at(ctr).tag == ACCEPTING_STATE_TAG)
+		{
+			parserTokens.at(ctr).applyToWordList(&_inputContent);
 		}
 	}
 

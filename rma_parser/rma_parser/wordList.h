@@ -169,6 +169,11 @@ public:
 			else
 			{
 				matchesSoFar = 0;
+
+				if (isMatch(words.at(ctr), replacee.words.at(matchesSoFar)))
+				{
+					matchesSoFar++;
+				}
 			}
 
 			if (matchesSoFar == wordsInSequence)
