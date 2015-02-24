@@ -1,0 +1,9 @@
+{IGNORE}	[whitespace] ` {LINECOMMENT} ` {BLOCKCOMMENT}
+{NOT_EQUALS}	{NOT} {EQUALS}
+{LESS_EQUALS}	{LESS} {EQUALS}
+{GREATER_EQUALS}	{GREATER} {EQUALS}
+{integerTerm}	{INT} ` {ID}
+{integerComparisonOperator}	{EQUALS} ` {GREATER} ` {LESS} ` {GREATER_EQUALS} ` {LESS_EQUALS} ` {NOT_EQUALS}
+{booleanTerm}	{integerTerm} {integerComparisonOperator} {integerTerm}
+{predicate}	{LEFTPARENTHESIS} {booleanTerm} {RIGHTPARENTHESIS} ` {predicate} {predicate}
+{ACCEPTING_STATE}	{predicate}

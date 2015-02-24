@@ -1,0 +1,46 @@
+{BLOCKCOMMENTDELIMITER_START}	{SLASH} {ASTERISK}
+{BLOCKCOMMENTDELIMITER_END}	{ASTERISK} {SLASH}
+{BLOCKCOMMENT}	{BLOCKCOMMENTDELIMITER_START} {BLOCKCOMMENTDELIMITER_END}
+{BLOCKCOMMENT}	{BLOCKCOMMENTDELIMITER_START} {WILDCARD} {BLOCKCOMMENTDELIMITER_END}
+{BLOCKCOMMENTDELIMITER_START}	{BLOCKCOMMENTDELIMITER_START} {WILDCARD}
+{NOT_EQUALS}	{NOT} {EQUALS}
+{LESS_EQUALS}	{LESS} {EQUALS}
+{GREATER_EQUALS}	{GREATER} {EQUALS}
+{IGNORE}	[whitespace] ` {LINECOMMENT} ` {BLOCKCOMMENT}
+{storeHeader}	{STORE_KEYWORD} {ID} {EQUALS}
+{storeStatement}	{storeHeader} {integerTerm} {SEMICOLON} ` {storeHeader} {INT} {SEMICOLON}
+{storeStatementCollection}	{BEGINIT_KEYWORD} {storeStatement} ` {storeStatementCollection}  {storeStatement}
+{loadHeader}	{LOAD_KEYWORD} {ID} {EQUALS}
+{loadStatement}	{loadHeader} {ID} {SEMICOLON}
+{integerTermFirstHalf}	{integerTerm} {binaryIntegerOperator} ` {INT} {binaryIntegerOperator} ` {ID} {binaryIntegerOperator}
+{integerTerm}	{LEFTPARENTHESIS} {integerTerm} {RIGHTPARENTHESIS} ` {integerTermFirstHalf} {integerTerm} ` {integerTermFirstHalf} {INT} ` {integerTermFirstHalf} {ID}
+{processHeader}	{PROCESS_KEYWORD} {INT} {COLON}
+{generalStatementCollection}	{processHeader} {generalStatement} ` {generalStatementCollection} {generalStatement}
+{label}	{INT} {COLON}
+{statement}	{storeStatement} ` {loadStatement} ` {ifElseBlock} ` {gotoStatement} ` {nopStatement} ` {assignStatement} ` {putStatement} ` {getStatement} ` {flushStatement}
+{labelledStatement}	{label} {statement}
+{generalStatement}	{labelledStatement} ` {statement}
+{processInitializationCollection}	{processInitialization} ` {processInitializationCollection} {processInitializationCollection}
+{initializationBlock} 	{BEGINIT_KEYWORD} {processInitializationCollection} {ENDINIT_KEYWORD} ` {storeStatementCollection} {ENDINIT_KEYWORD}
+{processInitialization}	{processHeader} {variableInitializationStatementCollection}
+{variableInitializationStatementCollection}	{variableInitializationStatement} ` {variableInitializationStatementCollection} {variableInitializationStatementCollection}
+{variableInitializationStatement}	{storeStatement} ` {assignStatement}
+{processDeclaration}	{processHeader} {generalStatementCollection}
+{ifElseBlock}	{generalIfConditionalLine} {generalStatementCollection} ` {generalIfConditionalLine} {generalStatementCollection} {ELSE_KEYWORD} {generalStatementCollection}
+{generalIfConditionalLine}	{labelledIfConditionalLine} ` {ifConditionalLine}
+{labelledIfConditionalLine}	{label} {IF_KEYWORD} {LEFTPARENTHESIS} {booleanTerm} {RIGHTPARENTHESIS}
+{ifConditionalLine}	{IF_KEYWORD} {LEFTPARENTHESIS} {booleanTerm} {RIGHTPARENTHESIS}
+{gotoStatement}	{GOTO_KEYWORD} {INT} {SEMICOLON}
+{nopStatement}	{NOP_KEYWORD} {SEMICOLON}
+{assignStatement}	{ID} {EXTENDED_ASSIGNMENT} {integerTerm} {SEMICOLON}
+{putStatement}	{PUT_KEYWORD} {LEFTPARENTHESIS} {ATOMICITY} {COMMA} {ATOMICITY} {RIGHTPARENTHESIS} {LEFTPARENTHESIS} {ID} {COMMA} {INT} {COMMA} {ID} {RIGHTPARENTHESIS} {SEMICOLON}
+{getStatement}	{GET_KEYWORD} {LEFTPARENTHESIS} {ATOMICITY} {COMMA} {ATOMICITY} {RIGHTPARENTHESIS} {LEFTPARENTHESIS} {ID} {COMMA} {INT} {RIGHTPARENTHESIS} {SEMICOLON}
+{flushStatement}	{FLUSH_KEYWORD} {LEFTPARENTHESIS} {INT} {RIGHTPARENTHESIS} {SEMICOLON}
+{binaryIntegerOperator}	{PLUS} ` {MINUS} ` {ASTERISK} ` {SLASH} ` {MOD}
+{unaryBooleanOperator}	{NOT}
+{binaryBooleanOperator}	{OR} ` {AND}
+{binaryIntegerComparisonOperator}	{EQUALS} ` {GREATER} ` {LESS} ` {GREATER_EQUALS} ` {LESS_EQUALS} ` {NOT_EQUALS}
+{EXTENDED_ASSIGNMENT}	{EQUALS} ` {EQUALS} {LEFTPARENTHESIS} {ATOMICITY} {RIGHTPARENTHESIS}
+{processCollection}	{processDeclaration} ` {processCollection} {processCollection}
+{booleanTerm}	{LEFTPARENTHESIS} {booleanTerm} {RIGHTPARENTHESIS} ` {unaryBooleanOperator} {booleanTerm} ` {booleanTerm} {binaryBooleanOperator} {booleanTerm} ` {integerTerm} {binaryIntegerComparisonOperator} {integerTerm}
+{ACCEPTING_STATE}	{initializationBlock} {processCollection}
