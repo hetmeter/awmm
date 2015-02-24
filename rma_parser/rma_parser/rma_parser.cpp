@@ -23,9 +23,12 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	string lexerPath;
-	string parserPath;
-	string inputPath;
-	string outputPath;
+	string programParserPath;
+	string predicateParserPath;
+	string programInputPath;
+	string programOutputPath;
+	string predicateInputPath;
+	string predicateOutputPath;
 
 	if (argc > 1)
 	{
@@ -39,39 +42,73 @@ int main(int argc, char** argv)
 
 	if (argc > 2)
 	{
-		parserPath = argv[2];
+		programParserPath = argv[2];
 	}
 	else
 	{
-		cout << "No parser rules file path specified\n";
+		cout << "No program parser rules file path specified\n";
 		return 1;
 	}
 
 	if (argc > 3)
 	{
-		inputPath = argv[3];
+		predicateParserPath = argv[3];
 	}
 	else
 	{
-		cout << "No input path specified\n";
+		cout << "No predicate parser rules file path specified\n";
 		return 1;
 	}
 
 	if (argc > 4)
 	{
-		outputPath = argv[4];
+		programInputPath = argv[4];
 	}
 	else
 	{
-		cout << "No output path specified\n";
+		cout << "No program input path specified\n";
 		return 1;
 	}
 
-	string parsedLexer = parse(lexerPath, parserPath, inputPath);
+	if (argc > 5)
+	{
+		programOutputPath = argv[5];
+	}
+	else
+	{
+		cout << "No program output path specified\n";
+		return 1;
+	}
 
-	ofstream out(outputPath);
-	out << parsedLexer;
-	out.close();
+	if (argc > 6)
+	{
+		predicateInputPath = argv[6];
+	}
+	else
+	{
+		cout << "No predicate input path specified\n";
+		return 1;
+	}
+
+	if (argc > 7)
+	{
+		predicateOutputPath = argv[7];
+	}
+	else
+	{
+		cout << "No predicate output path specified\n";
+		return 1;
+	}
+
+	parse(lexerPath, programParserPath, predicateParserPath, programInputPath, predicateInputPath);
+
+	ofstream programOut(programOutputPath);
+	programOut << programInputContent.toString();
+	programOut.close();
+
+	ofstream predicateOut(predicateOutputPath);
+	predicateOut << predicateInputContent.toString();
+	predicateOut.close();
 
 	return 0;
 }
