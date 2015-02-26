@@ -16,6 +16,14 @@ const string IGNORE_TAG = "{IGNORE}";
 const string WILDCARD_TAG = "{WILDCARD}";
 const string ACCEPTING_STATE_TAG = "{ACCEPTING_STATE}";
 
+const char CONFIG_SEPARATOR = '=';
+const char CONFIG_COMMENT = '#';
+const string CONFIG_FILE_PATH = "config.txt";
+const string LEXER_RULE_FILE_PROPERTY = "lexer rule file";
+const string PROGRAM_PARSER_RULE_FILE_PROPERTY = "program parser rule file";
+const string PREDICATE_PARSER_RULE_FILE_PROPERTY = "predicate parser rule file";
+const string CONFIG_REGEX = "^\\s*(.*\\S)\\s*=\\s*(.*\\S)\\s*$";
+
 const enum CharacterType { WHITESPACE, ALPHANUMERIC_OR_BRACKET, OTHER };
 
 bool isWhitespace(char c)

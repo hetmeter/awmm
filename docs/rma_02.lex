@@ -1,0 +1,41 @@
+/* Operators */
+LEFTPARENTHESIS						"("
+RIGHTPARENTHESIS					")"
+SEMICOLON							";"
+EQUALS								"="
+NOT									"!"
+NOT_EQUALS							"!="
+LESS								"<"
+LESS_EQUALS							"<="
+GREATER								">"
+GREATER_EQUALS						">="
+AND									"&"
+OR									"|"
+COLON								":"
+PLUS								"+"
+MINUS								"-"
+ASTERISK							"*"
+SLASH								"/"
+MOD									"%"
+COMMA								","
+ATOMICITY							"a" | "n"
+EXTENDED_ASSIGNMENT					{EQUALS} | "=(" {ATOMICITY} ")"
+
+/* Primitive constants */
+BOOL								"true" | "false"
+INT									[0-9]+
+
+/* Words */
+ID									[a-zA-Z_][a-zA-Z0-9_]*
+BEGINIT_KEYWORD						"beginit"
+ENDINIT_KEYWORD						"endinit"
+PROCESS_KEYWORD						"process"
+STORE_KEYWORD						"store"
+LOAD_KEYWORD						"load"
+IF_KEYWORD							"if"
+ELSE_KEYWORD						"else"
+GOTO_KEYWORD						"goto"
+NOP_KEYWORD							"nop"
+PUT_KEYWORD							"put"
+GET_KEYWORD							"get"
+FLUSH_KEYWORD						"flush"

@@ -45,8 +45,11 @@
 
 using namespace std;
 
-wordList programInputContent;
-wordList predicateInputContent;
+//wordList programInputContent;
+//wordList predicateInputContent;
+
+string programInputContent;
+string predicateInputContent;
 
 vector<token> initializeTokensFromFile(string path)
 {
@@ -70,7 +73,7 @@ vector<token> initializeTokensFromFile(string path)
 	return result;
 }
 
-void initializeInputFromFile(string path, wordList* content)
+string initializeInputFromFile(string path)
 {
 	ifstream inputFile(path);
 	stringstream buffer;
@@ -78,32 +81,43 @@ void initializeInputFromFile(string path, wordList* content)
 	string inputString = buffer.str();
 	inputFile.close();
 
-	content->parseString(inputString);
+	return inputString;
 }
 
-void processContent(wordList* content, vector<token>* lexerTokens, vector<token>* parserTokens)
+//void initializeInputFromFile(string path, wordList* content)
+//{
+//	ifstream inputFile(path);
+//	stringstream buffer;
+//	buffer << inputFile.rdbuf();
+//	string inputString = buffer.str();
+//	inputFile.close();
+//
+//	content->parseString(inputString);
+//}
+
+void processContent(string content, vector<token>* lexerTokens, vector<token>* parserTokens)
 {
 	int numberOfLexerTokens = lexerTokens->size();
 	int numberOfParserTokens = parserTokens->size();
 
 	for (int ctr = 0; ctr < numberOfLexerTokens; ctr++)
 	{
-		lexerTokens->at(ctr).applyToWordList(content);
+		lexerTokens->at(ctr).applyToString(content);
 	}
 
-	content->collapse();
+	content = normalize(content);
 
 	string oldInputContent = "";
 	string secondaryOldInputContent = "";
-	while (content->toString().compare(oldInputContent) != 0)
+	while (content.compare(oldInputContent) != 0)
 	{
-		oldInputContent = content->toString();
+		oldInputContent = content;
 
 		for (int ctr = 0; ctr < numberOfParserTokens; ctr++)
 		{
 			if (parserTokens->at(ctr).tag != ACCEPTING_STATE_TAG)
 			{
-				parserTokens->at(ctr).applyToWordList(content);
+				parserTokens->at(ctr).applyToString(content);
 			}
 		}
 	}
@@ -112,10 +126,46 @@ void processContent(wordList* content, vector<token>* lexerTokens, vector<token>
 	{
 		if (parserTokens->at(ctr).tag == ACCEPTING_STATE_TAG)
 		{
-			parserTokens->at(ctr).applyToWordList(content);
+			parserTokens->at(ctr).applyToString(content);
 		}
 	}
 }
+
+//void processContent(wordList* content, vector<token>* lexerTokens, vector<token>* parserTokens)
+//{
+//	int numberOfLexerTokens = lexerTokens->size();
+//	int numberOfParserTokens = parserTokens->size();
+//
+//	for (int ctr = 0; ctr < numberOfLexerTokens; ctr++)
+//	{
+//		lexerTokens->at(ctr).applyToWordList(content);
+//	}
+//
+//	content->collapse();
+//
+//	string oldInputContent = "";
+//	string secondaryOldInputContent = "";
+//	while (content->toString().compare(oldInputContent) != 0)
+//	{
+//		oldInputContent = content->toString();
+//
+//		for (int ctr = 0; ctr < numberOfParserTokens; ctr++)
+//		{
+//			if (parserTokens->at(ctr).tag != ACCEPTING_STATE_TAG)
+//			{
+//				parserTokens->at(ctr).applyToWordList(content);
+//			}
+//		}
+//	}
+//
+//	for (int ctr = 0; ctr < numberOfParserTokens; ctr++)
+//	{
+//		if (parserTokens->at(ctr).tag == ACCEPTING_STATE_TAG)
+//		{
+//			parserTokens->at(ctr).applyToWordList(content);
+//		}
+//	}
+//}
 
 void parse(string lexerPath, string programParserPath, string predicateParserPath, string programInputPath, string predicateInputPath)
 {
@@ -123,29 +173,15 @@ void parse(string lexerPath, string programParserPath, string predicateParserPat
 	vector<token> programParserTokens = initializeTokensFromFile(programParserPath);
 	vector<token> predicateParserTokens = initializeTokensFromFile(predicateParserPath);
 
-	initializeInputFromFile(programInputPath, &programInputContent);
+	programInputContent = initializeInputFromFile(programInputPath);
+	predicateInputContent = initializeInputFromFile(predicateInputPath);
+
+	processContent(programInputContent, &lexerTokens, &programParserTokens);
+	processContent(predicateInputContent, &lexerTokens, &predicateParserTokens);
+
+	/*initializeInputFromFile(programInputPath, &programInputContent);
 	initializeInputFromFile(predicateInputPath, &predicateInputContent);
 
-	/*int numberOfLexerTokens = lexerTokens.size();
-	cout << "Number of lexer tokens: " << numberOfLexerTokens << "\n\n";
-	cout << "Lexer tokens:\n";
-	for (int ctr = 0; ctr < numberOfLexerTokens; ctr++)
-	{
-		cout << "Lexer token " << ctr << ": " << lexerTokens.at(ctr).toString() << "\n";
-	}
-	cout << "\n";
-
-	int numberOfParserTokens = programParserTokens.size();
-	cout << "Number of parser tokens: " << numberOfParserTokens << "\n\n";
-	cout << "Parser tokens:\n";
-	for (int ctr = 0; ctr < numberOfParserTokens; ctr++)
-	{
-		cout << "Parser token " << ctr << ": " << programParserTokens.at(ctr).toString() << "\n";
-	}
-	cout << "\n";
-
-	cout << "Input content:\n" << programInputContent.toString() << "\n\n";*/
-
 	processContent(&programInputContent, &lexerTokens, &programParserTokens);
-	processContent(&predicateInputContent, &lexerTokens, &predicateParserTokens);
+	processContent(&predicateInputContent, &lexerTokens, &predicateParserTokens);*/
 }
