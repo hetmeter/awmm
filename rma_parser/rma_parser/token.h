@@ -141,7 +141,7 @@ struct token
 
 	void applyToString(string s)
 	{
-		cout << "Applying \"" << rule << "\" to \"" << s << "\":\n";
+		cout << "---\nApplying \"" << rule << "\" -> \"" << tag << "\" to \"" << s << "\":\n---\n";
 
 		regex ruleRegex(rule);
 		s = regex_replace(s, ruleRegex, tag);
