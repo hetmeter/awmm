@@ -3,6 +3,11 @@
 #include <string>
 #endif
 
+#ifndef __REGEX_INCLUDED__
+#define __REGEX_INCLUDED__
+#include <regex>
+#endif
+
 using namespace std;
 
 const char DESCRIPTION_RULE_SEPARATOR = '\t';
@@ -28,6 +33,7 @@ const string LEXER_RULE_FILE_PROPERTY = "lexer rule file";
 const string PROGRAM_PARSER_RULE_FILE_PROPERTY = "program parser rule file";
 const string PREDICATE_PARSER_RULE_FILE_PROPERTY = "predicate parser rule file";
 const string CONFIG_REGEX = "^\\s*(.*\\S)\\s*=\\s*(.*\\S)\\s*$";
+const string IDENTIFIER_REGEX = "[a-zA-Z_][a-zA-Z0-9_]*";
 
 const enum CharacterType { WHITESPACE, ALPHANUMERIC_UNDERSCORE_OR_BRACKET, OTHER };
 
@@ -219,4 +225,33 @@ bool isMatch(string s, string rule)
 		(rule == NUMBER_RULE && isNumber(s)) ||
 		(rule == WHITESPACE_RULE && isWhitespace(s) ||
 		(rule == WILDCARD_TAG));
+}
+
+string toIdentifier(string s)
+{
+	if (s.empty())
+	{
+		return "";
+	}
+	else if (s.at(0) == LEFT_TOKEN_DELIMITER || s.at(s.length() - 1) == RIGHT_TOKEN_DELIMITER)
+	{
+		return "";
+	}
+	else
+	{
+		regex identifierRegex(IDENTIFIER_REGEX);
+		smatch stringMatch;
+
+		if (regex_match(s, identifierRegex))
+		{
+			regex_search(s, stringMatch, identifierRegex);
+
+			if (stringMatch.size() >= 2)
+			{
+				return stringMatch[1].str();
+			}
+		}
+	}
+
+	return "";
 }

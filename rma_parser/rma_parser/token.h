@@ -141,6 +141,9 @@ struct token
 
 	string applyToString(string s)
 	{
+
+		//cout << "\t\"" << rule << "\"\n";
+
 		if (rule != IDENTIFIER_RULE)
 		{
 			regex ruleRegex(rule);
@@ -148,45 +151,75 @@ struct token
 		}
 		else
 		{
-			string result = "";
-			string currentWord = "";
-			int sLength = s.length();
-			char currentChar;
-			bool lastCharWasWhitespace = true;
-			CharacterType currentType;
-			CharacterType lastType = WHITESPACE;
+			string result = s;
+			string identifier;
+			string currentWord;
+			regex identifierRegex("\\S+");
+			smatch stringMatch;
+			int stringMatchSize;
 
-			for (int ctr = 0; ctr < sLength; ctr++)
+			cout << "searching {\n\n" << result << "\n\n} for \\S+ : " << regex_match(result, identifierRegex) << "\n";
+
+			if (regex_match(result, identifierRegex))
 			{
-				currentChar = s.at(ctr);
-				currentType = getType(currentChar);
+				regex_search(result, stringMatch, identifierRegex);
+				stringMatchSize = stringMatch.size();
 
-				if (currentType == lastType)
+				cout << "\t" << stringMatchSize << "\n";
+
+				for (int ctr = 1; ctr < stringMatchSize; ctr++)
 				{
-					currentWord += currentChar;
-				}
-				else
-				{
-					if (isIdentifier(currentWord))
+					currentWord = stringMatch[ctr].str();
+
+					if (!(identifier = toIdentifier(currentWord)).empty())
 					{
-						//cout << "\t\"" << currentWord << "\" is an identifier\n";
-
-						result.append(tag);
+						identifierRegex = regex(currentWord);
+						result = regex_replace(result, identifierRegex, tag);
 					}
-					else
-					{
-						//cout << "\t\"" << currentWord << "\" is not an identifier\n";
-
-						result.append(currentWord);
-					}
-
-					currentWord = "";
 				}
-
-				lastType = currentType;
 			}
 
 			return result;
+
+			//string result = "";
+			//string currentWord = "";
+			//int sLength = s.length();
+			//char currentChar;
+			//bool lastCharWasWhitespace = true;
+			//CharacterType currentType;
+			//CharacterType lastType = WHITESPACE;
+
+			//for (int ctr = 0; ctr < sLength; ctr++)
+			//{
+			//	currentChar = s.at(ctr);
+			//	currentType = getType(currentChar);
+
+			//	if (currentType == lastType)
+			//	{
+			//		currentWord += currentChar;
+			//	}
+			//	else
+			//	{
+			//		if (isIdentifier(currentWord))
+			//		{
+			//			//cout << "\t\"" << currentWord << "\" is an identifier\n";
+
+			//			result.append(tag);
+			//		}
+			//		else
+			//		{
+			//			//cout << "\t\"" << currentWord << "\" is not an identifier\n";
+
+			//			result.append(currentWord);
+			//		}
+
+			//		currentWord = "";
+			//	}
+
+			//	lastType = currentType;
+			//}
+
+			//return result;
 		}
 	}
 };
