@@ -9,6 +9,9 @@ const char DESCRIPTION_RULE_SEPARATOR = '\t';
 const char OR_OPERATOR = '`';
 const string WHITESPACES = " \t\r\n";
 const string WHITESPACES_WITHOUT_SPACE = "\t\r\n";
+const string ALPHANUMERIC_UNDERSCORE_OR_BRACKET_CHARACTERS = "_{}[]()abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const string IDENTIFIER_FIRST_CHARACTERS = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const string IDENTIFIER_SUCCESSIVE_CHARACTERS = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const string IDENTIFIER_RULE = "[identifier]";
 const string NUMBER_RULE = "[number]";
 const string WHITESPACE_RULE = "[whitespace]";
@@ -16,6 +19,8 @@ const string IGNORE_TAG = "{IGNORE}";
 const string WILDCARD_TAG = "{WILDCARD}";
 const string ACCEPTING_STATE_TAG = "{ACCEPTING_STATE}";
 
+const char LEFT_TOKEN_DELIMITER = '{';
+const char RIGHT_TOKEN_DELIMITER = '}';
 const char CONFIG_SEPARATOR = '=';
 const char CONFIG_COMMENT = '#';
 const string CONFIG_FILE_PATH = "config.txt";
@@ -24,7 +29,7 @@ const string PROGRAM_PARSER_RULE_FILE_PROPERTY = "program parser rule file";
 const string PREDICATE_PARSER_RULE_FILE_PROPERTY = "predicate parser rule file";
 const string CONFIG_REGEX = "^\\s*(.*\\S)\\s*=\\s*(.*\\S)\\s*$";
 
-const enum CharacterType { WHITESPACE, ALPHANUMERIC_OR_BRACKET, OTHER };
+const enum CharacterType { WHITESPACE, ALPHANUMERIC_UNDERSCORE_OR_BRACKET, OTHER };
 
 bool isWhitespace(char c)
 {
@@ -62,10 +67,17 @@ bool isWhitespace(string s)
 	return sLength > 0;
 }
 
-bool isAlphanumericOrBracket(char c)
+bool isAlphanumericUnderscoreOrBracket(char c)
 {
-	int cValue = (int)c;
-	return (cValue >= 48 && cValue <= 57) || (cValue >= 65 && cValue <= 91) || (cValue == 93) || (cValue == 95) || (cValue >= 97 && cValue <= 123 || (cValue == 125));
+	for (char currentChar : ALPHANUMERIC_UNDERSCORE_OR_BRACKET_CHARACTERS)
+	{
+		if (currentChar == c)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool isNumber(char c)
@@ -90,8 +102,28 @@ bool isNumber(string s)
 
 bool isStartOfIdentifier(char c)
 {
-	int cValue = (int)c;
-	return (cValue == '_') || (cValue >= 65 && cValue <= 90) || (cValue >= 97 && cValue <= 122);
+	for (char currentChar : IDENTIFIER_FIRST_CHARACTERS)
+	{
+		if (currentChar == c)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool isSuccessiveIdentifierCharacter(char c)
+{
+	for (char currentChar : IDENTIFIER_SUCCESSIVE_CHARACTERS)
+	{
+		if (currentChar == c)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 CharacterType getType(char c)
@@ -100,9 +132,9 @@ CharacterType getType(char c)
 	{
 		return WHITESPACE;
 	}
-	else if (isAlphanumericOrBracket(c))
+	else if (isAlphanumericUnderscoreOrBracket(c))
 	{
-		return ALPHANUMERIC_OR_BRACKET;
+		return ALPHANUMERIC_UNDERSCORE_OR_BRACKET;
 	}
 	else
 	{
@@ -167,7 +199,7 @@ bool isIdentifier(string s)
 		{
 			for (int ctr = 0; ctr < sLength; ctr++)
 			{
-				if (!isAlphanumericOrBracket(s.at(ctr)) || s.at(ctr) == '[' || s.at(ctr) == ']' || s.at(ctr) == '{' || s.at(ctr) == '}')
+				if (!isSuccessiveIdentifierCharacter(s.at(ctr)))
 				{
 					return false;
 				}

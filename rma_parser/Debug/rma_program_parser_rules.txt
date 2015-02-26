@@ -1,31 +1,32 @@
-{BLOCKCOMMENTDELIMITER_START}	{SLASH} {ASTERISK}
-{BLOCKCOMMENTDELIMITER_END}	{ASTERISK} {SLASH}
-{BLOCKCOMMENT}	{BLOCKCOMMENTDELIMITER_START} {BLOCKCOMMENTDELIMITER_END}
-{BLOCKCOMMENT}	{BLOCKCOMMENTDELIMITER_START} {WILDCARD} {BLOCKCOMMENTDELIMITER_END}
-{BLOCKCOMMENTDELIMITER_START}	{BLOCKCOMMENTDELIMITER_START} {WILDCARD}
-{NOT_EQUALS}	{NOT} {EQUALS}
-{LESS_EQUALS}	{LESS} {EQUALS}
-{GREATER_EQUALS}	{GREATER} {EQUALS}
-{IGNORE}	[whitespace] ` {LINECOMMENT} ` {BLOCKCOMMENT}
-{integerTermFirstHalf}	{integerTerm} {binaryIntegerOperator} ` {INT} {binaryIntegerOperator} ` {ID} {binaryIntegerOperator}
-{integerTerm}	{LEFTPARENTHESIS} {integerTerm} {RIGHTPARENTHESIS} ` {integerTermFirstHalf} {integerTerm} ` {integerTermFirstHalf} {INT} ` {integerTermFirstHalf} {ID}
-{processDeclaration}	{PROCESS_KEYWORD} {INT} {COLON} ` {processDeclaration} {storeStatement} ` {processDeclaration} {loadStatement} ` {processDeclaration} {ifElseBlock} ` {processDeclaration} {gotoStatement} ` {processDeclaration} {nopStatement} ` {processDeclaration} {assignStatement} ` {processDeclaration} {putStatement} ` {processDeclaration} {getStatement} ` {processDeclaration} {flushStatement} ` {processDeclaration} {label} {storeStatement} ` {processDeclaration} {label} {loadStatement} ` {processDeclaration} {label} {ifElseBlock} ` {processDeclaration} {label} {gotoStatement} ` {processDeclaration} {label} {nopStatement} ` {processDeclaration} {label} {assignStatement} ` {processDeclaration} {label} {putStatement} ` {processDeclaration} {label} {getStatement} ` {processDeclaration} {label} {flushStatement}
-{storeBegin}	{STORE_KEYWORD} {ID} {EQUALS}
-{storeStatement}	{storeBegin} {integerTerm} {SEMICOLON} ` {storeBegin} {INT} {SEMICOLON} ` {storeBegin} {ID} {SEMICOLON}
-{loadStatement}	{LOAD_KEYWORD} {ID} {EQUALS} {ID} {SEMICOLON}
-{ifHeader}	{label} {IF_KEYWORD} {booleanTerm} ` {IF_KEYWORD} {booleanTerm} ` {ifHeader} {storeStatement} ` {ifHeader} {loadStatement} ` {ifHeader} {ifElseBlock} ` {ifHeader} {gotoStatement} ` {ifHeader} {nopStatement} ` {ifHeader} {assignStatement} ` {ifHeader} {putStatement} ` {ifHeader} {getStatement} ` {ifHeader} {flushStatement} ` {ifHeader} {label} {storeStatement} ` {ifHeader} {label} {loadStatement} ` {ifHeader} {label} {ifElseBlock} ` {ifHeader} {label} {gotoStatement} ` {ifHeader} {label} {nopStatement} ` {ifHeader} {label} {assignStatement} ` {ifHeader} {label} {putStatement} ` {ifHeader} {label} {getStatement} ` {ifHeader} {label} {flushStatement}
-{ifElseHeader}	{ifHeader} {ELSE_KEYWORD} ` {ifElseHeader} {storeStatement} ` {ifElseHeader} {loadStatement} ` {ifElseHeader} {ifElseBlock} ` {ifElseHeader} {gotoStatement} ` {ifElseHeader} {nopStatement} ` {ifElseHeader} {assignStatement} ` {ifElseHeader} {putStatement} ` {ifElseHeader} {getStatement} ` {ifElseHeader} {flushStatement} ` {ifElseHeader} {label} {storeStatement} ` {ifElseHeader} {label} {loadStatement} ` {ifElseHeader} {label} {ifElseBlock} ` {ifElseHeader} {label} {gotoStatement} ` {ifElseHeader} {label} {nopStatement} ` {ifElseHeader} {label} {assignStatement} ` {ifElseHeader} {label} {putStatement} ` {ifElseHeader} {label} {getStatement} ` {ifElseHeader} {label} {flushStatement}
-{ifElseBlock}	{ifHeader} {ENDIF_KEYWORD} {SEMICOLON} ` {ifElseHeader} {ENDIF_KEYWORD} {SEMICOLON}
-{gotoStatement}	{GOTO_KEYWORD} {INT} {SEMICOLON}
-{nopStatement}	{NOP_KEYWORD} {SEMICOLON}
-{initializationStores}	{BEGINIT_KEYWORD} {storeStatement} ` {initializationStores} {storeStatement}
-{initializationBlock}	{initializationStores} {ENDINIT_KEYWORD} ` {BEGINIT_KEYWORD} {ENDINIT_KEYWORD}
-{comparisonFirstHalf}	{INT} {binaryIntegerComparisonOperator} ` {ID} {binaryIntegerComparisonOperator} ` {integerTerm} {binaryIntegerComparisonOperator}
-{booleanTerm}	{LEFTPARENTHESIS} {booleanTerm} {RIGHTPARENTHESIS} ` {unaryBooleanOperator} {booleanTerm} ` {booleanTerm} {binaryBooleanOperator} {booleanTerm} ` {comparisonFirstHalf} {integerTerm} ` {comparisonFirstHalf} {ID} ` {comparisonFirstHalf} {INT}
-{label}	{INT} {COLON}
-{binaryIntegerOperator}	{PLUS} ` {MINUS} ` {ASTERISK} ` {SLASH} ` {MOD}
-{unaryBooleanOperator}	{NOT}
-{binaryBooleanOperator}	{OR} ` {AND}
-{binaryIntegerComparisonOperator}	{EQUALS} ` {GREATER} ` {LESS} ` {GREATER_EQUALS} ` {LESS_EQUALS} ` {NOT_EQUALS}
-{processBlock}	{processBlock} {processDeclaration} ` {processDeclaration} {processDeclaration} ` {processDeclaration} {processBlock} ` {processBlock} {processBlock}
-{ACCEPTING_STATE}	{initializationBlock} {processBlock}
+{BEGINIT_KEYWORD}	beginit
+{ENDINIT_KEYWORD}	endinit
+{PROCESS_KEYWORD}	process
+{STORE_KEYWORD}	store
+{LOAD_KEYWORD}	load
+{IF_KEYWORD}	if
+{ELSE_KEYWORD}	else
+{ENDIF_KEYWORD}	endif
+{GOTO_KEYWORD}	goto
+{NOP_KEYWORD}	nop
+{PUT_KEYWORD}	put
+{GET_KEYWORD}	get
+{FLUSH_KEYWORD}	flush
+{LEFTPARENTHESIS}	(
+{RIGHTPARENTHESIS}	)
+{SEMICOLON}	;
+{EQUALS}	=
+{NOT}	!
+{LESS}	<
+{GREATER}	>
+{AND}	&
+{OR}	|
+{COLON}	:
+{PLUS}	+
+{MINUS}	-
+{ASTERISK}	*
+{SLASH}	/
+{MOD}	%
+{COMMA}	,
+{ID}	[identifier]
+{INT}	[number]
+{ATOMICITY}	a ` n

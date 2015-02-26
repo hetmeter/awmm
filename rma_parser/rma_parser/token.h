@@ -115,7 +115,7 @@ struct token
 
 	void initialize(string inputTag, string inputRule)
 	{
-		tag = normalize(inputTag);
+		tag = inputTag;
 		rule = normalize(inputRule);
 	}
 
@@ -131,7 +131,7 @@ struct token
 
 	bool isInitialized()
 	{
-		return tag.length() > 0u && rule.length() > 0u;
+		return tag.length() > 0 && rule.length() > 0;
 	}
 
 	string toString()
@@ -139,14 +139,55 @@ struct token
 		return "token " + tag + " { \"" + rule + "\" }";
 	}
 
-	void applyToString(string s)
+	string applyToString(string s)
 	{
-		cout << "---\nApplying \"" << rule << "\" -> \"" << tag << "\" to \"" << s << "\":\n---\n";
+		if (rule != IDENTIFIER_RULE)
+		{
+			regex ruleRegex(rule);
+			return regex_replace(s, ruleRegex, tag);
+		}
+		else
+		{
+			string result = "";
+			string currentWord = "";
+			int sLength = s.length();
+			char currentChar;
+			bool lastCharWasWhitespace = true;
+			CharacterType currentType;
+			CharacterType lastType = WHITESPACE;
 
-		regex ruleRegex(rule);
-		s = regex_replace(s, ruleRegex, tag);
+			for (int ctr = 0; ctr < sLength; ctr++)
+			{
+				currentChar = s.at(ctr);
+				currentType = getType(currentChar);
 
-		cout << "\tResult: \"" << s << "\":\n";
+				if (currentType == lastType)
+				{
+					currentWord += currentChar;
+				}
+				else
+				{
+					if (isIdentifier(currentWord))
+					{
+						//cout << "\t\"" << currentWord << "\" is an identifier\n";
+
+						result.append(tag);
+					}
+					else
+					{
+						//cout << "\t\"" << currentWord << "\" is not an identifier\n";
+
+						result.append(currentWord);
+					}
+
+					currentWord = "";
+				}
+
+				lastType = currentType;
+			}
+
+			return result;
+		}
 	}
 };
 typedef struct token token;
