@@ -141,28 +141,46 @@ struct token
 
 	string applyToString(string s)
 	{
-
+		regex ruleRegex;
 		//cout << "\t\"" << rule << "\"\n";
 
 		if (rule != IDENTIFIER_RULE)
 		{
-			regex ruleRegex(rule);
+			ruleRegex = regex(rule);
 			return regex_replace(s, ruleRegex, tag);
 		}
 		else
 		{
+			//string regexString = "y1";
+			string regexString = "(\\S+\\s+)*";
 			string result = s;
 			string identifier;
 			string currentWord;
-			regex identifierRegex("\\S+");
+			ruleRegex = regex(regexString);
 			smatch stringMatch;
 			int stringMatchSize;
+			cout << "searching {\n\n" << result << "\n\n} for " << regexString << " : " << regex_match(result, ruleRegex) << "\n";
 
-			cout << "searching {\n\n" << result << "\n\n} for \\S+ : " << regex_match(result, identifierRegex) << "\n";
+			/*regex_search(result, stringMatch, ruleRegex);
+			stringMatchSize = stringMatch.size();
 
-			if (regex_match(result, identifierRegex))
+			cout << "\t" << stringMatchSize << "\n";
+
+			for (int ctr = 1; ctr < stringMatchSize; ctr++)
 			{
-				regex_search(result, stringMatch, identifierRegex);
+				currentWord = stringMatch[ctr].str();
+
+				if (!(identifier = toIdentifier(currentWord)).empty())
+				{
+					ruleRegex = regex(currentWord);
+					result = regex_replace(result, ruleRegex, tag);
+				}
+			}*/
+
+			if (regex_search(result, ruleRegex))
+			{
+				//regex_search(result, stringMatch, ruleRegex);
+				regex_match(result, stringMatch, ruleRegex);
 				stringMatchSize = stringMatch.size();
 
 				cout << "\t" << stringMatchSize << "\n";
@@ -173,8 +191,8 @@ struct token
 
 					if (!(identifier = toIdentifier(currentWord)).empty())
 					{
-						identifierRegex = regex(currentWord);
-						result = regex_replace(result, identifierRegex, tag);
+						ruleRegex = regex(currentWord);
+						result = regex_replace(result, ruleRegex, tag);
 					}
 				}
 			}
