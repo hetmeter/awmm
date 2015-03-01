@@ -28,6 +28,7 @@ const string ACCEPTING_STATE_TAG = "{ACCEPTING_STATE}";
 
 const char LEFT_TOKEN_DELIMITER = '{';
 const char RIGHT_TOKEN_DELIMITER = '}';
+const char TAG_PARAMETER_SEPARATOR = ',';
 const char CONFIG_COMMENT = '#';
 const string CONFIG_FILE_PATH = "config.txt";
 const string LEXER_RULE_FILE_PROPERTY = "lexer rule file";

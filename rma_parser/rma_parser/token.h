@@ -103,10 +103,12 @@ struct token
 					//cout << result << "\n\n";
 
 					string identifier;
+					string extendedIdentifier;
 					string currentWord;
 					ruleRegex = regex("(\\S+)");
 					vector<string> matches = find_all_matches(ruleRegex, result);
 					int matchesCount = matches.size();
+					string tagPrefix = tag.substr(0, tag.length() - 2);
 
 					for (int ctr = 0; ctr < matchesCount; ctr++)
 					{
@@ -114,9 +116,9 @@ struct token
 
 						if (!(identifier = toIdentifier(currentWord)).empty())
 						{
-							identifier = " " + identifier + " ";
-							ruleRegex = regex(identifier);
-							result = regex_replace(result, ruleRegex, tag);
+							extendedIdentifier = " " + identifier + " ";
+							ruleRegex = regex(extendedIdentifier);
+							result = regex_replace(result, ruleRegex, " " + tagPrefix + TAG_PARAMETER_SEPARATOR + identifier + RIGHT_TOKEN_DELIMITER + " ");
 						}
 					}
 				}

@@ -122,7 +122,7 @@ string processContent(string content, vector<token>* lexerTokens, vector<token>*
 
 	result = normalize(result);
 
-	//cout << "Lexer tokens applied and normalized:\n" << result << "\n\n";
+	cout << "Lexer tokens applied and normalized:\n" << result << "\n\n";
 
 	string oldInputContent = "";
 	string secondaryOldInputContent = "";

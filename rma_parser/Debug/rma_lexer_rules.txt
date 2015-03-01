@@ -37,5 +37,5 @@
  {RIGHTPARENTHESIS} 	\)
 } {	\}\{
  {ID} 	[identifier]
- {INT} 	\d+
+ {INT,$1} 	[^\{\}abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_](\d+)[^\{\}abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_]
  	\s+
