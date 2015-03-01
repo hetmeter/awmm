@@ -82,7 +82,6 @@
     <ClInclude Include="parser.h" />
     <ClInclude Include="parserStatics.h" />
     <ClInclude Include="token.h" />
-    <ClInclude Include="wordList.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

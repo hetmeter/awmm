@@ -1,159 +1,44 @@
-#ifndef __STRING_INCLUDED__
-#define __STRING_INCLUDED__
-#include <string>
-#endif
-
-#ifndef __REGEX_INCLUDED__
-#define __REGEX_INCLUDED__
-#include <regex>
-#endif
+//#ifndef __STRING_INCLUDED__
+//#define __STRING_INCLUDED__
+//#include <string>
+//#endif
+//
+//#ifndef __REGEX_INCLUDED__
+//#define __REGEX_INCLUDED__
+//#include <regex>
+//#endif
+//
+//#ifndef __IOSTREAM_INCLUDED__
+//#define __IOSTREAM_INCLUDED__
+//#include <iostream>
+//#endif
+//
+//#ifndef __VECTOR_INCLUDED__
+//#define __VECTOR_INCLUDED__
+//#include <vector>
+//#endif
 
 using namespace std;
 
 const char DESCRIPTION_RULE_SEPARATOR = '\t';
-const char OR_OPERATOR = '`';
-const string WHITESPACES = " \t\r\n";
 const string WHITESPACES_WITHOUT_SPACE = "\t\r\n";
-const string ALPHANUMERIC_UNDERSCORE_OR_BRACKET_CHARACTERS = "_{}[]()abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const string IDENTIFIER_FIRST_CHARACTERS = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const string IDENTIFIER_SUCCESSIVE_CHARACTERS = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const string IDENTIFIER_RULE = "[identifier]";
-const string NUMBER_RULE = "[number]";
-const string WHITESPACE_RULE = "[whitespace]";
-const string IGNORE_TAG = "{IGNORE}";
-const string WILDCARD_TAG = "{WILDCARD}";
+const string EOF_TAG = "{EOF}";
 const string ACCEPTING_STATE_TAG = "{ACCEPTING_STATE}";
 
 const char LEFT_TOKEN_DELIMITER = '{';
 const char RIGHT_TOKEN_DELIMITER = '}';
-const char CONFIG_SEPARATOR = '=';
 const char CONFIG_COMMENT = '#';
 const string CONFIG_FILE_PATH = "config.txt";
 const string LEXER_RULE_FILE_PROPERTY = "lexer rule file";
 const string PROGRAM_PARSER_RULE_FILE_PROPERTY = "program parser rule file";
 const string PREDICATE_PARSER_RULE_FILE_PROPERTY = "predicate parser rule file";
 const string CONFIG_REGEX = "^\\s*(.*\\S)\\s*=\\s*(.*\\S)\\s*$";
-const string IDENTIFIER_REGEX = "[a-zA-Z_][a-zA-Z0-9_]*";
-
-const enum CharacterType { WHITESPACE, ALPHANUMERIC_UNDERSCORE_OR_BRACKET, OTHER };
-
-bool isWhitespace(char c)
-{
-	int ctr = 0;
-	char currentChar = WHITESPACES[ctr];
-
-	while (currentChar != '\0')
-	{
-		if (currentChar == c)
-		{
-			//cout << "\t'" << c << "' is a whitespace character\n";
-
-			return true;
-		}
-
-		ctr++;
-		currentChar = WHITESPACES[ctr];
-	}
-
-	return false;
-}
-
-bool isWhitespace(string s)
-{
-	int sLength = s.length();
-
-	for (int ctr = 0; ctr < sLength; ctr++)
-	{
-		if (!isWhitespace(s.at(ctr)))
-		{
-			return false;
-		}
-	}
-
-	return sLength > 0;
-}
-
-bool isAlphanumericUnderscoreOrBracket(char c)
-{
-	for (char currentChar : ALPHANUMERIC_UNDERSCORE_OR_BRACKET_CHARACTERS)
-	{
-		if (currentChar == c)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool isNumber(char c)
-{
-	return (int)c >= 48 && (int)c <= 57;
-}
-
-bool isNumber(string s)
-{
-	int sLength = s.length();
-
-	for (int ctr = 0; ctr < sLength; ctr++)
-	{
-		if (!isNumber(s.at(ctr)))
-		{
-			return false;
-		}
-	}
-
-	return sLength > 0;
-}
-
-bool isStartOfIdentifier(char c)
-{
-	for (char currentChar : IDENTIFIER_FIRST_CHARACTERS)
-	{
-		if (currentChar == c)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool isSuccessiveIdentifierCharacter(char c)
-{
-	for (char currentChar : IDENTIFIER_SUCCESSIVE_CHARACTERS)
-	{
-		if (currentChar == c)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-CharacterType getType(char c)
-{
-	if (isWhitespace(c))
-	{
-		return WHITESPACE;
-	}
-	else if (isAlphanumericUnderscoreOrBracket(c))
-	{
-		return ALPHANUMERIC_UNDERSCORE_OR_BRACKET;
-	}
-	else
-	{
-		return OTHER;
-	}
-}
+const string IDENTIFIER_REGEX = "([a-zA-Z_][a-zA-Z0-9_]*)";
 
 string normalize(string s)
 {
 	string result = string(s);
-
-	//cout << "[" << result << "]\n";
-	//cout << result << "\n";
 
 	int ctr = 0;
 	char currentWhitespace = WHITESPACES_WITHOUT_SPACE[ctr];
@@ -166,8 +51,6 @@ string normalize(string s)
 		currentWhitespace = WHITESPACES_WITHOUT_SPACE[ctr];
 	}
 
-	//cout << "\t[" << result << "]\n";
-
 	int doubleSpaceIndex;
 
 	while ((doubleSpaceIndex = result.find("  ")) != string::npos)
@@ -175,14 +58,10 @@ string normalize(string s)
 		result.erase(doubleSpaceIndex, 1);
 	}
 
-	//cout << "\t\t[" << result << "]\n";
-
 	while (result.length() > 0 && result[0] == ' ')
 	{
 		result.erase(0, 1);
 	}
-
-	//cout << "\t\t\t[" << result << "]\n";
 
 	int resultLength = result.length();
 
@@ -191,40 +70,19 @@ string normalize(string s)
 		result.erase(resultLength - 1, 1);
 	}
 
-	//cout << "\t\t\t\t[" << result << "]\n";
-
 	return result;
 }
 
-bool isIdentifier(string s)
-{
-	int sLength = s.length();
-	if (sLength > 0)
-	{
-		if (isStartOfIdentifier(s.at(0)))
-		{
-			for (int ctr = 0; ctr < sLength; ctr++)
-			{
-				if (!isSuccessiveIdentifierCharacter(s.at(ctr)))
-				{
-					return false;
-				}
-			}
+vector<string> find_all_matches(regex const& r, string input) {
+	smatch match;
+	vector<string> results;
 
-			return true;
-		}
+	while (regex_search(input, match, r)) {
+		results.push_back(match[1]);
+		input = match.suffix().str();
 	}
 
-	return false;
-}
-
-bool isMatch(string s, string rule)
-{
-	return (s == rule) ||
-		(rule == IDENTIFIER_RULE && isIdentifier(s)) ||
-		(rule == NUMBER_RULE && isNumber(s)) ||
-		(rule == WHITESPACE_RULE && isWhitespace(s) ||
-		(rule == WILDCARD_TAG));
+	return results;
 }
 
 string toIdentifier(string s)
@@ -254,4 +112,34 @@ string toIdentifier(string s)
 	}
 
 	return "";
+}
+
+vector<string> separate(string input, char separator)
+{
+	vector<string> result;
+	string source = input;
+	int separatorIndex;
+
+	while ((separatorIndex = source.find(separator)) != string::npos)
+	{
+		result.push_back(source.substr(0, separatorIndex));
+
+		if (((int)source.length()) > separatorIndex + 1)
+		{
+			source = source.substr(separatorIndex + 1, string::npos);
+		}
+		else
+		{
+			source = "";
+		}
+	}
+	
+	result.push_back(source);
+
+	return result;
+}
+
+void throwError(string message)
+{
+	cout << "\n\tERROR: " << message << "\n\n";
 }

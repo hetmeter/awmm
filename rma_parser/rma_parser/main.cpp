@@ -48,7 +48,6 @@ int main(int argc, char** argv)
 
 	while (getline(ruleFile, line))
 	{
-		//cout << "Parsing " << line << "\n";
 		commentMarkerIndex = line.find(CONFIG_COMMENT);
 
 		if (commentMarkerIndex != string::npos)
@@ -58,20 +57,13 @@ int main(int argc, char** argv)
 
 		if (regex_match(line, propertyValueRegex))
 		{
-			//cout << "\tMatch found" << "\n";
-
 			regex_search(line, stringMatch, propertyValueRegex);
 			
 			if (stringMatch.size() >= 3)
 			{
-				//cout << "\t\tstringMatch.size() >= 2" << "\n";
-
 				property = stringMatch[1].str();
-				//cout << "\t\t\t\"" << property << "\"\n";
 				value = stringMatch[2].str();
-				//cout << "\t\t\t\"" << value << "\"\n";
-
-				//if (property.compare(LEXER_RULE_FILE_PROPERTY) == 0)
+				
 				if (property == LEXER_RULE_FILE_PROPERTY)
 				{
 					lexerPath = value;
@@ -140,13 +132,13 @@ int main(int argc, char** argv)
 
 	ofstream programOut(programOutputPath);
 	programOut << programInputContent;
-	//programOut << programInputContent.toString();
 	programOut.close();
 
 	ofstream predicateOut(predicateOutputPath);
 	predicateOut << predicateInputContent;
-	//predicateOut << predicateInputContent.toString();
 	predicateOut.close();
+
+	cout << "\nParsed program:\n" << programInputContent << "\n\nParsed predicates:\n" << predicateInputContent << "\n";
 
 	return 0;
 }

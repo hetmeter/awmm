@@ -12,7 +12,7 @@
 {ELSE_KEYWORD}	else
 {ENDIF_KEYWORD}	endif
 {IF_KEYWORD}	if
-{LABEL}	\d+:
+{label}	\d+:
 {PLUS}	\+
 {MINUS}	-
 {ASTERISK}	\*
@@ -34,6 +34,4 @@
 } 	\}
 {ID}	[identifier]
 {INT}	\d+
- 	\{
- 	\}
  	\s+
