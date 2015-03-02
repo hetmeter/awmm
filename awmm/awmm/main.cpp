@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 			currentAst->name = currentName;
 			currentName = "";
 			currentAst->addChild(new ast);
-			currentAst = &(currentAst->children.at(0));
+			currentAst = currentAst->children.at(0);
 		}
 		else if (currentChar == COMMA)
 		{
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 
 			currentAst = currentAst->parent;
 			currentAst->addChild(new ast);
-			currentAst = &(currentAst->children.at(currentAst->children.size() - 1));
+			currentAst = currentAst->children.at(currentAst->children.size() - 1);
 		}
 		else if (currentChar == RIGHT_PARENTHESIS)
 		{
@@ -114,6 +114,8 @@ int main(int argc, char** argv)
 			currentName += currentChar;
 		}
 	}
+
+	rootAst.linearlyIterateThroughControlFlow();
 
 	cout << rootAst.toString() << "\n\n";
 
