@@ -23,6 +23,11 @@
 #include "ast.h"
 #endif
 
+#ifndef __CONTROLFLOWVISITOR_H_INCLUDED__
+#define __CONTROLFLOWVISITOR_H_INCLUDED__
+#include "controlFlowVisitor.h"
+#endif
+
 using namespace std;
 
 const char LEFT_PARENTHESIS = '(';
@@ -115,7 +120,17 @@ int main(int argc, char** argv)
 		}
 	}
 
-	rootAst.linearlyIterateThroughControlFlow();
+	rootAst.initializeGlobalVariables();
+	rootAst.inceptControlFlowGraph();
+
+	int processCount = rootAst.children.size();
+	controlFlowVisitor* crawler;
+
+	for (int ctr = 1; ctr < processCount; ctr++)
+	{
+		crawler = new controlFlowVisitor;
+		crawler->traverseControlFlowGraph(rootAst.children.at(ctr)->children.at(1)->children.at(0));
+	}
 
 	cout << rootAst.toString() << "\n\n";
 

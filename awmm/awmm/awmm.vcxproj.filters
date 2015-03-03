@@ -23,5 +23,11 @@
     <ClInclude Include="ast.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="controlFlowEdge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="controlFlowVisitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

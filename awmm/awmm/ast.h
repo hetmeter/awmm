@@ -18,6 +18,11 @@
 #include <map>
 #endif
 
+#ifndef __CONTROL_FLOW_EDGE_INCLUDED__
+#define __CONTROL_FLOW_EDGE_INCLUDED__
+#include "controlFlowEdge.h"
+#endif
+
 using namespace std;
 
 const int TOP_VALUE = -1;
@@ -31,7 +36,10 @@ const string PROCESS_DECLARATION_TOKEN_NAME = "processDeclaration";
 const string INITIALIZATION_BLOCK_TOKEN_NAME = "initializationBlock";
 const string STATEMENTS_TOKEN_NAME = "statements";
 const string STORE_TOKEN_NAME = "store";
+const string LOAD_TOKEN_NAME = "load";
 const string FENCE_TOKEN_NAME = "fence";
+const string LABEL_TOKEN_NAME = "label";
+const string GOTO_TOKEN_NAME = "goto";
 const string IF_ELSE_TOKEN_NAME = "ifElse";
 const string WHILE_TOKEN_NAME = "while";
 const string NONE_TAG_NAME = "none";
@@ -39,11 +47,14 @@ const string NONE_TAG_NAME = "none";
 typedef map<string, int> bufferSizeMap;
 typedef bufferSizeMap::iterator bufferSizeMapIterator;
 
+map<int, ast*> labelLookupMap;
+
 struct ast
 {
 	string name;
 	ast* parent = NULL;
 	vector<ast*> children;
+	vector<controlFlowEdge*> outgoingEdges;
 
 	bufferSizeMap writeBufferSizeMap;
 	bufferSizeMap readBufferSizeMap;
@@ -182,6 +193,13 @@ struct ast
 				incrementBufferSizeIfExists(name, &(parent->readBufferSizeMap));
 			}
 		}
+		else if (parent->name == LABEL_TOKEN_NAME && parent->children.at(0) == this)
+		{
+			if (labelLookupMap.find(stoi(name)) == labelLookupMap.end())
+			{
+				labelLookupMap[stoi(name)] = parent;
+			}
+		}
 	}
 
 	void incrementBufferSizeByN(bufferSizeMap* targetMap, string variableName, int n)
@@ -281,6 +299,19 @@ struct ast
 		}
 	}
 
+	void resetBufferSizes()
+	{
+		for (bufferSizeMapIterator iterator = writeBufferSizeMap.begin(); iterator != writeBufferSizeMap.end(); iterator++)
+		{
+			writeBufferSizeMap[iterator->first] = 0;
+		}
+
+		for (bufferSizeMapIterator iterator = readBufferSizeMap.begin(); iterator != readBufferSizeMap.end(); iterator++)
+		{
+			readBufferSizeMap[iterator->first] = 0;
+		}
+	}
+
 	void copyBufferSizes(ast* source)
 	{
 		for (bufferSizeMapIterator iterator = source->writeBufferSizeMap.begin(); iterator != source->writeBufferSizeMap.end(); iterator++)
@@ -300,23 +331,26 @@ struct ast
 		}
 	}
 
-	void linearlyIterateThroughControlFlow()
+	void initializeGlobalVariables()
 	{
 		if (name == PROGRAM_DECLARATION_TOKEN_NAME)
 		{
 			int childrenCount = children.size();
 
-			// Initialize global variables
 			children.at(0)->topDownBufferSizeInitialization();
 
 			for (int ctr = 1; ctr < childrenCount; ctr++)
 			{
 				children.at(ctr)->topDownCascadingBufferSizeMapUnion(children.at(0)->writeBufferSizeMap);
 				children.at(ctr)->topDownBufferSizeEvaluation();
-				children.at(ctr)->linearlyIterateThroughControlFlow();
+				//children.at(ctr)->linearlyIterateThroughControlFlow();
 			}
 		}
-		else if (name == PROCESS_DECLARATION_TOKEN_NAME)
+	}
+
+	void linearlyIterateThroughControlFlow()
+	{
+		if (name == PROCESS_DECLARATION_TOKEN_NAME)
 		{
 			children.at(1)->linearlyIterateThroughControlFlow();
 			copyBufferSizes(children.at(1));
@@ -372,6 +406,189 @@ struct ast
 			whileNode->children.at(1)->additiveMergeBufferSizes(whileNode->children.at(0));
 			whileNode->copyBufferSizes(whileNode->children.at(1));
 			whileNode->setNonZeroToTop();
+		}
+	}
+
+	void propagateTopValues()
+	{
+		bool propagateFurther;
+
+		for (controlFlowEdge* edge : outgoingEdges)
+		{
+			propagateFurther = false;
+
+			for (bufferSizeMapIterator iterator = writeBufferSizeMap.begin(); iterator != writeBufferSizeMap.end(); iterator++)
+			{
+				if (iterator->second == TOP_VALUE && edge->end->writeBufferSizeMap[iterator->first] != TOP_VALUE)
+				{
+					propagateFurther = true;
+					edge->end->writeBufferSizeMap[iterator->first] = TOP_VALUE;
+				}
+			}
+
+			for (bufferSizeMapIterator iterator = readBufferSizeMap.begin(); iterator != readBufferSizeMap.end(); iterator++)
+			{
+				if (iterator->second == TOP_VALUE && edge->end->readBufferSizeMap[iterator->first] != TOP_VALUE)
+				{
+					propagateFurther = true;
+					edge->end->readBufferSizeMap[iterator->first] = TOP_VALUE;
+				}
+			}
+
+			if (propagateFurther)
+			{
+				edge->end->propagateTopValues();
+			}
+		}
+	}
+
+	ast* getNextStatement()
+	{
+		int currentIndex, statementsCount;
+
+		if (parent->name == STATEMENTS_TOKEN_NAME)
+		{
+			currentIndex = -1;
+			statementsCount = parent->children.size();
+
+			for (int ctr = 0; ctr < statementsCount; ctr++)
+			{
+				if (parent->children.at(ctr) == this)
+				{
+					currentIndex = ctr;
+					break;
+				}
+			}
+
+			return currentIndex == -1 ? this : parent->children.at(currentIndex);
+		}
+		else if (parent->parent->name == STATEMENTS_TOKEN_NAME)
+		{
+			currentIndex = -1;
+			statementsCount = parent->parent->children.size();
+
+			for (int ctr = 0; ctr < statementsCount - 1; ctr++)
+			{
+				if (parent->parent->children.at(ctr) == parent)
+				{
+					currentIndex = ctr + 1;
+					break;
+				}
+			}
+
+			return currentIndex == -1 ? this : parent->parent->children.at(currentIndex);
+		}
+
+		return this;
+	}
+
+	void inceptControlFlowGraph()
+	{
+		//cout << "\t\t\tinceptControlFlowGraph(" << name << ")\n";
+
+		if (outgoingEdges.size() == 0)
+		{
+			ast* nextStatement;
+
+			if (name == PROGRAM_DECLARATION_TOKEN_NAME)
+			{
+				int childrenCount = children.size();
+
+				for (int ctr = 1; ctr < childrenCount; ctr++)
+				{
+					children.at(ctr)->inceptControlFlowGraph();
+				}
+			}
+			else if (name == PROCESS_DECLARATION_TOKEN_NAME)
+			{
+				children.at(1)->inceptControlFlowGraph();
+			}
+			else if (name == STATEMENTS_TOKEN_NAME)
+			{
+				children.at(0)->inceptControlFlowGraph();
+			}
+			else if (name == LABEL_TOKEN_NAME)
+			{
+				resetBufferSizes();
+
+				//cout << "\t\t\tEdge (" << (name) << ", " << (children.at(1)->name) << ")\n";
+
+				outgoingEdges.push_back(new controlFlowEdge(this, children.at(1)));
+				children.at(1)->inceptControlFlowGraph();
+			}
+			else if (name == GOTO_TOKEN_NAME)
+			{
+				int labelValue = stoi(children.at(0)->name);
+
+				resetBufferSizes();
+
+				//cout << "\t\t\tEdge (" << (name) << ", " << (labelLookupMap[labelValue]->name) << ")\n";
+
+				outgoingEdges.push_back(new controlFlowEdge(this, labelLookupMap[labelValue]));
+				labelLookupMap[labelValue]->inceptControlFlowGraph();
+			}
+			else if (name == IF_ELSE_TOKEN_NAME)
+			{
+				nextStatement = getNextStatement();
+				ast* lastBlockStatement;
+
+				resetBufferSizes();
+
+				//cout << "\t\t\tEdge (" << (name) << ", " << (children.at(0)->name) << ")\n";
+
+				outgoingEdges.push_back(new controlFlowEdge(this, children.at(0)));
+
+				//cout << "\t\t\tEdge (" << (children.at(0)->name) << ", " << (children.at(1)->children.at(0)->name) << ")\n";
+
+				children.at(0)->outgoingEdges.push_back(new controlFlowEdge(children.at(0), children.at(1)->children.at(0)));
+				children.at(1)->children.at(0)->inceptControlFlowGraph();
+
+				lastBlockStatement = children.at(1)->children.at(children.at(1)->children.size() - 1);
+				if (nextStatement != this && !(lastBlockStatement->name == GOTO_TOKEN_NAME || (lastBlockStatement->name == LABEL_TOKEN_NAME && lastBlockStatement->children.at(1)->name == GOTO_TOKEN_NAME)))
+				{
+					//cout << "\t\t\tEdge (" << (lastBlockStatement->name) << ", " << (nextStatement->name) << ")\n";
+
+					lastBlockStatement->outgoingEdges.push_back(new controlFlowEdge(lastBlockStatement, nextStatement));
+				}
+
+				if (children.at(2)->name == STATEMENTS_TOKEN_NAME)
+				{
+
+					//cout << "\t\t\tEdge (" << (children.at(0)->name) << ", " << (children.at(2)->children.at(0)->name) << ")\n";
+
+					children.at(0)->outgoingEdges.push_back(new controlFlowEdge(children.at(0), children.at(2)->children.at(0)));
+					children.at(2)->children.at(0)->inceptControlFlowGraph();
+
+					lastBlockStatement = children.at(2)->children.at(children.at(2)->children.size() - 1);
+					if (nextStatement != this && !(lastBlockStatement->name == GOTO_TOKEN_NAME || (lastBlockStatement->name == LABEL_TOKEN_NAME && lastBlockStatement->children.at(1)->name == GOTO_TOKEN_NAME)))
+					{
+
+						//cout << "\t\t\tEdge (" << (lastBlockStatement->name) << ", " << (nextStatement->name) << ")\n";
+
+						lastBlockStatement->outgoingEdges.push_back(new controlFlowEdge(lastBlockStatement, nextStatement));
+					}
+				}
+
+				if (nextStatement != this)
+				{
+					//cout << "\t\t\tEdge (" << (name) << ", " << (nextStatement->name) << ")\n";
+
+					outgoingEdges.push_back(new controlFlowEdge(this, nextStatement));
+					nextStatement->inceptControlFlowGraph();
+				}
+			}
+			else
+			{
+				nextStatement = getNextStatement();
+
+				if (nextStatement != this)
+				{
+					//cout << "\t\t\tEdge (" << (name) << ", " << (nextStatement->name) << ")\n";
+
+					outgoingEdges.push_back(new controlFlowEdge(this, nextStatement));
+					nextStatement->inceptControlFlowGraph();
+				}
+			}
 		}
 	}
 
@@ -436,7 +653,7 @@ struct ast
 		string result = name;
 
 		//if (name != PROGRAM_DECLARATION_TOKEN_NAME && (name == STATEMENTS_TOKEN_NAME || name == INITIALIZATION_BLOCK_TOKEN_NAME || parent->name == IF_ELSE_TOKEN_NAME || parent->name == WHILE_TOKEN_NAME || parent->name == STATEMENTS_TOKEN_NAME))
-		if (name != PROGRAM_DECLARATION_TOKEN_NAME && (parent->name == STATEMENTS_TOKEN_NAME || parent->name == IF_ELSE_TOKEN_NAME || parent->name == WHILE_TOKEN_NAME))
+		if (name != PROGRAM_DECLARATION_TOKEN_NAME && (parent->name == STATEMENTS_TOKEN_NAME || parent->name == IF_ELSE_TOKEN_NAME || parent->name == WHILE_TOKEN_NAME || name == IF_ELSE_TOKEN_NAME || name == STORE_TOKEN_NAME || name == LOAD_TOKEN_NAME))
 		{
 			result += "\t\t" + bufferSizeMapString();
 		}
