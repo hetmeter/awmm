@@ -18,9 +18,15 @@ namespace config
 	const extern char TAG_PARAMETER_SEPARATOR;
 	const extern char CONFIG_COMMENT;
 	const extern std::string CONFIG_FILE_PATH;
+
+	const extern std::string RMA_EXTENSION;
+	const extern std::string TSO_EXTENSION;
+	const extern std::string PSO_EXTENSION;
+
 	const extern std::string LEXER_RULE_FILE_PROPERTY;
 	const extern std::string PROGRAM_PARSER_RULE_FILE_PROPERTY;
 	const extern std::string PREDICATE_PARSER_RULE_FILE_PROPERTY;
+
 	const extern std::string CONFIG_REGEX;
 	const extern std::string IDENTIFIER_REGEX;
 

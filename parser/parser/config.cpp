@@ -13,9 +13,15 @@ namespace config
 	const char TAG_PARAMETER_SEPARATOR = ',';
 	const char CONFIG_COMMENT = '#';
 	const std::string CONFIG_FILE_PATH = "config.txt";
+
+	const std::string RMA_EXTENSION = "RMA";
+	const std::string TSO_EXTENSION = "TSO";
+	const std::string PSO_EXTENSION = "PSO";
+
 	const std::string LEXER_RULE_FILE_PROPERTY = "lexer rule file";
 	const std::string PROGRAM_PARSER_RULE_FILE_PROPERTY = "program parser rule file";
 	const std::string PREDICATE_PARSER_RULE_FILE_PROPERTY = "predicate parser rule file";
+
 	const std::string CONFIG_REGEX = "^\\s*(.*\\S)\\s*=\\s*(.*\\S)\\s*$";
 	const std::string IDENTIFIER_REGEX = "([a-zA-Z_][a-zA-Z0-9_]*)";
 

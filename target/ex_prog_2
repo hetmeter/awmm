@@ -14,7 +14,7 @@ process 1:
     goto 3;
    else
    endif;
-6: nop
+6: nop;
 7: store flag0 = 0;
    goto 1;
 
@@ -28,7 +28,7 @@ process 2:
     goto 3;
    else
    endif;
-6: nop
+6: nop;
 7: store flag1 = 0;
    goto 1;
 

@@ -47,6 +47,7 @@
  {ifBlock,$1,statements($2,$3)} 	\{ifBlock,(\S+),statements\((\S+)\)\}\s*\{statement,(\S+)\}
  {ifElseBlock,$1,statements($2),statements($3)} 	\{ifBlock,(\S+),statements\((\S+)\)\}\s*\{ELSE_KEYWORD\}\s*\{statement,(\S+)\}
  {ifElseBlock,$1,statements($2),statements($3,$4)} 	\{ifElseBlock,(\S+),statements\((\S+)\),statements\((\S+)\)\}\s*\{statement,(\S+)\}
+ {statement,ifElse($1,statements($2),none)} 	\{ifBlock,(\S+),statements\((\S+)\)\}\s*\{ELSE_KEYWORD\}\s*\{ENDIF_KEYWORD\}\s*\{SEMICOLON\}
  {statement,ifElse($1,statements($2),statements($3))} 	\{ifElseBlock,(\S+),statements\((\S+)\),statements\((\S+)\)\}\s*\{ENDIF_KEYWORD\}\s*\{SEMICOLON\}
  {statement,ifElse($1,statements($2),none)} 	\{ifBlock,(\S+),statements\((\S+)\)\}\s*\{ENDIF_KEYWORD\}\s*\{SEMICOLON\}
  {whileBlock,$1,statements($2)} 	\{whileHeader,(\S+)\}\s*\{statement,(\S+)\}
