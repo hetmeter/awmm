@@ -1,1 +1,0 @@
-{ACCEPTING_STATE,(predicateList,(>=,(ID,y1),(INT,0)),(>,(ID,y1),(INT,0)),(>=,(ID,t21),(INT,0)),(>=,(ID,y2),(INT,0)),(>,(ID,y2),(INT,0)),(>=,(ID,t12),(INT,0)),(=,(ID,y1),(ID,t11)),(=,(ID,y2),(ID,t22)),(=,(ID,y2),(ID,t12)),(=,(ID,y1),(ID,t21)),(<,(ID,y1),(ID,y2)),(=,(ID,ch1),(INT,0)),(=,(ID,ch2),(INT,0)),(=,(ID,t13),(INT,0)),(=,(ID,t23),(INT,0)))}

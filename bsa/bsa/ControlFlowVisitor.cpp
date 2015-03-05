@@ -18,7 +18,7 @@ ControlFlowVisitor* ControlFlowVisitor::clone()
 {
 	ControlFlowVisitor * result = new ControlFlowVisitor;
 
-	for (int visitedLabel : visitedLabels)
+	for (string visitedLabel : visitedLabels)
 	{
 		result->visitedLabels.push_back(visitedLabel);
 	}
@@ -29,9 +29,17 @@ ControlFlowVisitor* ControlFlowVisitor::clone()
 	return result;
 }
 
-bool ControlFlowVisitor::intVectorContains(std::vector<int> container, int item)
+bool ControlFlowVisitor::stringVectorContains(vector<string> container, string item)
 {
-	int count = container.size();
+	for (string member : container)
+	{
+		if (member == item)
+		{
+			return true;
+		}
+	}
+
+	/*int count = container.size();
 
 	for (int ctr = 0; ctr < count; ctr++)
 	{
@@ -39,7 +47,7 @@ bool ControlFlowVisitor::intVectorContains(std::vector<int> container, int item)
 		{
 			return true;
 		}
-	}
+	}*/
 
 	return false;
 }
@@ -48,7 +56,7 @@ bool ControlFlowVisitor::isVisitingAlreadyVisitedLabel(Ast* currentNode)
 {
 	if (currentNode->name == config::LABEL_TOKEN_NAME)
 	{
-		if (intVectorContains(visitedLabels, currentNode->getLabelCode()))
+		if (stringVectorContains(visitedLabels, currentNode->getLabelCode()))
 		{
 			return true;
 		}
@@ -61,21 +69,48 @@ void ControlFlowVisitor::traverseControlFlowGraph(Ast* startNode)
 {
 	string s1 = startNode->children.size() > 0 ? startNode->children.at(0)->name : "";
 	string s2 = startNode->children.size() > 0 && startNode->children.at(0)->children.size() > 0 ? startNode->children.at(0)->children.at(0)->name : "";
-	cout << "\t\tTraversing " << startNode->name << " " << s1 << " " << s2 << "\n\t\t\twriteBufferSizeMap: " << toString(&writeBufferSizeMap) << " readBufferSizeMap: " << toString(&readBufferSizeMap) << "\n";
+	//cout << "Traversing " << startNode->name << " " << to_string((int)startNode) << " " << s1 << " " << s2 << "\n\twriteBufferSizeMap: " << toString(&writeBufferSizeMap) << " readBufferSizeMap: " << toString(&readBufferSizeMap) << "\n\tvisitedLabelCount = " << visitedLabels.size() << "\n";
 
 	if (isVisitingAlreadyVisitedLabel(startNode))
 	{
+		//cout << "\t\tstartNode->persistentWriteCost: " << toString(&(startNode->persistentWriteCost)) << ", startNode->persistentReadCost: " << toString(&(startNode->persistentReadCost)) << "\n";
 		setTopIfIncremented(&writeBufferSizeMap, &(startNode->persistentWriteCost));
+		//cout << "\t\tstartNode->persistentWriteCost: " << toString(&(startNode->persistentWriteCost)) << ", startNode->persistentReadCost: " << toString(&(startNode->persistentReadCost)) << "\n";
 		setTopIfIncremented(&readBufferSizeMap, &(startNode->persistentReadCost));
+		//cout << "\t\tstartNode->persistentWriteCost: " << toString(&(startNode->persistentWriteCost)) << ", startNode->persistentReadCost: " << toString(&(startNode->persistentReadCost)) << "\n";
 		startNode->controlFlowDirectionCascadingPropagateTops();
+		//cout << "\t\tstartNode->persistentWriteCost: " << toString(&(startNode->persistentWriteCost)) << ", startNode->persistentReadCost: " << toString(&(startNode->persistentReadCost)) << "\n";
 	}
 	else
 	{
+		if (startNode->name == config::LABEL_TOKEN_NAME)
+		{
+			visitedLabels.push_back(startNode->getLabelCode());
+		}
+		else if (startNode->name == config::FENCE_TOKEN_NAME)
+		{
+			for (bufferSizeMapIterator iterator = writeBufferSizeMap.begin(); iterator != writeBufferSizeMap.end(); iterator++)
+			{
+				writeBufferSizeMap[iterator->first] = 0;
+			}
+
+			for (bufferSizeMapIterator iterator = readBufferSizeMap.begin(); iterator != readBufferSizeMap.end(); iterator++)
+			{
+				readBufferSizeMap[iterator->first] = 0;
+			}
+		}
+
+		//cout << "\t\tstartNode->persistentWriteCost: " << toString(&(startNode->persistentWriteCost)) << ", startNode->persistentReadCost: " << toString(&(startNode->persistentReadCost)) << "\n";
+
 		additiveMergeBufferSizes(&writeBufferSizeMap, &(startNode->persistentWriteCost));
 		additiveMergeBufferSizes(&readBufferSizeMap, &(startNode->persistentReadCost));
 
+		//cout << "\t\tstartNode->persistentWriteCost: " << toString(&(startNode->persistentWriteCost)) << ", startNode->persistentReadCost: " << toString(&(startNode->persistentReadCost)) << "\n";
+
 		copyBufferSizes(&(startNode->persistentWriteCost), &writeBufferSizeMap);
 		copyBufferSizes(&(startNode->persistentReadCost), &readBufferSizeMap);
+
+		//cout << "\t\tstartNode->persistentWriteCost: " << toString(&(startNode->persistentWriteCost)) << ", startNode->persistentReadCost: " << toString(&(startNode->persistentReadCost)) << "\n";
 
 		int outgoingEdgeCount = startNode->outgoingEdges.size();
 

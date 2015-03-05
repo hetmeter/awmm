@@ -17,11 +17,11 @@ public:
 
 private:
 
-	std::vector<int> visitedLabels;
+	std::vector<std::string> visitedLabels;
 	bufferSizeMap writeBufferSizeMap;
 	bufferSizeMap readBufferSizeMap;
 	ControlFlowVisitor* clone();
-	bool intVectorContains(std::vector<int> container, int item);
+	bool stringVectorContains(std::vector<std::string> container, std::string item);
 	bool isVisitingAlreadyVisitedLabel(Ast* currentNode);
 };
 

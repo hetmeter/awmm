@@ -1,76 +1,238 @@
-predicateList
-|>=
-||ID
-|||y1
-||INT
-|||0
-|>
-||ID
-|||y1
-||INT
-|||0
-|>=
-||ID
-|||t21
-||INT
-|||0
-|>=
-||ID
-|||y2
-||INT
-|||0
-|>
-||ID
-|||y2
-||INT
-|||0
-|>=
-||ID
-|||t12
-||INT
-|||0
-|=
-||ID
-|||y1
-||ID
-|||t11
-|=
-||ID
-|||y2
-||ID
-|||t22
-|=
-||ID
-|||y2
-||ID
-|||t12
-|=
-||ID
-|||y1
-||ID
-|||t21
-|<
-||ID
-|||y1
-||ID
-|||y2
-|=
-||ID
-|||ch1
-||INT
-|||0
-|=
-||ID
-|||ch2
-||INT
-|||0
-|=
-||ID
-|||t13
-||INT
-|||0
-|=
-||ID
-|||t23
-||INT
-|||0
+programDeclaration 7469688
+|initializationBlock 11397952
+||store 11400696	persistentReadCost = ()	persistentWriteCost = ()	
+|||ID 11401912
+||||y1 11403192
+|||INT 11404472
+||||0 11405760
+||store 11406976	persistentReadCost = ()	persistentWriteCost = ()	
+|||ID 11408264
+||||y2 11409480
+|||INT 11410760
+||||0 11412048
+||store 11413264	persistentReadCost = ()	persistentWriteCost = ()	
+|||ID 11414552
+||||ch1 11415768
+|||INT 11417048
+||||0 11418336
+||store 11419552	persistentReadCost = ()	persistentWriteCost = ()	
+|||ID 11420848
+||||ch2 11422056
+|||INT 11423336
+||||0 11424624
+|processDeclaration 11425840
+||processHeader 11427224
+|||1 11428440
+||statements 11429720
+|||label 11431008	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	(label 1, store) 
+||||1 11432232
+||||store 11433512	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 0, y2: 0)	(store, label 2) 
+|||||ID 11434800
+||||||ch1 11436016
+|||||INT 11437296
+||||||1 11438584
+|||label 11439800	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 0, y2: 0)	(label 2, load) 
+||||2 11441088
+||||load 11442304	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 0, y2: 0)	(load, label 4) 
+|||||ID 11443592
+||||||t12 11444816
+|||||ID 11446096
+||||||y2 11447384
+|||label 11448600	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 0, y2: 0)	(label 4, store) 
+||||4 11449888
+||||store 11451096	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)	(store, label 5) 
+|||||ID 11452384
+||||||y1 11453600
+|||||+ 11454880
+||||||ID 11456168
+|||||||t12 11457384
+||||||INT 11458664
+|||||||1 11459952
+|||label 11461168	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)	(label 5, store) 
+||||5 11462464
+||||store 11463672	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)	(store, label 6) 
+|||||ID 11464960
+||||||ch1 11466176
+|||||INT 11467456
+||||||0 11468744
+|||label 11469960	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)	(label 6, load) 
+||||6 11471264
+||||load 11472472	persistentReadCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)	(load, label 7) 
+|||||ID 11473760
+||||||t13 11474976
+|||||ID 11476256
+||||||ch2 11477544
+|||label 11478760	persistentReadCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)	(label 7, ifElse) 
+||||7 11479976
+||||ifElse 11481256	persistentReadCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)	(ifElse, =) 
+|||||= 11482544
+||||||ID 11483760
+|||||||t13 11485040
+||||||INT 11486320
+|||||||0 11487608
+|||||statements 11488824
+||||||label 11490112	persistentReadCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)	(label 8, goto) 
+|||||||8 11491328
+|||||||goto 11492608	persistentReadCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)	(goto, label 10) (goto, label 10) 
+||||||||10 11493896
+|||||statements 11495112
+||||||label 11496400	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	(label 9, goto) 
+|||||||9 11497616
+|||||||goto 11498896	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	(goto, label 6) 
+||||||||6 11500184
+|||label 11501400	persistentReadCost = (ch1: 0, ch2: 3, y1: 2, y2: 5)	persistentWriteCost = (ch1: 6, ch2: 0, y1: 5, y2: 0)	(label 10, load) 
+||||10 11502712
+||||load 11503920	persistentReadCost = (ch1: 0, ch2: 6, y1: 4, y2: 9)	persistentWriteCost = (ch1: 12, ch2: 0, y1: 9, y2: 0)	(load, label 11) 
+|||||ID 11505208
+||||||t11 11506424
+|||||ID 11507704
+||||||y1 11508992
+|||label 11510208	persistentReadCost = (ch1: 0, ch2: 10, y1: 7, y2: 14)	persistentWriteCost = (ch1: 20, ch2: 0, y1: 14, y2: 0)	(label 11, load) 
+||||11 11511424
+||||load 11512704	persistentReadCost = (ch1: 0, ch2: 15, y1: 11, y2: 21)	persistentWriteCost = (ch1: 30, ch2: 0, y1: 20, y2: 0)	(load, label 12) 
+|||||ID 11513992
+||||||t12 11515208
+|||||ID 11516488
+||||||y2 11517776
+|||label 11518992	persistentReadCost = (ch1: 0, ch2: 21, y1: 16, y2: 30)	persistentWriteCost = (ch1: 42, ch2: 0, y1: 27, y2: 0)	(label 12, ifElse) 
+||||12 11520208
+||||ifElse 11521488	persistentReadCost = (ch1: 0, ch2: 28, y1: 22, y2: 41)	persistentWriteCost = (ch1: 56, ch2: 0, y1: 35, y2: 0)	(ifElse, |) 
+|||||| 11522784
+||||||= 11524000
+|||||||ID 11525280
+||||||||t12 11526560
+|||||||INT 11527840
+||||||||0 11529128
+||||||< 11530344
+|||||||ID 11531632
+||||||||t11 11532848
+|||||||ID 11534128
+||||||||t12 11535416
+|||||statements 11536632
+||||||label 11537920	persistentReadCost = (ch1: 0, ch2: 45, y1: 37, y2: 69)	persistentWriteCost = (ch1: 90, ch2: 0, y1: 54, y2: 0)	(label 13, goto) 
+|||||||13 11539136
+|||||||goto 11540416	persistentReadCost = (ch1: 0, ch2: 55, y1: 46, y2: 86)	persistentWriteCost = (ch1: 110, ch2: 0, y1: 65, y2: 0)	(goto, label 15) (goto, label 15) 
+||||||||15 11541704
+|||||statements 11542920
+||||||label 11544208	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	(label 14, goto) 
+|||||||14 11545416
+|||||||goto 11546696	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	(goto, label 10) 
+||||||||10 11547984
+|||label 11549200	persistentReadCost = (ch1: 0, ch2: 2248, y1: 2150, y2: 4211)	persistentWriteCost = (ch1: 4496, ch2: 0, y1: 2985, y2: 0)	(label 15, nop) 
+||||15 11550528
+||||nop 11551744	persistentReadCost = (ch1: 0, ch2: 3783, y1: 3612, y2: 7071)	persistentWriteCost = (ch1: 7566, ch2: 0, y1: 5016, y2: 0)	(nop, label 16) 
+|||label 11553032	persistentReadCost = (ch1: 0, ch2: 5933, y1: 5661, y2: 11080)	persistentWriteCost = (ch1: 11866, ch2: 0, y1: 7862, y2: 0)	(label 16, store) 
+||||16 11554248
+||||store 11555464	persistentReadCost = (ch1: 0, ch2: 9129, y1: 8713, y2: 17055)	persistentWriteCost = (ch1: 18258, ch2: 0, y1: 12100, y2: 0)	
+|||||ID 11556752
+||||||y1 11557968
+|||||INT 11559248
+||||||0 11560536
+|processDeclaration 11561752
+||processHeader 11563136
+|||2 11564344
+||statements 11565624
+|||label 11566912	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	(label 1, store) 
+||||1 11568136
+||||store 11569416	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 0)	(store, label 2) 
+|||||ID 11570704
+||||||ch2 11571920
+|||||INT 11573200
+||||||1 11574488
+|||label 11575704	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 0)	(label 2, load) 
+||||2 11576992
+||||load 11578208	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 0)	(load, label 4) 
+|||||ID 11579496
+||||||t21 11580712
+|||||ID 11581992
+||||||y1 11583280
+|||label 11584496	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 0)	(label 4, store) 
+||||4 11585784
+||||store 11586992	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)	(store, label 5) 
+|||||ID 11588280
+||||||y2 11589496
+|||||+ 11590776
+||||||ID 11592064
+|||||||t21 11593280
+||||||INT 11594560
+|||||||1 11595856
+|||label 11597072	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)	(label 5, store) 
+||||5 11598368
+||||store 11599576	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)	(store, label 6) 
+|||||ID 11600864
+||||||ch2 11602080
+|||||INT 11603360
+||||||0 11604648
+|||label 11605864	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)	(label 6, load) 
+||||6 11607168
+||||load 11608376	persistentReadCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)	(load, label 7) 
+|||||ID 11609664
+||||||t23 11610880
+|||||ID 11612168
+||||||ch1 11613456
+|||label 11614672	persistentReadCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)	(label 7, ifElse) 
+||||7 11615888
+||||ifElse 11617168	persistentReadCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)	(ifElse, =) 
+|||||= 11618456
+||||||ID 11619672
+|||||||t23 11620952
+||||||INT 11622232
+|||||||0 11623520
+|||||statements 11624744
+||||||label 11626032	persistentReadCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)	(label 8, goto) 
+|||||||8 11627248
+|||||||goto 11628528	persistentReadCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)	(goto, label 10) (goto, label 10) 
+||||||||10 11629816
+|||||statements 11631032
+||||||label 11632320	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	(label 9, goto) 
+|||||||9 11633528
+|||||||goto 11634808	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	(goto, label 6) 
+||||||||6 11636096
+|||label 11637312	persistentReadCost = (ch1: 3, ch2: 0, y1: 5, y2: 2)	persistentWriteCost = (ch1: 0, ch2: 6, y1: 0, y2: 5)	(label 10, load) 
+||||10 11638624
+||||load 11639832	persistentReadCost = (ch1: 6, ch2: 0, y1: 10, y2: 3)	persistentWriteCost = (ch1: 0, ch2: 12, y1: 0, y2: 9)	(load, label 11) 
+|||||ID 11641128
+||||||t21 11642344
+|||||ID 11643624
+||||||y1 11644912
+|||label 11646128	persistentReadCost = (ch1: 10, ch2: 0, y1: 17, y2: 4)	persistentWriteCost = (ch1: 0, ch2: 20, y1: 0, y2: 14)	(label 11, load) 
+||||11 11647344
+||||load 11648624	persistentReadCost = (ch1: 15, ch2: 0, y1: 26, y2: 6)	persistentWriteCost = (ch1: 0, ch2: 30, y1: 0, y2: 20)	(load, label 12) 
+|||||ID 11649912
+||||||t22 11651128
+|||||ID 11652408
+||||||y2 11653696
+|||label 11654912	persistentReadCost = (ch1: 21, ch2: 0, y1: 37, y2: 9)	persistentWriteCost = (ch1: 0, ch2: 42, y1: 0, y2: 27)	(label 12, ifElse) 
+||||12 11656128
+||||ifElse 11657408	persistentReadCost = (ch1: 28, ch2: 0, y1: 50, y2: 13)	persistentWriteCost = (ch1: 0, ch2: 56, y1: 0, y2: 35)	(ifElse, |) 
+|||||| 11658696
+||||||= 11659912
+|||||||ID 11661192
+||||||||t21 11662472
+|||||||INT 11663752
+||||||||0 11665040
+||||||<= 11666256
+|||||||ID 11667544
+||||||||t22 11668760
+|||||||ID 11670048
+||||||||t21 11671336
+|||||statements 11672552
+||||||label 11673840	persistentReadCost = (ch1: 45, ch2: 0, y1: 82, y2: 24)	persistentWriteCost = (ch1: 0, ch2: 90, y1: 0, y2: 54)	(label 13, goto) 
+|||||||13 11675056
+|||||||goto 11676336	persistentReadCost = (ch1: 55, ch2: 0, y1: 101, y2: 31)	persistentWriteCost = (ch1: 0, ch2: 110, y1: 0, y2: 65)	(goto, label 15) (goto, label 15) 
+||||||||15 11677624
+|||||statements 11678840
+||||||label 11680128	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	(label 14, goto) 
+|||||||14 11681336
+|||||||goto 11682616	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	(goto, label 10) 
+||||||||10 11683904
+|||label 11685120	persistentReadCost = (ch1: 2248, ch2: 0, y1: 4398, y2: 1963)	persistentWriteCost = (ch1: 0, ch2: 4496, y1: 0, y2: 2985)	(label 15, nop) 
+||||15 11686448
+||||nop 11687656	persistentReadCost = (ch1: 3783, ch2: 0, y1: 7395, y2: 3288)	persistentWriteCost = (ch1: 0, ch2: 7566, y1: 0, y2: 5016)	(nop, label 16) 
+|||label 11688944	persistentReadCost = (ch1: 5933, ch2: 0, y1: 11594, y2: 5147)	persistentWriteCost = (ch1: 0, ch2: 11866, y1: 0, y2: 7862)	(label 16, store) 
+||||16 11690160
+||||store 11691376	persistentReadCost = (ch1: 9129, ch2: 0, y1: 17842, y2: 7926)	persistentWriteCost = (ch1: 0, ch2: 18258, y1: 0, y2: 12100)	
+|||||ID 11692664
+||||||y2 11693880
+|||||INT 11695160
+||||||0 11696448

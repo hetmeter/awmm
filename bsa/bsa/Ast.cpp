@@ -28,26 +28,11 @@ vector<bufferSizeMap*> Ast::allBufferSizeContainers()
 	return _allBufferSizeContainers;
 }
 
-string Ast::bufferSizeMapString(bufferSizeMap* source)
-{
-	string result = "";
-
-	for (bufferSizeMapIterator iterator = source->begin(); iterator != source->end(); iterator++)
-	{
-		result += iterator->first + ": " + to_string((*source)[iterator->first]) + ", ";
-	}
-
-	if (result.length() > 2)
-	{
-		result = result.substr(0, result.length() - 2);
-	}
-
-	return result;
-}
-
 bool Ast::isProgramPoint()
 {
-	return name == config::LABEL_TOKEN_NAME || name == config::GOTO_TOKEN_NAME || name == config::STORE_TOKEN_NAME || name == config::LOAD_TOKEN_NAME || name == config::IF_ELSE_TOKEN_NAME || name == config::FENCE_TOKEN_NAME;
+	return name == config::LABEL_TOKEN_NAME || name == config::GOTO_TOKEN_NAME || name == config::STORE_TOKEN_NAME
+		|| name == config::LOAD_TOKEN_NAME || name == config::IF_ELSE_TOKEN_NAME || name == config::FENCE_TOKEN_NAME
+		|| name == config::NOP_TAG_NAME;
 }
 
 void Ast::getCostsFromChildren()
@@ -101,16 +86,16 @@ void Ast::propagateTops()
 
 	copyAndSetNonTopToZero(&persistentWriteCost, &topContainer);
 
-	for (Ast* child : children)
+	for (ControlFlowEdge* edge : outgoingEdges)
 	{
-		additiveMergeBufferSizes(&topContainer, &(child->persistentWriteCost));
+		additiveMergeBufferSizes(&topContainer, &(edge->end->persistentWriteCost));
 	}
 
 	copyAndSetNonTopToZero(&persistentReadCost, &topContainer);
 
-	for (Ast* child : children)
+	for (ControlFlowEdge* edge : outgoingEdges)
 	{
-		additiveMergeBufferSizes(&topContainer, &(child->persistentReadCost));
+		additiveMergeBufferSizes(&topContainer, &(edge->end->persistentWriteCost));
 	}
 }
 
@@ -184,7 +169,6 @@ void Ast::controlFlowDirectionCascadingPropagateTops()
 	}
 }
 
-//void Ast::cascadingGenerateOutgoingEdges()	// If the current node is a program point, the method cascades along the control flow. Otherwise, it cascades down the tree.
 void Ast::cascadingGenerateOutgoingEdges()
 {
 	/*if (generateOutgoingEdges())
@@ -248,11 +232,11 @@ bool Ast::generateOutgoingEdges()
 			newEdge = new ControlFlowEdge(this, children.at(0));
 			outgoingEdges.push_back(newEdge);
 
-			newEdge = new ControlFlowEdge(children.at(0), children.at(1));
+			newEdge = new ControlFlowEdge(children.at(0), children.at(1)->children.at(0));
 			children.at(0)->outgoingEdges.push_back(newEdge);
 
-			lastChild = children.at(1)->tryGetLastChild();
-			if (nextStatementExists && lastChild != NULL)
+			lastChild = children.at(1)->tryGetLastStatement();
+			if (nextStatementExists && lastChild != NULL && lastChild->name != config::GOTO_TOKEN_NAME)
 			{
 				newEdge = new ControlFlowEdge(lastChild, nextStatement);
 				lastChild->outgoingEdges.push_back(newEdge);
@@ -263,8 +247,8 @@ bool Ast::generateOutgoingEdges()
 				newEdge = new ControlFlowEdge(children.at(0), children.at(2));
 				children.at(0)->outgoingEdges.push_back(newEdge);
 
-				lastChild = children.at(2)->tryGetLastChild();
-				if (nextStatementExists && lastChild != NULL)
+				lastChild = children.at(2)->tryGetLastStatement();
+				if (nextStatementExists && lastChild != NULL && lastChild->name != config::GOTO_TOKEN_NAME)
 				{
 					newEdge = new ControlFlowEdge(lastChild, nextStatement);
 					lastChild->outgoingEdges.push_back(newEdge);
@@ -288,36 +272,36 @@ bool Ast::generateOutgoingEdges()
 	return false;
 }
 
-int Ast::getGotoCode()
+string Ast::getGotoCode()
 {
 	if (name == config::GOTO_TOKEN_NAME)
 	{
-		int parentProcessNumber;
+		string parentProcessNumber;
 		string label = children.at(0)->name;
 
 		if (tryGetParentProcessNumber(&parentProcessNumber))
 		{
-			return toLabelCode(to_string(parentProcessNumber), label);
+			return parentProcessNumber + config::LABEL_SEPARATOR + label;
 		}
 	}
 
-	return -1;
+	return "";
 }
 
-int Ast::getLabelCode()
+string Ast::getLabelCode()
 {
 	if (name == config::LABEL_TOKEN_NAME)
 	{
-		int parentProcessNumber;
+		string parentProcessNumber;
 		string label = children.at(0)->name;
 
 		if (tryGetParentProcessNumber(&parentProcessNumber))
 		{
-			return toLabelCode(to_string(parentProcessNumber), label);
+			return parentProcessNumber + config::LABEL_SEPARATOR + label;
 		}
 	}
 
-	return -1;
+	return "";
 }
 
 int Ast::toLabelCode(string processNumber, string labelNumber)
@@ -331,6 +315,7 @@ void Ast::registerLabel()
 	if (name == config::LABEL_TOKEN_NAME)
 	{
 		config::labelLookupMap[getLabelCode()] = this;
+		//cout << "Added " << this << " for code " << getLabelCode() << "\n";
 	}
 }
 
@@ -416,7 +401,7 @@ bool Ast::isRoot()
 	return indexAsChild == -1;
 }
 
-bool Ast::tryGetParentProcessNumber(int* out)
+bool Ast::tryGetParentProcessNumber(string* out)
 {
 	bool result = false;
 
@@ -424,7 +409,7 @@ bool Ast::tryGetParentProcessNumber(int* out)
 	{
 		if (parent->name == config::PROCESS_DECLARATION_TOKEN_NAME)
 		{
-			(*out) = stoi(parent->children.at(0)->children.at(0)->name);
+			(*out) = parent->children.at(0)->children.at(0)->name;
 			result = true;
 		}
 		else
@@ -448,7 +433,19 @@ Ast* Ast::tryGetLastChild()
 	return NULL;
 }
 
-string Ast::toString()
+Ast* Ast::tryGetLastStatement()
+{
+	Ast* lastChild = tryGetLastChild();
+
+	if (lastChild->name == config::LABEL_TOKEN_NAME)
+	{
+		lastChild = lastChild->children.at(1);
+	}
+
+	return lastChild;
+}
+
+string Ast::astToString()
 {
 	regex indentationRegex("\n");
 	string result = name;
@@ -464,21 +461,24 @@ string Ast::toString()
 		//result += "\tcausedReadCost = (" + bufferSizeMapString(&causedReadCost) + ")";
 		//result += "\tcausedWriteCost = (" + bufferSizeMapString(&causedWriteCost) + ")";
 
-		result += "\tpersistentReadCost = (" + bufferSizeMapString(&persistentReadCost) + ")";
-		result += "\tpersistentWriteCost = (" + bufferSizeMapString(&persistentWriteCost) + ")";
+		result += "\tpersistentReadCost = (" + toString(&persistentReadCost) + ")";
+		result += "\tpersistentWriteCost = (" + toString(&persistentWriteCost) + ")";
 
-		//result += "\t";
-		//for (ControlFlowEdge* edge : outgoingEdges)
-		//{
-		//	result += "(" + edge->start->name + ", " + edge->end->name + ") ";
-		//}
+		/*result += "\t";
+		string startName, endName;
+		for (ControlFlowEdge* edge : outgoingEdges)
+		{
+			startName = edge->start->name == config::LABEL_TOKEN_NAME ? edge->start->name + " " + edge->start->children.at(0)->name : edge->start->name;
+			endName = edge->end->name == config::LABEL_TOKEN_NAME ? edge->end->name + " " + edge->end->children.at(0)->name : edge->end->name;
+			result += "(" + startName + ", " + endName + ") ";
+		}*/
 	}
 
 	int childrenCount = children.size();
 
 	for (int ctr = 0; ctr < childrenCount; ctr++)
 	{
-		result += "\n" + children.at(ctr)->toString();
+		result += "\n" + children.at(ctr)->astToString();
 	}
 
 	result = regex_replace(result, indentationRegex, "\n|");

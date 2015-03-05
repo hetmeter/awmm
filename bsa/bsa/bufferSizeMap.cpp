@@ -106,10 +106,24 @@ void copyAndSetNonTopToZero(bufferSizeMap* source, bufferSizeMap* destination)
 string toString(bufferSizeMap* source)
 {
 	string result = "";
+	string currentValue;
 
 	for (bufferSizeMapIterator iterator = source->begin(); iterator != source->end(); iterator++)
 	{
-		result += iterator->first + ": " + to_string(iterator->second) + ", ";
+		if (iterator->second == config::TOP_VALUE)
+		{
+			currentValue = config::TOP_STRING;
+		}
+		else if (iterator->second == config::BOTTOM_VALUE)
+		{
+			currentValue = config::BOTTOM_STRING;
+		}
+		else
+		{
+			currentValue = to_string(iterator->second);
+		}
+
+		result += iterator->first + ": " + currentValue + ", ";
 	}
 
 	if (((int)result.length()) > 0)

@@ -27,9 +27,9 @@ public:
 	int indexAsChild;
 
 	void addChild(Ast* child);
-	std::string toString();
+	std::string astToString();
 
-	int getLabelCode();
+	std::string getLabelCode();
 
 	void controlFlowDirectionCascadingPropagateTops();
 	void cascadingGenerateOutgoingEdges();	// If the current node is a program point, the method cascades along the control flow. Otherwise, it cascades down the tree.
@@ -45,7 +45,6 @@ private:
 
 	std::vector<bufferSizeMap*> _allBufferSizeContainers;
 	std::vector<bufferSizeMap*> allBufferSizeContainers();
-	std::string bufferSizeMapString(bufferSizeMap* source);
 	bool isProgramPoint();
 	void resetBufferSizes();
 	void copyPersistentBufferSizes(Ast* source);
@@ -55,13 +54,14 @@ private:
 	void topDownCascadingAddInitializedCausedCostsToPersistentCosts();
 	bool hasElse();
 	bool generateOutgoingEdges();
-	int getGotoCode();
+	std::string getGotoCode();
 	int toLabelCode(std::string processNumber, std::string labelNumber);
 	void registerLabel();
 	Ast* tryGetNextSibling();
 	Ast* tryGetNextStatement();
 	bool isRoot();
-	bool tryGetParentProcessNumber(int* out);
+	bool tryGetParentProcessNumber(std::string* out);
 	Ast* tryGetLastChild();
+	Ast* tryGetLastStatement();
 };
 

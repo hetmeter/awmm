@@ -20,6 +20,7 @@ namespace config
 	const std::string IF_ELSE_TOKEN_NAME = "ifElse";
 	const std::string WHILE_TOKEN_NAME = "while";
 	const std::string NONE_TAG_NAME = "none";
+	const std::string NOP_TAG_NAME = "nop";
 	const std::string ACCEPTING_STATE_REGEX = "\\{ACCEPTING_STATE,(\\S+)\\}";
 
 	const int TOP_VALUE = -1;
@@ -27,5 +28,5 @@ namespace config
 	const std::string TOP_STRING = "T";
 	const std::string BOTTOM_STRING = "_";
 
-	//static std::map<int, Ast*> labelLookupMap;
+	std::map<std::string, Ast*> labelLookupMap;
 }

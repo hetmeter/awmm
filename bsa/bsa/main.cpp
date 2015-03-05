@@ -93,16 +93,32 @@ int main(int argc, char** argv)
 		}
 	}
 
-	rootAst.getCostsFromChildren();
+	Ast* rootAstRef = &rootAst;
+
+	rootAstRef->getCostsFromChildren();
+	rootAstRef->initializePersistentCosts();
+	rootAstRef->topDownCascadingRegisterLabels();
+
+	//for (map<string, Ast*>::iterator iterator = config::labelLookupMap.begin(); iterator != config::labelLookupMap.end(); iterator++)
+	//{
+	//	cout << "Label code " << iterator->first << " node " << iterator->second << "\n";
+	//}
+
+	rootAstRef->cascadingGenerateOutgoingEdges();
+	rootAstRef->visitAllProgramPoints();
+
+	/*rootAst.getCostsFromChildren();
 	rootAst.initializePersistentCosts();
 	rootAst.topDownCascadingRegisterLabels();
 	rootAst.cascadingGenerateOutgoingEdges();
-	rootAst.visitAllProgramPoints();
+	rootAst.visitAllProgramPoints();*/
 
-	cout << rootAst.toString() << "\n\n";
+	//cout << rootAst.toString() << "\n\n";
+
+	cout << rootAstRef->astToString() << "\n\n";
 
 	ofstream programOut("output.txt");
-	programOut << rootAst.toString();
+	programOut << rootAst.astToString();
 	programOut.close();
 
 	return 0;
