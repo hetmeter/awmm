@@ -1,0 +1,238 @@
+programDeclaration
+|initializationBlock
+||store	persistentReadCost = ()	persistentWriteCost = ()
+|||ID
+||||y1
+|||INT
+||||0
+||store	persistentReadCost = ()	persistentWriteCost = ()
+|||ID
+||||y2
+|||INT
+||||0
+||store	persistentReadCost = ()	persistentWriteCost = ()
+|||ID
+||||ch1
+|||INT
+||||0
+||store	persistentReadCost = ()	persistentWriteCost = ()
+|||ID
+||||ch2
+|||INT
+||||0
+|processDeclaration
+||processHeader
+|||1
+||statements
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||1
+||||store	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 0, y2: 0)
+|||||ID
+||||||ch1
+|||||INT
+||||||1
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 0, y2: 0)
+||||2
+||||load	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 0, y2: 0)
+|||||ID
+||||||t12
+|||||ID
+||||||y2
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 0, y2: 0)
+||||4
+||||store	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)
+|||||ID
+||||||y1
+|||||+
+||||||ID
+|||||||t12
+||||||INT
+|||||||1
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)
+||||5
+||||store	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+|||||ID
+||||||ch1
+|||||INT
+||||||0
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+||||6
+||||load	persistentReadCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+|||||ID
+||||||t13
+|||||ID
+||||||ch2
+|||label	persistentReadCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+||||7
+||||ifElse	persistentReadCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+|||||=
+||||||ID
+|||||||t13
+||||||INT
+|||||||0
+|||||statements
+||||||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+|||||||8
+|||||||goto	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||||||10
+|||||statements
+||||||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+|||||||9
+|||||||goto	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||||||6
+|||label	persistentReadCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+||||10
+||||load	persistentReadCost = (ch1: 0, ch2: 1, y1: 1, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+|||||ID
+||||||t11
+|||||ID
+||||||y1
+|||label	persistentReadCost = (ch1: 0, ch2: 1, y1: 1, y2: 1)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+||||11
+||||load	persistentReadCost = (ch1: 0, ch2: 1, y1: 1, y2: 2)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+|||||ID
+||||||t12
+|||||ID
+||||||y2
+|||label	persistentReadCost = (ch1: 0, ch2: 1, y1: 1, y2: 2)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+||||12
+||||ifElse	persistentReadCost = (ch1: 0, ch2: 1, y1: 1, y2: 2)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+||||||
+||||||=
+|||||||ID
+||||||||t12
+|||||||INT
+||||||||0
+||||||<
+|||||||ID
+||||||||t11
+|||||||ID
+||||||||t12
+|||||statements
+||||||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+|||||||13
+|||||||goto	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||||||15
+|||||statements
+||||||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+|||||||14
+|||||||goto	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||||||10
+|||label	persistentReadCost = (ch1: 0, ch2: 1, y1: 1, y2: 2)	persistentWriteCost = (ch1: 2, ch2: 0, y1: 1, y2: 0)
+||||15
+||||nop
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||16
+||||store	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)
+|||||ID
+||||||y1
+|||||INT
+||||||0
+|processDeclaration
+||processHeader
+|||2
+||statements
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||1
+||||store	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 0)
+|||||ID
+||||||ch2
+|||||INT
+||||||1
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 0)
+||||2
+||||load	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 0)
+|||||ID
+||||||t21
+|||||ID
+||||||y1
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 0)
+||||4
+||||store	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)
+|||||ID
+||||||y2
+|||||+
+||||||ID
+|||||||t21
+||||||INT
+|||||||1
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 1, y1: 0, y2: 1)
+||||5
+||||store	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+|||||ID
+||||||ch2
+|||||INT
+||||||0
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+||||6
+||||load	persistentReadCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+|||||ID
+||||||t23
+|||||ID
+||||||ch1
+|||label	persistentReadCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+||||7
+||||ifElse	persistentReadCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+|||||=
+||||||ID
+|||||||t23
+||||||INT
+|||||||0
+|||||statements
+||||||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+|||||||8
+|||||||goto	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||||||10
+|||||statements
+||||||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+|||||||9
+|||||||goto	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||||||6
+|||label	persistentReadCost = (ch1: 1, ch2: 0, y1: 1, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+||||10
+||||load	persistentReadCost = (ch1: 1, ch2: 0, y1: 2, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+|||||ID
+||||||t21
+|||||ID
+||||||y1
+|||label	persistentReadCost = (ch1: 1, ch2: 0, y1: 2, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+||||11
+||||load	persistentReadCost = (ch1: 1, ch2: 0, y1: 2, y2: 1)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+|||||ID
+||||||t22
+|||||ID
+||||||y2
+|||label	persistentReadCost = (ch1: 1, ch2: 0, y1: 2, y2: 1)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+||||12
+||||ifElse	persistentReadCost = (ch1: 1, ch2: 0, y1: 2, y2: 1)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+||||||
+||||||=
+|||||||ID
+||||||||t21
+|||||||INT
+||||||||0
+||||||<=
+|||||||ID
+||||||||t22
+|||||||ID
+||||||||t21
+|||||statements
+||||||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+|||||||13
+|||||||goto	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||||||15
+|||||statements
+||||||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+|||||||14
+|||||||goto	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||||||10
+|||label	persistentReadCost = (ch1: 1, ch2: 0, y1: 2, y2: 1)	persistentWriteCost = (ch1: 0, ch2: 2, y1: 0, y2: 1)
+||||15
+||||nop
+|||label	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)
+||||16
+||||store	persistentReadCost = (ch1: 0, ch2: 0, y1: 0, y2: 0)	persistentWriteCost = (ch1: 0, ch2: 0, y1: 0, y2: 1)
+|||||ID
+||||||y2
+|||||INT
+||||||0

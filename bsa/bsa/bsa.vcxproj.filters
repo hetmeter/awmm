@@ -18,30 +18,36 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ast.cpp">
+    <ClCompile Include="Ast.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bufferSize.cpp">
+    <ClCompile Include="ControlFlowEdge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="controlFlowEdge.cpp">
+    <ClCompile Include="ControlFlowVisitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="controlFlowVisitor.cpp">
+    <ClCompile Include="config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bufferSizeMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ast.h">
+    <ClInclude Include="Ast.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="controlFlowEdge.h">
+    <ClInclude Include="bufferSizeMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="controlFlowVisitor.h">
+    <ClInclude Include="ControlFlowEdge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="bufferSize.h">
+    <ClInclude Include="ControlFlowVisitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

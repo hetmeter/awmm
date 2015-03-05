@@ -1,40 +1,13 @@
-#ifndef STRING_INCLUDED
-#define STRING_INCLUDED
 #include <string>
-#endif
-
-#ifndef IOSTREAM_INCLUDED
-#define IOSTREAM_INCLUDED
 #include <iostream>
-#endif
-
-#ifndef REGEX_INCLUDED
-#define REGEX_INCLUDED
-#include <regex>
-#endif
-
-#ifndef FSTREAM_INCLUDED
-#define FSTREAM_INCLUDED
 #include <fstream>
-#endif
+#include <regex>
+#include <map>
 
-#ifndef AST_H_INCLUDED
-#define AST_H_INCLUDED
-#include "ast.h"
-#endif
-
-#ifndef CONTROLFLOWVISITOR_H_INCLUDED
-#define CONTROLFLOWVISITOR_H_INCLUDED
-#include "controlFlowVisitor.h"
-#endif
+#include "config.h"
+#include "Ast.h"
 
 using namespace std;
-
-const char LEFT_PARENTHESIS = '(';
-const char RIGHT_PARENTHESIS = ')';
-const char COMMA = ',';
-
-const string ACCEPTING_STATE_REGEX = "\\{ACCEPTING_STATE,(\\S+)\\}";
 
 int main(int argc, char** argv)
 {
@@ -59,10 +32,10 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	regex programInputRegex(ACCEPTING_STATE_REGEX);
+	regex programInputRegex(config::ACCEPTING_STATE_REGEX);
 	smatch stringMatch;
 	string parsedProgramString;
-	ast rootAst;
+	Ast rootAst;
 
 	regex_search(parsedProgramLine, stringMatch, programInputRegex);
 
@@ -76,7 +49,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	ast* currentAst = &rootAst;
+	Ast* currentAst = &rootAst;
 	char currentChar;
 	string currentName = "";
 	int parsedProgramStringLength = parsedProgramString.length();
@@ -85,14 +58,14 @@ int main(int argc, char** argv)
 	{
 		currentChar = parsedProgramString.at(ctr);
 
-		if (currentChar == LEFT_PARENTHESIS)
+		if (currentChar == config::LEFT_PARENTHESIS)
 		{
 			currentAst->name = currentName;
 			currentName = "";
-			currentAst->addChild(new ast);
+			currentAst->addChild(new Ast);
 			currentAst = currentAst->children.at(0);
 		}
-		else if (currentChar == COMMA)
+		else if (currentChar == config::COMMA)
 		{
 			if (!currentName.empty())
 			{
@@ -101,10 +74,10 @@ int main(int argc, char** argv)
 			}
 
 			currentAst = currentAst->parent;
-			currentAst->addChild(new ast);
+			currentAst->addChild(new Ast);
 			currentAst = currentAst->children.at(currentAst->children.size() - 1);
 		}
-		else if (currentChar == RIGHT_PARENTHESIS)
+		else if (currentChar == config::RIGHT_PARENTHESIS)
 		{
 			if (!currentName.empty())
 			{

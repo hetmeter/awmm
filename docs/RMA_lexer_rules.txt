@@ -6,15 +6,12 @@
  {BEGINIT_KEYWORD} 	beginit
  {ENDINIT_KEYWORD} 	endinit
  {PROCESS_KEYWORD} 	process
- {STORE_KEYWORD} 	store
- {LOAD_KEYWORD} 	load
+ {PUT_KEYWORD} 	put
+ {GET_KEYWORD} 	get
+ {FLUSH_KEYWORD} 	flush
  {NOP_KEYWORD} 	nop
  {GOTO_KEYWORD} 	goto
  {ELSE_KEYWORD} 	else
- {ENDIF_KEYWORD} 	endif
- {WHILE_KEYWORD} 	while
- {ENDWHILE_KEYWORD} 	endwhile
- {FENCE_KEYWORD} 	fence
  {IF_KEYWORD} 	if
  {PLUS} 	\+
  {MINUS} 	-
@@ -22,11 +19,14 @@
  {SLASH} 	/
  {PIPE} 	\|
  {AMPERSAND} 	&
+ {EQUAL_TO} 	==
  {LESS_OR_EQUAL} 	<=
  {GREATER_OR_EQUAL} 	>=
  {NOT_EQUAL} 	!=
  {LESS} 	<
  {GREATER} 	>
+ {ATOMIC_LOCAL_ASSIGN} 	=\(a\)
+ {NON_ATOMIC_LOCAL_ASSIGN} 	=\(n\)
  {EQUALS} 	=
  {EXCLAMATION} 	!
  {COLON} 	\:
@@ -36,5 +36,5 @@
  {RIGHTPARENTHESIS} 	\)
 } {	\}\{
  {ID} 	[identifier]
- {INT,$1} 	\s+(\d+)\s+
+ {INT,$1} 	[^\{\}abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_](\d+)[^\{\}abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_]
  	\s+

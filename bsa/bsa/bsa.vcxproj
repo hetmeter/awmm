@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{30B157DE-37CC-44D0-B1DB-A754E6E9349D}</ProjectGuid>
+    <ProjectGuid>{E29A3AC5-BDCC-4A0D-A985-C4676E5F2112}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>rma_parser</RootNamespace>
+    <RootNamespace>bsa</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -77,12 +77,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Ast.cpp" />
+    <ClCompile Include="bufferSizeMap.cpp" />
+    <ClCompile Include="config.cpp" />
+    <ClCompile Include="ControlFlowEdge.cpp" />
+    <ClCompile Include="ControlFlowVisitor.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="parser.h" />
-    <ClInclude Include="parserStatics.h" />
-    <ClInclude Include="token.h" />
+    <ClInclude Include="Ast.h" />
+    <ClInclude Include="bufferSizeMap.h" />
+    <ClInclude Include="config.h" />
+    <ClInclude Include="ControlFlowEdge.h" />
+    <ClInclude Include="ControlFlowVisitor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

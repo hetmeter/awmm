@@ -1,25 +1,12 @@
-#ifndef __AST_H_INCLUDED__
-#define __AST_H_INCLUDED__
-#include "ast.h"
-#endif
+#pragma once
 
-#ifndef __VECTOR_INCLUDED__
-#define __VECTOR_INCLUDED__
-#include <vector>
-#endif
-
+struct ast;
 typedef struct ast ast;
-using namespace std;
 
 struct controlFlowEdge
 {
 	ast* start;
 	ast* end;
-
-	controlFlowEdge(ast* startParameter, ast* endParameter)
-	{
-		start = startParameter;
-		end = endParameter;
-	}
+	controlFlowEdge(ast* startParameter, ast* endParameter);
 };
 typedef struct controlFlowEdge controlFlowEdge;

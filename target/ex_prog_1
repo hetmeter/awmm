@@ -1,0 +1,59 @@
+beginit
+
+store y1 = 0;
+store y2 = 0; 
+
+store ch1 = 0; 
+store ch2 = 0; 
+
+endinit
+
+process 1:
+1: store ch1 = 1;
+2: load t12 = y2;
+4: store y1 = t12 + 1;
+5: store ch1 = 0;
+
+6: load t13 = ch2;
+7: if ((t13 = 0))
+8:     goto 10;
+   else 
+9:     goto 6;
+   endif;
+
+10: load t11 = y1;
+11: load t12 = y2;
+12: if ((t12 = 0) | (t11 < t12))
+13:     goto 15;
+   else 
+14:     goto 10;
+   endif;
+15: nop;
+16: store y1 = 0;
+
+
+process 2:
+
+1: store ch2 = 1;
+2: load t21 = y1;
+4: store y2 = t21 + 1;
+5: store ch2 = 0;
+
+6: load t23 = ch1;
+7: if ((t23 = 0))
+8:     goto 10;
+   else 
+9:     goto 6;
+   endif;
+
+10: load t21 = y1;
+11: load t22 = y2;
+12: if ((t21 = 0) | (t22 <= t21))
+13:     goto 15;
+   else 
+14:     goto 10;
+   endif;
+15: nop;
+16: store y2 = 0;
+
+/*program counters:  ((pc{1} != 15) || (pc{2} != 15)) */
