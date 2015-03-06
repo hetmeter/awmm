@@ -9,6 +9,7 @@ typedef bufferSizeMap::iterator bufferSizeMapIterator;
 
 bool bufferSizeMapContains(bufferSizeMap* container, std::string key);
 int bufferSizeValueCompare(int first, int second);
+bool bufferSizeMapCompare(bufferSizeMap* first, bufferSizeMap* second);
 void copyBufferSizes(bufferSizeMap* source, bufferSizeMap* destination);
 void incrementCost(std::string varName, int increment, bufferSizeMap* target);
 void incrementCostIfExists(std::string varName, int increment, bufferSizeMap* target);

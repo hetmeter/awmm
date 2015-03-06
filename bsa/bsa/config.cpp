@@ -1,3 +1,7 @@
+/*
+Global variables, constants, and methods
+*/
+
 #include "config.h"
 
 namespace config

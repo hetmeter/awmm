@@ -32,7 +32,7 @@ public:
 	std::string getLabelCode();
 
 	void controlFlowDirectionCascadingPropagateTops();
-	void cascadingGenerateOutgoingEdges();	// If the current node is a program point, the method cascades along the control flow. Otherwise, it cascades down the tree.
+	void cascadingGenerateOutgoingEdges();
 	void topDownCascadingRegisterLabels();
 	void getCostsFromChildren();
 	void initializePersistentCosts();
@@ -48,7 +48,7 @@ private:
 	bool isProgramPoint();
 	void resetBufferSizes();
 	void copyPersistentBufferSizes(Ast* source);
-	void propagateTops();
+	bool propagateTops();
 	std::vector<std::string> getIDs();
 	void topDownCascadingCopyPersistentBufferSizes(Ast* source);
 	void topDownCascadingAddInitializedCausedCostsToPersistentCosts();

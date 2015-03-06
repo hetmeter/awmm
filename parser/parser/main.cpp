@@ -103,13 +103,13 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	cout << "lexerPath = " << lexerPath << "\n"
+	/*cout << "lexerPath = " << lexerPath << "\n"
 		<< "programParserPath = " << programParserPath << "\n"
 		<< "predicateParserPath = " << predicateParserPath << "\n"
 		<< "programInputPath = " << programInputPath << "\n"
 		<< "programOutputPath = " << programOutputPath << "\n"
 		<< "predicateInputPath = " << predicateInputPath << "\n"
-		<< "predicateOutputPath = " << predicateOutputPath << "\n";
+		<< "predicateOutputPath = " << predicateOutputPath << "\n";*/
 
 	parse(lexerPath, programParserPath, predicateParserPath, programInputPath, predicateInputPath);
 
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
 	predicateOut << predicateInputContent;
 	predicateOut.close();
 
-	cout << "\nParsed program:\n" << programInputContent << "\n\nParsed predicates:\n" << predicateInputContent << "\n";
+	//cout << "\nParsed program:\n" << programInputContent << "\n\nParsed predicates:\n" << predicateInputContent << "\n";
 
 	return 0;
 }

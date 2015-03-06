@@ -1,3 +1,10 @@
+/*
+A node of the abstract semantic tree. Its type is contained in the name variable, unless it's an identifier's name or an integer value.
+It can hold buffer size maps containing the buffer size increases caused by the program point it's representing, and the buffer size
+the program would at most need at this point. May also contain directed edges to other AST nodes, representing control flow.
+
+Cascading operations may go top to bottom or bottom to top in the tree, or down along the control flow graph, which might be cyclic.
+*/
 #include "Ast.h"
 
 #include "ControlFlowEdge.h"
@@ -6,6 +13,7 @@ using namespace std;
 
 Ast::Ast()
 {
+	// The index by which this node can be referred to from its parent's children vector. The root always has an index of -1
 	indexAsChild = -1;
 }
 
@@ -14,7 +22,7 @@ Ast::~Ast()
 {
 }
 
-
+// Contains all buffer size maps
 vector<bufferSizeMap*> Ast::allBufferSizeContainers()
 {
 	if (_allBufferSizeContainers.empty())
@@ -28,6 +36,7 @@ vector<bufferSizeMap*> Ast::allBufferSizeContainers()
 	return _allBufferSizeContainers;
 }
 
+// Returns whether the node represents one of the program point types
 bool Ast::isProgramPoint()
 {
 	return name == config::LABEL_TOKEN_NAME || name == config::GOTO_TOKEN_NAME || name == config::STORE_TOKEN_NAME
@@ -35,6 +44,7 @@ bool Ast::isProgramPoint()
 		|| name == config::NOP_TAG_NAME;
 }
 
+// Cascades from top to bottom. If a store or a load is encountered, the cascade stops and the IDs read and written by its children are gathered
 void Ast::getCostsFromChildren()
 {
 	if (name == config::STORE_TOKEN_NAME || name == config::LOAD_TOKEN_NAME)
@@ -61,6 +71,7 @@ void Ast::getCostsFromChildren()
 	}
 }
 
+// Sets all buffer size map entry values to 0
 void Ast::resetBufferSizes()
 {
 	vector<bufferSizeMap*> containers = allBufferSizeContainers();
@@ -74,40 +85,57 @@ void Ast::resetBufferSizes()
 	}
 }
 
+// Copies the contents of the persistent buffer size maps from another node
 void Ast::copyPersistentBufferSizes(Ast* source)
 {
 	copyBufferSizes(&(source->persistentWriteCost), &persistentWriteCost);
 	copyBufferSizes(&(source->persistentReadCost), &persistentReadCost);
 }
 
-void Ast::propagateTops()
+// Compares the persistent buffer size maps of those of the direct control flow successors, and if they don't match, it sets the locally TOP values
+// remotely to TOP. If no changes have been made, returns false.
+bool Ast::propagateTops()
 {
+	bool result = false;
 	bufferSizeMap topContainer;
 
+	// Creates a map containing 0s for each non-TOP, and TOP for each TOP value in the persistent write cost map, and adds it to the successor's map if necessary
 	copyAndSetNonTopToZero(&persistentWriteCost, &topContainer);
 
 	for (ControlFlowEdge* edge : outgoingEdges)
 	{
-		additiveMergeBufferSizes(&topContainer, &(edge->end->persistentWriteCost));
+		if (bufferSizeMapCompare(&persistentWriteCost, &(edge->end->persistentWriteCost)))
+		{
+			result = true;
+			additiveMergeBufferSizes(&topContainer, &(edge->end->persistentWriteCost));
+		}
 	}
 
+	// Creates a map containing 0s for each non-TOP, and TOP for each TOP value in the persistent read cost map, and adds it to the successor's map if necessary
 	copyAndSetNonTopToZero(&persistentReadCost, &topContainer);
 
 	for (ControlFlowEdge* edge : outgoingEdges)
 	{
-		additiveMergeBufferSizes(&topContainer, &(edge->end->persistentWriteCost));
+		if (bufferSizeMapCompare(&persistentReadCost, &(edge->end->persistentReadCost)))
+		{
+			result = true;
+			additiveMergeBufferSizes(&topContainer, &(edge->end->persistentReadCost));
+		}
 	}
+
+	return result;
 }
 
+// Cascades from top to bottom and back. Returns a string vector containing all identifiers along the downward path, including the current node's own.
 vector<string> Ast::getIDs()
 {
 	vector<string> results;
 
-	if (name == config::ID_TOKEN_NAME)
+	if (name == config::ID_TOKEN_NAME)	// If this is an identifier, push it on the vector to return it upwards
 	{
 		results.push_back(children.at(0)->name);
 	}
-	else
+	else // If this isn't an identifier, gather all identifiers from the progeny
 	{
 		vector<string> subResults;
 
@@ -125,6 +153,7 @@ vector<string> Ast::getIDs()
 	return results;
 }
 
+// Cascades from top to bottom. Copies all persistent buffer size maps to the successors.
 void Ast::topDownCascadingCopyPersistentBufferSizes(Ast* source)
 {
 	copyPersistentBufferSizes(source);
@@ -135,6 +164,7 @@ void Ast::topDownCascadingCopyPersistentBufferSizes(Ast* source)
 	}
 }
 
+// Cascades from top to bottom. Causes those nodes that have their own caused costs to add them to their persistent maps.
 void Ast::topDownCascadingAddInitializedCausedCostsToPersistentCosts()
 {
 	conditionalAdditiveMergeBufferSizes(&causedReadCost, &persistentReadCost);
@@ -146,6 +176,7 @@ void Ast::topDownCascadingAddInitializedCausedCostsToPersistentCosts()
 	}
 }
 
+// Cascades from top to bottom. Causes label nodes to register themselves with the global register.
 void Ast::topDownCascadingRegisterLabels()
 {
 	if (name == config::LABEL_TOKEN_NAME)
@@ -159,33 +190,21 @@ void Ast::topDownCascadingRegisterLabels()
 	}
 }
 
+// Cascades down the control flow graph. If any successor node has a different persistent map, causes this to propagate its TOP values down the line.
 void Ast::controlFlowDirectionCascadingPropagateTops()
 {
-	propagateTops();
-
-	for (ControlFlowEdge* edge : outgoingEdges)
-	{
-		edge->end->controlFlowDirectionCascadingPropagateTops();
-	}
-}
-
-void Ast::cascadingGenerateOutgoingEdges()
-{
-	/*if (generateOutgoingEdges())
+	if (propagateTops())
 	{
 		for (ControlFlowEdge* edge : outgoingEdges)
 		{
-			edge->end->cascadingGenerateOutgoingEdges();
+			edge->end->controlFlowDirectionCascadingPropagateTops();
 		}
 	}
-	else
-	{
-		for (Ast* child : children)
-		{
-			child->cascadingGenerateOutgoingEdges();
-		}
-	}*/
+}
 
+// Cascades from top to bottom. Causes label nodes to generate outgoing directional control flow edges, if applicable.
+void Ast::cascadingGenerateOutgoingEdges()
+{
 	generateOutgoingEdges();
 	
 	for (Ast* child : children)
@@ -194,6 +213,7 @@ void Ast::cascadingGenerateOutgoingEdges()
 	}
 }
 
+// Returns whether the current node is an ifElse node with an Else statement block.
 bool Ast::hasElse()
 {
 	if (name == config::IF_ELSE_TOKEN_NAME)
@@ -204,63 +224,62 @@ bool Ast::hasElse()
 	return false;
 }
 
+// Checks whether the node is a program point and has any control flow successors, and if so, creates control flow edges between this node and its successors.
 bool Ast::generateOutgoingEdges()
 {
-	if (isProgramPoint())
+	if (isProgramPoint())	// Checks whether the node is a program point
 	{
-		//cout << "\tGenerating outgoing edges for \"" << name << "\"\n";
-
 		ControlFlowEdge* newEdge;
 		Ast* nextStatement = NULL;
 
-		if (name == config::GOTO_TOKEN_NAME)
+		if (name == config::GOTO_TOKEN_NAME)	// Goto nodes only lead to their corresponding label
 		{
 			newEdge = new ControlFlowEdge(this, config::labelLookupMap[getGotoCode()]);
 			outgoingEdges.push_back(newEdge);
 		}
-		else if (name == config::LABEL_TOKEN_NAME)
+		else if (name == config::LABEL_TOKEN_NAME)	// Label nodes only lead to their corresponding statement
 		{
 			newEdge = new ControlFlowEdge(this, children.at(1));
 			outgoingEdges.push_back(newEdge);
 		}
-		else if (name == config::IF_ELSE_TOKEN_NAME)
-		{
+		else if (name == config::IF_ELSE_TOKEN_NAME)	// IfElse nodes lead to their conditionals, which lead to both statement blocks' first statements,
+		{												// of which the last statements lead to the statement following the IfElse block, unless they're goto statements
 			Ast* lastChild = NULL;
 			nextStatement = tryGetNextStatement();
 			bool nextStatementExists = nextStatement != NULL;
 
-			newEdge = new ControlFlowEdge(this, children.at(0));
+			newEdge = new ControlFlowEdge(this, children.at(0));	// Create an edge to the conditional
 			outgoingEdges.push_back(newEdge);
 
-			newEdge = new ControlFlowEdge(children.at(0), children.at(1)->children.at(0));
+			newEdge = new ControlFlowEdge(children.at(0), children.at(1)->children.at(0));	// Create an edge from the conditional to the first statement of the If block
 			children.at(0)->outgoingEdges.push_back(newEdge);
 
-			lastChild = children.at(1)->tryGetLastStatement();
+			lastChild = children.at(1)->tryGetLastStatement();		// If there is a statement after the IfElse block, connect to it from the last statement of the If block, if it's not a goto statement
 			if (nextStatementExists && lastChild != NULL && lastChild->name != config::GOTO_TOKEN_NAME)
 			{
 				newEdge = new ControlFlowEdge(lastChild, nextStatement);
 				lastChild->outgoingEdges.push_back(newEdge);
 			}
 
-			if (hasElse())
+			if (hasElse())	// If there is a non-empty Else block, connect to its first statement from the conditional
 			{
 				newEdge = new ControlFlowEdge(children.at(0), children.at(2));
 				children.at(0)->outgoingEdges.push_back(newEdge);
 
-				lastChild = children.at(2)->tryGetLastStatement();
+				lastChild = children.at(2)->tryGetLastStatement();		// If there is a statement after the IfElse block, connect to it from the last statement of the Else block, if it's not a goto statement
 				if (nextStatementExists && lastChild != NULL && lastChild->name != config::GOTO_TOKEN_NAME)
 				{
 					newEdge = new ControlFlowEdge(lastChild, nextStatement);
 					lastChild->outgoingEdges.push_back(newEdge);
 				}
 			}
-			else if (nextStatementExists)
+			else if (nextStatementExists)	// If there is no Else block, but there is a statement following the IfElse block, connect to it from the conditional
 			{
 				newEdge = new ControlFlowEdge(children.at(0), nextStatement);
 				children.at(0)->outgoingEdges.push_back(newEdge);
 			}
 		}
-		else if ((nextStatement = tryGetNextStatement()) != NULL)
+		else if ((nextStatement = tryGetNextStatement()) != NULL)	// For other program points, follow the statement block if it continues
 		{
 			newEdge = new ControlFlowEdge(this, nextStatement);
 			outgoingEdges.push_back(newEdge);
@@ -272,6 +291,7 @@ bool Ast::generateOutgoingEdges()
 	return false;
 }
 
+// Gets the qualified name representing the label to which this goto node links
 string Ast::getGotoCode()
 {
 	if (name == config::GOTO_TOKEN_NAME)
@@ -288,6 +308,7 @@ string Ast::getGotoCode()
 	return "";
 }
 
+// Gets the qualified name representing this label
 string Ast::getLabelCode()
 {
 	if (name == config::LABEL_TOKEN_NAME)
@@ -304,25 +325,28 @@ string Ast::getLabelCode()
 	return "";
 }
 
+// Returns the qualified name described by the process- and label numbers
 int Ast::toLabelCode(string processNumber, string labelNumber)
 {
 	hash<string> labelHash;
 	return labelHash(processNumber + config::LABEL_SEPARATOR + labelNumber);
 }
 
+// Registers this label node with the global label container
 void Ast::registerLabel()
 {
 	if (name == config::LABEL_TOKEN_NAME)
 	{
 		config::labelLookupMap[getLabelCode()] = this;
-		//cout << "Added " << this << " for code " << getLabelCode() << "\n";
 	}
 }
 
+// Cascades from top to bottom. Causes nodes to initialize the global variables initialized in the program's first block into their persistent maps
 void Ast::initializePersistentCosts()
 {
 	if (name == config::PROGRAM_DECLARATION_TOKEN_NAME)
 	{
+		// Collect all buffer costs caused by the variable initialization statements
 		vector<Ast*> initializationBlockStatements = children.at(0)->children;
 
 		for (Ast* initializationStatement : initializationBlockStatements)
@@ -331,8 +355,10 @@ void Ast::initializePersistentCosts()
 			additiveMergeBufferSizes(&(initializationStatement->causedWriteCost), &(persistentReadCost));
 		}
 
+		// Sets the values of the recently initialized entries to 0
 		resetBufferSizes();
 
+		// Propagates the 0-initialized global variable map to the progeny of the process declarations
 		for (Ast* child : children)
 		{
 			if (child->name == config::PROCESS_DECLARATION_TOKEN_NAME)
@@ -343,6 +369,7 @@ void Ast::initializePersistentCosts()
 		}
 	}
 }
+
 
 void Ast::visitAllProgramPoints()
 {
