@@ -5,6 +5,8 @@
 #include <regex>
 #include <iostream>
 
+struct token;
+
 namespace config
 {
 	const extern char DESCRIPTION_RULE_SEPARATOR;
@@ -29,10 +31,13 @@ namespace config
 
 	const extern std::string CONFIG_REGEX;
 	const extern std::string IDENTIFIER_REGEX;
+	const extern std::string TAG_REGEX;
 
 	extern std::string normalize(std::string s);
 	extern std::vector<std::string> find_all_matches(std::regex const& r, std::string input);
 	extern std::string toIdentifier(std::string s);
 	extern std::vector<std::string> separate(std::string input, char separator);
 	extern void throwError(std::string message);
+	extern int tagCount(std::string s);
+	extern int errorLine(std::string parsedProgram, std::string originalProgram, std::vector<token>* lexerTokens, std::vector<token>* parserTokens);
 }

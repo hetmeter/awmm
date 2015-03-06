@@ -5,8 +5,8 @@
 
 using namespace std;
 
-std::string programInputContent;
-std::string predicateInputContent;
+string programInputContent;
+string predicateInputContent;
 
 vector<token> initializeTokensFromFile(string path)
 {
@@ -133,16 +133,40 @@ string processContent(string content, vector<token>* lexerTokens, vector<token>*
 
 void parse(string lexerPath, string programParserPath, string predicateParserPath, string programInputPath, string predicateInputPath)
 {
-	vector<token> lexerTokens = initializeTokensFromFile(lexerPath);
-	vector<token> programParserTokens = initializeTokensFromFile(programParserPath);
-	vector<token> predicateParserTokens = initializeTokensFromFile(predicateParserPath);
+	vector<token> lexerTokens;
+	vector<token> programParserTokens;
+	vector<token> predicateParserTokens;
+
+	lexerTokens = initializeTokensFromFile(lexerPath);
+	programParserTokens = initializeTokensFromFile(programParserPath);
+	predicateParserTokens = initializeTokensFromFile(predicateParserPath);
 
 	programInputContent = initializeInputFromFile(programInputPath);
+	string programInputContentCopy = programInputContent;
 	predicateInputContent = initializeInputFromFile(predicateInputPath);
+	string predicateInputContentCopy = predicateInputContent;
 
 	cout << "Processing program...\n";
 	programInputContent = processContent(programInputContent, &lexerTokens, &programParserTokens);
+	int programErrorLine = config::errorLine(programInputContent, programInputContentCopy, &lexerTokens, &programParserTokens);
+	if (programErrorLine == 0)
+	{
+		config::throwError("Error parsing the program on an unknown line.");
+	}
+	else if (programErrorLine > 0)
+	{
+		config::throwError("Error parsing the program on line " + to_string(programErrorLine));
+	}
 
 	cout << "Processing predicates...\n";
 	predicateInputContent = processContent(predicateInputContent, &lexerTokens, &predicateParserTokens);
+	int predicateErrorLine = config::errorLine(programInputContent, programInputContentCopy, &lexerTokens, &programParserTokens);
+	if (predicateErrorLine == 0)
+	{
+		config::throwError("Error parsing the predicates on an unknown line.");
+	}
+	else if (predicateErrorLine > 0)
+	{
+		config::throwError("Error parsing the predicates on line " + to_string(predicateErrorLine));
+	}
 }

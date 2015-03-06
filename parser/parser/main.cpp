@@ -103,14 +103,6 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	/*cout << "lexerPath = " << lexerPath << "\n"
-		<< "programParserPath = " << programParserPath << "\n"
-		<< "predicateParserPath = " << predicateParserPath << "\n"
-		<< "programInputPath = " << programInputPath << "\n"
-		<< "programOutputPath = " << programOutputPath << "\n"
-		<< "predicateInputPath = " << predicateInputPath << "\n"
-		<< "predicateOutputPath = " << predicateOutputPath << "\n";*/
-
 	parse(lexerPath, programParserPath, predicateParserPath, programInputPath, predicateInputPath);
 
 	ofstream programOut(programOutputPath);
@@ -120,8 +112,6 @@ int main(int argc, char** argv)
 	ofstream predicateOut(predicateOutputPath);
 	predicateOut << predicateInputContent;
 	predicateOut.close();
-
-	//cout << "\nParsed program:\n" << programInputContent << "\n\nParsed predicates:\n" << predicateInputContent << "\n";
 
 	return 0;
 }

@@ -1,5 +1,7 @@
 #include "config.h"
 
+#include "parser.h"
+
 namespace config
 {
 	const char DESCRIPTION_RULE_SEPARATOR = '\t';
@@ -24,6 +26,7 @@ namespace config
 
 	const std::string CONFIG_REGEX = "^\\s*(.*\\S)\\s*=\\s*(.*\\S)\\s*$";
 	const std::string IDENTIFIER_REGEX = "([a-zA-Z_][a-zA-Z0-9_]*)";
+	const std::string TAG_REGEX = "\\{.*?\\}";
 
 	std::string normalize(std::string s)
 	{
@@ -67,7 +70,8 @@ namespace config
 		std::smatch match;
 		std::vector<std::string> results;
 
-		while (regex_search(input, match, r)) {
+		while (regex_search(input, match, r))
+		{
 			results.push_back(match[1]);
 			input = match.suffix().str();
 		}
@@ -132,5 +136,56 @@ namespace config
 	void throwError(std::string message)
 	{
 		std::cout << "\n\tERROR: " << message << "\n\n";
+	}
+
+	int tagCount(std::string s)
+	{
+		std::string sCopy = s;
+		std::smatch match;;
+		std::regex tagRegex(TAG_REGEX);
+		int matchCtr = 0;
+
+		while (regex_search(sCopy, match, tagRegex))
+		{
+			matchCtr++;
+			sCopy = match.suffix().str();
+		}
+
+		return matchCtr;
+	}
+
+	int errorLine(std::string parsedProgram, std::string originalProgram, std::vector<token>* lexerTokens, std::vector<token>* parserTokens)
+	{
+		int programTagCount = tagCount(parsedProgram);
+
+		if (programTagCount > 1)
+		{
+			std::string originalProgramCopy = originalProgram;
+			std::string currentParsedLine;
+			std::regex lineRegex("\\n");
+			std::smatch match;;
+			int lineCtr = 1;
+
+			while (regex_search(originalProgramCopy, match, lineRegex))
+			{
+				currentParsedLine = processContent(match.prefix().str(), lexerTokens, parserTokens);
+
+				if (tagCount(currentParsedLine) != 1)
+				{
+					return lineCtr;
+				}
+
+				originalProgramCopy = match.suffix().str();
+				lineCtr++;
+			}
+
+			return 0;
+		}
+		else if (programTagCount == 0)
+		{
+			return 1;
+		}
+
+		return -1;
 	}
 }
