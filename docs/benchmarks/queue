@@ -1,0 +1,27 @@
+beginit
+ store head = tail;
+endinit
+
+process 1:
+/* ENQ */
+
+1: load h1 = head;
+2: nop;
+3: store head = h1 + 1;
+4: goto 1;
+
+process 2:
+/* DEQ */
+
+1: load h2 = head;
+3: if (tail >= h2)
+     goto 1;
+   else
+5:   nop;
+6:   tail = tail + 1;
+7:   nop;
+   endif
+   goto 1;
+
+/* program counters: || !(pc{1} == 2) || !(pc{2} == 5) */
+ assert always (tail < h1);
