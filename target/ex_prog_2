@@ -21,7 +21,7 @@ process 1:
 process 2:
 
 1: store flag1 = 1;
-2: store turn = 0;
+2: store turn = 0
 3: load f2 = flag0;
 4: load t2 = turn;
 5: if ((f2 != 0) & (t2 = 0))

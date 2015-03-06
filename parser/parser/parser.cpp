@@ -160,7 +160,7 @@ void parse(string lexerPath, string programParserPath, string predicateParserPat
 
 	cout << "Processing predicates...\n";
 	predicateInputContent = processContent(predicateInputContent, &lexerTokens, &predicateParserTokens);
-	int predicateErrorLine = config::errorLine(programInputContent, programInputContentCopy, &lexerTokens, &programParserTokens);
+	int predicateErrorLine = config::errorLine(predicateInputContent, predicateInputContentCopy, &lexerTokens, &predicateParserTokens);
 	if (predicateErrorLine == 0)
 	{
 		config::throwError("Error parsing the predicates on an unknown line.");
