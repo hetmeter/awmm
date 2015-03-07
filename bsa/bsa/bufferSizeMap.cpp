@@ -50,7 +50,7 @@ bool bufferSizeMapCompare(bufferSizeMap* first, bufferSizeMap* second)
 		{
 			return false;
 		}
-		else if (bufferSizeValueCompare(iterator->second, *(second)[iterator->first]) != 0)
+		else if (bufferSizeValueCompare(iterator->second, (*(second))[iterator->first]) != 0)
 		{
 			return false;
 		}
@@ -62,7 +62,7 @@ bool bufferSizeMapCompare(bufferSizeMap* first, bufferSizeMap* second)
 		{
 			return false;
 		}
-		else if (bufferSizeValueCompare(iterator->second, *(first)[iterator->first]) != 0)
+		else if (bufferSizeValueCompare(iterator->second, (*(first))[iterator->first]) != 0)
 		{
 			return false;
 		}

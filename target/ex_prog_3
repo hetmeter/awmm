@@ -30,7 +30,6 @@ process 1:
    endif;
 15: nop;
 16: store y1 = 0;
-  goto 1;
 
 
 process 2:
@@ -42,20 +41,13 @@ process 2:
 
 6: load t23 = ch1;
 7: if ((t23 = 0))
-8:     goto 10;
+     store ch2 = 1;
+	 load t21 = y1;
+	 store y2 = t21 + 1;
+	store ch2 = 0;
    else 
-9:     goto 6;
+store y2 = t21 + 1;
+	store ch2 = 0;
    endif;
-
-10: load t21 = y1;
-11: load t22 = y2;
-12: if ((t21 = 0) | (t22 <= t21))
-13:     goto 15;
-   else 
-14:     goto 10;
-   endif;
-15: nop;
-16: store y2 = 0;
-  goto 1;
 
 /*program counters:  ((pc{1} != 15) || (pc{2} != 15)) */
