@@ -20,25 +20,25 @@ int main(int argc, char** argv)
 	string predicateInputPath;
 	string predicateOutputPath;
 
+	// Get the persistent configuration settings from a configuration file
 	ifstream ruleFile(config::CONFIG_FILE_PATH);
 	string line;
 	smatch stringMatch;
-	ssub_match subMatch;
 	string property;
 	string value;
 	regex propertyValueRegex(config::CONFIG_REGEX);
 	int commentMarkerIndex;
 
-	while (getline(ruleFile, line))
+	while (getline(ruleFile, line))	// Iterate through every line
 	{
-		commentMarkerIndex = line.find(config::CONFIG_COMMENT);
+		commentMarkerIndex = line.find(config::CONFIG_COMMENT);	// Check if the line has a comment
 
 		if (commentMarkerIndex != string::npos)
 		{
-			line = line.substr(0, commentMarkerIndex);
+			line = line.substr(0, commentMarkerIndex);	// If the line has a comment marker, remove the comment
 		}
 
-		if (regex_match(line, propertyValueRegex))
+		if (regex_match(line, propertyValueRegex))	// If the line matches the format of a property-value assignment, parse them
 		{
 			regex_search(line, stringMatch, propertyValueRegex);
 
@@ -63,6 +63,7 @@ int main(int argc, char** argv)
 		}
 	}
 
+	// Get the program arguments
 	if (argc > 1)
 	{
 		programInputPath = argv[1];
@@ -103,8 +104,10 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	// Parse the input program and predicate files
 	parse(lexerPath, programParserPath, predicateParserPath, programInputPath, predicateInputPath);
 
+	// Output the parsed program and predicate each to its own file
 	ofstream programOut(programOutputPath);
 	programOut << programInputContent;
 	programOut.close();

@@ -61,6 +61,7 @@ int main(int argc, char** argv)
 	string parsedProgramString;
 	Ast rootAst;
 
+	// Check if the program is in an accepting state, prompt an error otherwise
 	regex_search(parsedProgramLine, stringMatch, programInputRegex);
 
 	if (stringMatch.size() >= 2)

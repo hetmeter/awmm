@@ -32,8 +32,9 @@ namespace config
 	const extern std::string CONFIG_REGEX;
 	const extern std::string IDENTIFIER_REGEX;
 	const extern std::string TAG_REGEX;
+	const extern std::string ACCEPTING_STATE_REGEX;
 
-	extern std::string normalize(std::string s);
+	extern std::string removeWhitespace(std::string s);
 	extern std::vector<std::string> find_all_matches(std::regex const& r, std::string input);
 	extern std::string toIdentifier(std::string s);
 	extern std::vector<std::string> separate(std::string input, char separator);
