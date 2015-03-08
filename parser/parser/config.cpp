@@ -17,18 +17,28 @@ namespace config
 	const char LEFT_TOKEN_DELIMITER = '{';
 	const char RIGHT_TOKEN_DELIMITER = '}';
 	const char TAG_PARAMETER_SEPARATOR = ',';
+	const char EXTENSION_SEPARATOR = '.';
 	const char CONFIG_COMMENT = '#';
 	const std::string CONFIG_FILE_PATH = "config.txt";
 
-	const std::string RMA_EXTENSION = "RMA";
-	const std::string TSO_EXTENSION = "TSO";
-	const std::string PSO_EXTENSION = "PSO";
+	const std::string PREDICATE_EXTENSION = "predicate";
+	const std::string OUT_EXTENSION = "out";
+	const std::string RMA_EXTENSION = "rma";
+	const std::string TSO_EXTENSION = "tso";
+	const std::string PSO_EXTENSION = "pso";
 
-	const std::string LEXER_RULE_FILE_PROPERTY = "lexer rule file";
-	const std::string PROGRAM_PARSER_RULE_FILE_PROPERTY = "program parser rule file";
-	const std::string PREDICATE_PARSER_RULE_FILE_PROPERTY = "predicate parser rule file";
+	const std::string RMA_LEXER_RULE_FILE_PROPERTY = "RMA lexer rule file";
+	const std::string RMA_PROGRAM_PARSER_RULE_FILE_PROPERTY = "RMA program parser rule file";
+	const std::string RMA_PREDICATE_PARSER_RULE_FILE_PROPERTY = "RMA predicate parser rule file";
+	const std::string TSO_LEXER_RULE_FILE_PROPERTY = "TSO lexer rule file";
+	const std::string TSO_PROGRAM_PARSER_RULE_FILE_PROPERTY = "TSO program parser rule file";
+	const std::string TSO_PREDICATE_PARSER_RULE_FILE_PROPERTY = "TSO predicate parser rule file";
+	const std::string PSO_LEXER_RULE_FILE_PROPERTY = "PSO lexer rule file";
+	const std::string PSO_PROGRAM_PARSER_RULE_FILE_PROPERTY = "PSO program parser rule file";
+	const std::string PSO_PREDICATE_PARSER_RULE_FILE_PROPERTY = "PSO predicate parser rule file";
 
 	const std::string CONFIG_REGEX = "^\\s*(.*\\S)\\s*=\\s*(.*\\S)\\s*$";
+	const std::string EXTENSION_REGEX = "(.*)\\.(...)";
 	const std::string IDENTIFIER_REGEX = "([a-zA-Z_][a-zA-Z0-9_]*)";
 	const std::string TAG_REGEX = "\\{.*?\\}";
 	const std::string ACCEPTING_STATE_REGEX = "\\{ACCEPTING_STATE,(\\S+)\\}";
@@ -44,7 +54,7 @@ namespace config
 	}
 
 	// Returns a vector of all matches to the regex in the input string
-	std::vector<std::string> find_all_matches(std::regex const& r, std::string input)
+	std::vector<std::string> findAllMatches(std::regex const& r, std::string input)
 	{
 		std::smatch match;
 		std::vector<std::string> results;
@@ -114,24 +124,66 @@ namespace config
 		return result;
 	}
 
+	// Returns a map of the property-value-pairs stored in a configuration file. Comments starting with '#' are ignored until the end of the line.
+	std::map<std::string, std::string> parseConfiguration(std::string path)
+	{
+		std::map<std::string, std::string> result;
+
+		std::ifstream configFile(path);
+		std::string line;
+		std::smatch stringMatch;
+		std::regex configRegex(CONFIG_REGEX);
+		int commentMarkerIndex;
+
+		while (std::getline(configFile, line))	// Iterate through every line
+		{
+			commentMarkerIndex = line.find(CONFIG_COMMENT);	// Check if the line has a comment
+
+			if (commentMarkerIndex != std::string::npos)
+			{
+				line = line.substr(0, commentMarkerIndex);	// If the line has a comment marker, remove the comment
+			}
+
+			if (std::regex_match(line, configRegex))	// If the line matches the format of a property-value assignment, parse them
+			{
+				std::regex_search(line, stringMatch, configRegex);
+
+				if (stringMatch.size() >= 3)
+				{
+					result[stringMatch[1].str()] = stringMatch[2].str();
+				}
+			}
+		}
+
+		return result;
+	}
+
 	// Handles an error with an attached message
 	void throwError(std::string message)
 	{
 		std::cout << "\n\tERROR: " << message << "\n\n";
 	}
 
-	// Counts the number of tags in the parameter string
+	// Counts the number of tags in the parameter string. If it contains non-whitespace characters outside of any tag, it returns -1.
 	int tagCount(std::string s)
 	{
 		std::string sCopy = s;
-		std::smatch match;;
-		std::regex tagRegex(TAG_REGEX);
+		std::smatch match;
+		std::regex generalPurposeRegex(TAG_REGEX);
 		int matchCtr = 0;
 
-		while (regex_search(sCopy, match, tagRegex))
+		// Find the first tag, count it, remove it from the string, and repeat until no more tags are found
+		while (std::regex_search(sCopy, match, generalPurposeRegex))
 		{
 			matchCtr++;
 			sCopy = match.suffix().str();
+		}
+
+		generalPurposeRegex = std::regex("\\S");	// Search for non-whitespace characters remaining after the removal of all tags
+
+		if (std::regex_search(sCopy, match, generalPurposeRegex))	// If there are non-whitespace characters left, return -1
+		{
+			return -1;
 		}
 
 		return matchCtr;
@@ -157,11 +209,13 @@ namespace config
 
 				while (regex_search(originalProgramCopy, match, lineRegex))	// Iterate through every line in the unprocessed program
 				{
-					currentParsedLine = processContent(match.prefix().str(), lexerTokens, parserTokens);
+					currentParsedLine = processContent(" " + match.prefix().str() + " ", lexerTokens, parserTokens);
 
 					// Check if the current line is non-empty and parses to other than exactly one tag
-					if (currentParsedLine != "" || tagCount(currentParsedLine) != 1)
+					if (currentParsedLine != "" && tagCount(currentParsedLine) != 1)
 					{
+						std::cout << "\t\tParser error: line " << lineCtr << ": \"" << match.prefix().str() << "\"\n\t\tparses to \"" << currentParsedLine << "\"\n";
+
 						return lineCtr;
 					}
 

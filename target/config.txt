@@ -1,7 +1,13 @@
-# lexer rule file = ..\docs\rules\RMA_lexer_rules.txt
-# program parser rule file = ..\docs\rules\RMA_program_parser_rules.txt
-# predicate parser rule file = ..\docs\rules\RMA_predicate_parser_rules.txt
+# comment
 
-lexer rule file = ..\docs\rules\TSO_PSO_lexer_rules.txt
-program parser rule file = ..\docs\rules\TSO_PSO_program_parser_rules.txt
-predicate parser rule file = ..\docs\rules\TSO_PSO_predicate_parser_rules.txt
+RMA lexer rule file = ..\docs\rules\RMA_lexer_rules.txt
+RMA program parser rule file = ..\docs\rules\RMA_program_parser_rules.txt
+RMA predicate parser rule file = ..\docs\rules\RMA_predicate_parser_rules.txt
+
+TSO lexer rule file = ..\docs\rules\TSO_PSO_lexer_rules.txt
+TSO program parser rule file = ..\docs\rules\TSO_PSO_program_parser_rules.txt
+TSO predicate parser rule file = ..\docs\rules\TSO_PSO_predicate_parser_rules.txt
+
+PSO lexer rule file = ..\docs\rules\TSO_PSO_lexer_rules.txt
+PSO program parser rule file = ..\docs\rules\TSO_PSO_program_parser_rules.txt
+PSO predicate parser rule file = ..\docs\rules\TSO_PSO_predicate_parser_rules.txt

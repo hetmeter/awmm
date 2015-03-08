@@ -4,7 +4,7 @@ store y1 = 0;
 store y2 = 0; 
 
 store ch1 = 0; 
-store ch2 = 0; 
+store ch2 = 0;
 
 endinit
 
@@ -22,7 +22,7 @@ process 1:
    endif;
 
 10: load t11 = y1;
-11: load t12 = y2;
+11: load t12 = y2
 12: if ((t12 = 0) | (t11 < t12))
 13:     goto 15;
    else 
