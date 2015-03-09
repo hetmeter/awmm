@@ -43,14 +43,17 @@ namespace config
 	const extern std::string EXTENSION_REGEX;
 	const extern std::string IDENTIFIER_REGEX;
 	const extern std::string TAG_REGEX;
+	const extern std::string TAG_LABEL_REGEX;
 	const extern std::string ACCEPTING_STATE_REGEX;
 
 	extern std::string removeWhitespace(std::string s);
 	extern std::vector<std::string> findAllMatches(std::regex const& r, std::string input);
+	extern std::vector<std::string> findAllMatches(std::regex const& r, std::string input, int subMatchIndex);
 	extern std::string toIdentifier(std::string s);
 	extern std::vector<std::string> separate(std::string input, char separator);
 	extern std::map<std::string, std::string> parseConfiguration(std::string path);
 	extern void throwError(std::string message);
 	extern int tagCount(std::string s);
+	extern bool lineIsParsable(std::string line);
 	extern int errorLine(std::string parsedProgram, std::string originalProgram, std::vector<token>* lexerTokens, std::vector<token>* parserTokens);
 }

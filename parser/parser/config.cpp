@@ -40,8 +40,14 @@ namespace config
 	const std::string CONFIG_REGEX = "^\\s*(.*\\S)\\s*=\\s*(.*\\S)\\s*$";
 	const std::string EXTENSION_REGEX = "(.*)\\.(...)";
 	const std::string IDENTIFIER_REGEX = "([a-zA-Z_][a-zA-Z0-9_]*)";
-	const std::string TAG_REGEX = "\\{.*?\\}";
+	const std::string TAG_REGEX = "\\{(.*?)\\}";
+	const std::string TAG_LABEL_REGEX = "\\{(\\S+?),\\S+?\\}";
 	const std::string ACCEPTING_STATE_REGEX = "\\{ACCEPTING_STATE,(\\S+)\\}";
+
+	const std::string ENDIF_TAG_KEYWORD = "ENDIF_KEYWORD";
+	const std::string SEMICOLON_TAG_KEYWORD = "SEMICOLON";
+	const std::string LABEL_TAG_KEYWORD = "label";
+	const std::string IFHEADER_TAG_KEYWORD = "ifHeader";
 
 	// Returns a copy of the parameter string without whitespace characters
 	std::string removeWhitespace(std::string s)
@@ -56,12 +62,19 @@ namespace config
 	// Returns a vector of all matches to the regex in the input string
 	std::vector<std::string> findAllMatches(std::regex const& r, std::string input)
 	{
+		return findAllMatches(r, input, 1);
+	}
+
+
+	// Returns a vector of all of the specific submatches to the regex in the input string
+	std::vector<std::string> findAllMatches(std::regex const& r, std::string input, int subMatchIndex)
+	{
 		std::smatch match;
 		std::vector<std::string> results;
 
 		while (regex_search(input, match, r))
 		{
-			results.push_back(match[1]);
+			results.push_back(match[subMatchIndex]);
 			input = match.suffix().str();
 		}
 
@@ -189,6 +202,42 @@ namespace config
 		return matchCtr;
 	}
 
+	//
+	bool lineIsParsable(std::string line)
+	{
+		int lineTagCount = tagCount(line);
+
+		if (line.empty() || lineTagCount == 1)	// If the line is empty or containing only a token, it's parsable
+		{
+			return true;
+		}
+		else if (lineTagCount == 2)	// Check whether the line has an accepted combination of two tokens
+		{
+			std::regex tagRegex(TAG_REGEX);
+			std::vector<std::string> tags = findAllMatches(tagRegex, line);
+			std::vector<std::string> subTags;
+
+			if (tags.at(0) == ENDIF_TAG_KEYWORD && tags.at(1) == SEMICOLON_TAG_KEYWORD)	// Accepted: {ENDIF_KEYWORD} {SEMICOLON}
+			{
+				return true;
+			}
+			
+			subTags = separate(tags.at(0), TAG_PARAMETER_SEPARATOR);	// Accepted: {label,...} {ifHeader,...}
+
+			if (subTags.at(0) == LABEL_TAG_KEYWORD)
+			{
+				subTags = separate(tags.at(1), TAG_PARAMETER_SEPARATOR);
+
+				if (subTags.at(0) == IFHEADER_TAG_KEYWORD)
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	// Checks if the parsed program is in a non-accepting state and if so, returns the line number of the first parsing error in the original program. Otherwise, returns -1
 	int errorLine(std::string parsedProgram, std::string originalProgram, std::vector<token>* lexerTokens, std::vector<token>* parserTokens)
 	{
@@ -205,14 +254,20 @@ namespace config
 				std::string originalProgramCopy = originalProgram;
 				std::string currentParsedLine;
 				std::regex lineRegex("\\n");
+				std::smatch subMatch;
 				int lineCtr = 1;
 
 				while (regex_search(originalProgramCopy, match, lineRegex))	// Iterate through every line in the unprocessed program
 				{
-					currentParsedLine = processContent(" " + match.prefix().str() + " ", lexerTokens, parserTokens);
+					// Check if the current line conforms to any accepted line pattern
 
-					// Check if the current line is non-empty and parses to other than exactly one tag
-					if (currentParsedLine != "" && tagCount(currentParsedLine) != 1)
+					if (lineCtr == 23)
+					{
+						int a = 2 + 1;
+						int b = a + 2 + 1;
+					}
+
+					if (!lineIsParsable((currentParsedLine = processContent(" " + match.prefix().str() + " ", lexerTokens, parserTokens))))
 					{
 						std::cout << "\t\tParser error: line " << lineCtr << ": \"" << match.prefix().str() << "\"\n\t\tparses to \"" << currentParsedLine << "\"\n";
 
