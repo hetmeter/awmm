@@ -202,7 +202,7 @@ namespace config
 		return matchCtr;
 	}
 
-	//
+	// Returns whether the current line in itself parses to a string containing 0, 1 or 2 tags and nothing else, which might further be successfully parsed
 	bool lineIsParsable(std::string line)
 	{
 		int lineTagCount = tagCount(line);
