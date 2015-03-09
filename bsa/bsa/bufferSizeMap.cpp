@@ -76,7 +76,16 @@ void copyBufferSizes(bufferSizeMap* source, bufferSizeMap* destination)
 {
 	for (bufferSizeMapIterator iterator = source->begin(); iterator != source->end(); iterator++)
 	{
-		(*destination)[iterator->first] = iterator->second;
+		if (destination->find(iterator->first) != destination->end())
+		{
+			destination->at(iterator->first) = iterator->second;
+		}
+		else
+		{
+			destination->insert(std::pair<std::string, int>(iterator->first, iterator->second));
+		}
+
+		//(*destination)[iterator->first] = iterator->second;
 	}
 }
 
@@ -89,7 +98,14 @@ void incrementCost(string varName, int increment, bufferSizeMap* target)
 	}
 	else if ((*target)[varName] != config::TOP_VALUE)
 	{
-		(*target)[varName] += increment;
+		if (increment == config::TOP_VALUE)
+		{
+			(*target)[varName] = config::TOP_VALUE;
+		}
+		else if (increment != config::BOTTOM_VALUE)
+		{
+			(*target)[varName] += increment;
+		}
 	}
 }
 

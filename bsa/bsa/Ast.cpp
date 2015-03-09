@@ -17,7 +17,6 @@ Ast::Ast()
 	indexAsChild = -1;
 }
 
-
 Ast::~Ast()
 {
 }
@@ -104,7 +103,7 @@ bool Ast::propagateTops()
 
 	for (ControlFlowEdge* edge : outgoingEdges)
 	{
-		if (bufferSizeMapCompare(&persistentWriteCost, &(edge->end->persistentWriteCost)))
+		if (!bufferSizeMapCompare(&persistentWriteCost, &(edge->end->persistentWriteCost)))
 		{
 			result = true;
 			additiveMergeBufferSizes(&topContainer, &(edge->end->persistentWriteCost));
@@ -116,7 +115,7 @@ bool Ast::propagateTops()
 
 	for (ControlFlowEdge* edge : outgoingEdges)
 	{
-		if (bufferSizeMapCompare(&persistentReadCost, &(edge->end->persistentReadCost)))
+		if (!bufferSizeMapCompare(&persistentReadCost, &(edge->end->persistentReadCost)))
 		{
 			result = true;
 			additiveMergeBufferSizes(&topContainer, &(edge->end->persistentReadCost));
@@ -218,7 +217,7 @@ bool Ast::hasElse()
 {
 	if (name == config::IF_ELSE_TOKEN_NAME)
 	{
-		return children.at(2)->name == config::NONE_TAG_NAME;
+		return children.at(2)->name != config::NONE_TAG_NAME;
 	}
 
 	return false;
@@ -261,9 +260,9 @@ bool Ast::generateOutgoingEdges()
 				lastChild->outgoingEdges.push_back(newEdge);
 			}
 
-			if (hasElse())	// If there is a non-empty Else block, connect to its first statement from the conditional
+			if (this->hasElse())	// If there is a non-empty Else block, connect to its first statement from the conditional
 			{
-				newEdge = new ControlFlowEdge(children.at(0), children.at(2));
+				newEdge = new ControlFlowEdge(children.at(0), children.at(2)->children.at(0));
 				children.at(0)->outgoingEdges.push_back(newEdge);
 
 				lastChild = children.at(2)->tryGetLastStatement();		// If there is a statement after the IfElse block, connect to it from the last statement of the Else block, if it's not a goto statement
@@ -490,7 +489,7 @@ string Ast::astToString()
 	regex indentationRegex("\n");
 	string result = name;
 
-	if (isProgramPoint())
+	if (isProgramPoint()) //|| (!isRoot() && parent->name == config::IF_ELSE_TOKEN_NAME))
 	{
 		result += "\tpersistentReadCost = (" + toString(&persistentReadCost) + ")";
 		result += "\tpersistentWriteCost = (" + toString(&persistentWriteCost) + ")";
