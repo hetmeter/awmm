@@ -17,7 +17,6 @@ Ast::Ast()
 	indexAsChild = -1;
 }
 
-
 Ast::~Ast()
 {
 }
@@ -104,7 +103,7 @@ bool Ast::propagateTops()
 
 	for (ControlFlowEdge* edge : outgoingEdges)
 	{
-		if (bufferSizeMapCompare(&persistentWriteCost, &(edge->end->persistentWriteCost)))
+		if (!bufferSizeMapCompare(&persistentWriteCost, &(edge->end->persistentWriteCost)))
 		{
 			result = true;
 			additiveMergeBufferSizes(&topContainer, &(edge->end->persistentWriteCost));
@@ -116,7 +115,7 @@ bool Ast::propagateTops()
 
 	for (ControlFlowEdge* edge : outgoingEdges)
 	{
-		if (bufferSizeMapCompare(&persistentReadCost, &(edge->end->persistentReadCost)))
+		if (!bufferSizeMapCompare(&persistentReadCost, &(edge->end->persistentReadCost)))
 		{
 			result = true;
 			additiveMergeBufferSizes(&topContainer, &(edge->end->persistentReadCost));
@@ -218,7 +217,7 @@ bool Ast::hasElse()
 {
 	if (name == config::IF_ELSE_TOKEN_NAME)
 	{
-		return children.at(2)->name == config::NONE_TAG_NAME;
+		return children.at(2)->name != config::NONE_TAG_NAME;
 	}
 
 	return false;
@@ -261,9 +260,9 @@ bool Ast::generateOutgoingEdges()
 				lastChild->outgoingEdges.push_back(newEdge);
 			}
 
-			if (hasElse())	// If there is a non-empty Else block, connect to its first statement from the conditional
+			if (this->hasElse())	// If there is a non-empty Else block, connect to its first statement from the conditional
 			{
-				newEdge = new ControlFlowEdge(children.at(0), children.at(2));
+				newEdge = new ControlFlowEdge(children.at(0), children.at(2)->children.at(0));
 				children.at(0)->outgoingEdges.push_back(newEdge);
 
 				lastChild = children.at(2)->tryGetLastStatement();		// If there is a statement after the IfElse block, connect to it from the last statement of the Else block, if it's not a goto statement
@@ -370,7 +369,7 @@ void Ast::initializePersistentCosts()
 	}
 }
 
-
+// Spawns a control flow visitor on the first statement of every process declaration statement block
 void Ast::visitAllProgramPoints()
 {
 	if (name == config::PROGRAM_DECLARATION_TOKEN_NAME)
@@ -392,6 +391,7 @@ void Ast::visitAllProgramPoints()
 	}
 }
 
+// Adds a child node and sets its variables connecting it to this node
 void Ast::addChild(Ast* child)
 {
 	child->parent = this;
@@ -399,6 +399,7 @@ void Ast::addChild(Ast* child)
 	children.push_back(child);
 }
 
+// Returns the next child of the node's parent if it exists, otherwise returns NULL
 Ast* Ast::tryGetNextSibling()
 {
 	if (!isRoot() && ((int)parent->children.size()) > indexAsChild + 1)
@@ -409,6 +410,7 @@ Ast* Ast::tryGetNextSibling()
 	return NULL;
 }
 
+// Returns the next statement node of the current statements block if applicable, otherwise returns NULL
 Ast* Ast::tryGetNextStatement()
 {
 	if (parent->name == config::LABEL_TOKEN_NAME)
@@ -423,11 +425,13 @@ Ast* Ast::tryGetNextStatement()
 	return NULL;
 }
 
+// Returns whether the node has no parent
 bool Ast::isRoot()
 {
 	return indexAsChild == -1;
 }
 
+// Outputs the number string of the superior process in the value of the out pointer and returns true if applicable, otherwise returns false
 bool Ast::tryGetParentProcessNumber(string* out)
 {
 	bool result = false;
@@ -448,6 +452,7 @@ bool Ast::tryGetParentProcessNumber(string* out)
 	return result;
 }
 
+// Returns the last child node if it exists, otherwise returns NULL
 Ast* Ast::tryGetLastChild()
 {
 	int childrenCount = children.size();
@@ -460,34 +465,32 @@ Ast* Ast::tryGetLastChild()
 	return NULL;
 }
 
+// Returns the last statement node of the current statements block if applicable, otherwise returns NULL
 Ast* Ast::tryGetLastStatement()
 {
-	Ast* lastChild = tryGetLastChild();
-
-	if (lastChild->name == config::LABEL_TOKEN_NAME)
+	if (name == config::STATEMENTS_TOKEN_NAME)
 	{
-		lastChild = lastChild->children.at(1);
+		Ast* lastChild = tryGetLastChild();
+
+		if (lastChild->name == config::LABEL_TOKEN_NAME)
+		{
+			lastChild = lastChild->children.at(1);
+		}
+
+		return lastChild;
 	}
 
-	return lastChild;
+	return NULL;
 }
 
+// Returns a string representation of the node and its children
 string Ast::astToString()
 {
 	regex indentationRegex("\n");
 	string result = name;
 
-	//if (name != PROGRAM_DECLARATION_TOKEN_NAME && (name == STATEMENTS_TOKEN_NAME || name == INITIALIZATION_BLOCK_TOKEN_NAME || parent->name == IF_ELSE_TOKEN_NAME || parent->name == WHILE_TOKEN_NAME || parent->name == STATEMENTS_TOKEN_NAME))
-	/*if (name != PROGRAM_DECLARATION_TOKEN_NAME && (parent->name == STATEMENTS_TOKEN_NAME || parent->name == IF_ELSE_TOKEN_NAME || parent->name == WHILE_TOKEN_NAME || name == IF_ELSE_TOKEN_NAME || name == STORE_TOKEN_NAME || name == LOAD_TOKEN_NAME))
+	if (isProgramPoint()) //|| (!isRoot() && parent->name == config::IF_ELSE_TOKEN_NAME))
 	{
-	result += "\t\t" + bufferSizeMapString();
-	}*/
-
-	if (isProgramPoint())
-	{
-		//result += "\tcausedReadCost = (" + bufferSizeMapString(&causedReadCost) + ")";
-		//result += "\tcausedWriteCost = (" + bufferSizeMapString(&causedWriteCost) + ")";
-
 		result += "\tpersistentReadCost = (" + toString(&persistentReadCost) + ")";
 		result += "\tpersistentWriteCost = (" + toString(&persistentWriteCost) + ")";
 
@@ -509,23 +512,6 @@ string Ast::astToString()
 	}
 
 	result = regex_replace(result, indentationRegex, "\n|");
-
-	/*string result = name + ", children:";
-	int childrenCount = children.size();
-
-	for (int ctr = 0; ctr < childrenCount; ctr++)
-	{
-	result += " " + children.at(ctr).name;
-	}
-
-	result += " {\n";
-
-	for (int ctr = 0; ctr < childrenCount; ctr++)
-	{
-	result += "\n" + children.at(ctr).toString();
-	}
-
-	result += "}";*/
 
 	return result;
 }

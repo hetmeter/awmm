@@ -15,96 +15,60 @@ int main(int argc, char** argv)
 	string lexerPath;
 	string programParserPath;
 	string predicateParserPath;
-	string programInputPath;
-	string programOutputPath;
-	string predicateInputPath;
-	string predicateOutputPath;
+	string inputArgument;
+	string fileName;
 
-	ifstream ruleFile(config::CONFIG_FILE_PATH);
-	string line;
-	smatch stringMatch;
-	ssub_match subMatch;
-	string property;
-	string value;
-	regex propertyValueRegex(config::CONFIG_REGEX);
-	int commentMarkerIndex;
+	// Get the persistent configuration settings from a configuration file
+	map<string, string> configVariables = config::parseConfiguration(config::CONFIG_FILE_PATH);
 
-	while (getline(ruleFile, line))
-	{
-		commentMarkerIndex = line.find(config::CONFIG_COMMENT);
-
-		if (commentMarkerIndex != string::npos)
-		{
-			line = line.substr(0, commentMarkerIndex);
-		}
-
-		if (regex_match(line, propertyValueRegex))
-		{
-			regex_search(line, stringMatch, propertyValueRegex);
-
-			if (stringMatch.size() >= 3)
-			{
-				property = stringMatch[1].str();
-				value = stringMatch[2].str();
-
-				if (property == config::LEXER_RULE_FILE_PROPERTY)
-				{
-					lexerPath = value;
-				}
-				else if (property == config::PROGRAM_PARSER_RULE_FILE_PROPERTY)
-				{
-					programParserPath = value;
-				}
-				else if (property == config::PREDICATE_PARSER_RULE_FILE_PROPERTY)
-				{
-					predicateParserPath = value;
-				}
-			}
-		}
-	}
-
+	// Get the program arguments
 	if (argc > 1)
 	{
-		programInputPath = argv[1];
+		inputArgument = argv[1];
 	}
 	else
 	{
-		cout << "No program input path specified\n";
+		config::throwError("No program input specified");
 		return 1;
 	}
 
-	if (argc > 2)
+	// Derive the input file paths from the input argument
+	regex fileNameRegex(config::EXTENSION_REGEX);
+	std::smatch stringMatch;
+
+	regex_search(inputArgument, stringMatch, fileNameRegex);
+	if (stringMatch[2] == config::RMA_EXTENSION)
 	{
-		programOutputPath = argv[2];
+		lexerPath = configVariables[config::RMA_LEXER_RULE_FILE_PROPERTY];
+		programParserPath = configVariables[config::RMA_PROGRAM_PARSER_RULE_FILE_PROPERTY];
+		predicateParserPath = configVariables[config::RMA_PREDICATE_PARSER_RULE_FILE_PROPERTY];
+	}
+	else if (stringMatch[2] == config::TSO_EXTENSION)
+	{
+		lexerPath = configVariables[config::TSO_LEXER_RULE_FILE_PROPERTY];
+		programParserPath = configVariables[config::TSO_PROGRAM_PARSER_RULE_FILE_PROPERTY];
+		predicateParserPath = configVariables[config::TSO_PREDICATE_PARSER_RULE_FILE_PROPERTY];
+	}
+	else if (stringMatch[2] == config::PSO_EXTENSION)
+	{
+		lexerPath = configVariables[config::PSO_LEXER_RULE_FILE_PROPERTY];
+		programParserPath = configVariables[config::PSO_PROGRAM_PARSER_RULE_FILE_PROPERTY];
+		predicateParserPath = configVariables[config::PSO_PREDICATE_PARSER_RULE_FILE_PROPERTY];
 	}
 	else
 	{
-		cout << "No program output path specified\n";
-		return 1;
+		config::throwError("Invalid input file extension");
 	}
 
-	if (argc > 3)
-	{
-		predicateInputPath = argv[3];
-	}
-	else
-	{
-		cout << "No predicate input path specified\n";
-		return 1;
-	}
+	string programInputPath = inputArgument;
+	string programOutputPath = programInputPath + config::EXTENSION_SEPARATOR + config::OUT_EXTENSION;
+	string predicateInputPath = stringMatch[1].str() + config::EXTENSION_SEPARATOR + config::PREDICATE_EXTENSION + config::EXTENSION_SEPARATOR + stringMatch[2].str();
+	string predicateOutputPath = predicateInputPath + config::EXTENSION_SEPARATOR + config::OUT_EXTENSION;
 
-	if (argc > 4)
-	{
-		predicateOutputPath = argv[4];
-	}
-	else
-	{
-		cout << "No predicate output path specified\n";
-		return 1;
-	}
-
+	// Parse the input program and predicate files
 	parse(lexerPath, programParserPath, predicateParserPath, programInputPath, predicateInputPath);
 
+	// Output the parsed program and predicate each to its own file
 	ofstream programOut(programOutputPath);
 	programOut << programInputContent;
 	programOut.close();

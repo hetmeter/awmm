@@ -4,7 +4,7 @@ store y1 = 0;
 store y2 = 0; 
 
 store ch1 = 0; 
-store ch2 = 0; 
+store ch2 = 0;
 
 endinit
 

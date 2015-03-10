@@ -1,0 +1,18 @@
+beginit
+
+store a = 4;
+
+endinit
+
+process 1:
+
+store x = 1;
+load x = a;
+1: store a = 3;
+store a = 3;
+store a = 3;
+if (5 = 4)
+	goto 1;
+else
+	nop;
+endif;

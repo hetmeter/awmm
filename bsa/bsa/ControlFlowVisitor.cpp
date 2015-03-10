@@ -66,6 +66,11 @@ void ControlFlowVisitor::traverseControlFlowGraph(Ast* startNode)
 {
 	if (isVisitingAlreadyVisitedLabel(startNode))	// If re-visiting this node, set the local persistent buffer sizes to TOP, if they'd been increased
 	{												// on the traversed path. Cascade these changes along all successive control flow paths.
+
+		// Add the visitor's accumulated buffer sizes to the persistent buffer sizes of the node
+		additiveMergeBufferSizes(&(startNode->causedWriteCost), &writeBufferSizeMap);
+		additiveMergeBufferSizes(&(startNode->causedReadCost), &readBufferSizeMap);
+
 		setTopIfIncremented(&writeBufferSizeMap, &(startNode->persistentWriteCost));
 		setTopIfIncremented(&readBufferSizeMap, &(startNode->persistentReadCost));
 		startNode->controlFlowDirectionCascadingPropagateTops();
