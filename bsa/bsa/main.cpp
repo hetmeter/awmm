@@ -31,8 +31,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		cout << "No program input path specified\n";
-		return 1;
+		config::throwCriticalError("No program input path specified");
 	}
 
 	if (argc > 2)
@@ -41,8 +40,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		cout << "No output path specified\n";
-		return 1;
+		config::throwCriticalError("No output path specified");
 	}
 
 	// Parse input file (no line breaks are expected)
@@ -51,8 +49,7 @@ int main(int argc, char** argv)
 
 	if (!getline(parsedProgramFile, parsedProgramLine))
 	{
-		cout << "Error: Empty parsed program file.\n";
-		return 1;
+		config::throwCriticalError("Empty parsed program file");
 	}
 
 	// Extract AST representation from the input file
@@ -70,8 +67,34 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		cout << "Error: Invalid parsed program format or program in a non-accepting state.\n";
-		return 1;
+		config::throwCriticalError("Invalid parsed program format or program in a non-accepting state");
+	}
+
+	// Get the input extension and set the global language variable accordingly. Prompt an error otherwise.
+	string extension;
+	programInputRegex = regex(config::EXTENSION_REGEX);
+	regex_search(parsedProgramPath, stringMatch, programInputRegex);
+
+	if (stringMatch.size() == 2)
+	{
+		extension = stringMatch[1].str();
+
+		if (extension == config::PSO_EXTENSION)
+		{
+			config::currentLanguage = config::language::PSO;
+		}
+		else if (extension == config::TSO_EXTENSION)
+		{
+			config::currentLanguage = config::language::TSO;
+		}
+		else if (extension == config::RMA_EXTENSION)
+		{
+			config::currentLanguage = config::language::RMA;
+		}
+	}
+	else
+	{
+		config::throwCriticalError("Invalid parsed program extension");
 	}
 
 	// Parse through the AST representation string character by character

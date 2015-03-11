@@ -38,34 +38,81 @@ vector<bufferSizeMap*> Ast::allBufferSizeContainers()
 // Returns whether the node represents one of the program point types
 bool Ast::isProgramPoint()
 {
-	return name == config::LABEL_TOKEN_NAME || name == config::GOTO_TOKEN_NAME || name == config::STORE_TOKEN_NAME
-		|| name == config::LOAD_TOKEN_NAME || name == config::IF_ELSE_TOKEN_NAME || name == config::FENCE_TOKEN_NAME
-		|| name == config::NOP_TAG_NAME;
-}
-
-// Cascades from top to bottom. If a store or a load is encountered, the cascade stops and the IDs read and written by its children are gathered
-void Ast::getCostsFromChildren()
-{
-	if (name == config::STORE_TOKEN_NAME || name == config::LOAD_TOKEN_NAME)
+	if (config::currentLanguage == config::language::RMA)
 	{
-		vector<string> writtenVariables = children.at(0)->getIDs();
-		vector<string> readVariables = children.at(1)->getIDs();
-
-		for (string member : writtenVariables)
-		{
-			incrementCost(member, 1, &causedWriteCost);
-		}
-
-		for (string member : readVariables)
-		{
-			incrementCost(member, 1, &causedReadCost);
-		}
+		return name == config::LABEL_TOKEN_NAME || name == config::GOTO_TOKEN_NAME || name == config::RMA_GET_TOKEN_NAME
+			|| name == config::PSO_TSO_LOAD_TOKEN_NAME || name == config::IF_ELSE_TOKEN_NAME || name == config::FENCE_TOKEN_NAME
+			|| name == config::RMA_PUT_TOKEN_NAME || name == config::RMA_LOCAL_ASSIGN_TOKEN_NAME || name == config::NOP_TAG_NAME;
 	}
 	else
 	{
-		for (Ast* child : children)
+		return name == config::LABEL_TOKEN_NAME || name == config::GOTO_TOKEN_NAME || name == config::PSO_TSO_STORE_TOKEN_NAME
+			|| name == config::PSO_TSO_LOAD_TOKEN_NAME || name == config::IF_ELSE_TOKEN_NAME || name == config::FENCE_TOKEN_NAME
+			|| name == config::NOP_TAG_NAME;
+	}
+}
+
+// Cascades from top to bottom. If for a read- or write-statement is encountered, the cascade stops and the IDs read and written by its children are gathered
+void Ast::getCostsFromChildren()
+{
+	if (config::currentLanguage == config::language::RMA)
+	{
+		if (name == config::RMA_LOCAL_ASSIGN_TOKEN_NAME)
 		{
-			child->getCostsFromChildren();
+			vector<string> writtenVariables = children.at(0)->getIDs();
+			vector<string> readVariables = children.at(2)->getIDs();
+
+			for (string member : writtenVariables)
+			{
+				incrementCost(member, 1, &causedWriteCost);
+			}
+
+			for (string member : readVariables)
+			{
+				incrementCost(member, 1, &causedReadCost);
+			}
+		}
+		else if (name == config::RMA_PUT_TOKEN_NAME)
+		{
+			incrementCost(children.at(2)->name, 1, &causedWriteCost);
+			incrementCost(children.at(4)->name, 1, &causedReadCost);
+		}
+		else if (name == config::RMA_GET_TOKEN_NAME)
+		{
+			incrementCost(children.at(0)->name, 1, &causedWriteCost);
+			incrementCost(children.at(3)->name, 1, &causedReadCost);
+		}
+		else
+		{
+			for (Ast* child : children)
+			{
+				child->getCostsFromChildren();
+			}
+		}
+	}
+	else	// TSO/PSO: critical statements are store and load
+	{
+		if (name == config::PSO_TSO_STORE_TOKEN_NAME || name == config::PSO_TSO_LOAD_TOKEN_NAME)
+		{
+			vector<string> writtenVariables = children.at(0)->getIDs();
+			vector<string> readVariables = children.at(1)->getIDs();
+
+			for (string member : writtenVariables)
+			{
+				incrementCost(member, 1, &causedWriteCost);
+			}
+
+			for (string member : readVariables)
+			{
+				incrementCost(member, 1, &causedReadCost);
+			}
+		}
+		else
+		{
+			for (Ast* child : children)
+			{
+				child->getCostsFromChildren();
+			}
 		}
 	}
 }
@@ -346,12 +393,29 @@ void Ast::initializePersistentCosts()
 	if (name == config::PROGRAM_DECLARATION_TOKEN_NAME)
 	{
 		// Collect all buffer costs caused by the variable initialization statements
-		vector<Ast*> initializationBlockStatements = children.at(0)->children;
-
-		for (Ast* initializationStatement : initializationBlockStatements)
+		if (config::currentLanguage == config::language::RMA)
 		{
-			additiveMergeBufferSizes(&(initializationStatement->causedWriteCost), &(persistentWriteCost));
-			additiveMergeBufferSizes(&(initializationStatement->causedWriteCost), &(persistentReadCost));
+			for (Ast* processInitialization : children)
+			{
+				if (processInitialization->name != config::RMA_PROCESS_INITIALIZATION_TOKEN_NAME)
+				{
+					break;
+				}
+
+				for (Ast* initializationStatement : processInitialization->children.at(1)->children)
+				{
+					additiveMergeBufferSizes(&(initializationStatement->causedWriteCost), &(persistentWriteCost));
+					additiveMergeBufferSizes(&(initializationStatement->causedWriteCost), &(persistentReadCost));
+				}
+			}
+		}
+		else
+		{
+			for (Ast* initializationStatement : children.at(0)->children)
+			{
+				additiveMergeBufferSizes(&(initializationStatement->causedWriteCost), &(persistentWriteCost));
+				additiveMergeBufferSizes(&(initializationStatement->causedWriteCost), &(persistentReadCost));
+			}
 		}
 
 		// Sets the values of the recently initialized entries to 0
