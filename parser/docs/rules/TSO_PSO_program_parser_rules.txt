@@ -1,0 +1,62 @@
+ 	\{COMMENT\}
+ 	\s+
+ {processHeader,processHeader($1)} 	\{PROCESS_KEYWORD\}\s*\{INT,(\d+)\}\s*\{COLON\}
+ {label,label($1)} 	\{INT,(\d+)\}\s*\{COLON\}
+ {gotoStatement,$1} 	\{GOTO_KEYWORD\}\s*\{INT,(\d+)\}\s*\{SEMICOLON\}
+ {binaryIntegerOperation,+} 	\{PLUS\}
+ {binaryIntegerOperation,-} 	\{MINUS\}
+ {binaryIntegerOperation,*} 	\{ASTERISK\}
+ {binaryIntegerOperation,/} 	\{SLASH\}
+ {integerTerm,$2($1,$3)} 	\{integerTerm,(\S+)\}\s*\{binaryIntegerOperation,(\S)\}\s*\{integerTerm,(\S+)\}
+ {integerTerm,$1} 	\{LEFTPARENTHESIS\}\s*\{integerTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
+ {integerTerm,ID($1)} 	\{ID,(\S+)\}
+ {integerTerm,INT($1)} 	\{INT,(\d+)\}
+ {storeStatementStart,ID($1)} 	\{STORE_KEYWORD\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{EQUALS\}
+ {storeStatement,$1,$2} 	\{storeStatementStart,(\S+)\}\s*\{integerTerm,(\S+)\}\s*\{SEMICOLON\}
+ {loadStatement,ID($1),ID($2)} 	\{LOAD_KEYWORD\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{EQUALS\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{SEMICOLON\}
+ {nopStatement} 	\{NOP_KEYWORD\}\s*\{SEMICOLON\}
+ {fenceStatement} 	\{FENCE_KEYWORD\}\s*\{SEMICOLON\}
+ {initializationBlockStart,initializationBlock(store(ID($1),INT($2)))} 	\{BEGINIT_KEYWORD\}\s*\{storeStatement,ID\((\S+)\),INT\((\d+)\)\}
+ {initializationBlockStart,initializationBlock($1,store(ID($2),INT($3)))} 	\{initializationBlockStart,initializationBlock\((\S+)\)\}\s*\{storeStatement,ID\((\S+)\),INT\((\d+)\)\}
+ {initializationBlock,initializationBlock($1)} 	\{initializationBlockStart,initializationBlock\((\S+)\)\}\s*\{ENDINIT_KEYWORD\}
+ {initializationBlock,initializationBlock()} 	\{BEGINIT_KEYWORD\}\s*\{ENDINIT_KEYWORD\}
+ {unaryBooleanOperation,!} 	\{EXCLAMATION\}
+ {binaryBooleanOperation,&} 	\{AMPERSAND\}
+ {binaryBooleanOperation,|} 	\{PIPE\}
+ {binaryIntegerComparison,<=} 	\{LESS_OR_EQUAL\}
+ {binaryIntegerComparison,>=} 	\{GREATER_OR_EQUAL\}
+ {binaryIntegerComparison,<} 	\{LESS\}
+ {binaryIntegerComparison,>} 	\{GREATER\}
+ {binaryIntegerComparison,!=} 	\{NOT_EQUAL\}
+ {binaryIntegerComparison,=} 	\{EQUALS\}
+ {ifHeaderStart} 	\{IF_KEYWORD\}\s*\{LEFTPARENTHESIS\}
+ {whileHeaderStart} 	\{WHILE_KEYWORD\}\s*\{LEFTPARENTHESIS\}
+ {booleanTerm,$1($2)} 	\{unaryBooleanOperation,(\S+)\}\s*\{booleanTerm,(\S+)\}
+ {booleanTerm,$2($1,$3)} 	\{booleanTerm,(\S+)\}\s*\{binaryBooleanOperation,(\S+)\}\s*\{booleanTerm,(\S+)\}
+ {booleanTerm,$2($1,$3)} 	\{integerTerm,(\S+)\}\s*\{binaryIntegerComparison,(\S+)\}\s*\{integerTerm,(\S+)\}
+ {booleanTerm,$1} 	\{LEFTPARENTHESIS\}\s*\{booleanTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
+ {ifHeader,$1} 	\{ifHeaderStart\}\s*\{booleanTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
+ {whileHeader,$1} 	\{whileHeaderStart\}\s*\{booleanTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
+ {statement,nop} 	\{nopStatement\}
+ {statement,fence} 	\{fenceStatement\}
+ {statement,goto($1)} 	\{gotoStatement,(\d+)\}
+ {statement,store($1,$2)} 	\{storeStatement,(\S+),(\S+)\}
+ {statement,load($1,$2)} 	\{loadStatement,(\S+),(\S+)\}
+ {statement,label($1,$2)} 	\{label,label\((\d+)\)\}\s*\{statement,(\S+)\}
+ {ifBlock,$1,statements($2)} 	\{ifHeader,(\S+)\}\s*\{statement,(\S+)\}
+ {ifBlock,$1,statements($2,$3)} 	\{ifBlock,(\S+),statements\((\S+)\)\}\s*\{statement,(\S+)\}
+ {ifElseBlock,$1,statements($2),statements($3)} 	\{ifBlock,(\S+),statements\((\S+)\)\}\s*\{ELSE_KEYWORD\}\s*\{statement,(\S+)\}
+ {ifElseBlock,$1,statements($2),statements($3,$4)} 	\{ifElseBlock,(\S+),statements\((\S+)\),statements\((\S+)\)\}\s*\{statement,(\S+)\}
+ {statement,ifElse($1,statements($2),none)} 	\{ifBlock,(\S+),statements\((\S+)\)\}\s*\{ELSE_KEYWORD\}\s*\{ENDIF_KEYWORD\}\s*\{SEMICOLON\}
+ {statement,ifElse($1,statements($2),statements($3))} 	\{ifElseBlock,(\S+),statements\((\S+)\),statements\((\S+)\)\}\s*\{ENDIF_KEYWORD\}\s*\{SEMICOLON\}
+ {statement,ifElse($1,statements($2),none)} 	\{ifBlock,(\S+),statements\((\S+)\)\}\s*\{ENDIF_KEYWORD\}\s*\{SEMICOLON\}
+ {whileBlock,$1,statements($2)} 	\{whileHeader,(\S+)\}\s*\{statement,(\S+)\}
+ {whileBlock,$1,statements($2,$3)} 	\{whileHeader,(\S+),statements\((\S+)\)\}\s*\{statement,(\S+)\}
+ {statement,while($1,statements($2))} 	\{whileBlock,(\S+),statements\((\S+)\)\}\s*\{ENDWHILE_KEYWORD\}\s*\{SEMICOLON\}
+ {processDeclarationStart,processDeclaration(processHeader($1),statements($2))} 	\{processHeader,processHeader\((\d+)\)\}\s*\{statement,(\S+)\}
+ {processDeclarationStart,processDeclaration(processHeader($1),statements($2,$3))} 	\{processDeclarationStart,processDeclaration\(processHeader\((\d+)\),statements\((\S+)\)\)\}\s*\{statement,(\S+)\}
+ {processDeclaration,$1} {EOF}	\{processDeclarationStart,(\S+)\}\s*\{EOF\}
+ {processDeclaration,$1} {processDeclaration,$2} 	\{processDeclarationStart,(\S+)\}\s*\{processDeclaration,(\S+)\}
+ {programDeclaration,$1,$2} 	\{initializationBlock,(\S+)\}\s*\{processDeclaration,(\S+)\}
+ {programDeclaration,$1,$2} 	\{programDeclaration,(\S+)\}\s*\{processDeclaration,(\S+)\}
+{ACCEPTING_STATE,programDeclaration($1)}	\{programDeclaration,(\S+)\}\s*\{EOF\}

@@ -1,0 +1,1 @@
+{ACCEPTING_STATE,programDeclaration(initializationBlock(store(ID(a),INT(4))),processDeclaration(processHeader(1),statements(store(ID(x),INT(1)),load(ID(x),ID(a)),label(1,store(ID(a),INT(3))),store(ID(a),INT(3)),store(ID(a),INT(3)),ifElse(=(INT(5),INT(4)),statements(goto(1)),statements(nop)))))}
