@@ -10,6 +10,9 @@ store x = 1;
 load x = a;
 1: store a = 3;
 store a = 3;
+abort("overflow");
+flush;
+fence;
 store a = 3;
 if (5 = 4)
 	goto 1;

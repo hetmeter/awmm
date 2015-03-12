@@ -15,6 +15,8 @@
  {WHILE_KEYWORD} 	while
  {ENDWHILE_KEYWORD} 	endwhile
  {FENCE_KEYWORD} 	fence
+ {ABORT_KEYWORD} 	abort
+ {FLUSH_KEYWORD} 	flush
  {IF_KEYWORD} 	if
  {PLUS} 	\+
  {MINUS} 	-
@@ -34,6 +36,7 @@
  {COMMA} 	,
  {LEFTPARENTHESIS} 	\(
  {RIGHTPARENTHESIS} 	\)
+ {STRING_LITERAL,$1} 	\"(.*?)\"
 } {	\}\{
  {ID} 	[identifier]
  {INT,$1} 	\s+(\d+)\s+
