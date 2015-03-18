@@ -10,6 +10,7 @@ namespace config
 	const char RIGHT_PARENTHESIS = ')';
 	const char COMMA = ',';
 	const char SEMICOLON = ';';
+	const char COLON = ':';
 	const char EQUALS = '=';
 	const char SPACE = ' ';
 	const char LABEL_SEPARATOR = '.';
@@ -27,9 +28,11 @@ namespace config
 	const std::string NONE_TOKEN_NAME = "none";
 	const std::string NOP_TOKEN_NAME = "nop";
 	const std::string FLUSH_TOKEN_NAME = "flush";
+	const std::string PROCESS_HEADER_TOKEN_NAME = "processHeader";
 
 	const std::string BEGINIT_TAG_NAME = "beginit";
 	const std::string ENDINIT_TAG_NAME = "endinit";
+	const std::string PROCESS_TAG_NAME = "process";
 	
 	const std::string PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME = "initializationBlock";
 	const std::string PSO_TSO_STORE_TOKEN_NAME = "store";
@@ -64,5 +67,29 @@ namespace config
 	{
 		std::cout << "Error: " << msg << "\n";
 		std::exit(EXIT_FAILURE);
+	}
+
+	std::string replicateString(std::string s, int n)
+	{
+		std::string result = "";
+
+		for (int ctr = 0; ctr < n; ctr++)
+		{
+			result += s;
+		}
+
+		return result;
+	}
+
+	std::string addTabs(std::string s, int numberOfTabs)
+	{
+		std::regex newLineRegex("\\n");
+		std::smatch stringMatch;
+		std::string tabs = replicateString("\t", numberOfTabs);
+		std::string result = tabs + s;
+
+		result = std::regex_replace(result, newLineRegex, "\n" + tabs);
+
+		return result;
 	}
 }

@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <regex>
 
 class Ast;
 
@@ -12,6 +13,7 @@ namespace config
 	const extern char RIGHT_PARENTHESIS;
 	const extern char COMMA;
 	const extern char SEMICOLON;
+	const extern char COLON;
 	const extern char EQUALS;
 	const extern char SPACE;
 	const extern char LABEL_SEPARATOR;
@@ -29,9 +31,11 @@ namespace config
 	const extern std::string NONE_TOKEN_NAME;
 	const extern std::string NOP_TOKEN_NAME;
 	const extern std::string FLUSH_TOKEN_NAME;
+	const extern std::string PROCESS_HEADER_TOKEN_NAME;
 
 	const extern std::string BEGINIT_TAG_NAME;
 	const extern std::string ENDINIT_TAG_NAME;
+	const extern std::string PROCESS_TAG_NAME;
 
 	const extern std::string PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME;
 	const extern std::string PSO_TSO_STORE_TOKEN_NAME;
@@ -58,6 +62,8 @@ namespace config
 	extern language currentLanguage;
 	extern std::map<std::string, Ast*> labelLookupMap;
 
+	extern std::string replicateString(std::string s, int n);
+	extern std::string addTabs(std::string s, int numberOfTabs);
 	extern void throwError(std::string msg);
 	extern void throwCriticalError(std::string msg);
 }

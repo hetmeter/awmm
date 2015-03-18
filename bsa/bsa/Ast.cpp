@@ -622,7 +622,15 @@ string Ast::emitCode()
 		}
 		else if (name == config::INT_TOKEN_NAME)
 		{
-
+			result += children.at(0)->name;
+		}
+		else if (name == config::PROCESS_DECLARATION_TOKEN_NAME)
+		{
+			result += children.at(0)->emitCode() + "\n\n" + config::addTabs(children.at(1)->emitCode(), 1);
+		}
+		else if (name == config::PROCESS_HEADER_TOKEN_NAME)
+		{
+			result += config::PROCESS_TAG_NAME + config::SPACE + children.at(0)->name + config::COLON;
 		}
 	}
 
