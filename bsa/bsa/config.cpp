@@ -8,12 +8,16 @@ namespace config
 {
 	const char LEFT_PARENTHESIS = '(';
 	const char RIGHT_PARENTHESIS = ')';
+	const char QUOTATION = '\"';
 	const char COMMA = ',';
 	const char SEMICOLON = ';';
 	const char COLON = ':';
 	const char EQUALS = '=';
 	const char SPACE = ' ';
 	const char LABEL_SEPARATOR = '.';
+
+	const std::vector<std::string> UNARY_OPERATORS = { "!" };
+	const std::vector<std::string> BINARY_OPERATORS = { "+", "-", "*", "/", "&", "|", "<", ">", "<=", ">=", "=", "!=" };
 
 	const std::string ID_TOKEN_NAME = "ID";
 	const std::string INT_TOKEN_NAME = "INT";
@@ -27,12 +31,17 @@ namespace config
 	const std::string WHILE_TOKEN_NAME = "while";
 	const std::string NONE_TOKEN_NAME = "none";
 	const std::string NOP_TOKEN_NAME = "nop";
+	const std::string ABORT_TOKEN_NAME = "abort";
 	const std::string FLUSH_TOKEN_NAME = "flush";
 	const std::string PROCESS_HEADER_TOKEN_NAME = "processHeader";
+	const std::string ASTERISK_TOKEN_NAME = "*";
 
 	const std::string BEGINIT_TAG_NAME = "beginit";
 	const std::string ENDINIT_TAG_NAME = "endinit";
 	const std::string PROCESS_TAG_NAME = "process";
+	const std::string IF_TAG_NAME = "if";
+	const std::string ELSE_TAG_NAME = "else";
+	const std::string ENDIF_TAG_NAME = "endif";
 	
 	const std::string PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME = "initializationBlock";
 	const std::string PSO_TSO_STORE_TOKEN_NAME = "store";

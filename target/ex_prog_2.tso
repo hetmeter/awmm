@@ -6,7 +6,7 @@ endinit
 process 1:
 1: store flag0 = 1;
 2: store turn2 = 1;
-3: load f1 = flag1
+3: load f1 = flag1;
 4: load t1 = turn;
 5: if ((t1 != 0) & (f1 != 0))
     goto 3;
@@ -17,7 +17,7 @@ process 1:
    goto 1;
 process 2:
 1: store flag1 = 1;
-2: store turn = 0
+2: store turn = 0;
 3: load f2 = flag0;
 4: load t2 = turn;
 5: if ((f2 != 0) & (t2 = 0))

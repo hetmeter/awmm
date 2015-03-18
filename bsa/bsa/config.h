@@ -11,12 +11,16 @@ namespace config
 {
 	const extern char LEFT_PARENTHESIS;
 	const extern char RIGHT_PARENTHESIS;
+	const extern char QUOTATION;
 	const extern char COMMA;
 	const extern char SEMICOLON;
 	const extern char COLON;
 	const extern char EQUALS;
 	const extern char SPACE;
 	const extern char LABEL_SEPARATOR;
+
+	const extern std::vector<std::string> UNARY_OPERATORS;
+	const extern std::vector<std::string> BINARY_OPERATORS;
 
 	const extern std::string ID_TOKEN_NAME;
 	const extern std::string INT_TOKEN_NAME;
@@ -30,12 +34,17 @@ namespace config
 	const extern std::string WHILE_TOKEN_NAME;
 	const extern std::string NONE_TOKEN_NAME;
 	const extern std::string NOP_TOKEN_NAME;
+	const extern std::string ABORT_TOKEN_NAME;
 	const extern std::string FLUSH_TOKEN_NAME;
 	const extern std::string PROCESS_HEADER_TOKEN_NAME;
+	const extern std::string ASTERISK_TOKEN_NAME;
 
 	const extern std::string BEGINIT_TAG_NAME;
 	const extern std::string ENDINIT_TAG_NAME;
 	const extern std::string PROCESS_TAG_NAME;
+	const extern std::string IF_TAG_NAME;
+	const extern std::string ELSE_TAG_NAME;
+	const extern std::string ENDIF_TAG_NAME;
 
 	const extern std::string PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME;
 	const extern std::string PSO_TSO_STORE_TOKEN_NAME;

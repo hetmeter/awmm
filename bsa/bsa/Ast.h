@@ -37,6 +37,7 @@ public:
 	void getCostsFromChildren();
 	void initializePersistentCosts();
 	void visitAllProgramPoints();
+	std::string emitCode();
 
 	Ast();
 	~Ast();
@@ -63,6 +64,5 @@ private:
 	bool tryGetParentProcessNumber(std::string* out);
 	Ast* tryGetLastChild();
 	Ast* tryGetLastStatement();
-	std::string emitCode();
 };
 
