@@ -63,5 +63,6 @@ private:
 	bool tryGetParentProcessNumber(std::string* out);
 	Ast* tryGetLastChild();
 	Ast* tryGetLastStatement();
+	std::string emitCode();
 };
 

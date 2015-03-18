@@ -9,9 +9,13 @@ namespace config
 	const char LEFT_PARENTHESIS = '(';
 	const char RIGHT_PARENTHESIS = ')';
 	const char COMMA = ',';
+	const char SEMICOLON = ';';
+	const char EQUALS = '=';
+	const char SPACE = ' ';
 	const char LABEL_SEPARATOR = '.';
 
 	const std::string ID_TOKEN_NAME = "ID";
+	const std::string INT_TOKEN_NAME = "INT";
 	const std::string PROGRAM_DECLARATION_TOKEN_NAME = "programDeclaration";
 	const std::string PROCESS_DECLARATION_TOKEN_NAME = "processDeclaration";
 	const std::string STATEMENTS_TOKEN_NAME = "statements";
@@ -20,10 +24,14 @@ namespace config
 	const std::string GOTO_TOKEN_NAME = "goto";
 	const std::string IF_ELSE_TOKEN_NAME = "ifElse";
 	const std::string WHILE_TOKEN_NAME = "while";
-	const std::string NONE_TAG_NAME = "none";
-	const std::string NOP_TAG_NAME = "nop";
+	const std::string NONE_TOKEN_NAME = "none";
+	const std::string NOP_TOKEN_NAME = "nop";
+	const std::string FLUSH_TOKEN_NAME = "flush";
+
+	const std::string BEGINIT_TAG_NAME = "beginit";
+	const std::string ENDINIT_TAG_NAME = "endinit";
 	
-	//const std::string PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME = "initializationBlock";
+	const std::string PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME = "initializationBlock";
 	const std::string PSO_TSO_STORE_TOKEN_NAME = "store";
 	const std::string PSO_TSO_LOAD_TOKEN_NAME = "load";
 	
@@ -46,6 +54,11 @@ namespace config
 
 	language currentLanguage;
 	std::map<std::string, Ast*> labelLookupMap;
+
+	void throwError(std::string msg)
+	{
+		std::cout << "Error: " << msg << "\n";
+	}
 
 	void throwCriticalError(std::string msg)
 	{

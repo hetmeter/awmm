@@ -11,9 +11,13 @@ namespace config
 	const extern char LEFT_PARENTHESIS;
 	const extern char RIGHT_PARENTHESIS;
 	const extern char COMMA;
+	const extern char SEMICOLON;
+	const extern char EQUALS;
+	const extern char SPACE;
 	const extern char LABEL_SEPARATOR;
 
 	const extern std::string ID_TOKEN_NAME;
+	const extern std::string INT_TOKEN_NAME;
 	const extern std::string PROGRAM_DECLARATION_TOKEN_NAME;
 	const extern std::string PROCESS_DECLARATION_TOKEN_NAME;
 	const extern std::string STATEMENTS_TOKEN_NAME;
@@ -22,10 +26,14 @@ namespace config
 	const extern std::string GOTO_TOKEN_NAME;
 	const extern std::string IF_ELSE_TOKEN_NAME;
 	const extern std::string WHILE_TOKEN_NAME;
-	const extern std::string NONE_TAG_NAME;
-	const extern std::string NOP_TAG_NAME;
+	const extern std::string NONE_TOKEN_NAME;
+	const extern std::string NOP_TOKEN_NAME;
+	const extern std::string FLUSH_TOKEN_NAME;
 
-	//const extern std::string PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME;
+	const extern std::string BEGINIT_TAG_NAME;
+	const extern std::string ENDINIT_TAG_NAME;
+
+	const extern std::string PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME;
 	const extern std::string PSO_TSO_STORE_TOKEN_NAME;
 	const extern std::string PSO_TSO_LOAD_TOKEN_NAME;
 
@@ -50,5 +58,6 @@ namespace config
 	extern language currentLanguage;
 	extern std::map<std::string, Ast*> labelLookupMap;
 
+	extern void throwError(std::string msg);
 	extern void throwCriticalError(std::string msg);
 }

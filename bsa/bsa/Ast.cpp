@@ -42,13 +42,14 @@ bool Ast::isProgramPoint()
 	{
 		return name == config::LABEL_TOKEN_NAME || name == config::GOTO_TOKEN_NAME || name == config::RMA_GET_TOKEN_NAME
 			|| name == config::PSO_TSO_LOAD_TOKEN_NAME || name == config::IF_ELSE_TOKEN_NAME || name == config::FENCE_TOKEN_NAME
-			|| name == config::RMA_PUT_TOKEN_NAME || name == config::RMA_LOCAL_ASSIGN_TOKEN_NAME || name == config::NOP_TAG_NAME;
+			|| name == config::RMA_PUT_TOKEN_NAME || name == config::RMA_LOCAL_ASSIGN_TOKEN_NAME || name == config::NOP_TOKEN_NAME
+			|| name == config::FLUSH_TOKEN_NAME;
 	}
 	else
 	{
 		return name == config::LABEL_TOKEN_NAME || name == config::GOTO_TOKEN_NAME || name == config::PSO_TSO_STORE_TOKEN_NAME
 			|| name == config::PSO_TSO_LOAD_TOKEN_NAME || name == config::IF_ELSE_TOKEN_NAME || name == config::FENCE_TOKEN_NAME
-			|| name == config::NOP_TAG_NAME;
+			|| name == config::NOP_TOKEN_NAME || name == config::FLUSH_TOKEN_NAME;
 	}
 }
 
@@ -264,7 +265,7 @@ bool Ast::hasElse()
 {
 	if (name == config::IF_ELSE_TOKEN_NAME)
 	{
-		return children.at(2)->name != config::NONE_TAG_NAME;
+		return children.at(2)->name != config::NONE_TOKEN_NAME;
 	}
 
 	return false;
@@ -576,6 +577,54 @@ string Ast::astToString()
 	}
 
 	result = regex_replace(result, indentationRegex, "\n|");
+
+	return result;
+}
+
+string Ast::emitCode()
+{
+	string result = "";
+
+	if (config::currentLanguage == config::language::RMA)
+	{
+		// TODO
+		config::throwError("RMA code emission not implemented yet.");
+	}
+	else
+	{
+		if (name == config::PROGRAM_DECLARATION_TOKEN_NAME)
+		{
+			for (Ast* child : children)
+			{
+				result += child->emitCode() + "\n\n";
+			}
+		}
+		else if (name == config::PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME)
+		{
+			result += config::BEGINIT_TAG_NAME + "\n\n";
+
+			for (Ast* child : children)
+			{
+				result += "\t" + child->emitCode() + "\n";
+			}
+
+			result += "\n" + config::ENDINIT_TAG_NAME;
+		}
+		else if (name == config::PSO_TSO_STORE_TOKEN_NAME)
+		{
+			result += config::PSO_TSO_STORE_TOKEN_NAME + config::SPACE +
+				children.at(0)->emitCode() + config::SPACE + config::EQUALS +
+				config::SPACE + children.at(1)->emitCode() + config::SEMICOLON;
+		}
+		else if (name == config::ID_TOKEN_NAME)
+		{
+			result += children.at(0)->name;
+		}
+		else if (name == config::INT_TOKEN_NAME)
+		{
+
+		}
+	}
 
 	return result;
 }

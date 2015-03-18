@@ -81,7 +81,16 @@ void ControlFlowVisitor::traverseControlFlowGraph(Ast* startNode)
 		{
 			visitedLabels.push_back(startNode->getLabelCode());
 		}
-		else if (startNode->name == config::FENCE_TOKEN_NAME)	// If visiting a fence, reset all buffer sizes to 0
+
+		// Add the visitor's accumulated buffer sizes to the persistent buffer sizes of the node
+		additiveMergeBufferSizes(&writeBufferSizeMap, &(startNode->persistentWriteCost));
+		additiveMergeBufferSizes(&readBufferSizeMap, &(startNode->persistentReadCost));
+
+		// Copy the node's updated buffer sizes to the visitor's maps
+		copyBufferSizes(&(startNode->persistentWriteCost), &writeBufferSizeMap);
+		copyBufferSizes(&(startNode->persistentReadCost), &readBufferSizeMap);
+
+		if (startNode->name == config::FENCE_TOKEN_NAME)	// If visiting a fence, reset all buffer sizes to 0
 		{
 			for (bufferSizeMapIterator iterator = writeBufferSizeMap.begin(); iterator != writeBufferSizeMap.end(); iterator++)
 			{
@@ -93,14 +102,6 @@ void ControlFlowVisitor::traverseControlFlowGraph(Ast* startNode)
 				readBufferSizeMap[iterator->first] = 0;
 			}
 		}
-
-		// Add the visitor's accumulated buffer sizes to the persistent buffer sizes of the node
-		additiveMergeBufferSizes(&writeBufferSizeMap, &(startNode->persistentWriteCost));
-		additiveMergeBufferSizes(&readBufferSizeMap, &(startNode->persistentReadCost));
-
-		// Copy the node's updated buffer sizes to the visitor's maps
-		copyBufferSizes(&(startNode->persistentWriteCost), &writeBufferSizeMap);
-		copyBufferSizes(&(startNode->persistentReadCost), &readBufferSizeMap);
 
 		// Continue visiting the nodes on all outgoing control flow paths, if they exist
 		int outgoingEdgeCount = startNode->outgoingEdges.size();
