@@ -52,6 +52,6 @@
  {processDeclarationStart,processDeclaration(processHeader($1),statements($2,$3))} 	\{processDeclarationStart,processDeclaration\(processHeader\((\d+)\),statements\((\S+)\)\)\}\s*\{statement,(\S+)\}
  {processDeclaration,$1} {EOF}	\{processDeclarationStart,(\S+)\}\s*\{EOF\}
  {processDeclaration,$1} {processDeclaration,$2} 	\{processDeclarationStart,(\S+)\}\s*\{processDeclaration,(\S+)\}
- {programDeclaration,$1,$2} 	\{initializationBlock,(\S+)\}\s*\{processDeclaration,(\S+)\}
+ {programDeclaration,initializationBlock($1),$2} 	\{initializationBlock,(\S+)\}\s*\{processDeclaration,(\S+)\}
  {programDeclaration,$1,$2} 	\{programDeclaration,(\S+)\}\s*\{processDeclaration,(\S+)\}
  {ACCEPTING_STATE,programDeclaration($1)} 	\{programDeclaration,(\S+)\}\s*\{EOF\}

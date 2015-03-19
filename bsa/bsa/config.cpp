@@ -17,7 +17,8 @@ namespace config
 	const char LABEL_SEPARATOR = '.';
 
 	const std::vector<std::string> UNARY_OPERATORS = { "!" };
-	const std::vector<std::string> BINARY_OPERATORS = { "+", "-", "*", "/", "&", "|", "<", ">", "<=", ">=", "=", "!=" };
+	const std::vector<std::string> BINARY_OPERATORS = { "+", "-", "*", "/", "&", "|", "<", ">", "<=", ">=", "=",
+		"==", "!=" };
 
 	const std::string ID_TOKEN_NAME = "ID";
 	const std::string INT_TOKEN_NAME = "INT";
@@ -35,6 +36,7 @@ namespace config
 	const std::string FLUSH_TOKEN_NAME = "flush";
 	const std::string PROCESS_HEADER_TOKEN_NAME = "processHeader";
 	const std::string ASTERISK_TOKEN_NAME = "*";
+	const std::string INITIALIZATION_BLOCK_TOKEN_NAME = "initializationBlock";
 
 	const std::string BEGINIT_TAG_NAME = "beginit";
 	const std::string ENDINIT_TAG_NAME = "endinit";
@@ -43,7 +45,6 @@ namespace config
 	const std::string ELSE_TAG_NAME = "else";
 	const std::string ENDIF_TAG_NAME = "endif";
 	
-	const std::string PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME = "initializationBlock";
 	const std::string PSO_TSO_STORE_TOKEN_NAME = "store";
 	const std::string PSO_TSO_LOAD_TOKEN_NAME = "load";
 	
@@ -53,7 +54,7 @@ namespace config
 	const std::string RMA_GET_TOKEN_NAME = "get";
 
 	const std::string ACCEPTING_STATE_REGEX = "\\{ACCEPTING_STATE,(\\S+)\\}";
-	const std::string EXTENSION_REGEX = ".*\\.(\\S\\S\\S)\\.out";
+	const std::string EXTENSION_REGEX = "(.*)\\.(\\S\\S\\S)\\.out";
 
 	const int TOP_VALUE = -1;
 	const int BOTTOM_VALUE = -2;

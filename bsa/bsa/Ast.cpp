@@ -396,7 +396,7 @@ void Ast::initializePersistentCosts()
 		// Collect all buffer costs caused by the variable initialization statements
 		if (config::currentLanguage == config::language::RMA)
 		{
-			for (Ast* processInitialization : children)
+			for (Ast* processInitialization : children.at(0)->children)
 			{
 				if (processInitialization->name != config::RMA_PROCESS_INITIALIZATION_TOKEN_NAME)
 				{
@@ -587,8 +587,153 @@ string Ast::emitCode()
 
 	if (config::currentLanguage == config::language::RMA)
 	{
-		// TODO
-		config::throwError("RMA code emission not implemented yet.");
+		if (name == config::PROGRAM_DECLARATION_TOKEN_NAME)
+		{
+			for (Ast* child : children)
+			{
+				result += child->emitCode() + "\n\n";
+			}
+		}
+		else if (name == config::INITIALIZATION_BLOCK_TOKEN_NAME)
+		{
+			result += config::BEGINIT_TAG_NAME + "\n\n";
+
+			for (Ast* child : children)
+			{
+				result += config::addTabs(child->emitCode(), 1) + "\n";
+			}
+
+			result += "\n" + config::ENDINIT_TAG_NAME;
+		}
+		else if (name == config::RMA_PROCESS_INITIALIZATION_TOKEN_NAME)
+		{
+			result += children.at(0)->emitCode() + "\n" + config::addTabs(children.at(1)->emitCode(), 1);
+		}
+		else if (name == config::PROCESS_DECLARATION_TOKEN_NAME)
+		{
+			result += children.at(0)->emitCode() + "\n\n" + config::addTabs(children.at(1)->emitCode(), 1);
+		}
+		else if (name == config::PROCESS_HEADER_TOKEN_NAME)
+		{
+			result += config::PROCESS_TAG_NAME + config::SPACE + children.at(0)->name + config::COLON;
+		}
+		else if (name == config::STATEMENTS_TOKEN_NAME)
+		{
+			for (Ast* child : children)
+			{
+				result += child->emitCode() + "\n";
+			}
+
+			if (!result.empty())
+			{
+				result = result.substr(0, result.length() - 1);
+			}
+		}
+		else if (name == config::LABEL_TOKEN_NAME)
+		{
+			result += children.at(0)->name + config::COLON + config::SPACE + children.at(1)->emitCode();
+		}
+		else if (name == config::RMA_LOCAL_ASSIGN_TOKEN_NAME)
+		{
+			result += children.at(0)->emitCode() + config::SPACE + config::EQUALS + config::LEFT_PARENTHESIS + 
+				children.at(1)->name + config::RIGHT_PARENTHESIS + config::SPACE + 
+				children.at(2)->emitCode() + config::SEMICOLON;
+		}
+		else if (name == config::ID_TOKEN_NAME)
+		{
+			result += children.at(0)->name;
+		}
+		else if (name == config::INT_TOKEN_NAME)
+		{
+			result += children.at(0)->name;
+		}
+		else if (name == config::RMA_PUT_TOKEN_NAME)
+		{
+			result += config::RMA_PUT_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(0)->name +
+				config::COMMA + config::SPACE + children.at(1)->name + config::RIGHT_PARENTHESIS +
+				config::SPACE + config::LEFT_PARENTHESIS + children.at(2)->name + config::COMMA +
+				config::SPACE + children.at(3)->name + config::COMMA + config::SPACE + children.at(4)->name +
+				config::RIGHT_PARENTHESIS + config::SEMICOLON;
+		}
+		else if (name == config::RMA_GET_TOKEN_NAME)
+		{
+			result += children.at(0)->name + config::SPACE + config::EQUALS + config::SPACE +
+				config::RMA_GET_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(1)->name +
+				config::COMMA + config::SPACE + children.at(2)->name + config::RIGHT_PARENTHESIS +
+				config::SPACE + config::LEFT_PARENTHESIS + children.at(3)->name + config::COMMA +
+				config::SPACE + children.at(4)->name + config::RIGHT_PARENTHESIS + config::SEMICOLON;
+		}
+		else if (name == config::IF_ELSE_TOKEN_NAME)
+		{
+			result += config::IF_TAG_NAME + config::SPACE + config::LEFT_PARENTHESIS +
+				children.at(0)->emitCode() + config::RIGHT_PARENTHESIS + "\n" +
+				config::addTabs(children.at(1)->emitCode(), 1) + "\n";
+
+			if (children.at(2)->name != config::NONE_TOKEN_NAME)
+			{
+				result += config::ELSE_TAG_NAME + "\n" + config::addTabs(children.at(2)->emitCode(), 1) + "\n";
+			}
+
+			result += config::ENDIF_TAG_NAME + config::SEMICOLON;
+		}
+		else if (find(config::UNARY_OPERATORS.begin(), config::UNARY_OPERATORS.end(), name) != config::UNARY_OPERATORS.end())
+		{
+			result += name + config::LEFT_PARENTHESIS + children.at(0)->emitCode() + config::RIGHT_PARENTHESIS;
+		}
+		else if (find(config::BINARY_OPERATORS.begin(), config::BINARY_OPERATORS.end(), name) != config::BINARY_OPERATORS.end())
+		{
+			if (name == config::ASTERISK_TOKEN_NAME && children.size() == 0)
+			{
+				result += name;
+			}
+			else
+			{
+				if (children.at(0)->name == config::ID_TOKEN_NAME || children.at(0)->name == config::INT_TOKEN_NAME)
+				{
+					result += children.at(0)->children.at(0)->name;
+				}
+				else
+				{
+					result += config::LEFT_PARENTHESIS + children.at(0)->emitCode() + config::RIGHT_PARENTHESIS;
+				}
+
+				result += config::SPACE + name + config::SPACE;
+
+				if (children.at(1)->name == config::ID_TOKEN_NAME || children.at(1)->name == config::INT_TOKEN_NAME)
+				{
+					result += children.at(1)->children.at(0)->name;
+				}
+				else
+				{
+					result += config::LEFT_PARENTHESIS + children.at(1)->emitCode() + config::RIGHT_PARENTHESIS;
+				}
+			}
+		}
+		else if (name == config::ABORT_TOKEN_NAME)
+		{
+			result += config::ABORT_TOKEN_NAME + config::LEFT_PARENTHESIS + config::QUOTATION +
+				children.at(0)->name + config::QUOTATION + config::RIGHT_PARENTHESIS + config::SEMICOLON;
+		}
+		else if (name == config::FLUSH_TOKEN_NAME)
+		{
+			result += config::FLUSH_TOKEN_NAME + config::SEMICOLON;
+		}
+		else if (name == config::FENCE_TOKEN_NAME)
+		{
+			result += config::FENCE_TOKEN_NAME + config::SEMICOLON;
+		}
+		else if (name == config::GOTO_TOKEN_NAME)
+		{
+			result += config::GOTO_TOKEN_NAME + config::SPACE + children.at(0)->name + config::SEMICOLON;
+		}
+		else if (name == config::NOP_TOKEN_NAME)
+		{
+			result += config::NOP_TOKEN_NAME + config::SEMICOLON;
+		}
+		else
+		{
+			config::throwError("Can't emit node: " + name);
+		}
 	}
 	else
 	{
@@ -599,7 +744,7 @@ string Ast::emitCode()
 				result += child->emitCode() + "\n\n";
 			}
 		}
-		else if (name == config::PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME)
+		else if (name == config::INITIALIZATION_BLOCK_TOKEN_NAME)
 		{
 			result += config::BEGINIT_TAG_NAME + "\n\n";
 

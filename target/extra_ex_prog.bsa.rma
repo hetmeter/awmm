@@ -1,0 +1,27 @@
+beginit
+
+	process 1:
+		X =(a) 0;
+	process 2:
+		Y =(n) 0;
+
+endinit
+
+process 1:
+
+	1: put(a, n) (Y, 2, X);
+	2: X =(a) 1;
+	3: put(n, n) (Y, 2, X);
+	4: flush;
+	5: X = get(a, a) (Y, 2);
+	6: c =(n) X;
+	7: if (c == 1)
+		goto 5;
+	endif;
+
+process 2:
+
+	1: put(n, a) (X, 1, Y);
+	2: Y = get(a, a) (X, 1);
+	3: f =(a) Y;
+

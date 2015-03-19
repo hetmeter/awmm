@@ -34,15 +34,6 @@ int main(int argc, char** argv)
 		config::throwCriticalError("No program input path specified");
 	}
 
-	if (argc > 2)
-	{
-		outputPath = argv[2];
-	}
-	else
-	{
-		config::throwCriticalError("No output path specified");
-	}
-
 	// Parse input file (no line breaks are expected)
 	ifstream parsedProgramFile(parsedProgramPath);
 	string parsedProgramLine;
@@ -71,13 +62,14 @@ int main(int argc, char** argv)
 	}
 
 	// Get the input extension and set the global language variable accordingly. Prompt an error otherwise.
-	string extension;
+	string extension, fileNameStub;
 	programInputRegex = regex(config::EXTENSION_REGEX);
 	regex_search(parsedProgramPath, stringMatch, programInputRegex);
 
-	if (stringMatch.size() == 2)
+	if (stringMatch.size() == 3)
 	{
-		extension = stringMatch[1].str();
+		fileNameStub = stringMatch[1].str();
+		extension = stringMatch[2].str();
 
 		if (extension == config::PSO_EXTENSION)
 		{
@@ -150,12 +142,14 @@ int main(int argc, char** argv)
 	rootAstRef->cascadingGenerateOutgoingEdges();	// Send a cascading command to the root node that results in all program points estabilishing outgoing program flow edges to their possible successor nodes in the control flow graph
 	rootAstRef->visitAllProgramPoints();			// Generate one control flow visitor in the first program point nodes of each process declaration and prompt them to start traversing the AST
 
-	cout << rootAst.emitCode();
 	//cout << rootAst.astToString();
+	//cout << "\n";
+	cout << rootAst.emitCode();
 
 	// Generate the output
+	outputPath = fileNameStub + ".bsa." + extension;
 	ofstream programOut(outputPath);
-	programOut << rootAst.astToString();
+	programOut << rootAst.emitCode();
 	programOut.close();
 
 	return 0;

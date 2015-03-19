@@ -38,6 +38,7 @@ namespace config
 	const extern std::string FLUSH_TOKEN_NAME;
 	const extern std::string PROCESS_HEADER_TOKEN_NAME;
 	const extern std::string ASTERISK_TOKEN_NAME;
+	const extern std::string INITIALIZATION_BLOCK_TOKEN_NAME;
 
 	const extern std::string BEGINIT_TAG_NAME;
 	const extern std::string ENDINIT_TAG_NAME;
@@ -46,7 +47,6 @@ namespace config
 	const extern std::string ELSE_TAG_NAME;
 	const extern std::string ENDIF_TAG_NAME;
 
-	const extern std::string PSO_TSO_INITIALIZATION_BLOCK_TOKEN_NAME;
 	const extern std::string PSO_TSO_STORE_TOKEN_NAME;
 	const extern std::string PSO_TSO_LOAD_TOKEN_NAME;
 

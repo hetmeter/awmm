@@ -1,0 +1,60 @@
+programDeclaration
+|initializationBlock
+||store	persistentReadCost = (())	persistentWriteCost = (())
+|||ID
+||||a
+|||INT
+||||4
+|processDeclaration
+||processHeader
+|||1
+||statements
+|||store	persistentReadCost = ((a: 0))	persistentWriteCost = ((a: 0))
+||||ID
+|||||x
+||||INT
+|||||1
+|||load	persistentReadCost = ((a: 1))	persistentWriteCost = ((a: 0))
+||||ID
+|||||x
+||||ID
+|||||a
+|||label	persistentReadCost = ((a: 1))	persistentWriteCost = ((a: T))
+||||1
+||||store	persistentReadCost = ((a: 1))	persistentWriteCost = ((a: T))
+|||||ID
+||||||a
+|||||+
+||||||INT
+|||||||3
+||||||INT
+|||||||1
+|||store	persistentReadCost = ((a: 1))	persistentWriteCost = ((a: T))
+||||ID
+|||||a
+||||INT
+|||||3
+|||ifElse	persistentReadCost = ((a: 1))	persistentWriteCost = ((a: T))
+||||*
+||||statements
+|||||abort
+||||||overflow
+||||none
+|||flush	persistentReadCost = ((a: 1))	persistentWriteCost = ((a: T))
+|||fence	persistentReadCost = ((a: 2))	persistentWriteCost = ((a: T))
+|||store	persistentReadCost = ((a: 0))	persistentWriteCost = ((a: T))
+||||ID
+|||||a
+||||INT
+|||||3
+|||ifElse	persistentReadCost = ((a: 0))	persistentWriteCost = ((a: T))
+||||=
+|||||INT
+||||||5
+|||||INT
+||||||4
+||||statements
+|||||goto	persistentReadCost = ((a: 0))	persistentWriteCost = ((a: T))
+||||||1
+||||statements
+|||||nop	persistentReadCost = ((a: 0))	persistentWriteCost = ((a: T))
