@@ -926,10 +926,36 @@ int Ast::effectiveMaxWriteBufferSize(string variableName)
 
 void Ast::initializeAuxiliaryVariables()
 {
-	if (name == config::STATEMENTS_TOKEN_NAME)
+	if (config::currentLanguage == config::language::RMA)
 	{
-		vector<string> globalVariables = getAllKeys(&persistentWriteCost);
+		// TODO
+		config::throwError("Auxiliary variable generation not implemented for RMA");
+	}
+	else
+	{
+		vector<string> globalVariableNames = getAllKeys(&persistentWriteCost);
 
+		if (name == config::PROGRAM_DECLARATION_TOKEN_NAME)
+		{
+			vector<int> processes;
 
+			for (Ast* child : children)
+			{
+				if (child->name == config::PROCESS_DECLARATION_TOKEN_NAME)
+				{
+					processes.push_back(stoi(child->children.at(0)->children.at(0)->name));
+				}
+			}
+
+			for (string globalVariableName : globalVariableNames)
+			{
+				config::globalVariables[globalVariableName] = new GlobalVariable(globalVariableName, processes);
+			}
+		}
+		else if (name == config::PROCESS_DECLARATION_TOKEN_NAME)
+		{
+			int process = stoi(children.at(0)->children.at(0)->name);
+			int currentMaximum
+		}
 	}
 }

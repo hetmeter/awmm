@@ -12,10 +12,11 @@ private:
 
 public:
 
-	GlobalVariable(std::string variableName);
+	GlobalVariable(std::string variableName, std::vector<int> processes);
 	~GlobalVariable();
 
 	std::map<int, std::string> auxiliaryCounterVariableNames;
 	std::map<int, std::string> auxiliaryFirstPointerVariableNames;
+	std::map<std::pair<int, int>, std::string> auxiliaryWriteBufferVariableNames;
 };
 

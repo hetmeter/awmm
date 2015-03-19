@@ -9,9 +9,18 @@ GlobalVariable::GlobalVariable(string variableName, vector<int> processes)
 
 	for (int processNumber : processes)
 	{
+		auxiliaryCounterVariableNames[processNumber] = registerAuxiliaryVariable(variableName + config::AUXILIARY_VARIABLE_SEPARATOR +
+			config::AUXILIARY_COUNTER_TAG + config::AUXILIARY_VARIABLE_SEPARATOR + to_string(processNumber));
+		auxiliaryFirstPointerVariableNames[processNumber] = registerAuxiliaryVariable(variableName + config::AUXILIARY_VARIABLE_SEPARATOR +
+			config::AUXILIARY_FIRST_POINTER_TAG + config::AUXILIARY_VARIABLE_SEPARATOR + to_string(processNumber));
 
+		for (int ctr = 0; ctr < config::K; ctr++)
+		{
+			auxiliaryWriteBufferVariableNames[pair<int, int>(processNumber, ctr)] = registerAuxiliaryVariable(variableName +
+				config::AUXILIARY_VARIABLE_SEPARATOR + to_string(ctr) + config::AUXILIARY_VARIABLE_SEPARATOR +
+				to_string(processNumber));
+		}
 	}
-	auxiliaryCounterVariableName = registerAuxiliaryVariable(variableName + config::AUXILIARY_VARIABLE_SEPARATOR + config::AUXILIARY_COUNTER_TAG + config::)
 }
 
 

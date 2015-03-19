@@ -6,6 +6,7 @@
 #include <regex>
 
 class Ast;
+class GlobalVariable;
 
 namespace config
 {
@@ -76,6 +77,7 @@ namespace config
 	extern language currentLanguage;
 	extern std::map<std::string, Ast*> labelLookupMap;
 	extern std::vector<std::string> variableNames;
+	extern std::map<std::string, GlobalVariable*> globalVariables;
 	extern int K;
 
 	extern std::string replicateString(std::string s, int n);
