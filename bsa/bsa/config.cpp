@@ -15,6 +15,7 @@ namespace config
 	const char EQUALS = '=';
 	const char SPACE = ' ';
 	const char LABEL_SEPARATOR = '.';
+	const char AUXILIARY_VARIABLE_SEPARATOR = '_';
 
 	const std::vector<std::string> UNARY_OPERATORS = { "!" };
 	const std::vector<std::string> BINARY_OPERATORS = { "+", "-", "*", "/", "&", "|", "<", ">", "<=", ">=", "=",
@@ -44,6 +45,9 @@ namespace config
 	const std::string IF_TAG_NAME = "if";
 	const std::string ELSE_TAG_NAME = "else";
 	const std::string ENDIF_TAG_NAME = "endif";
+
+	const std::string AUXILIARY_COUNTER_TAG = "cnt";
+	const std::string AUXILIARY_FIRST_POINTER_TAG = "fst";
 	
 	const std::string PSO_TSO_STORE_TOKEN_NAME = "store";
 	const std::string PSO_TSO_LOAD_TOKEN_NAME = "load";
@@ -58,6 +62,7 @@ namespace config
 
 	const int TOP_VALUE = -1;
 	const int BOTTOM_VALUE = -2;
+	const int UNDEFINED_VALUE = -3;
 	const std::string TOP_STRING = "T";
 	const std::string BOTTOM_STRING = "_";
 
@@ -67,6 +72,8 @@ namespace config
 
 	language currentLanguage;
 	std::map<std::string, Ast*> labelLookupMap;
+	std::vector<std::string> variableNames;
+	int K;
 
 	void throwError(std::string msg)
 	{
@@ -101,5 +108,10 @@ namespace config
 		result = std::regex_replace(result, newLineRegex, "\n" + tabs);
 
 		return result;
+	}
+
+	bool stringVectorContains(std::vector<std::string> container, std::string element)
+	{
+		return find(container.begin(), container.end(), element) != container.end();
 	}
 }

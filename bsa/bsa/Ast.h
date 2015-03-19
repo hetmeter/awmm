@@ -33,6 +33,7 @@ public:
 
 	void controlFlowDirectionCascadingPropagateTops();
 	void cascadingGenerateOutgoingEdges();
+	void cascadingUnifyVariableNames();
 	void topDownCascadingRegisterLabels();
 	void getCostsFromChildren();
 	void initializePersistentCosts();
@@ -55,6 +56,7 @@ private:
 	void topDownCascadingAddInitializedCausedCostsToPersistentCosts();
 	bool hasElse();
 	bool generateOutgoingEdges();
+	bool unifyVariableNames();
 	std::string getGotoCode();
 	int toLabelCode(std::string processNumber, std::string labelNumber);
 	void registerLabel();
@@ -64,5 +66,7 @@ private:
 	bool tryGetParentProcessNumber(std::string* out);
 	Ast* tryGetLastChild();
 	Ast* tryGetLastStatement();
+	int effectiveMaxWriteBufferSize(std::string variableName);
+	void initializeAuxiliaryVariables();
 };
 

@@ -34,6 +34,15 @@ int main(int argc, char** argv)
 		config::throwCriticalError("No program input path specified");
 	}
 
+	if (argc > 2)
+	{
+		config::K = stoi(argv[2]);
+	}
+	else
+	{
+		config::throwCriticalError("No K specified");
+	}
+
 	// Parse input file (no line breaks are expected)
 	ifstream parsedProgramFile(parsedProgramPath);
 	string parsedProgramLine;
@@ -136,6 +145,7 @@ int main(int argc, char** argv)
 
 	Ast* rootAstRef = &rootAst;
 
+	rootAstRef->cascadingUnifyVariableNames();		// Send a cascading command to the root node that results in all variable identifiers registering their variable names in a global vector
 	rootAstRef->getCostsFromChildren();				// Send a cascading command to the root node that results in all program points storing the buffer size increases they cause
 	rootAstRef->initializePersistentCosts();		// Prompt the AST to gather all globally initialized variables and have all program point nodes keep track of their buffer sizes
 	rootAstRef->topDownCascadingRegisterLabels();	// Send a cascading command to the root node that results in all label AST nodes registering themselves in a global map

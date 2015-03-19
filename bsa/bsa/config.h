@@ -18,6 +18,7 @@ namespace config
 	const extern char EQUALS;
 	const extern char SPACE;
 	const extern char LABEL_SEPARATOR;
+	const extern char AUXILIARY_VARIABLE_SEPARATOR;
 
 	const extern std::vector<std::string> UNARY_OPERATORS;
 	const extern std::vector<std::string> BINARY_OPERATORS;
@@ -47,6 +48,9 @@ namespace config
 	const extern std::string ELSE_TAG_NAME;
 	const extern std::string ENDIF_TAG_NAME;
 
+	const extern std::string AUXILIARY_COUNTER_TAG;
+	const extern std::string AUXILIARY_FIRST_POINTER_TAG;
+
 	const extern std::string PSO_TSO_STORE_TOKEN_NAME;
 	const extern std::string PSO_TSO_LOAD_TOKEN_NAME;
 
@@ -60,6 +64,7 @@ namespace config
 	
 	const extern int TOP_VALUE;
 	const extern int BOTTOM_VALUE;
+	const extern int UNDEFINED_VALUE;
 	const extern std::string TOP_STRING;
 	const extern std::string BOTTOM_STRING;
 
@@ -70,9 +75,12 @@ namespace config
 
 	extern language currentLanguage;
 	extern std::map<std::string, Ast*> labelLookupMap;
+	extern std::vector<std::string> variableNames;
+	extern int K;
 
 	extern std::string replicateString(std::string s, int n);
 	extern std::string addTabs(std::string s, int numberOfTabs);
 	extern void throwError(std::string msg);
 	extern void throwCriticalError(std::string msg);
+	extern bool stringVectorContains(std::vector<std::string> container, std::string element);
 }

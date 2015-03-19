@@ -71,6 +71,16 @@ bool bufferSizeMapCompare(bufferSizeMap* first, bufferSizeMap* second)
 	return true;
 }
 
+vector<string> getAllKeys(bufferSizeMap* source)
+{
+	vector<string> result;
+
+	for (bufferSizeMapIterator iterator = source->begin(); iterator != source->end(); iterator++)
+	{
+		result.push_back(iterator->first);
+	}
+}
+
 // Copies all members of the source map to the destination map, creating them if they don't exist already, and overwriting them if they do
 void copyBufferSizes(bufferSizeMap* source, bufferSizeMap* destination)
 {

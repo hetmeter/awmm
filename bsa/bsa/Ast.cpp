@@ -260,6 +260,17 @@ void Ast::cascadingGenerateOutgoingEdges()
 	}
 }
 
+void Ast::cascadingUnifyVariableNames()
+{
+	if (!unifyVariableNames())
+	{
+		for (Ast* child : children)
+		{
+			child->cascadingUnifyVariableNames();
+		}
+	}
+}
+
 // Returns whether the current node is an ifElse node with an Else statement block.
 bool Ast::hasElse()
 {
@@ -330,6 +341,23 @@ bool Ast::generateOutgoingEdges()
 		{
 			newEdge = new ControlFlowEdge(this, nextStatement);
 			outgoingEdges.push_back(newEdge);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+bool Ast::unifyVariableNames()
+{
+	if (name == config::ID_TOKEN_NAME)
+	{
+		string variableName = children.at(0)->name;
+
+		if (find(config::variableNames.begin(), config::variableNames.end(), children.at(0)->name) == config::variableNames.end())
+		{
+			config::variableNames.push_back(variableName);
 		}
 
 		return true;
@@ -873,4 +901,35 @@ string Ast::emitCode()
 	}
 
 	return result;
+}
+
+int Ast::effectiveMaxWriteBufferSize(string variableName)
+{
+	if (bufferSizeMapContains(&persistentWriteCost, variableName))
+	{
+		int maxBufferSize = persistentWriteCost[variableName];
+
+		if (maxBufferSize == config::TOP_VALUE || maxBufferSize > config::K)
+		{
+			return config::K;
+		}
+		else
+		{
+			return maxBufferSize;
+		}
+	}
+	else
+	{
+		return config::UNDEFINED_VALUE;
+	}
+}
+
+void Ast::initializeAuxiliaryVariables()
+{
+	if (name == config::STATEMENTS_TOKEN_NAME)
+	{
+		vector<string> globalVariables = getAllKeys(&persistentWriteCost);
+
+
+	}
 }

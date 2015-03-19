@@ -82,6 +82,7 @@
     <ClCompile Include="config.cpp" />
     <ClCompile Include="ControlFlowEdge.cpp" />
     <ClCompile Include="ControlFlowVisitor.cpp" />
+    <ClCompile Include="GlobalVariable.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -90,6 +91,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="ControlFlowEdge.h" />
     <ClInclude Include="ControlFlowVisitor.h" />
+    <ClInclude Include="GlobalVariable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
