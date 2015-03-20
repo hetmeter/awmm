@@ -21,7 +21,6 @@ private:
 	bufferSizeMap writeBufferSizeMap;
 	bufferSizeMap readBufferSizeMap;
 	ControlFlowVisitor* clone();
-	bool stringVectorContains(std::vector<std::string> container, std::string item);
 	bool isVisitingAlreadyVisitedLabel(Ast* currentNode);
 };
 

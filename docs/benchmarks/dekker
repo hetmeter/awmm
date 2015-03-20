@@ -10,18 +10,15 @@ process 1:
 2: load f1 = flag1;
 3: if (f1 = 0) 
      goto 11;
-   else
    endif;
    load t1 = turn;
 5: if (t1 = 0) 
      goto 2;
-   else
    endif;
 6: store flag0 = 0;
 7: load t1 = turn;
 8: if (t1 != 0) 
      goto 7;
-     else
    endif;
 9: store flag0 = 1;
 10: goto 2; 
@@ -37,18 +34,15 @@ nop;
 2: load f2 = flag0;
 3: if (f2 = 0) 
      goto 11;
-    else
-49: endif;
+	endif;
 4: load t2 = turn;
 5: if (t2 != 0) 
     goto 2;
-    else
     endif;
 6: store flag1 = 0;
 7: load t2 = turn;
 8: if (t2 = 0) 
     goto 7;
-    else
     endif;
 9: store flag1 = 1;
 10: goto 2;

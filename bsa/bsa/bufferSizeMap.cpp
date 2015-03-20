@@ -79,6 +79,8 @@ vector<string> getAllKeys(bufferSizeMap* source)
 	{
 		result.push_back(iterator->first);
 	}
+
+	return result;
 }
 
 // Copies all members of the source map to the destination map, creating them if they don't exist already, and overwriting them if they do

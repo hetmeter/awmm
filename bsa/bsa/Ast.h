@@ -27,6 +27,7 @@ public:
 	int indexAsChild;
 
 	void addChild(Ast* child);
+	void refreshChildIndices();
 	std::string astToString();
 
 	std::string getLabelCode();
@@ -34,6 +35,8 @@ public:
 	void controlFlowDirectionCascadingPropagateTops();
 	void cascadingGenerateOutgoingEdges();
 	void cascadingUnifyVariableNames();
+	void cascadingInitializeAuxiliaryVariables();
+	void carryOutReplacements();
 	void topDownCascadingRegisterLabels();
 	void getCostsFromChildren();
 	void initializePersistentCosts();
@@ -41,6 +44,15 @@ public:
 	std::string emitCode();
 
 	Ast();
+	Ast(std::string variableName);
+	Ast(int value);
+	Ast(std::string variableName, int initialValue);
+	Ast(std::string variableName, Ast* assignmentNode);
+	Ast(Ast* ifConditionalNode, std::vector<Ast*> statements);
+	Ast(Ast* ifConditionalNode, std::vector<Ast*> ifStatements, std::vector<Ast*> elseStatements);
+	Ast(Ast* assumeConditionalNode);
+	Ast(Ast* leftOperand, Ast* rightOperand, std::string operation);
+	Ast(Ast* operand, std::string operation);
 	~Ast();
 
 private:
@@ -67,6 +79,8 @@ private:
 	Ast* tryGetLastChild();
 	Ast* tryGetLastStatement();
 	int effectiveMaxWriteBufferSize(std::string variableName);
+	void replaceNode(std::vector<Ast*> nodes, Ast* oldNode);
 	void initializeAuxiliaryVariables();
+	std::vector<Ast*> reportBack();
 };
 

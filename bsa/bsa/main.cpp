@@ -151,9 +151,12 @@ int main(int argc, char** argv)
 	rootAstRef->topDownCascadingRegisterLabels();	// Send a cascading command to the root node that results in all label AST nodes registering themselves in a global map
 	rootAstRef->cascadingGenerateOutgoingEdges();	// Send a cascading command to the root node that results in all program points estabilishing outgoing program flow edges to their possible successor nodes in the control flow graph
 	rootAstRef->visitAllProgramPoints();			// Generate one control flow visitor in the first program point nodes of each process declaration and prompt them to start traversing the AST
+	rootAstRef->cascadingUnifyVariableNames();
+	rootAstRef->cascadingInitializeAuxiliaryVariables();
+	rootAstRef->carryOutReplacements();
 
-	//cout << rootAst.astToString();
-	//cout << "\n";
+	cout << rootAst.astToString();
+	cout << "\n";
 	cout << rootAst.emitCode();
 
 	// Generate the output

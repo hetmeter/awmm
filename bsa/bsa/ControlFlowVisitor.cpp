@@ -2,6 +2,7 @@
 
 #include "ControlFlowEdge.h"
 #include "Ast.h"
+#include "config.h"
 
 using namespace std;
 
@@ -32,26 +33,12 @@ ControlFlowVisitor* ControlFlowVisitor::clone()
 	return result;
 }
 
-// Returns whether a string vector contains the parameter string
-bool ControlFlowVisitor::stringVectorContains(vector<string> container, string item)
-{
-	for (string member : container)
-	{
-		if (member == item)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
 // Returns whether the currently visited node has already been visited by this visitor or one of its ancestors
 bool ControlFlowVisitor::isVisitingAlreadyVisitedLabel(Ast* currentNode)
 {
 	if (currentNode->name == config::LABEL_TOKEN_NAME)	// Since the only possible closing points of cycles are labels, disregard any other node type
 	{
-		if (stringVectorContains(visitedLabels, currentNode->getLabelCode()))
+		if (config::stringVectorContains(visitedLabels, currentNode->getLabelCode()))
 		{
 			return true;
 		}

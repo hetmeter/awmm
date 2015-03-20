@@ -16,6 +16,8 @@ namespace config
 	const char SPACE = ' ';
 	const char LABEL_SEPARATOR = '.';
 	const char AUXILIARY_VARIABLE_SEPARATOR = '_';
+	const char PLUS = '+';
+	const char GREATER_THAN = '>';
 
 	const std::vector<std::string> UNARY_OPERATORS = { "!" };
 	const std::vector<std::string> BINARY_OPERATORS = { "+", "-", "*", "/", "&", "|", "<", ">", "<=", ">=", "=",
@@ -38,6 +40,8 @@ namespace config
 	const std::string PROCESS_HEADER_TOKEN_NAME = "processHeader";
 	const std::string ASTERISK_TOKEN_NAME = "*";
 	const std::string INITIALIZATION_BLOCK_TOKEN_NAME = "initializationBlock";
+	const std::string LOCAL_ASSIGN_TOKEN_NAME = "localAssign";
+	const std::string ASSUME_TOKEN_NAME = "assume";
 
 	const std::string BEGINIT_TAG_NAME = "beginit";
 	const std::string ENDINIT_TAG_NAME = "endinit";
@@ -53,7 +57,6 @@ namespace config
 	const std::string PSO_TSO_LOAD_TOKEN_NAME = "load";
 	
 	const std::string RMA_PROCESS_INITIALIZATION_TOKEN_NAME = "processInitialization";
-	const std::string RMA_LOCAL_ASSIGN_TOKEN_NAME = "localAssign";
 	const std::string RMA_PUT_TOKEN_NAME = "put";
 	const std::string RMA_GET_TOKEN_NAME = "get";
 
@@ -73,6 +76,7 @@ namespace config
 	language currentLanguage;
 	std::map<std::string, Ast*> labelLookupMap;
 	std::vector<std::string> variableNames;
+	std::map<std::string, GlobalVariable*> globalVariables;
 	int K;
 
 	void throwError(std::string msg)

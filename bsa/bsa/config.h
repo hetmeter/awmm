@@ -20,6 +20,8 @@ namespace config
 	const extern char SPACE;
 	const extern char LABEL_SEPARATOR;
 	const extern char AUXILIARY_VARIABLE_SEPARATOR;
+	const extern char PLUS;
+	const extern char GREATER_THAN;
 
 	const extern std::vector<std::string> UNARY_OPERATORS;
 	const extern std::vector<std::string> BINARY_OPERATORS;
@@ -41,6 +43,8 @@ namespace config
 	const extern std::string PROCESS_HEADER_TOKEN_NAME;
 	const extern std::string ASTERISK_TOKEN_NAME;
 	const extern std::string INITIALIZATION_BLOCK_TOKEN_NAME;
+	const extern std::string LOCAL_ASSIGN_TOKEN_NAME;
+	const extern std::string ASSUME_TOKEN_NAME;
 
 	const extern std::string BEGINIT_TAG_NAME;
 	const extern std::string ENDINIT_TAG_NAME;
@@ -56,7 +60,6 @@ namespace config
 	const extern std::string PSO_TSO_LOAD_TOKEN_NAME;
 
 	const extern std::string RMA_PROCESS_INITIALIZATION_TOKEN_NAME;
-	const extern std::string RMA_LOCAL_ASSIGN_TOKEN_NAME;
 	const extern std::string RMA_PUT_TOKEN_NAME;
 	const extern std::string RMA_GET_TOKEN_NAME;
 
