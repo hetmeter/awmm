@@ -14,7 +14,7 @@
  {storeStatementStart,ID($1)} 	\{STORE_KEYWORD\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{EQUALS\}
  {storeStatement,$1,$2} 	\{storeStatementStart,(\S+)\}\s*\{integerTerm,(\S+)\}\s*\{SEMICOLON\}
  {loadStatement,ID($1),ID($2)} 	\{LOAD_KEYWORD\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{EQUALS\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{SEMICOLON\}
- {localAssignStatement,ID($1),$2} 	\{LOAD_KEYWORD\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{EQUALS\}\s*\{integerTerm,(\S+)\}\s*\{SEMICOLON\}
+ {localAssignStatement,ID($1),$2} 	\{integerTerm,ID\((\S+)\)\}\s*\{EQUALS\}\s*\{integerTerm,(\S+)\}\s*\{SEMICOLON\}
  {nopStatement} 	\{NOP_KEYWORD\}\s*\{SEMICOLON\}
  {fenceStatement} 	\{FENCE_KEYWORD\}\s*\{SEMICOLON\}
  {abortStatement,$1} 	\{ABORT_KEYWORD\}\s*\{LEFTPARENTHESIS\}\s*\{STRING_LITERAL,(.*?)\}\s*\{RIGHTPARENTHESIS\}\s*\{SEMICOLON\}

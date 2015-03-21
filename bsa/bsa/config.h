@@ -18,6 +18,7 @@ namespace config
 	const extern char COLON;
 	const extern char EQUALS;
 	const extern char SPACE;
+	const extern char TAB;
 	const extern char LABEL_SEPARATOR;
 	const extern char AUXILIARY_VARIABLE_SEPARATOR;
 	const extern char PLUS;
@@ -25,6 +26,10 @@ namespace config
 
 	const extern std::vector<std::string> UNARY_OPERATORS;
 	const extern std::vector<std::string> BINARY_OPERATORS;
+	const extern std::string COMMENT_PREFIX;
+	const extern std::string REPLACING_CAPTION;
+	const extern std::string FINISHED_REPLACING_CAPTION;
+	const extern std::string OVERFLOW_MESSAGE;
 
 	const extern std::string ID_TOKEN_NAME;
 	const extern std::string INT_TOKEN_NAME;

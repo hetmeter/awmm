@@ -65,7 +65,6 @@ namespace config
 		return findAllMatches(r, input, 1);
 	}
 
-
 	// Returns a vector of all of the specific submatches to the regex in the input string
 	std::vector<std::string> findAllMatches(std::regex const& r, std::string input, int subMatchIndex)
 	{

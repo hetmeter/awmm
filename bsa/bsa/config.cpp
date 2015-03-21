@@ -14,6 +14,7 @@ namespace config
 	const char COLON = ':';
 	const char EQUALS = '=';
 	const char SPACE = ' ';
+	const char TAB = '\t';
 	const char LABEL_SEPARATOR = '.';
 	const char AUXILIARY_VARIABLE_SEPARATOR = '_';
 	const char PLUS = '+';
@@ -22,6 +23,10 @@ namespace config
 	const std::vector<std::string> UNARY_OPERATORS = { "!" };
 	const std::vector<std::string> BINARY_OPERATORS = { "+", "-", "*", "/", "&", "|", "<", ">", "<=", ">=", "=",
 		"==", "!=" };
+	const std::string COMMENT_PREFIX = "//";
+	const std::string REPLACING_CAPTION = "Replacing";
+	const std::string FINISHED_REPLACING_CAPTION = "Finished replacing";
+	const std::string OVERFLOW_MESSAGE = "overflow";
 
 	const std::string ID_TOKEN_NAME = "ID";
 	const std::string INT_TOKEN_NAME = "INT";

@@ -22,6 +22,8 @@ public:
 	bufferSizeMap persistentReadCost;
 
 	Ast* parent;
+	std::string startComment;
+	std::string endComment;
 	std::vector<Ast*> children;
 	std::vector<ControlFlowEdge*> outgoingEdges;
 	int indexAsChild;
@@ -79,6 +81,7 @@ private:
 	Ast* tryGetLastChild();
 	Ast* tryGetLastStatement();
 	int effectiveMaxWriteBufferSize(std::string variableName);
+	int numberOfVariablesInPersistentWriteBuffer();
 	void replaceNode(std::vector<Ast*> nodes, Ast* oldNode);
 	void initializeAuxiliaryVariables();
 	std::vector<Ast*> reportBack();

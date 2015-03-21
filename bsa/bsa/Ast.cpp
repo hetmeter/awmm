@@ -376,6 +376,21 @@ void Ast::cascadingInitializeAuxiliaryVariables()
 	}
 }
 
+int Ast::numberOfVariablesInPersistentWriteBuffer()
+{
+	int result = 0;
+
+	for (bufferSizeMapIterator iterator = persistentWriteCost.begin(); iterator != persistentWriteCost.end(); iterator++)
+	{
+		if (iterator->second > 0 || iterator->second == config::TOP_VALUE)
+		{
+			result++;
+		}
+	}
+
+	return result;
+}
+
 void Ast::carryOutReplacements()
 {
 	if (config::currentLanguage == config::language::RMA)
@@ -443,158 +458,103 @@ void Ast::carryOutReplacements()
 				statement->carryOutReplacements();
 			}
 		}
-		else if (name == config::PSO_TSO_STORE_TOKEN_NAME)
+		else if (name == config::PSO_TSO_STORE_TOKEN_NAME || name == config::PSO_TSO_LOAD_TOKEN_NAME ||
+			name == config::FENCE_TOKEN_NAME || name == config::FLUSH_TOKEN_NAME)
 		{
-			string globalVariableName = children.at(0)->children.at(0)->name;
-			string processId;
-			tryGetParentProcessNumber(&processId);
-			int process = stoi(processId);
-			string x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
-			string x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
-
-			int s;
-			if (persistentWriteCost[globalVariableName] == config::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
-			{
-				s = config::K;
-			}
-			else
-			{
-				s = persistentWriteCost[globalVariableName];
-			}
-
 			vector<Ast*> replacement;
 
-			vector<Ast*> statements;
-			statements.push_back(new Ast(x_fst_t, 1));
-			statements.push_back(new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, 1)], children.at(1)));
-
-			replacement.push_back(new Ast(
-					new Ast(
-						new Ast(x_fst_t),
-						new Ast(0),
-						string(1, config::EQUALS)
-					),
-					statements
-				));
-
-			replacement.push_back(new Ast(
-					x_cnt_t,
-					new Ast(
-						new Ast(x_cnt_t),
-						new Ast(1),
-						string(1, config::PLUS)
-					)
-				));
-
-			for (int ctr = 2; ctr <= s; ctr++)
+			if (name == config::PSO_TSO_STORE_TOKEN_NAME)
 			{
-				statements.clear();
-				statements.push_back(new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)], children.at(1)));
+				string globalVariableName = children.at(0)->children.at(0)->name;
+				string processId;
+				tryGetParentProcessNumber(&processId);
+				int process = stoi(processId);
+				string x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
+				string x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
+
+				vector<Ast*> statements;
+
+				int s;
+				if (persistentWriteCost[globalVariableName] == config::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
+				{
+					s = config::K;
+
+					Ast* abortAst = new Ast();
+					abortAst->name = config::ABORT_TOKEN_NAME;
+					abortAst->addChild(new Ast());
+					abortAst->children.at(0)->name = config::OVERFLOW_MESSAGE;
+
+					statements.push_back(abortAst);
+
+					replacement.push_back(new Ast(
+							new Ast(
+									new Ast(x_cnt_t),
+									new Ast(config::K),
+									string(1, config::EQUALS)
+								),
+							statements
+						));
+
+					statements.clear();
+				}
+				else
+				{
+					s = persistentWriteCost[globalVariableName];
+				}
+
+				if (persistentWriteCost[globalVariableName] == 1)
+				{
+					replacement.push_back(new Ast(x_fst_t, 1));
+					replacement.push_back(new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, 1)], children.at(1)));
+				}
+				else
+				{
+					statements.push_back(new Ast(x_fst_t, 1));
+					statements.push_back(new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, 1)], children.at(1)));
+
+					replacement.push_back(new Ast(
+							new Ast(
+									new Ast(x_fst_t),
+									new Ast(0),
+									string(1, config::EQUALS)
+								),
+							statements
+						));
+				}
 
 				replacement.push_back(new Ast(
+						x_cnt_t,
 						new Ast(
 							new Ast(x_cnt_t),
-							new Ast(ctr),
-							string(1, config::EQUALS)
-						),
-						statements
-					));
-			}
-
-			replaceNode(replacement, this);
-		}
-		else if (name == config::PSO_TSO_LOAD_TOKEN_NAME)
-		{
-			string globalVariableName = children.at(1)->children.at(0)->name;
-			string processId;
-			tryGetParentProcessNumber(&processId);
-			int process = stoi(processId);
-			string x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
-
-			int s;
-			if (persistentWriteCost[globalVariableName] == config::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
-			{
-				s = config::K;
-			}
-			else
-			{
-				s = persistentWriteCost[globalVariableName];
-			}
-
-			vector<Ast*> statements;
-			statements.push_back(new Ast(x_cnt_t, 0));
-			statements.push_back(new Ast(children.at(0), children.at(1), config::PSO_TSO_LOAD_TOKEN_NAME));
-
-			for (int ctr = 1; ctr <= s; ctr++)
-			{
-				statements.clear();
-				statements.push_back(new Ast(
-						children.at(0),
-						new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)]),
-						config::LOCAL_ASSIGN_TOKEN_NAME
-					));
-			}
-
-			replaceNode(statements, this);
-		}
-		else if (name == config::FENCE_TOKEN_NAME)
-		{
-			string processId;
-			tryGetParentProcessNumber(&processId);
-			int process = stoi(processId);
-			vector<string> globalVariableNames = getAllKeys(&persistentWriteCost);
-			string x_cnt_t;
-			string x_fst_t;
-
-			vector<Ast*> replacement;
-
-			for (string globalVariableName : globalVariableNames)
-			{
-				x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
-				x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
-
-				replacement.push_back(new Ast(
-						new Ast(
-							new Ast(x_cnt_t),
-							new Ast(0),
-							string(1, config::EQUALS)
+							new Ast(1),
+							string(1, config::PLUS)
 						)
 					));
 
-				replacement.push_back(new Ast(
-						new Ast(
-							new Ast(x_fst_t),
-							new Ast(0),
-							string(1, config::EQUALS)
-						)
-					));
+				for (int ctr = 2; ctr <= s; ctr++)
+				{
+					statements.clear();
+					statements.push_back(new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)], children.at(1)));
+
+					replacement.push_back(new Ast(
+							new Ast(
+								new Ast(x_cnt_t),
+								new Ast(ctr),
+								string(1, config::EQUALS)
+							),
+							statements
+						));
+				}
 			}
-
-			replaceNode(replacement, this);
-		}
-		else if (name == config::FLUSH_TOKEN_NAME)
-		{
-			string processId;
-			tryGetParentProcessNumber(&processId);
-			int process = stoi(processId);
-			vector<string> globalVariableNames = getAllKeys(&persistentWriteCost);
-			string x_cnt_t;
-			string x_fst_t;
-			srand(time(NULL));
-			int uniqueLabel = rand();
-			int s;
-			Ast* currentIfElse;
-			Ast* asteriskConditional;
-
-			vector<Ast*> replacement;
-
-			vector<Ast*> currentIfStatements;
-			vector<Ast*> oldIfStatements;
-			vector<Ast*> currentElseStatements;
-
-			vector<Ast*> flushStatements;
-			for (string globalVariableName : globalVariableNames)
+			else if (name == config::PSO_TSO_LOAD_TOKEN_NAME)
 			{
+				string globalVariableName = children.at(1)->children.at(0)->name;
+				string processId;
+				tryGetParentProcessNumber(&processId);
+				int process = stoi(processId);
+				string x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
+
+				int s;
 				if (persistentWriteCost[globalVariableName] == config::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
 				{
 					s = config::K;
@@ -604,104 +564,213 @@ void Ast::carryOutReplacements()
 					s = persistentWriteCost[globalVariableName];
 				}
 
-				x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
-				x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
+				vector<Ast*> statements;
+				statements.push_back(new Ast(children.at(0), children.at(1), config::PSO_TSO_LOAD_TOKEN_NAME));
 
-				for (int ctr = s - 1; ctr >= 1; ctr--)
+				replacement.push_back(new Ast(
+						new Ast(
+							new Ast(x_cnt_t),
+							new Ast(0),
+							string(1, config::EQUALS)
+						),
+						statements
+					));
+
+				for (int ctr = 1; ctr <= s; ctr++)
 				{
-					if (currentIfStatements.empty())
-					{
-						currentIfStatements.push_back(new Ast(
-								new Ast(globalVariableName),
-								new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr + 1)]),
-								config::PSO_TSO_STORE_TOKEN_NAME
-							));
-					}
-					else
-					{
-						currentIfStatements.clear();
-						currentIfStatements.push_back(currentIfElse);
-					}
-
-					currentElseStatements.clear();
-
-					currentElseStatements.push_back(new Ast(
-							new Ast(globalVariableName),
-							new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)]),
-							config::PSO_TSO_STORE_TOKEN_NAME
+					statements.clear();
+					statements.push_back(new Ast(
+						children.at(0),
+						new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)]),
+						config::LOCAL_ASSIGN_TOKEN_NAME
 						));
 
-					currentIfElse = new Ast(
+					replacement.push_back(new Ast(
 							new Ast(
-								new Ast(x_fst_t),
+								new Ast(x_cnt_t),
 								new Ast(ctr),
-								string(1, config::GREATER_THAN)
+								string(1, config::EQUALS)
 							),
-							currentIfStatements,
-							currentElseStatements
-						);
-				}
-
-				if (s >= 1)
-				{
-					asteriskConditional = new Ast();
-					asteriskConditional->name = config::ASTERISK_TOKEN_NAME;
-
-					currentIfStatements.clear();
-					currentIfStatements.push_back(currentIfElse);
-					currentIfStatements.push_back(new Ast(
-							x_fst_t,
-							new Ast(
-								new Ast(x_fst_t),
-								new Ast(1),
-								string(1, config::PLUS)
-							)
+							statements
 						));
+				}
+			}
+			else if (name == config::FENCE_TOKEN_NAME)
+			{
+				string processId;
+				tryGetParentProcessNumber(&processId);
+				int process = stoi(processId);
+				vector<string> globalVariableNames = getAllKeys(&persistentWriteCost);
+				string x_cnt_t;
+				string x_fst_t;
 
-					currentIfElse = new Ast(
-							asteriskConditional,
-							currentIfStatements
-						);
+				for (string globalVariableName : globalVariableNames)
+				{
+					x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
+					x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
 
-					currentIfStatements.clear();
-					currentIfStatements.push_back(currentIfElse);
-
-					currentIfElse = new Ast(
+					replacement.push_back(new Ast(
 							new Ast(
 								new Ast(x_cnt_t),
 								new Ast(0),
-								string(1, config::GREATER_THAN)
-							),
-							currentIfStatements
-						);
+								string(1, config::EQUALS)
+							)
+						));
 
-					flushStatements.push_back(currentIfElse);
-					currentIfStatements.clear();
+					replacement.push_back(new Ast(
+							new Ast(
+								new Ast(x_fst_t),
+								new Ast(0),
+								string(1, config::EQUALS)
+							)
+						));
 				}
 			}
+			else if (name == config::FLUSH_TOKEN_NAME && numberOfVariablesInPersistentWriteBuffer() > 0)
+			{
+				string processId;
+				tryGetParentProcessNumber(&processId);
+				int process = stoi(processId);
+				vector<string> globalVariableNames = getAllKeys(&persistentWriteCost);
+				string x_cnt_t;
+				string x_fst_t;
+				srand(time(NULL));
+				int uniqueLabel = rand();
+				int s;
+				Ast* currentIfElse;
+				Ast* asteriskConditional;
 
-			Ast* gotoNode = new Ast();
-			gotoNode->addChild(new Ast());
-			gotoNode->name = config::GOTO_TOKEN_NAME;
-			gotoNode->children.at(0)->name = to_string(uniqueLabel);
+				vector<Ast*> currentIfStatements;
+				vector<Ast*> oldIfStatements;
+				vector<Ast*> currentElseStatements;
 
-			flushStatements.push_back(gotoNode);
+				vector<Ast*> flushStatements;
+				for (string globalVariableName : globalVariableNames)
+				{
+					if (persistentWriteCost[globalVariableName] == config::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
+					{
+						s = config::K;
+					}
+					else
+					{
+						s = persistentWriteCost[globalVariableName];
+					}
 
-			asteriskConditional = new Ast();
-			asteriskConditional->name = config::ASTERISK_TOKEN_NAME;
+					x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
+					x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
 
-			Ast* envelopingIfNode = new Ast(
-					asteriskConditional,
-					flushStatements
-				);
+					for (int ctr = s - 1; ctr >= 1; ctr--)
+					{
+						if (currentIfStatements.empty())
+						{
+							currentIfStatements.push_back(new Ast(
+									new Ast(globalVariableName),
+									new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr + 1)]),
+									config::PSO_TSO_STORE_TOKEN_NAME
+								));
+						}
+						else
+						{
+							currentIfStatements.clear();
+							currentIfStatements.push_back(currentIfElse);
+						}
 
-			Ast* labelAst = new Ast();
-			labelAst->name = config::LABEL_TOKEN_NAME;
-			labelAst->addChild(new Ast());
-			labelAst->children.at(0)->name = to_string(uniqueLabel);
-			labelAst->addChild(envelopingIfNode);
+						currentElseStatements.clear();
 
-			replacement.push_back(labelAst);
+						currentElseStatements.push_back(new Ast(
+								new Ast(globalVariableName),
+								new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)]),
+								config::PSO_TSO_STORE_TOKEN_NAME
+							));
+
+						currentIfElse = new Ast(
+								new Ast(
+									new Ast(x_fst_t),
+									new Ast(ctr),
+									string(1, config::GREATER_THAN)
+								),
+								currentIfStatements,
+								currentElseStatements
+							);
+					}
+
+					if (s >= 1)
+					{
+						asteriskConditional = new Ast();
+						asteriskConditional->name = config::ASTERISK_TOKEN_NAME;
+
+						currentIfStatements.clear();
+						currentIfStatements.push_back(currentIfElse);
+						currentIfStatements.push_back(new Ast(
+								x_fst_t,
+								new Ast(
+									new Ast(x_fst_t),
+									new Ast(1),
+									string(1, config::PLUS)
+								)
+							));
+
+						if (numberOfVariablesInPersistentWriteBuffer() > 1)
+						{
+							currentIfElse = new Ast(
+									asteriskConditional,
+									currentIfStatements
+								);
+
+							currentIfStatements.clear();
+							currentIfStatements.push_back(currentIfElse);
+						}
+
+						currentIfElse = new Ast(
+								new Ast(
+									new Ast(x_cnt_t),
+									new Ast(0),
+									string(1, config::GREATER_THAN)
+								),
+								currentIfStatements
+							);
+
+						flushStatements.push_back(currentIfElse);
+						currentIfStatements.clear();
+					}
+				}
+
+				Ast* gotoNode = new Ast();
+				gotoNode->addChild(new Ast());
+				gotoNode->name = config::GOTO_TOKEN_NAME;
+				gotoNode->children.at(0)->name = to_string(uniqueLabel);
+
+				flushStatements.push_back(gotoNode);
+
+				asteriskConditional = new Ast();
+				asteriskConditional->name = config::ASTERISK_TOKEN_NAME;
+
+				Ast* envelopingIfNode = new Ast(
+						asteriskConditional,
+						flushStatements
+					);
+
+				Ast* labelAst = new Ast();
+				labelAst->name = config::LABEL_TOKEN_NAME;
+				labelAst->addChild(new Ast());
+				labelAst->children.at(0)->name = to_string(uniqueLabel);
+				labelAst->addChild(envelopingIfNode);
+
+				replacement.push_back(labelAst);
+			}
+
+			if (!replacement.empty())
+			{
+				if (this->parent->name == config::LABEL_TOKEN_NAME)
+				{
+					this->parent->startComment = config::REPLACING_CAPTION + config::SPACE + config::QUOTATION + emitCode() + config::QUOTATION;
+				}
+				else
+				{
+					replacement.at(0)->startComment = config::REPLACING_CAPTION + config::SPACE + config::QUOTATION + emitCode() + config::QUOTATION;
+				}
+				replacement.at(replacement.size() - 1)->endComment = config::FINISHED_REPLACING_CAPTION + config::SPACE + config::QUOTATION + emitCode() + config::QUOTATION;
+			}
 
 			replaceNode(replacement, this);
 		}
@@ -1060,6 +1129,11 @@ string Ast::emitCode()
 {
 	string result = "";
 
+	if (!startComment.empty())
+	{
+		result += config::COMMENT_PREFIX + config::SPACE + startComment + "\n";
+	}
+
 	if (config::currentLanguage == config::language::RMA)
 	{
 		if (name == config::PROGRAM_DECLARATION_TOKEN_NAME)
@@ -1360,6 +1434,11 @@ string Ast::emitCode()
 		{
 			config::throwError("Can't emit node: " + name);
 		}
+	}
+
+	if (!endComment.empty())
+	{
+		result += "\n" + config::COMMENT_PREFIX + config::SPACE + endComment;
 	}
 
 	return result;

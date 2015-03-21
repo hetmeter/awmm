@@ -83,6 +83,8 @@ string processContent(string content, vector<token>* lexerTokens, vector<token>*
 	for (int ctr = 0; ctr < numberOfLexerTokens; ctr++)	// Apply each lexer token once
 	{
 		result = lexerTokens->at(ctr).applyToString(result);
+
+		//cout << "Token \"" << lexerTokens->at(ctr).toString() << "\"\n\n" << result << "\n\n";
 	}
 
 	cout << "\tApplying parser tokens...\n";

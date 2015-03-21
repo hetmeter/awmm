@@ -2,7 +2,7 @@
  	\r
  	\n
  	\s+
- {COMMENT} 	/\*.*\*/
+ {COMMENT} 	/\*.*?\*/
  {BEGINIT_KEYWORD} 	beginit
  {ENDINIT_KEYWORD} 	endinit
  {PROCESS_KEYWORD} 	process
