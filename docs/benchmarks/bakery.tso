@@ -4,7 +4,7 @@ store y1 = 0;
 store y2 = 0; 
 
 store ch1 = 0; 
-store ch2 = 0;
+store ch2 = 0; 
 
 endinit
 
@@ -15,7 +15,7 @@ process 1:
 5: store ch1 = 0;
 
 6: load t13 = ch2;
-7: if ((t13 == 0))
+7: if ((t13 = 0))
 8:     goto 10;
    else 
 9:     goto 6;
@@ -23,13 +23,14 @@ process 1:
 
 10: load t11 = y1;
 11: load t12 = y2;
-12: if ((t12 == 0) | (t11 < t12))
+12: if ((t12 = 0) | (t11 < t12))
 13:     goto 15;
    else 
 14:     goto 10;
    endif;
 15: nop;
 16: store y1 = 0;
+  goto 1;
 
 
 process 2:
@@ -40,7 +41,7 @@ process 2:
 5: store ch2 = 0;
 
 6: load t23 = ch1;
-7: if ((t23 == 0))
+7: if ((t23 = 0))
 8:     goto 10;
    else 
 9:     goto 6;
@@ -48,12 +49,13 @@ process 2:
 
 10: load t21 = y1;
 11: load t22 = y2;
-12: if ((t21 == 0) | (t22 <= t21))
+12: if ((t21 = 0) | (t22 <= t21))
 13:     goto 15;
    else 
 14:     goto 10;
    endif;
 15: nop;
 16: store y2 = 0;
+  goto 1;
 
 /*program counters:  ((pc{1} != 15) || (pc{2} != 15)) */

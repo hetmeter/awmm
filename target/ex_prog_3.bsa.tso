@@ -15,15 +15,26 @@ process 1:
 	a1_cnt_1 = 0;
 	t1 = 2;
 	t2 = 4;
-	4: load t3 = a1;
-	if (a2_fst_1 = 0)
-		a2_fst_1 = 1;
-		a2_1_1 = t1 + t2;
+	// Replacing "load t3 = a1;"
+	4: if (a1_cnt_1 == 0)
+		load t3 = a1;
 	endif;
+	// Finished replacing "load t3 = a1;"
+	
+	// Replacing "store a2 = t1 + t2;"
+	a2_fst_1 = 1;
+	a2_1_1 = t1 + t2;
 	a2_cnt_1 = a2_cnt_1 + 1;
-	fence;
+	// Finished replacing "store a2 = t1 + t2;"
+	// Replacing "fence;"
+	assume(a1_cnt_1 == 0);
+	assume(a1_fst_1 == 0);
+	assume(a2_cnt_1 == 0);
+	assume(a2_fst_1 == 0);
+	// Finished replacing "fence;"
+	
 	if (*)
 		goto 4;
 	endif;
-	flush;
+	
 

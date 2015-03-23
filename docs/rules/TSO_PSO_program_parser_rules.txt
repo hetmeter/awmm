@@ -11,10 +11,10 @@
  {integerTerm,$1} 	\{LEFTPARENTHESIS\}\s*\{integerTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
  {integerTerm,ID($1)} 	\{ID,(\S+)\}
  {integerTerm,INT($1)} 	\{INT,(\d+)\}
- {storeStatementStart,ID($1)} 	\{STORE_KEYWORD\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{EQUALS\}
+ {storeStatementStart,ID($1)} 	\{STORE_KEYWORD\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{ASSIGN_OPERATOR\}
  {storeStatement,$1,$2} 	\{storeStatementStart,(\S+)\}\s*\{integerTerm,(\S+)\}\s*\{SEMICOLON\}
- {loadStatement,ID($1),ID($2)} 	\{LOAD_KEYWORD\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{EQUALS\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{SEMICOLON\}
- {localAssignStatement,ID($1),$2} 	\{integerTerm,ID\((\S+)\)\}\s*\{EQUALS\}\s*\{integerTerm,(\S+)\}\s*\{SEMICOLON\}
+ {loadStatement,ID($1),ID($2)} 	\{LOAD_KEYWORD\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{ASSIGN_OPERATOR\}\s*\{integerTerm,ID\((\S+)\)\}\s*\{SEMICOLON\}
+ {localAssignStatement,ID($1),$2} 	\{integerTerm,ID\((\S+)\)\}\s*\{ASSIGN_OPERATOR\}\s*\{integerTerm,(\S+)\}\s*\{SEMICOLON\}
  {nopStatement} 	\{NOP_KEYWORD\}\s*\{SEMICOLON\}
  {fenceStatement} 	\{FENCE_KEYWORD\}\s*\{SEMICOLON\}
  {abortStatement,$1} 	\{ABORT_KEYWORD\}\s*\{LEFTPARENTHESIS\}\s*\{STRING_LITERAL,(.*?)\}\s*\{RIGHTPARENTHESIS\}\s*\{SEMICOLON\}
@@ -31,7 +31,7 @@
  {binaryIntegerComparison,<} 	\{LESS\}
  {binaryIntegerComparison,>} 	\{GREATER\}
  {binaryIntegerComparison,!=} 	\{NOT_EQUAL\}
- {binaryIntegerComparison,=} 	\{EQUALS\}
+ {binaryIntegerComparison,==} 	\{EQUALS\}
  {ifHeaderStart} 	\{IF_KEYWORD\}\s*\{LEFTPARENTHESIS\}
  {whileHeaderStart} 	\{WHILE_KEYWORD\}\s*\{LEFTPARENTHESIS\}
  {booleanTerm,*} 	\{binaryIntegerOperation,\*\}
@@ -60,6 +60,9 @@
  {whileBlock,$1,statements($2)} 	\{whileHeader,(\S+)\}\s*\{statement,(\S+)\}
  {whileBlock,$1,statements($2,$3)} 	\{whileHeader,(\S+),statements\((\S+)\)\}\s*\{statement,(\S+)\}
  {statement,while($1,statements($2))} 	\{whileBlock,(\S+),statements\((\S+)\)\}\s*\{ENDWHILE_KEYWORD\}\s*\{SEMICOLON\}
+ {atomicBlock,statements($1)} 	\{BEGIN_ATOMIC_KEYWORD\}\s*\{statement,(\S+)\}
+ {atomicBlock,statements($1,$2)} 	\{atomicBlock,statements\((\S+)\)\}\s*\{statement,(\S+)\}
+ {statement,atomic(statements($1))} 	\{atomicBlock,statements\((\S+)\)\}\s*\{END_ATOMIC_KEYWORD\}
  {processDeclarationStart,processDeclaration(processHeader($1),statements($2))} 	\{processHeader,processHeader\((\d+)\)\}\s*\{statement,(\S+)\}
  {processDeclarationStart,processDeclaration(processHeader($1),statements($2,$3))} 	\{processDeclarationStart,processDeclaration\(processHeader\((\d+)\),statements\((\S+)\)\)\}\s*\{statement,(\S+)\}
  {processDeclaration,$1} {EOF}	\{processDeclarationStart,(\S+)\}\s*\{EOF\}

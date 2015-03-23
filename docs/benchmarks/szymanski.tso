@@ -1,0 +1,66 @@
+beginit
+
+store f1 = 0;
+store f2 = 0;
+
+endinit
+
+process 1:
+
+1: store f1 = 1;
+2: load t2 = f2;
+   if (t2 >= 3)
+     goto 2;
+   else
+   endif
+   store f1 = 3;
+   load t2 = f2;
+   if (t2 = 1)
+     store f1 = 2;
+3:   load t2 = f2;
+     if (t2 != 4)
+       goto 3;
+     else 
+     endif
+   else
+   endif
+   store f1 = 4;
+4: nop;
+5: load t2 = f2;
+   if ((t2 = 2) | (t2 = 3))
+     goto 5;
+   else
+   endif
+   store f1 = 0;
+   goto 1;
+
+process 2:
+
+1: store f2 = 1;
+2: load t1 = f1;
+   if (t1 >= 3)
+     goto 2;
+   else
+   endif
+   store f2 = 3;
+   load t1 = f1;
+   if (t1 = 1)
+     store f2 = 2;
+3:   load t1 = f1;
+     if (t1 != 4)
+       goto 3;
+     else
+     endif;
+   else
+   endif;
+   store f2 = 4;
+4: load t1 = f1;
+   if (t1 >= 2)
+     goto 4;
+   else
+   endif;
+5: nop;
+   store f2 = 0;
+   goto 1;
+
+/* program counters: ((pc{1} != 4) || (pc{2} != 5)) */

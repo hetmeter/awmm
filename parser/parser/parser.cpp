@@ -54,6 +54,8 @@ vector<token> initializeTokensFromFile(string path)
 			config::throwError("Invalid token initialization input \"" + line + "\"");
 		}
 	}
+	
+	ruleFile.close();
 
 	return result;
 }
@@ -83,8 +85,6 @@ string processContent(string content, vector<token>* lexerTokens, vector<token>*
 	for (int ctr = 0; ctr < numberOfLexerTokens; ctr++)	// Apply each lexer token once
 	{
 		result = lexerTokens->at(ctr).applyToString(result);
-
-		//cout << "Token \"" << lexerTokens->at(ctr).toString() << "\"\n\n" << result << "\n\n";
 	}
 
 	cout << "\tApplying parser tokens...\n";
@@ -97,10 +97,14 @@ string processContent(string content, vector<token>* lexerTokens, vector<token>*
 
 		for (int ctr = 0; ctr < numberOfParserTokens; ctr++)	// Iterate through all parser tokens
 		{
+			//cout << parserTokens->at(ctr).toString() << "\n\n";
+
 			if (parserTokens->at(ctr).tag != config::ACCEPTING_STATE_TAG)	// Consider only non-accepting tokens
 			{
 				result = parserTokens->at(ctr).applyToString(result);
 			}
+
+			//cout << result << "\n\n";
 		}
 	}
 

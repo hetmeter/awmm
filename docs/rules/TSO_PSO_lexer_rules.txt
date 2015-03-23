@@ -18,6 +18,8 @@
  {ABORT_KEYWORD} 	abort
  {FLUSH_KEYWORD} 	flush
  {IF_KEYWORD} 	if
+ {BEGIN_ATOMIC_KEYWORD} 	begin_atomic
+ {END_ATOMIC_KEYWORD} 	end_atomic
  {PLUS} 	\+
  {MINUS} 	-
  {ASTERISK} 	\*
@@ -29,7 +31,8 @@
  {NOT_EQUAL} 	!=
  {LESS} 	<
  {GREATER} 	>
- {EQUALS} 	=
+ {EQUALS} 	==
+ {ASSIGN_OPERATOR} 	=
  {EXCLAMATION} 	!
  {COLON} 	\:
  {SEMICOLON} 	;

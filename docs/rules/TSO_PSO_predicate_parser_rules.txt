@@ -5,7 +5,7 @@
  {binaryIntegerComparison,<} 	\{LESS\}
  {binaryIntegerComparison,>} 	\{GREATER\}
  {binaryIntegerComparison,!=} 	\{NOT_EQUAL\}
- {binaryIntegerComparison,=} 	\{EQUALS\}
+ {binaryIntegerComparison,==} 	\{EQUALS\}
  {predicate,$2($1,$3)} 	\{LEFTPARENTHESIS\}\s*\{integerTerm,(\S+)\}\s*\{binaryIntegerComparison,(\S+)\}\s*\{integerTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
  {predicateList,$1} {EOF}	\{predicate,(\S+)\}\s*\{EOF\}
  {predicateList,$1,$2} 	\{predicate,(\S+)\}\s*\{predicateList,(\S+)\}

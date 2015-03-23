@@ -156,7 +156,7 @@ int main(int argc, char** argv)
 	rootAstRef->carryOutReplacements();
 
 	cout << rootAst.astToString();
-	cout << "\n";
+	cout << "\n---\n";
 	cout << rootAst.emitCode();
 
 	// Generate the output

@@ -12,7 +12,7 @@ namespace config
 	const char COMMA = ',';
 	const char SEMICOLON = ';';
 	const char COLON = ':';
-	const char EQUALS = '=';
+	const char ASSIGN_OPERATOR = '=';
 	const char SPACE = ' ';
 	const char TAB = '\t';
 	const char LABEL_SEPARATOR = '.';
@@ -23,6 +23,7 @@ namespace config
 	const std::vector<std::string> UNARY_OPERATORS = { "!" };
 	const std::vector<std::string> BINARY_OPERATORS = { "+", "-", "*", "/", "&", "|", "<", ">", "<=", ">=", "=",
 		"==", "!=" };
+	const std::string EQUALS = "==";
 	const std::string COMMENT_PREFIX = "//";
 	const std::string REPLACING_CAPTION = "Replacing";
 	const std::string FINISHED_REPLACING_CAPTION = "Finished replacing";

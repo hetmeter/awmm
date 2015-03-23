@@ -65,7 +65,7 @@ Ast::Ast(Ast* ifConditionalNode, vector<Ast*> statements)
 
 	addChild(new Ast());
 	children.at(1)->name = config::STATEMENTS_TOKEN_NAME;
-	children.at(1)->children = statements;
+	children.at(1)->addChildren(statements);
 
 	addChild(new Ast());
 	children.at(2)->name = config::NONE_TOKEN_NAME;
@@ -80,11 +80,11 @@ Ast::Ast(Ast* ifConditionalNode, vector<Ast*> ifStatements, vector<Ast*> elseSta
 
 	addChild(new Ast());
 	children.at(1)->name = config::STATEMENTS_TOKEN_NAME;
-	children.at(1)->children = ifStatements;
+	children.at(1)->addChildren(ifStatements);
 
 	addChild(new Ast());
 	children.at(2)->name = config::STATEMENTS_TOKEN_NAME;
-	children.at(2)->children = elseStatements;
+	children.at(2)->addChildren(elseStatements);
 }
 
 // Initializes an assume(conditional) node
@@ -490,7 +490,7 @@ void Ast::carryOutReplacements()
 							new Ast(
 									new Ast(x_cnt_t),
 									new Ast(config::K),
-									string(1, config::EQUALS)
+									config::EQUALS
 								),
 							statements
 						));
@@ -516,7 +516,7 @@ void Ast::carryOutReplacements()
 							new Ast(
 									new Ast(x_fst_t),
 									new Ast(0),
-									string(1, config::EQUALS)
+									config::EQUALS
 								),
 							statements
 						));
@@ -540,7 +540,7 @@ void Ast::carryOutReplacements()
 							new Ast(
 								new Ast(x_cnt_t),
 								new Ast(ctr),
-								string(1, config::EQUALS)
+								config::EQUALS
 							),
 							statements
 						));
@@ -571,7 +571,7 @@ void Ast::carryOutReplacements()
 						new Ast(
 							new Ast(x_cnt_t),
 							new Ast(0),
-							string(1, config::EQUALS)
+							config::EQUALS
 						),
 						statements
 					));
@@ -589,7 +589,7 @@ void Ast::carryOutReplacements()
 							new Ast(
 								new Ast(x_cnt_t),
 								new Ast(ctr),
-								string(1, config::EQUALS)
+								config::EQUALS
 							),
 							statements
 						));
@@ -613,7 +613,7 @@ void Ast::carryOutReplacements()
 							new Ast(
 								new Ast(x_cnt_t),
 								new Ast(0),
-								string(1, config::EQUALS)
+								config::EQUALS
 							)
 						));
 
@@ -621,7 +621,7 @@ void Ast::carryOutReplacements()
 							new Ast(
 								new Ast(x_fst_t),
 								new Ast(0),
-								string(1, config::EQUALS)
+								config::EQUALS
 							)
 						));
 				}
@@ -700,7 +700,12 @@ void Ast::carryOutReplacements()
 						asteriskConditional->name = config::ASTERISK_TOKEN_NAME;
 
 						currentIfStatements.clear();
-						currentIfStatements.push_back(currentIfElse);
+
+						if (s > 1)
+						{
+							currentIfStatements.push_back(currentIfElse);
+						}
+
 						currentIfStatements.push_back(new Ast(
 								x_fst_t,
 								new Ast(
@@ -735,28 +740,31 @@ void Ast::carryOutReplacements()
 					}
 				}
 
-				Ast* gotoNode = new Ast();
-				gotoNode->addChild(new Ast());
-				gotoNode->name = config::GOTO_TOKEN_NAME;
-				gotoNode->children.at(0)->name = to_string(uniqueLabel);
+				if (!flushStatements.empty())
+				{
+					Ast* gotoNode = new Ast();
+					gotoNode->addChild(new Ast());
+					gotoNode->name = config::GOTO_TOKEN_NAME;
+					gotoNode->children.at(0)->name = to_string(uniqueLabel);
 
-				flushStatements.push_back(gotoNode);
+					flushStatements.push_back(gotoNode);
 
-				asteriskConditional = new Ast();
-				asteriskConditional->name = config::ASTERISK_TOKEN_NAME;
+					asteriskConditional = new Ast();
+					asteriskConditional->name = config::ASTERISK_TOKEN_NAME;
 
-				Ast* envelopingIfNode = new Ast(
-						asteriskConditional,
-						flushStatements
-					);
+					Ast* envelopingIfNode = new Ast(
+							asteriskConditional,
+							flushStatements
+						);
 
-				Ast* labelAst = new Ast();
-				labelAst->name = config::LABEL_TOKEN_NAME;
-				labelAst->addChild(new Ast());
-				labelAst->children.at(0)->name = to_string(uniqueLabel);
-				labelAst->addChild(envelopingIfNode);
+					Ast* labelAst = new Ast();
+					labelAst->name = config::LABEL_TOKEN_NAME;
+					labelAst->addChild(new Ast());
+					labelAst->children.at(0)->name = to_string(uniqueLabel);
+					labelAst->addChild(envelopingIfNode);
 
-				replacement.push_back(labelAst);
+					replacement.push_back(labelAst);
+				}
 			}
 
 			if (!replacement.empty())
@@ -998,6 +1006,16 @@ void Ast::addChild(Ast* child)
 	children.push_back(child);
 }
 
+void Ast::addChildren(vector<Ast*> newChildren)
+{
+	for (Ast* child : newChildren)
+	{
+		child->parent = this;
+		child->indexAsChild = children.size();
+		children.push_back(child);
+	}
+}
+
 void Ast::refreshChildIndices()
 {
 	int childCount = children.size();
@@ -1180,11 +1198,16 @@ string Ast::emitCode()
 		}
 		else if (name == config::LABEL_TOKEN_NAME)
 		{
+			if (children.at(0)->name == config::IF_ELSE_TOKEN_NAME)
+			{
+				result.insert(result.begin(), '\n');
+			}
+
 			result += children.at(0)->name + config::COLON + config::SPACE + children.at(1)->emitCode();
 		}
 		else if (name == config::LOCAL_ASSIGN_TOKEN_NAME)
 		{
-			result += children.at(0)->emitCode() + config::SPACE + config::EQUALS + config::LEFT_PARENTHESIS + 
+			result += children.at(0)->emitCode() + config::SPACE + config::ASSIGN_OPERATOR + config::LEFT_PARENTHESIS + 
 				children.at(1)->name + config::RIGHT_PARENTHESIS + config::SPACE + 
 				children.at(2)->emitCode() + config::SEMICOLON;
 		}
@@ -1214,6 +1237,11 @@ string Ast::emitCode()
 		}
 		else if (name == config::IF_ELSE_TOKEN_NAME)
 		{
+			if (parent->name != config::LABEL_TOKEN_NAME)
+			{
+				result.insert(result.begin(), '\n');
+			}
+
 			result += config::IF_TAG_NAME + config::SPACE + config::LEFT_PARENTHESIS +
 				children.at(0)->emitCode() + config::RIGHT_PARENTHESIS + "\n" +
 				config::addTabs(children.at(1)->emitCode(), 1) + "\n";
@@ -1312,18 +1340,18 @@ string Ast::emitCode()
 		else if (name == config::PSO_TSO_STORE_TOKEN_NAME)
 		{
 			result += config::PSO_TSO_STORE_TOKEN_NAME + config::SPACE +
-				children.at(0)->emitCode() + config::SPACE + config::EQUALS +
+				children.at(0)->emitCode() + config::SPACE + config::ASSIGN_OPERATOR +
 				config::SPACE + children.at(1)->emitCode() + config::SEMICOLON;
 		}
 		else if (name == config::PSO_TSO_LOAD_TOKEN_NAME)
 		{
 			result += config::PSO_TSO_LOAD_TOKEN_NAME + config::SPACE +
-				children.at(0)->emitCode() + config::SPACE + config::EQUALS +
+				children.at(0)->emitCode() + config::SPACE + config::ASSIGN_OPERATOR +
 				config::SPACE + children.at(1)->emitCode() + config::SEMICOLON;
 		}
 		else if (name == config::LOCAL_ASSIGN_TOKEN_NAME)
 		{
-			result += children.at(0)->emitCode() + config::SPACE + config::EQUALS +
+			result += children.at(0)->emitCode() + config::SPACE + config::ASSIGN_OPERATOR +
 				config::SPACE + children.at(1)->emitCode() + config::SEMICOLON;
 		}
 		else if (name == config::ID_TOKEN_NAME)
@@ -1356,10 +1384,20 @@ string Ast::emitCode()
 		}
 		else if (name == config::LABEL_TOKEN_NAME)
 		{
+			if (children.at(0)->name == config::IF_ELSE_TOKEN_NAME)
+			{
+				result.insert(result.begin(), '\n');
+			}
+
 			result += children.at(0)->name + config::COLON + config::SPACE + children.at(1)->emitCode();
 		}
 		else if (name == config::IF_ELSE_TOKEN_NAME)
 		{
+			if (parent->name != config::LABEL_TOKEN_NAME)
+			{
+				result.insert(result.begin(), '\n');
+			}
+
 			result += config::IF_TAG_NAME + config::SPACE + config::LEFT_PARENTHESIS +
 				children.at(0)->emitCode() + config::RIGHT_PARENTHESIS + "\n" +
 				config::addTabs(children.at(1)->emitCode(), 1) + "\n";
@@ -1439,6 +1477,11 @@ string Ast::emitCode()
 	if (!endComment.empty())
 	{
 		result += "\n" + config::COMMENT_PREFIX + config::SPACE + endComment;
+	}
+
+	if (name == config::IF_ELSE_TOKEN_NAME)
+	{
+		result += "\n";
 	}
 
 	return result;

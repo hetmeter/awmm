@@ -16,7 +16,7 @@ namespace config
 	const extern char COMMA;
 	const extern char SEMICOLON;
 	const extern char COLON;
-	const extern char EQUALS;
+	const extern char ASSIGN_OPERATOR;
 	const extern char SPACE;
 	const extern char TAB;
 	const extern char LABEL_SEPARATOR;
@@ -26,6 +26,7 @@ namespace config
 
 	const extern std::vector<std::string> UNARY_OPERATORS;
 	const extern std::vector<std::string> BINARY_OPERATORS;
+	const extern std::string EQUALS;
 	const extern std::string COMMENT_PREFIX;
 	const extern std::string REPLACING_CAPTION;
 	const extern std::string FINISHED_REPLACING_CAPTION;

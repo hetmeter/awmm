@@ -1,1 +1,1 @@
-{ACCEPTING_STATE,predicateList(=(ID(f1),INT(0)),=(ID(t1),INT(0)),=(ID(f2),INT(0)),=(ID(t2),INT(0)),=(ID(flag0),INT(0)),=(ID(flag1),INT(0)),=(ID(turn),INT(0)))}
+{ACCEPTING_STATE,predicateList(==(ID(f1),INT(0)),==(ID(t1),INT(0)),==(ID(f2),INT(0)),==(ID(t2),INT(0)),==(ID(flag0),INT(0)),==(ID(flag1),INT(0)),==(ID(turn),INT(0)))}

@@ -29,6 +29,7 @@ public:
 	int indexAsChild;
 
 	void addChild(Ast* child);
+	void addChildren(std::vector<Ast*> newChildren);
 	void refreshChildIndices();
 	std::string astToString();
 
