@@ -1,0 +1,52 @@
+beginit
+
+	store x = 2;
+
+endinit
+
+process 1:
+
+	x_fst_1 = 0;
+	x_cnt_1 = 0;
+	x_1_1 = 0;
+	x_2_1 = 0;
+	x_3_1 = 0;
+	// Replacing "store x = 10;"
+	x_fst_1 = 1;
+	x_1_1 = 10;
+	x_cnt_1 = x_cnt_1 + 1;
+	// Finished replacing "store x = 10;"
+	
+	// Replacing "store x = 20;"
+	if (x_fst_1 == 0)
+		x_fst_1 = 1;
+		x_1_1 = 20;
+	endif;
+	
+	x_cnt_1 = x_cnt_1 + 1;
+	
+	if (x_cnt_1 == 2)
+		x_2_1 = 20;
+	endif;
+	// Finished replacing "store x = 20;"
+	
+	
+	// Replacing "store x = 30;"
+	if (x_fst_1 == 0)
+		x_fst_1 = 1;
+		x_1_1 = 30;
+	endif;
+	
+	x_cnt_1 = x_cnt_1 + 1;
+	
+	if (x_cnt_1 == 2)
+		x_2_1 = 30;
+	endif;
+	
+	
+	if (x_cnt_1 == 3)
+		x_3_1 = 30;
+	endif;
+	// Finished replacing "store x = 30;"
+	
+

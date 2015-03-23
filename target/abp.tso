@@ -1,0 +1,38 @@
+beginit
+  store msg = 0;
+  store ack = 0;
+  lSCnt = lRCnt;
+  lSSt = 0;
+  lRSt = 0;
+endinit
+
+
+process 1:
+1: load lAck = ack;
+   if (((lAck == 0) & (lSSt == 0)) | ((lAck != 0) & (lSSt != 0)))
+      begin_atomic
+      if (lSSt != 0)
+        lSSt = 0;
+      else 
+        lSSt = 1;
+      endif;
+      end_atomic
+      lSCnt = lSCnt + 1;
+      store msg = lSSt;
+   else
+   endif;
+   goto 1;
+
+
+process 2:
+1: load lMsg = msg;
+   if (((lMsg != 0) & (lRSt == 0)) | ((lMsg == 0) & (lRSt != 0)))
+      lRSt = lMsg;
+      lRCnt = lRCnt + 1;
+      store ack = lRSt;
+   else
+   endif;
+   goto 1;
+
+/* This belongs in a predicate file
+assert always (lRCnt == lSCnt) | ((lRCnt + 1) == lSCnt); */

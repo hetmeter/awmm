@@ -1,0 +1,280 @@
+beginit
+
+	store x = 2;
+	store y = 4;
+
+endinit
+
+process 1:
+
+	y_fst_1 = 0;
+	y_cnt_1 = 0;
+	y_1_1 = 0;
+	y_2_1 = 0;
+	y_3_1 = 0;
+	x_fst_1 = 0;
+	x_cnt_1 = 0;
+	x_1_1 = 0;
+	x_2_1 = 0;
+	x_3_1 = 0;
+	// Replacing "store x = 10;"
+	x_fst_1 = 1;
+	x_1_1 = 10;
+	x_cnt_1 = x_cnt_1 + 1;
+	// Finished replacing "store x = 10;"
+	// Replacing "flush;"
+	21601: if (*)
+		
+		if (x_cnt_1 > 0)
+			x_fst_1 = x_fst_1 + 1;
+		endif;
+		
+		goto 21601;
+	endif;
+	
+	// Finished replacing "flush;"
+	
+	// Replacing "store x = 20;"
+	if (x_fst_1 == 0)
+		x_fst_1 = 1;
+		x_1_1 = 20;
+	endif;
+	
+	x_cnt_1 = x_cnt_1 + 1;
+	
+	if (x_cnt_1 == 2)
+		x_2_1 = 20;
+	endif;
+	// Finished replacing "store x = 20;"
+	
+	// Replacing "flush;"
+	21601: if (*)
+		
+		if (x_cnt_1 > 0)
+			
+			if (x_fst_1 > 1)
+				store x = x_2_1;
+			else
+				store x = x_1_1;
+			endif;
+			
+			x_fst_1 = x_fst_1 + 1;
+		endif;
+		
+		goto 21601;
+	endif;
+	
+	// Finished replacing "flush;"
+	
+	// Replacing "store x = 30;"
+	if (x_fst_1 == 0)
+		x_fst_1 = 1;
+		x_1_1 = 30;
+	endif;
+	
+	x_cnt_1 = x_cnt_1 + 1;
+	
+	if (x_cnt_1 == 2)
+		x_2_1 = 30;
+	endif;
+	
+	
+	if (x_cnt_1 == 3)
+		x_3_1 = 30;
+	endif;
+	// Finished replacing "store x = 30;"
+	
+	// Replacing "flush;"
+	21601: if (*)
+		
+		if (x_cnt_1 > 0)
+			
+			if (x_fst_1 > 1)
+				
+				if (x_fst_1 > 2)
+					store x = x_3_1;
+				else
+					store x = x_2_1;
+				endif;
+				
+			else
+				store x = x_1_1;
+			endif;
+			
+			x_fst_1 = x_fst_1 + 1;
+		endif;
+		
+		goto 21601;
+	endif;
+	
+	// Finished replacing "flush;"
+	// Replacing "store y = 40;"
+	y_fst_1 = 1;
+	y_1_1 = 40;
+	y_cnt_1 = y_cnt_1 + 1;
+	// Finished replacing "store y = 40;"
+	// Replacing "flush;"
+	21601: if (*)
+		
+		if (x_cnt_1 > 0)
+			
+			if (*)
+				
+				if (x_fst_1 > 1)
+					
+					if (x_fst_1 > 2)
+						store x = x_3_1;
+					else
+						store x = x_2_1;
+					endif;
+					
+				else
+					store x = x_1_1;
+				endif;
+				
+				x_fst_1 = x_fst_1 + 1;
+			endif;
+			
+		endif;
+		
+		
+		if (y_cnt_1 > 0)
+			
+			if (*)
+				y_fst_1 = y_fst_1 + 1;
+			endif;
+			
+		endif;
+		
+		goto 21601;
+	endif;
+	
+	// Finished replacing "flush;"
+	
+	// Replacing "store y = 50;"
+	if (y_fst_1 == 0)
+		y_fst_1 = 1;
+		y_1_1 = 50;
+	endif;
+	
+	y_cnt_1 = y_cnt_1 + 1;
+	
+	if (y_cnt_1 == 2)
+		y_2_1 = 50;
+	endif;
+	// Finished replacing "store y = 50;"
+	
+	// Replacing "flush;"
+	21601: if (*)
+		
+		if (x_cnt_1 > 0)
+			
+			if (*)
+				
+				if (x_fst_1 > 1)
+					
+					if (x_fst_1 > 2)
+						store x = x_3_1;
+					else
+						store x = x_2_1;
+					endif;
+					
+				else
+					store x = x_1_1;
+				endif;
+				
+				x_fst_1 = x_fst_1 + 1;
+			endif;
+			
+		endif;
+		
+		
+		if (y_cnt_1 > 0)
+			
+			if (*)
+				
+				if (y_fst_1 > 1)
+					store y = y_2_1;
+				else
+					store y = y_1_1;
+				endif;
+				
+				y_fst_1 = y_fst_1 + 1;
+			endif;
+			
+		endif;
+		
+		goto 21601;
+	endif;
+	
+	// Finished replacing "flush;"
+	
+	// Replacing "store y = 60;"
+	if (y_fst_1 == 0)
+		y_fst_1 = 1;
+		y_1_1 = 60;
+	endif;
+	
+	y_cnt_1 = y_cnt_1 + 1;
+	
+	if (y_cnt_1 == 2)
+		y_2_1 = 60;
+	endif;
+	
+	
+	if (y_cnt_1 == 3)
+		y_3_1 = 60;
+	endif;
+	// Finished replacing "store y = 60;"
+	
+	// Replacing "flush;"
+	21601: if (*)
+		
+		if (x_cnt_1 > 0)
+			
+			if (*)
+				
+				if (x_fst_1 > 1)
+					
+					if (x_fst_1 > 2)
+						store x = x_3_1;
+					else
+						store x = x_2_1;
+					endif;
+					
+				else
+					store x = x_1_1;
+				endif;
+				
+				x_fst_1 = x_fst_1 + 1;
+			endif;
+			
+		endif;
+		
+		
+		if (y_cnt_1 > 0)
+			
+			if (*)
+				
+				if (y_fst_1 > 1)
+					
+					if (y_fst_1 > 2)
+						store y = y_3_1;
+					else
+						store y = y_2_1;
+					endif;
+					
+				else
+					store y = y_1_1;
+				endif;
+				
+				y_fst_1 = y_fst_1 + 1;
+			endif;
+			
+		endif;
+		
+		goto 21601;
+	endif;
+	
+	// Finished replacing "flush;"
+

@@ -1,0 +1,26 @@
+beginit
+
+	store x = 2;
+	store y = 4;
+	
+endinit
+
+process 1:
+	
+	store x = 10;
+	flush;
+	
+	store x = 20;
+	flush;
+	
+	store x = 30;
+	flush;
+	
+	store y = 40;
+	flush;
+	
+	store y = 50;
+	flush;
+	
+	store y = 60;
+	flush;

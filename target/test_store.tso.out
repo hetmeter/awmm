@@ -1,0 +1,1 @@
+{ACCEPTING_STATE,programDeclaration(initializationBlock(store(ID(x),INT(2))),processDeclaration(processHeader(1),statements(store(ID(x),INT(10)),store(ID(x),INT(20)),store(ID(x),INT(30)))))}

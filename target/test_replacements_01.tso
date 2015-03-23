@@ -1,0 +1,71 @@
+beginit
+
+	store x = 2;
+	store y = 4;
+	
+endinit
+
+process 1:
+
+	load t = x;
+	
+	store x = 10;
+	load t = x;
+	
+	store x = 20;
+	load t = x;
+	
+	// maxBufferSize(x) = 2
+	
+	flush;
+	
+	store x = 30;
+	load t = x;
+	
+	store x = 40;
+	load t = x;
+	
+	// maxBufferSize(x) = 4
+	
+	fence;
+	
+	// maxBufferSize(x) = 0
+	
+	store x = 50;
+	load t = x;
+	
+	store x = 60;
+	load t = x;
+	
+	store x = 70;
+	load t = x;
+	
+	// maxBufferSize(x) = 3
+	
+	flush;
+	
+process 2:
+	
+	store y = 80;
+	
+	load t = x;
+	
+	store y = 90;
+	
+	load t = y;
+	
+	fence;
+	
+	flush;
+	
+	store x = 100;
+	
+	flush;
+	
+	store x = 110;
+	
+	flush;
+	
+	store y = 120;
+	
+	flush;
