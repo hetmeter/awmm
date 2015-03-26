@@ -5,6 +5,7 @@
 #include <regex>
 
 #include "config.h"
+#include "z3code.h"
 #include "bufferSizeMap.h"
 #include "ControlFlowVisitor.h"
 
@@ -45,6 +46,7 @@ public:
 	void initializePersistentCosts();
 	void visitAllProgramPoints();
 	std::string emitCode();
+	std::string emitBooleanCode();
 
 	Ast();
 	Ast(std::string variableName);

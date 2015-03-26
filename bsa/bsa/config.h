@@ -86,6 +86,7 @@ namespace config
 	extern language currentLanguage;
 	extern std::map<std::string, Ast*> labelLookupMap;
 	extern std::vector<std::string> variableNames;
+	extern std::vector<z3code::Predicate> predicates;
 	extern std::map<std::string, GlobalVariable*> globalVariables;
 	extern int K;
 
