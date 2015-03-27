@@ -1,0 +1,7 @@
+--- Commencing parsing ---
+Syntax error
+ at line 1, column 8
+Couldn't repair and continue parse
+ at line 1, column 8
+An I/O error occured while parsing : 
+java.lang.Exception: Can't recover from previous error(s)

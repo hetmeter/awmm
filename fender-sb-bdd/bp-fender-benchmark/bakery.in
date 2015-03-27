@@ -1,0 +1,954 @@
+shared B0, B1, B2, B3, B4, B5, B6, B7;
+local t0, t1, t2, t3, t4, t5, t6, t7, ifvar12, ifvar18, ifvar32, ifvar38;
+
+init
+51: store B0 = 0;
+52: store B1 = 0;
+53: store B2 = 0;
+54: store B3 = 0;
+55: store B4 = 0;
+56: store B5 = 0;
+57: store B6 = 0;
+58: store B7 = 0;
+
+
+/* Statement: n1 = 0 */
+59: nop; 
+60:  load t0 = B0;
+61:  load t1 = B1;
+62:  load t2 = B2;
+63:  load t3 = B3;
+64:  load t4 = B4;
+65:  load t5 = B5;
+66:  load t6 = B6;
+67:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+68:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+69:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+70:   store B2 = choose((t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0), (t5 != 0) || (t2 == 0 && t4 != 0) || (t3 != 0 && t4 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+71:   store B3 = choose((t5 != 0) || (t2 == 0 && t4 != 0) || (t3 != 0 && t4 != 0), (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+72:   store B4 = choose((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0), false);
+
+
+ /* update predicate - B5: (n2 = 0) */
+73:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+74:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+75:   store B7 = choose((t7 != 0), (t7 == 0));
+
+
+/* Statement: n2 = 0 */
+76: nop; 
+77:  load t0 = B0;
+78:  load t1 = B1;
+79:  load t2 = B2;
+80:  load t3 = B3;
+81:  load t4 = B4;
+82:  load t5 = B5;
+83:  load t6 = B6;
+84:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+85:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+86:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+87:   store B2 = choose((t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0), (t4 != 0) || (t2 == 0 && t5 != 0) || (t3 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+88:   store B3 = choose((t4 != 0) || (t2 == 0 && t5 != 0) || (t3 != 0 && t5 != 0), (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+89:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+90:   store B5 = choose((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0), false);
+
+
+ /* update predicate - B6: (cs1 = 1) */
+91:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+92:   store B7 = choose((t7 != 0), (t7 == 0));
+
+
+/* Statement: ch1 = 0 */
+93: nop; 
+94:  load t0 = B0;
+95:  load t1 = B1;
+96:  load t2 = B2;
+97:  load t3 = B3;
+98:  load t4 = B4;
+99:  load t5 = B5;
+100:  load t6 = B6;
+101:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+102:   store B0 = choose(false, (t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+103:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+104:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+105:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+106:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+107:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+108:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+109:   store B7 = choose((t7 != 0), (t7 == 0));
+
+
+/* Statement: ch2 = 0 */
+110: nop; 
+111:  load t0 = B0;
+112:  load t1 = B1;
+113:  load t2 = B2;
+114:  load t3 = B3;
+115:  load t4 = B4;
+116:  load t5 = B5;
+117:  load t6 = B6;
+118:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+119:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+120:   store B1 = choose(false, (t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+121:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+122:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+123:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+124:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+125:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+126:   store B7 = choose((t7 != 0), (t7 == 0));
+
+
+/* Statement: cs1 = 0 */
+127: nop; 
+128:  load t0 = B0;
+129:  load t1 = B1;
+130:  load t2 = B2;
+131:  load t3 = B3;
+132:  load t4 = B4;
+133:  load t5 = B5;
+134:  load t6 = B6;
+135:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+136:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+137:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+138:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+139:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+140:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+141:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+142:   store B6 = choose(false, (t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+143:   store B7 = choose((t7 != 0), (t7 == 0));
+
+
+/* Statement: cs2 = 0 */
+144: nop; 
+145:  load t0 = B0;
+146:  load t1 = B1;
+147:  load t2 = B2;
+148:  load t3 = B3;
+149:  load t4 = B4;
+150:  load t5 = B5;
+151:  load t6 = B6;
+152:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+153:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+154:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+155:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+156:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+157:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+158:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+159:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+160:   store B7 = choose(false, (t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0));
+
+/* Reset local variables */ 
+161: t0 = 0; 
+162: t1 = 0; 
+163: t2 = 0; 
+164: t3 = 0; 
+165: t4 = 0; 
+166: t5 = 0; 
+167: t6 = 0; 
+168: t7 = 0; 
+169: ifvar12 = 0; 
+170: ifvar18 = 0; 
+171: ifvar32 = 0; 
+172: ifvar38 = 0; 
+
+
+process 0
+
+/* Statement: ch1 = 1 */
+1: nop; 
+173: begin_atomic;
+174:  load t0 = B0;
+175:  load t1 = B1;
+176:  load t2 = B2;
+177:  load t3 = B3;
+178:  load t4 = B4;
+179:  load t5 = B5;
+180:  load t6 = B6;
+181:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+182:   store B0 = choose((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0), false);
+
+
+ /* update predicate - B1: (ch2 = 1) */
+183:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+184:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+185:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+186:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+187:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+188:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+189:   store B7 = choose((t7 != 0), (t7 == 0));
+
+190: end_atomic;
+
+/* Statement: n1 = n2 + 1 */
+2: nop; 
+191: begin_atomic;
+192:  load t0 = B0;
+193:  load t1 = B1;
+194:  load t2 = B2;
+195:  load t3 = B3;
+196:  load t4 = B4;
+197:  load t5 = B5;
+198:  load t6 = B6;
+199:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+200:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+201:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+202:   store B2 = choose((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0), false);
+
+
+ /* update predicate - B3: (n2 >= n1) */
+203:   store B3 = choose(false, (t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+204:   store B4 = choose(false, (t5 != 0) || (t2 == 0 && t4 != 0) || (t3 != 0 && t4 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+205:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+206:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+207:   store B7 = choose((t7 != 0), (t7 == 0));
+
+208: end_atomic;
+
+/* Statement: ch1 = 0 */
+3: nop; 
+209: begin_atomic;
+210:  load t0 = B0;
+211:  load t1 = B1;
+212:  load t2 = B2;
+213:  load t3 = B3;
+214:  load t4 = B4;
+215:  load t5 = B5;
+216:  load t6 = B6;
+217:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+218:   store B0 = choose(false, (t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+219:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+220:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+221:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+222:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+223:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+224:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+225:   store B7 = choose((t7 != 0), (t7 == 0));
+
+226: end_atomic;
+
+/* Statement: if (ch2 = 1) */ 
+4: nop; 
+230: begin_atomic;
+231: ifvar12 = 0;
+232: load t0 = B0;
+233: load t1 = B1;
+234: load t2 = B2;
+235: load t3 = B3;
+236: load t4 = B4;
+237: load t5 = B5;
+238: load t6 = B6;
+239: load t7 = B7;
+240: end_atomic;
+
+241: if (*) goto 227;
+242: if (true) goto 228;
+227: assume(!((t1 == 0))); 
+243: ifvar12 = 1;
+5:   if (true) goto 4; 
+
+228:  if (ifvar12 == 0) goto 244; 
+245: if (true) goto 229;
+244: assume(!((t1 != 0))); 
+6:   if (true) goto 7; 
+
+229: nop;
+
+7: nop; 
+
+
+/* Statement: if ( (n2 >= n1) | (n2 = 0) ) */ 
+8: nop; 
+249: begin_atomic;
+250: ifvar18 = 0;
+251: load t0 = B0;
+252: load t1 = B1;
+253: load t2 = B2;
+254: load t3 = B3;
+255: load t4 = B4;
+256: load t5 = B5;
+257: load t6 = B6;
+258: load t7 = B7;
+259: end_atomic;
+
+260: if (*) goto 246;
+261: if (true) goto 247;
+246: assume(!((t2 != 0 && t4 != 0) || (t2 != 0 && t5 == 0) || (t3 == 0 && t4 != 0) || (t3 == 0 && t5 == 0))); 
+262: ifvar18 = 1;
+9:   if (true) goto 11; 
+
+247:  if (ifvar18 == 0) goto 263; 
+264: if (true) goto 248;
+263: assume(!((t2 == 0) || (t3 != 0) || (t5 != 0))); 
+10:   if (true) goto 7; 
+
+248: nop;
+
+11: nop; 
+
+
+/* Statement: cs1 = 1 */
+12: nop; 
+265: begin_atomic;
+266:  load t0 = B0;
+267:  load t1 = B1;
+268:  load t2 = B2;
+269:  load t3 = B3;
+270:  load t4 = B4;
+271:  load t5 = B5;
+272:  load t6 = B6;
+273:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+274:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+275:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+276:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+277:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+278:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+279:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+280:   store B6 = choose((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0), false);
+
+
+ /* update predicate - B7: (cs2 = 1) */
+281:   store B7 = choose((t7 != 0), (t7 == 0));
+
+282: end_atomic;
+
+/* Statement: cs1 = 0 */
+13: nop; 
+283: begin_atomic;
+284:  load t0 = B0;
+285:  load t1 = B1;
+286:  load t2 = B2;
+287:  load t3 = B3;
+288:  load t4 = B4;
+289:  load t5 = B5;
+290:  load t6 = B6;
+291:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+292:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+293:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+294:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+295:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+296:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+297:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+298:   store B6 = choose(false, (t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+299:   store B7 = choose((t7 != 0), (t7 == 0));
+
+300: end_atomic;
+
+/* Statement: n1 = 0 */
+14: nop; 
+301: begin_atomic;
+302:  load t0 = B0;
+303:  load t1 = B1;
+304:  load t2 = B2;
+305:  load t3 = B3;
+306:  load t4 = B4;
+307:  load t5 = B5;
+308:  load t6 = B6;
+309:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+310:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+311:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+312:   store B2 = choose((t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0), (t5 != 0) || (t2 == 0 && t4 != 0) || (t3 != 0 && t4 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+313:   store B3 = choose((t5 != 0) || (t2 == 0 && t4 != 0) || (t3 != 0 && t4 != 0), (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+314:   store B4 = choose((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0), false);
+
+
+ /* update predicate - B5: (n2 = 0) */
+315:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+316:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+317:   store B7 = choose((t7 != 0), (t7 == 0));
+
+318: end_atomic;
+15:   if (true) goto 1; 
+
+
+process 1
+
+/* Statement: ch2 = 1 */
+1: nop; 
+319: begin_atomic;
+320:  load t0 = B0;
+321:  load t1 = B1;
+322:  load t2 = B2;
+323:  load t3 = B3;
+324:  load t4 = B4;
+325:  load t5 = B5;
+326:  load t6 = B6;
+327:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+328:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+329:   store B1 = choose((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0), false);
+
+
+ /* update predicate - B2: (n1 > n2) */
+330:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+331:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+332:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+333:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+334:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+335:   store B7 = choose((t7 != 0), (t7 == 0));
+
+336: end_atomic;
+
+/* Statement: n2 = n1 + 1 */
+2: nop; 
+337: begin_atomic;
+338:  load t0 = B0;
+339:  load t1 = B1;
+340:  load t2 = B2;
+341:  load t3 = B3;
+342:  load t4 = B4;
+343:  load t5 = B5;
+344:  load t6 = B6;
+345:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+346:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+347:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+348:   store B2 = choose(false, (t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+349:   store B3 = choose((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0), false);
+
+
+ /* update predicate - B4: (n1 = 0) */
+350:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+351:   store B5 = choose(false, (t4 != 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+352:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+353:   store B7 = choose((t7 != 0), (t7 == 0));
+
+354: end_atomic;
+
+/* Statement: ch2 = 0 */
+3: nop; 
+355: begin_atomic;
+356:  load t0 = B0;
+357:  load t1 = B1;
+358:  load t2 = B2;
+359:  load t3 = B3;
+360:  load t4 = B4;
+361:  load t5 = B5;
+362:  load t6 = B6;
+363:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+364:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+365:   store B1 = choose(false, (t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+366:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+367:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+368:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+369:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+370:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+371:   store B7 = choose((t7 != 0), (t7 == 0));
+
+372: end_atomic;
+
+/* Statement: if (ch1 = 1) */ 
+4: nop; 
+376: begin_atomic;
+377: ifvar32 = 0;
+378: load t0 = B0;
+379: load t1 = B1;
+380: load t2 = B2;
+381: load t3 = B3;
+382: load t4 = B4;
+383: load t5 = B5;
+384: load t6 = B6;
+385: load t7 = B7;
+386: end_atomic;
+
+387: if (*) goto 373;
+388: if (true) goto 374;
+373: assume(!((t0 == 0))); 
+389: ifvar32 = 1;
+5:   if (true) goto 4; 
+
+374:  if (ifvar32 == 0) goto 390; 
+391: if (true) goto 375;
+390: assume(!((t0 != 0))); 
+6:   if (true) goto 7; 
+
+375: nop;
+
+7: nop; 
+
+
+/* Statement: if ( (n1 > n2) | (n1 = 0) ) */ 
+8: nop; 
+395: begin_atomic;
+396: ifvar38 = 0;
+397: load t0 = B0;
+398: load t1 = B1;
+399: load t2 = B2;
+400: load t3 = B3;
+401: load t4 = B4;
+402: load t5 = B5;
+403: load t6 = B6;
+404: load t7 = B7;
+405: end_atomic;
+
+406: if (*) goto 392;
+407: if (true) goto 393;
+392: assume(!((t2 == 0 && t4 == 0) || (t3 != 0 && t4 == 0))); 
+408: ifvar38 = 1;
+9:   if (true) goto 11; 
+
+393:  if (ifvar38 == 0) goto 409; 
+410: if (true) goto 394;
+409: assume(!((t2 != 0) || (t3 == 0) || (t4 != 0))); 
+10:   if (true) goto 7; 
+
+394: nop;
+
+11: nop; 
+
+
+/* Statement: cs2 = 1 */
+12: nop; 
+411: begin_atomic;
+412:  load t0 = B0;
+413:  load t1 = B1;
+414:  load t2 = B2;
+415:  load t3 = B3;
+416:  load t4 = B4;
+417:  load t5 = B5;
+418:  load t6 = B6;
+419:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+420:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+421:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+422:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+423:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+424:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+425:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+426:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+427:   store B7 = choose((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0), false);
+
+428: end_atomic;
+
+/* Statement: cs2 = 0 */
+13: nop; 
+429: begin_atomic;
+430:  load t0 = B0;
+431:  load t1 = B1;
+432:  load t2 = B2;
+433:  load t3 = B3;
+434:  load t4 = B4;
+435:  load t5 = B5;
+436:  load t6 = B6;
+437:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+438:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+439:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+440:   store B2 = choose((t2 != 0) || (t3 == 0), (t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+441:   store B3 = choose((t2 == 0) || (t3 != 0) || (t4 != 0 && t5 != 0), (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+442:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+443:   store B5 = choose((t5 != 0), (t5 == 0) || (t2 != 0 && t4 != 0) || (t3 == 0 && t4 != 0));
+
+
+ /* update predicate - B6: (cs1 = 1) */
+444:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+445:   store B7 = choose(false, (t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0));
+
+446: end_atomic;
+
+/* Statement: n2 = 0 */
+14: nop; 
+447: begin_atomic;
+448:  load t0 = B0;
+449:  load t1 = B1;
+450:  load t2 = B2;
+451:  load t3 = B3;
+452:  load t4 = B4;
+453:  load t5 = B5;
+454:  load t6 = B6;
+455:  load t7 = B7;
+
+ /* update predicate - B0: (ch1 = 1) */
+456:   store B0 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B1: (ch2 = 1) */
+457:   store B1 = choose((t1 != 0), (t1 == 0));
+
+
+ /* update predicate - B2: (n1 > n2) */
+458:   store B2 = choose((t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0), (t4 != 0) || (t2 == 0 && t5 != 0) || (t3 != 0 && t5 != 0));
+
+
+ /* update predicate - B3: (n2 >= n1) */
+459:   store B3 = choose((t4 != 0) || (t2 == 0 && t5 != 0) || (t3 != 0 && t5 != 0), (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B4: (n1 = 0) */
+460:   store B4 = choose((t4 != 0), (t4 == 0) || (t2 != 0 && t5 != 0) || (t3 == 0 && t5 != 0));
+
+
+ /* update predicate - B5: (n2 = 0) */
+461:   store B5 = choose((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0) || (t7 != 0) || (t7 == 0), false);
+
+
+ /* update predicate - B6: (cs1 = 1) */
+462:   store B6 = choose((t6 != 0), (t6 == 0));
+
+
+ /* update predicate - B7: (cs2 = 1) */
+463:   store B7 = choose((t7 != 0), (t7 == 0));
+
+464: end_atomic;
+15:   if (true) goto 1; 
+
+assert always (B6 == 0 || B7==0);

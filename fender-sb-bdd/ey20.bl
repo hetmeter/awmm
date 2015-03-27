@@ -1,0 +1,24 @@
+shared x, y, z, w;
+local r1, r2, r3, r4;
+
+init
+1: store x = 0;
+2: store y = 0;
+3: store z = 0;
+4: store w = 0;
+
+process 1
+10: store x = 1;
+11: store y = 1;
+12: store z = 1;
+13: store w = 1;
+
+
+process 2
+20: load r1 = y;
+21: load r2 = x;
+22: if (r1 > r2) goto 24;
+23: if true goto 26;
+24: load r3 = w;
+25: load r4 = z;
+26: nop;

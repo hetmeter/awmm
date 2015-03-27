@@ -1,0 +1,1534 @@
+shared B0, B1, B2, B3, B4, B5, B6;
+local t0, t1, t2, t3, t4, t5, t6, ifvar15, ifvar20, ifvar28, ifvar32, ifvar37, ifvar44, ifvar48, ifvar53, ifvar59, ifvar64, ifvar72, ifvar76, ifvar81, ifvar87, ifvar92, ifvar101, ifvar106, ifvar113, ifvar118, ifvar133, ifvar138, ifvar146, ifvar150, ifvar155, ifvar162, ifvar166, ifvar171, ifvar177, ifvar182, ifvar190, ifvar194, ifvar199, ifvar205, ifvar210, ifvar219, ifvar224, ifvar231, ifvar236;
+
+init
+51: store B0 = *;
+52: store B1 = *;
+53: store B2 = *;
+54: store B3 = *;
+55: store B4 = *;
+56: store B5 = *;
+57: store B6 = *;
+
+58: load t0 = B0;
+59: load t1 = B1;
+60: load t2 = B2;
+61: load t3 = B3;
+62: load t4 = B4;
+63: load t5 = B5;
+64: load t6 = B6;
+
+65: assume(!(false)); 
+
+66: nop; 
+
+/* Statement turn = 0 */
+67:  load t0 = B0;
+68:  load t1 = B1;
+69:  load t2 = B2;
+70:  load t3 = B3;
+71:  load t4 = B4;
+72:  load t5 = B5;
+73:  load t6 = B6;
+
+ /* update predicate - B6: (turn = 0) */
+74:   store B6 = choose(true, false);
+75: assume(!(false)); 
+
+76: nop; 
+
+/* Statement flag0 = 0 */
+77:  load t0 = B0;
+78:  load t1 = B1;
+79:  load t2 = B2;
+80:  load t3 = B3;
+81:  load t4 = B4;
+82:  load t5 = B5;
+83:  load t6 = B6;
+
+ /* update predicate - B4: (flag0 = 0) */
+84:   store B4 = choose(true, false);
+
+
+85: assume(!(false)); 
+
+86: nop; 
+
+/* Statement flag1 = 0 */
+87:  load t0 = B0;
+88:  load t1 = B1;
+89:  load t2 = B2;
+90:  load t3 = B3;
+91:  load t4 = B4;
+92:  load t5 = B5;
+93:  load t6 = B6;
+
+ /* update predicate - B5: (flag1 = 0) */
+94:   store B5 = choose(true, false);
+
+
+95: assume(!(false)); 
+
+96: nop; 
+
+/* Statement overflow = 0 */
+97:  load t0 = B0;
+98:  load t1 = B1;
+99:  load t2 = B2;
+100:  load t3 = B3;
+101:  load t4 = B4;
+102:  load t5 = B5;
+103:  load t6 = B6;
+
+104: assume(!(false)); 
+
+/* Reset local variables */ 
+105: t0 = 0; 
+106: t1 = 0; 
+107: t2 = 0; 
+108: t3 = 0; 
+109: t4 = 0; 
+110: t5 = 0; 
+111: t6 = 0; 
+112: ifvar15 = 0; 
+113: ifvar20 = 0; 
+114: ifvar28 = 0; 
+115: ifvar32 = 0; 
+116: ifvar37 = 0; 
+117: ifvar44 = 0; 
+118: ifvar48 = 0; 
+119: ifvar53 = 0; 
+120: ifvar59 = 0; 
+121: ifvar64 = 0; 
+122: ifvar72 = 0; 
+123: ifvar76 = 0; 
+124: ifvar81 = 0; 
+125: ifvar87 = 0; 
+126: ifvar92 = 0; 
+127: ifvar101 = 0; 
+128: ifvar106 = 0; 
+129: ifvar113 = 0; 
+130: ifvar118 = 0; 
+131: ifvar133 = 0; 
+132: ifvar138 = 0; 
+133: ifvar146 = 0; 
+134: ifvar150 = 0; 
+135: ifvar155 = 0; 
+136: ifvar162 = 0; 
+137: ifvar166 = 0; 
+138: ifvar171 = 0; 
+139: ifvar177 = 0; 
+140: ifvar182 = 0; 
+141: ifvar190 = 0; 
+142: ifvar194 = 0; 
+143: ifvar199 = 0; 
+144: ifvar205 = 0; 
+145: ifvar210 = 0; 
+146: ifvar219 = 0; 
+147: ifvar224 = 0; 
+148: ifvar231 = 0; 
+149: ifvar236 = 0; 
+
+
+process 1
+/* initialize counters */
+
+
+150: begin_atomic;
+
+151: nop; 
+
+/* Statement turn_cnt_p1 = 0 */
+152:  load t0 = B0;
+153:  load t1 = B1;
+154:  load t2 = B2;
+155:  load t3 = B3;
+156:  load t4 = B4;
+157:  load t5 = B5;
+158:  load t6 = B6;
+
+159: assume(!(false)); 
+
+160: nop; 
+
+/* Statement flag0_cnt_p1 = 0 */
+161:  load t0 = B0;
+162:  load t1 = B1;
+163:  load t2 = B2;
+164:  load t3 = B3;
+165:  load t4 = B4;
+166:  load t5 = B5;
+167:  load t6 = B6;
+
+168: assume(!(false)); 
+
+169: nop; 
+
+/* Statement flag1_cnt_p1 = 0 */
+170:  load t0 = B0;
+171:  load t1 = B1;
+172:  load t2 = B2;
+173:  load t3 = B3;
+174:  load t4 = B4;
+175:  load t5 = B5;
+176:  load t6 = B6;
+
+177: assume(!(false)); 
+
+178: end_atomic;
+
+1: begin_atomic;
+
+/* Statement: store flag0 = 1; */
+
+
+179: nop; 
+
+/* Statement if ((flag0_cnt_p1 != 0)) */ 
+183: ifvar15 = 0;
+
+184: if (*) goto 180;
+185: if (true) goto 181;
+180: assume(!(false)); 
+186: ifvar15 = 1;
+187: nop; 
+
+/* Statement overflow = 1 */
+188:  load t0 = B0;
+189:  load t1 = B1;
+190:  load t2 = B2;
+191:  load t3 = B3;
+192:  load t4 = B4;
+193:  load t5 = B5;
+194:  load t6 = B6;
+
+195: assume(!(false)); 
+
+181:  if (ifvar15 == 0) goto 196; 
+197: if (true) goto 182;
+196: assume(!(false)); 
+182: nop;
+
+198: nop; 
+
+/* Statement flag0_cnt_p1 = flag0_cnt_p1 + 1 */
+199:  load t0 = B0;
+200:  load t1 = B1;
+201:  load t2 = B2;
+202:  load t3 = B3;
+203:  load t4 = B4;
+204:  load t5 = B5;
+205:  load t6 = B6;
+
+206: assume(!(false)); 
+
+207: nop; 
+
+/* Statement if ((flag0_cnt_p1 != 0)) */ 
+211: ifvar20 = 0;
+
+212: if (*) goto 208;
+213: if (true) goto 209;
+208: assume(!(false)); 
+214: ifvar20 = 1;
+215: nop; 
+
+/* Statement flag0_1_p1 = 1 */
+216:  load t0 = B0;
+217:  load t1 = B1;
+218:  load t2 = B2;
+219:  load t3 = B3;
+220:  load t4 = B4;
+221:  load t5 = B5;
+222:  load t6 = B6;
+
+223: assume(!(false)); 
+
+209:  if (ifvar20 == 0) goto 224; 
+225: if (true) goto 210;
+224: assume(!(false)); 
+210: nop;
+
+226: end_atomic;
+
+2: nop; 
+
+/* Statement: load f1 = flag1; */
+
+
+227: begin_atomic;
+
+228: nop; 
+
+/* Statement if (flag1_cnt_p1 = 0) */ 
+232: ifvar28 = 0;
+
+233: if (*) goto 229;
+234: if (true) goto 230;
+229: assume(!(false)); 
+235: ifvar28 = 1;
+236: nop; 
+
+/* Statement f1 = flag1 */
+237:  load t0 = B0;
+238:  load t1 = B1;
+239:  load t2 = B2;
+240:  load t3 = B3;
+241:  load t4 = B4;
+242:  load t5 = B5;
+243:  load t6 = B6;
+
+ /* update predicate - B2: (f1 = 0) */
+244:   store B2 = choose((t5 != 0), (t5 == 0));
+
+
+245: assume(!(false)); 
+
+230:  if (ifvar28 == 0) goto 246; 
+247: if (true) goto 231;
+246: assume(!(false)); 
+231: nop;
+
+248: nop; 
+
+/* Statement if ((flag1_cnt_p1 != 0)) */ 
+252: ifvar32 = 0;
+
+253: if (*) goto 249;
+254: if (true) goto 250;
+249: assume(!(false)); 
+255: ifvar32 = 1;
+256: nop; 
+
+/* Statement f1 = flag1_1_p1 */
+257:  load t0 = B0;
+258:  load t1 = B1;
+259:  load t2 = B2;
+260:  load t3 = B3;
+261:  load t4 = B4;
+262:  load t5 = B5;
+263:  load t6 = B6;
+
+ /* update predicate - B2: (f1 = 0) */
+264:   store B2 = choose(false, false);
+
+
+265: assume(!(false)); 
+
+250:  if (ifvar32 == 0) goto 266; 
+267: if (true) goto 251;
+266: assume(!(false)); 
+251: nop;
+
+268: end_atomic;
+
+3: nop; 
+
+/* Statement if ((f1 = 0)) */ 
+272: begin_atomic;
+273: ifvar37 = 0;
+
+274: if (*) goto 269;
+275: if (true) goto 270;
+269: assume(!((B2 == 0))); 
+276: ifvar37 = 1;277: end_atomic;
+
+/* Statement goto goto 11 */ 
+278:   if (true) goto 11; 
+
+280: begin_atomic;
+270:  if (ifvar37 == 0) goto 279; 
+281: if (true) goto 271;
+279: assume(!((B2 != 0))); 282: end_atomic;
+
+271: nop;
+
+283: nop; 
+
+/* Statement: load t1 = turn; */
+
+
+284: begin_atomic;
+
+285: nop; 
+
+/* Statement if (turn_cnt_p1 = 0) */ 
+289: ifvar44 = 0;
+
+290: if (*) goto 286;
+291: if (true) goto 287;
+286: assume(!(false)); 
+292: ifvar44 = 1;
+293: nop; 
+
+/* Statement t1 = turn */
+294:  load t0 = B0;
+295:  load t1 = B1;
+296:  load t2 = B2;
+297:  load t3 = B3;
+298:  load t4 = B4;
+299:  load t5 = B5;
+300:  load t6 = B6;
+
+ /* update predicate - B1: (t1 = 0) */
+301:   store B1 = choose((t6 != 0), (t6 == 0));
+
+
+302: assume(!(false)); 
+
+287:  if (ifvar44 == 0) goto 303; 
+304: if (true) goto 288;
+303: assume(!(false)); 
+288: nop;
+
+305: nop; 
+
+/* Statement if ((turn_cnt_p1 != 0)) */ 
+309: ifvar48 = 0;
+
+310: if (*) goto 306;
+311: if (true) goto 307;
+306: assume(!(false)); 
+312: ifvar48 = 1;
+313: nop; 
+
+/* Statement t1 = turn_1_p1 */
+314:  load t0 = B0;
+315:  load t1 = B1;
+316:  load t2 = B2;
+317:  load t3 = B3;
+318:  load t4 = B4;
+319:  load t5 = B5;
+320:  load t6 = B6;
+
+ /* update predicate - B1: (t1 = 0) */
+321:   store B1 = choose(false, false);
+
+
+322: assume(!(false)); 
+
+307:  if (ifvar48 == 0) goto 323; 
+324: if (true) goto 308;
+323: assume(!(false)); 
+308: nop;
+
+325: end_atomic;
+
+5: nop; 
+
+/* Statement if ((t1 = 0)) */ 
+329: begin_atomic;
+330: ifvar53 = 0;
+
+331: if (*) goto 326;
+332: if (true) goto 327;
+326: assume(!((B1 == 0))); 
+333: ifvar53 = 1;334: end_atomic;
+
+/* Statement goto goto 2 */ 
+335:   if (true) goto 2; 
+
+337: begin_atomic;
+327:  if (ifvar53 == 0) goto 336; 
+338: if (true) goto 328;
+336: assume(!((B1 != 0))); 339: end_atomic;
+
+328: nop;
+
+6: begin_atomic;
+
+/* Statement: store flag0 = 0; */
+
+
+340: nop; 
+
+/* Statement if ((flag0_cnt_p1 != 0)) */ 
+344: ifvar59 = 0;
+
+345: if (*) goto 341;
+346: if (true) goto 342;
+341: assume(!(false)); 
+347: ifvar59 = 1;
+348: nop; 
+
+/* Statement overflow = 1 */
+349:  load t0 = B0;
+350:  load t1 = B1;
+351:  load t2 = B2;
+352:  load t3 = B3;
+353:  load t4 = B4;
+354:  load t5 = B5;
+355:  load t6 = B6;
+
+356: assume(!(false)); 
+
+342:  if (ifvar59 == 0) goto 357; 
+358: if (true) goto 343;
+357: assume(!(false)); 
+343: nop;
+
+359: nop; 
+
+/* Statement flag0_cnt_p1 = flag0_cnt_p1 + 1 */
+360:  load t0 = B0;
+361:  load t1 = B1;
+362:  load t2 = B2;
+363:  load t3 = B3;
+364:  load t4 = B4;
+365:  load t5 = B5;
+366:  load t6 = B6;
+
+367: assume(!(false)); 
+
+368: nop; 
+
+/* Statement if ((flag0_cnt_p1 != 0)) */ 
+372: ifvar64 = 0;
+
+373: if (*) goto 369;
+374: if (true) goto 370;
+369: assume(!(false)); 
+375: ifvar64 = 1;
+376: nop; 
+
+/* Statement flag0_1_p1 = 0 */
+377:  load t0 = B0;
+378:  load t1 = B1;
+379:  load t2 = B2;
+380:  load t3 = B3;
+381:  load t4 = B4;
+382:  load t5 = B5;
+383:  load t6 = B6;
+
+384: assume(!(false)); 
+
+370:  if (ifvar64 == 0) goto 385; 
+386: if (true) goto 371;
+385: assume(!(false)); 
+371: nop;
+
+387: end_atomic;
+
+7: nop; 
+
+/* Statement: load t1 = turn; */
+
+
+388: begin_atomic;
+
+389: nop; 
+
+/* Statement if (turn_cnt_p1 = 0) */ 
+393: ifvar72 = 0;
+
+394: if (*) goto 390;
+395: if (true) goto 391;
+390: assume(!(false)); 
+396: ifvar72 = 1;
+397: nop; 
+
+/* Statement t1 = turn */
+398:  load t0 = B0;
+399:  load t1 = B1;
+400:  load t2 = B2;
+401:  load t3 = B3;
+402:  load t4 = B4;
+403:  load t5 = B5;
+404:  load t6 = B6;
+
+ /* update predicate - B1: (t1 = 0) */
+405:   store B1 = choose((t6 != 0), (t6 == 0));
+
+
+406: assume(!(false)); 
+
+391:  if (ifvar72 == 0) goto 407; 
+408: if (true) goto 392;
+407: assume(!(false)); 
+392: nop;
+
+409: nop; 
+
+/* Statement if ((turn_cnt_p1 != 0)) */ 
+413: ifvar76 = 0;
+
+414: if (*) goto 410;
+415: if (true) goto 411;
+410: assume(!(false)); 
+416: ifvar76 = 1;
+417: nop; 
+
+/* Statement t1 = turn_1_p1 */
+418:  load t0 = B0;
+419:  load t1 = B1;
+420:  load t2 = B2;
+421:  load t3 = B3;
+422:  load t4 = B4;
+423:  load t5 = B5;
+424:  load t6 = B6;
+
+ /* update predicate - B1: (t1 = 0) */
+425:   store B1 = choose(false, false);
+
+
+426: assume(!(false)); 
+
+411:  if (ifvar76 == 0) goto 427; 
+428: if (true) goto 412;
+427: assume(!(false)); 
+412: nop;
+
+429: end_atomic;
+
+8: nop; 
+
+/* Statement if ((t != 0)) */ 
+433: begin_atomic;
+434: ifvar81 = 0;
+
+435: if (*) goto 430;
+436: if (true) goto 431;
+430: assume(!(false)); 
+437: ifvar81 = 1;438: end_atomic;
+
+/* Statement goto goto 7 */ 
+439:   if (true) goto 7; 
+
+441: begin_atomic;
+431:  if (ifvar81 == 0) goto 440; 
+442: if (true) goto 432;
+440: assume(!(false)); 443: end_atomic;
+
+432: nop;
+
+9: begin_atomic;
+
+/* Statement: store flag0 = 1; */
+
+
+444: nop; 
+
+/* Statement if ((flag0_cnt_p1 != 0)) */ 
+448: ifvar87 = 0;
+
+449: if (*) goto 445;
+450: if (true) goto 446;
+445: assume(!(false)); 
+451: ifvar87 = 1;
+452: nop; 
+
+/* Statement overflow = 1 */
+453:  load t0 = B0;
+454:  load t1 = B1;
+455:  load t2 = B2;
+456:  load t3 = B3;
+457:  load t4 = B4;
+458:  load t5 = B5;
+459:  load t6 = B6;
+
+460: assume(!(false)); 
+
+446:  if (ifvar87 == 0) goto 461; 
+462: if (true) goto 447;
+461: assume(!(false)); 
+447: nop;
+
+463: nop; 
+
+/* Statement flag0_cnt_p1 = flag0_cnt_p1 + 1 */
+464:  load t0 = B0;
+465:  load t1 = B1;
+466:  load t2 = B2;
+467:  load t3 = B3;
+468:  load t4 = B4;
+469:  load t5 = B5;
+470:  load t6 = B6;
+
+471: assume(!(false)); 
+
+472: nop; 
+
+/* Statement if ((flag0_cnt_p1 != 0)) */ 
+476: ifvar92 = 0;
+
+477: if (*) goto 473;
+478: if (true) goto 474;
+473: assume(!(false)); 
+479: ifvar92 = 1;
+480: nop; 
+
+/* Statement flag0_1_p1 = 1 */
+481:  load t0 = B0;
+482:  load t1 = B1;
+483:  load t2 = B2;
+484:  load t3 = B3;
+485:  load t4 = B4;
+486:  load t5 = B5;
+487:  load t6 = B6;
+
+488: assume(!(false)); 
+
+474:  if (ifvar92 == 0) goto 489; 
+490: if (true) goto 475;
+489: assume(!(false)); 
+475: nop;
+
+491: end_atomic;
+
+/* Statement 10: goto goto 2 */ 
+10:   if (true) goto 2; 
+
+11: nop; 
+
+12: begin_atomic;
+
+/* Statement: store turn = 1; */
+
+
+492: nop; 
+
+/* Statement if ((turn_cnt_p1 != 0)) */ 
+496: ifvar101 = 0;
+
+497: if (*) goto 493;
+498: if (true) goto 494;
+493: assume(!(false)); 
+499: ifvar101 = 1;
+500: nop; 
+
+/* Statement overflow = 1 */
+501:  load t0 = B0;
+502:  load t1 = B1;
+503:  load t2 = B2;
+504:  load t3 = B3;
+505:  load t4 = B4;
+506:  load t5 = B5;
+507:  load t6 = B6;
+
+508: assume(!(false)); 
+
+494:  if (ifvar101 == 0) goto 509; 
+510: if (true) goto 495;
+509: assume(!(false)); 
+495: nop;
+
+511: nop; 
+
+/* Statement turn_cnt_p1 = turn_cnt_p1 + 1 */
+512:  load t0 = B0;
+513:  load t1 = B1;
+514:  load t2 = B2;
+515:  load t3 = B3;
+516:  load t4 = B4;
+517:  load t5 = B5;
+518:  load t6 = B6;
+
+519: assume(!(false)); 
+
+520: nop; 
+
+/* Statement if ((turn_cnt_p1 != 0)) */ 
+524: ifvar106 = 0;
+
+525: if (*) goto 521;
+526: if (true) goto 522;
+521: assume(!(false)); 
+527: ifvar106 = 1;
+528: nop; 
+
+/* Statement turn_1_p1 = 1 */
+529:  load t0 = B0;
+530:  load t1 = B1;
+531:  load t2 = B2;
+532:  load t3 = B3;
+533:  load t4 = B4;
+534:  load t5 = B5;
+535:  load t6 = B6;
+
+536: assume(!(false)); 
+
+522:  if (ifvar106 == 0) goto 537; 
+538: if (true) goto 523;
+537: assume(!(false)); 
+523: nop;
+
+539: end_atomic;
+
+13: begin_atomic;
+
+/* Statement: store flag0 = 0; */
+
+
+540: nop; 
+
+/* Statement if ((flag0_cnt_p1 != 0)) */ 
+544: ifvar113 = 0;
+
+545: if (*) goto 541;
+546: if (true) goto 542;
+541: assume(!(false)); 
+547: ifvar113 = 1;
+548: nop; 
+
+/* Statement overflow = 1 */
+549:  load t0 = B0;
+550:  load t1 = B1;
+551:  load t2 = B2;
+552:  load t3 = B3;
+553:  load t4 = B4;
+554:  load t5 = B5;
+555:  load t6 = B6;
+
+556: assume(!(false)); 
+
+542:  if (ifvar113 == 0) goto 557; 
+558: if (true) goto 543;
+557: assume(!(false)); 
+543: nop;
+
+559: nop; 
+
+/* Statement flag0_cnt_p1 = flag0_cnt_p1 + 1 */
+560:  load t0 = B0;
+561:  load t1 = B1;
+562:  load t2 = B2;
+563:  load t3 = B3;
+564:  load t4 = B4;
+565:  load t5 = B5;
+566:  load t6 = B6;
+
+567: assume(!(false)); 
+
+568: nop; 
+
+/* Statement if ((flag0_cnt_p1 != 0)) */ 
+572: ifvar118 = 0;
+
+573: if (*) goto 569;
+574: if (true) goto 570;
+569: assume(!(false)); 
+575: ifvar118 = 1;
+576: nop; 
+
+/* Statement flag0_1_p1 = 0 */
+577:  load t0 = B0;
+578:  load t1 = B1;
+579:  load t2 = B2;
+580:  load t3 = B3;
+581:  load t4 = B4;
+582:  load t5 = B5;
+583:  load t6 = B6;
+
+584: assume(!(false)); 
+
+570:  if (ifvar118 == 0) goto 585; 
+586: if (true) goto 571;
+585: assume(!(false)); 
+571: nop;
+
+587: end_atomic;
+
+
+process 2
+/* initialize counters */
+
+
+588: begin_atomic;
+
+589: nop; 
+
+/* Statement turn_cnt_p2 = 0 */
+590:  load t0 = B0;
+591:  load t1 = B1;
+592:  load t2 = B2;
+593:  load t3 = B3;
+594:  load t4 = B4;
+595:  load t5 = B5;
+596:  load t6 = B6;
+
+597: assume(!(false)); 
+
+598: nop; 
+
+/* Statement flag0_cnt_p2 = 0 */
+599:  load t0 = B0;
+600:  load t1 = B1;
+601:  load t2 = B2;
+602:  load t3 = B3;
+603:  load t4 = B4;
+604:  load t5 = B5;
+605:  load t6 = B6;
+
+606: assume(!(false)); 
+
+607: nop; 
+
+/* Statement flag1_cnt_p2 = 0 */
+608:  load t0 = B0;
+609:  load t1 = B1;
+610:  load t2 = B2;
+611:  load t3 = B3;
+612:  load t4 = B4;
+613:  load t5 = B5;
+614:  load t6 = B6;
+
+615: assume(!(false)); 
+
+616: end_atomic;
+
+617: nop; 
+
+1: begin_atomic;
+
+/* Statement: store flag1 = 1; */
+
+
+618: nop; 
+
+/* Statement if ((flag1_cnt_p2 != 0)) */ 
+622: ifvar133 = 0;
+
+623: if (*) goto 619;
+624: if (true) goto 620;
+619: assume(!(false)); 
+625: ifvar133 = 1;
+626: nop; 
+
+/* Statement overflow = 1 */
+627:  load t0 = B0;
+628:  load t1 = B1;
+629:  load t2 = B2;
+630:  load t3 = B3;
+631:  load t4 = B4;
+632:  load t5 = B5;
+633:  load t6 = B6;
+
+634: assume(!(false)); 
+
+620:  if (ifvar133 == 0) goto 635; 
+636: if (true) goto 621;
+635: assume(!(false)); 
+621: nop;
+
+637: nop; 
+
+/* Statement flag1_cnt_p2 = flag1_cnt_p2 + 1 */
+638:  load t0 = B0;
+639:  load t1 = B1;
+640:  load t2 = B2;
+641:  load t3 = B3;
+642:  load t4 = B4;
+643:  load t5 = B5;
+644:  load t6 = B6;
+
+645: assume(!(false)); 
+
+646: nop; 
+
+/* Statement if ((flag1_cnt_p2 != 0)) */ 
+650: ifvar138 = 0;
+
+651: if (*) goto 647;
+652: if (true) goto 648;
+647: assume(!(false)); 
+653: ifvar138 = 1;
+654: nop; 
+
+/* Statement flag1_1_p2 = 1 */
+655:  load t0 = B0;
+656:  load t1 = B1;
+657:  load t2 = B2;
+658:  load t3 = B3;
+659:  load t4 = B4;
+660:  load t5 = B5;
+661:  load t6 = B6;
+
+662: assume(!(false)); 
+
+648:  if (ifvar138 == 0) goto 663; 
+664: if (true) goto 649;
+663: assume(!(false)); 
+649: nop;
+
+665: end_atomic;
+
+2: nop; 
+
+/* Statement: load f2 = flag0; */
+
+
+666: begin_atomic;
+
+667: nop; 
+
+/* Statement if (flag0_cnt_p2 = 0) */ 
+671: ifvar146 = 0;
+
+672: if (*) goto 668;
+673: if (true) goto 669;
+668: assume(!(false)); 
+674: ifvar146 = 1;
+675: nop; 
+
+/* Statement f2 = flag0 */
+676:  load t0 = B0;
+677:  load t1 = B1;
+678:  load t2 = B2;
+679:  load t3 = B3;
+680:  load t4 = B4;
+681:  load t5 = B5;
+682:  load t6 = B6;
+
+ /* update predicate - B3: (f2 = 0) */
+683:   store B3 = choose((t4 != 0), (t4 == 0));
+
+
+684: assume(!(false)); 
+
+669:  if (ifvar146 == 0) goto 685; 
+686: if (true) goto 670;
+685: assume(!(false)); 
+670: nop;
+
+687: nop; 
+
+/* Statement if ((flag0_cnt_p2 != 0)) */ 
+691: ifvar150 = 0;
+
+692: if (*) goto 688;
+693: if (true) goto 689;
+688: assume(!(false)); 
+694: ifvar150 = 1;
+695: nop; 
+
+/* Statement f2 = flag0_1_p2 */
+696:  load t0 = B0;
+697:  load t1 = B1;
+698:  load t2 = B2;
+699:  load t3 = B3;
+700:  load t4 = B4;
+701:  load t5 = B5;
+702:  load t6 = B6;
+
+ /* update predicate - B3: (f2 = 0) */
+703:   store B3 = choose(false, false);
+
+
+704: assume(!(false)); 
+
+689:  if (ifvar150 == 0) goto 705; 
+706: if (true) goto 690;
+705: assume(!(false)); 
+690: nop;
+
+707: end_atomic;
+
+3: nop; 
+
+/* Statement if ((f2 = 0)) */ 
+711: begin_atomic;
+712: ifvar155 = 0;
+
+713: if (*) goto 708;
+714: if (true) goto 709;
+708: assume(!((B3 == 0))); 
+715: ifvar155 = 1;716: end_atomic;
+
+/* Statement goto goto 11 */ 
+717:   if (true) goto 11; 
+
+719: begin_atomic;
+709:  if (ifvar155 == 0) goto 718; 
+720: if (true) goto 710;
+718: assume(!((B3 != 0))); 721: end_atomic;
+
+710: nop;
+
+4: nop; 
+
+/* Statement: load t2 = turn; */
+
+
+722: begin_atomic;
+
+723: nop; 
+
+/* Statement if (turn_cnt_p2 = 0) */ 
+727: ifvar162 = 0;
+
+728: if (*) goto 724;
+729: if (true) goto 725;
+724: assume(!(false)); 
+730: ifvar162 = 1;
+731: nop; 
+
+/* Statement t2 = turn */
+732:  load t0 = B0;
+733:  load t1 = B1;
+734:  load t2 = B2;
+735:  load t3 = B3;
+736:  load t4 = B4;
+737:  load t5 = B5;
+738:  load t6 = B6;
+
+ /* update predicate - B0: (t2 = 0) */
+739:   store B0 = choose((t6 != 0), (t6 == 0));
+
+
+740: assume(!(false)); 
+
+725:  if (ifvar162 == 0) goto 741; 
+742: if (true) goto 726;
+741: assume(!(false)); 
+726: nop;
+
+743: nop; 
+
+/* Statement if ((turn_cnt_p2 != 0)) */ 
+747: ifvar166 = 0;
+
+748: if (*) goto 744;
+749: if (true) goto 745;
+744: assume(!(false)); 
+750: ifvar166 = 1;
+751: nop; 
+
+/* Statement t2 = turn_1_p2 */
+752:  load t0 = B0;
+753:  load t1 = B1;
+754:  load t2 = B2;
+755:  load t3 = B3;
+756:  load t4 = B4;
+757:  load t5 = B5;
+758:  load t6 = B6;
+
+ /* update predicate - B0: (t2 = 0) */
+759:   store B0 = choose(false, false);
+
+
+760: assume(!(false)); 
+
+745:  if (ifvar166 == 0) goto 761; 
+762: if (true) goto 746;
+761: assume(!(false)); 
+746: nop;
+
+763: end_atomic;
+
+5: nop; 
+
+/* Statement if ((t2 != 0)) */ 
+767: begin_atomic;
+768: ifvar171 = 0;
+
+769: if (*) goto 764;
+770: if (true) goto 765;
+764: assume(!((B0 != 0))); 
+771: ifvar171 = 1;772: end_atomic;
+
+/* Statement goto goto 2 */ 
+773:   if (true) goto 2; 
+
+775: begin_atomic;
+765:  if (ifvar171 == 0) goto 774; 
+776: if (true) goto 766;
+774: assume(!((B0 == 0))); 777: end_atomic;
+
+766: nop;
+
+6: begin_atomic;
+
+/* Statement: store flag1 = 0; */
+
+
+778: nop; 
+
+/* Statement if ((flag1_cnt_p2 != 0)) */ 
+782: ifvar177 = 0;
+
+783: if (*) goto 779;
+784: if (true) goto 780;
+779: assume(!(false)); 
+785: ifvar177 = 1;
+786: nop; 
+
+/* Statement overflow = 1 */
+787:  load t0 = B0;
+788:  load t1 = B1;
+789:  load t2 = B2;
+790:  load t3 = B3;
+791:  load t4 = B4;
+792:  load t5 = B5;
+793:  load t6 = B6;
+
+794: assume(!(false)); 
+
+780:  if (ifvar177 == 0) goto 795; 
+796: if (true) goto 781;
+795: assume(!(false)); 
+781: nop;
+
+797: nop; 
+
+/* Statement flag1_cnt_p2 = flag1_cnt_p2 + 1 */
+798:  load t0 = B0;
+799:  load t1 = B1;
+800:  load t2 = B2;
+801:  load t3 = B3;
+802:  load t4 = B4;
+803:  load t5 = B5;
+804:  load t6 = B6;
+
+805: assume(!(false)); 
+
+806: nop; 
+
+/* Statement if ((flag1_cnt_p2 != 0)) */ 
+810: ifvar182 = 0;
+
+811: if (*) goto 807;
+812: if (true) goto 808;
+807: assume(!(false)); 
+813: ifvar182 = 1;
+814: nop; 
+
+/* Statement flag1_1_p2 = 0 */
+815:  load t0 = B0;
+816:  load t1 = B1;
+817:  load t2 = B2;
+818:  load t3 = B3;
+819:  load t4 = B4;
+820:  load t5 = B5;
+821:  load t6 = B6;
+
+822: assume(!(false)); 
+
+808:  if (ifvar182 == 0) goto 823; 
+824: if (true) goto 809;
+823: assume(!(false)); 
+809: nop;
+
+825: end_atomic;
+
+7: nop; 
+
+/* Statement: load t2 = turn; */
+
+
+826: begin_atomic;
+
+827: nop; 
+
+/* Statement if (turn_cnt_p2 = 0) */ 
+831: ifvar190 = 0;
+
+832: if (*) goto 828;
+833: if (true) goto 829;
+828: assume(!(false)); 
+834: ifvar190 = 1;
+835: nop; 
+
+/* Statement t2 = turn */
+836:  load t0 = B0;
+837:  load t1 = B1;
+838:  load t2 = B2;
+839:  load t3 = B3;
+840:  load t4 = B4;
+841:  load t5 = B5;
+842:  load t6 = B6;
+
+ /* update predicate - B0: (t2 = 0) */
+843:   store B0 = choose((t6 != 0), (t6 == 0));
+
+
+844: assume(!(false)); 
+
+829:  if (ifvar190 == 0) goto 845; 
+846: if (true) goto 830;
+845: assume(!(false)); 
+830: nop;
+
+847: nop; 
+
+/* Statement if ((turn_cnt_p2 != 0)) */ 
+851: ifvar194 = 0;
+
+852: if (*) goto 848;
+853: if (true) goto 849;
+848: assume(!(false)); 
+854: ifvar194 = 1;
+855: nop; 
+
+/* Statement t2 = turn_1_p2 */
+856:  load t0 = B0;
+857:  load t1 = B1;
+858:  load t2 = B2;
+859:  load t3 = B3;
+860:  load t4 = B4;
+861:  load t5 = B5;
+862:  load t6 = B6;
+
+ /* update predicate - B0: (t2 = 0) */
+863:   store B0 = choose(false, false);
+
+
+864: assume(!(false)); 
+
+849:  if (ifvar194 == 0) goto 865; 
+866: if (true) goto 850;
+865: assume(!(false)); 
+850: nop;
+
+867: end_atomic;
+
+8: nop; 
+
+/* Statement if ((t2 = 0)) */ 
+871: begin_atomic;
+872: ifvar199 = 0;
+
+873: if (*) goto 868;
+874: if (true) goto 869;
+868: assume(!((B0 == 0))); 
+875: ifvar199 = 1;876: end_atomic;
+
+/* Statement goto goto 7 */ 
+877:   if (true) goto 7; 
+
+879: begin_atomic;
+869:  if (ifvar199 == 0) goto 878; 
+880: if (true) goto 870;
+878: assume(!((B0 != 0))); 881: end_atomic;
+
+870: nop;
+
+9: begin_atomic;
+
+/* Statement: store flag1 = 1; */
+
+
+882: nop; 
+
+/* Statement if ((flag1_cnt_p2 != 0)) */ 
+886: ifvar205 = 0;
+
+887: if (*) goto 883;
+888: if (true) goto 884;
+883: assume(!(false)); 
+889: ifvar205 = 1;
+890: nop; 
+
+/* Statement overflow = 1 */
+891:  load t0 = B0;
+892:  load t1 = B1;
+893:  load t2 = B2;
+894:  load t3 = B3;
+895:  load t4 = B4;
+896:  load t5 = B5;
+897:  load t6 = B6;
+
+898: assume(!(false)); 
+
+884:  if (ifvar205 == 0) goto 899; 
+900: if (true) goto 885;
+899: assume(!(false)); 
+885: nop;
+
+901: nop; 
+
+/* Statement flag1_cnt_p2 = flag1_cnt_p2 + 1 */
+902:  load t0 = B0;
+903:  load t1 = B1;
+904:  load t2 = B2;
+905:  load t3 = B3;
+906:  load t4 = B4;
+907:  load t5 = B5;
+908:  load t6 = B6;
+
+909: assume(!(false)); 
+
+910: nop; 
+
+/* Statement if ((flag1_cnt_p2 != 0)) */ 
+914: ifvar210 = 0;
+
+915: if (*) goto 911;
+916: if (true) goto 912;
+911: assume(!(false)); 
+917: ifvar210 = 1;
+918: nop; 
+
+/* Statement flag1_1_p2 = 1 */
+919:  load t0 = B0;
+920:  load t1 = B1;
+921:  load t2 = B2;
+922:  load t3 = B3;
+923:  load t4 = B4;
+924:  load t5 = B5;
+925:  load t6 = B6;
+
+926: assume(!(false)); 
+
+912:  if (ifvar210 == 0) goto 927; 
+928: if (true) goto 913;
+927: assume(!(false)); 
+913: nop;
+
+929: end_atomic;
+
+/* Statement 10: goto goto 2 */ 
+10:   if (true) goto 2; 
+
+11: nop; 
+
+12: begin_atomic;
+
+/* Statement: store turn = 0; */
+
+
+930: nop; 
+
+/* Statement if ((turn_cnt_p2 != 0)) */ 
+934: ifvar219 = 0;
+
+935: if (*) goto 931;
+936: if (true) goto 932;
+931: assume(!(false)); 
+937: ifvar219 = 1;
+938: nop; 
+
+/* Statement overflow = 1 */
+939:  load t0 = B0;
+940:  load t1 = B1;
+941:  load t2 = B2;
+942:  load t3 = B3;
+943:  load t4 = B4;
+944:  load t5 = B5;
+945:  load t6 = B6;
+
+946: assume(!(false)); 
+
+932:  if (ifvar219 == 0) goto 947; 
+948: if (true) goto 933;
+947: assume(!(false)); 
+933: nop;
+
+949: nop; 
+
+/* Statement turn_cnt_p2 = turn_cnt_p2 + 1 */
+950:  load t0 = B0;
+951:  load t1 = B1;
+952:  load t2 = B2;
+953:  load t3 = B3;
+954:  load t4 = B4;
+955:  load t5 = B5;
+956:  load t6 = B6;
+
+957: assume(!(false)); 
+
+958: nop; 
+
+/* Statement if ((turn_cnt_p2 != 0)) */ 
+962: ifvar224 = 0;
+
+963: if (*) goto 959;
+964: if (true) goto 960;
+959: assume(!(false)); 
+965: ifvar224 = 1;
+966: nop; 
+
+/* Statement turn_1_p2 = 0 */
+967:  load t0 = B0;
+968:  load t1 = B1;
+969:  load t2 = B2;
+970:  load t3 = B3;
+971:  load t4 = B4;
+972:  load t5 = B5;
+973:  load t6 = B6;
+
+974: assume(!(false)); 
+
+960:  if (ifvar224 == 0) goto 975; 
+976: if (true) goto 961;
+975: assume(!(false)); 
+961: nop;
+
+977: end_atomic;
+
+13: begin_atomic;
+
+/* Statement: store flag1 = 0; */
+
+
+978: nop; 
+
+/* Statement if ((flag1_cnt_p2 != 0)) */ 
+982: ifvar231 = 0;
+
+983: if (*) goto 979;
+984: if (true) goto 980;
+979: assume(!(false)); 
+985: ifvar231 = 1;
+986: nop; 
+
+/* Statement overflow = 1 */
+987:  load t0 = B0;
+988:  load t1 = B1;
+989:  load t2 = B2;
+990:  load t3 = B3;
+991:  load t4 = B4;
+992:  load t5 = B5;
+993:  load t6 = B6;
+
+994: assume(!(false)); 
+
+980:  if (ifvar231 == 0) goto 995; 
+996: if (true) goto 981;
+995: assume(!(false)); 
+981: nop;
+
+997: nop; 
+
+/* Statement flag1_cnt_p2 = flag1_cnt_p2 + 1 */
+998:  load t0 = B0;
+999:  load t1 = B1;
+1000:  load t2 = B2;
+1001:  load t3 = B3;
+1002:  load t4 = B4;
+1003:  load t5 = B5;
+1004:  load t6 = B6;
+
+1005: assume(!(false)); 
+
+1006: nop; 
+
+/* Statement if ((flag1_cnt_p2 != 0)) */ 
+1010: ifvar236 = 0;
+
+1011: if (*) goto 1007;
+1012: if (true) goto 1008;
+1007: assume(!(false)); 
+1013: ifvar236 = 1;
+1014: nop; 
+
+/* Statement flag1_1_p2 = 0 */
+1015:  load t0 = B0;
+1016:  load t1 = B1;
+1017:  load t2 = B2;
+1018:  load t3 = B3;
+1019:  load t4 = B4;
+1020:  load t5 = B5;
+1021:  load t6 = B6;
+
+1022: assume(!(false)); 
+
+1008:  if (ifvar236 == 0) goto 1023; 
+1024: if (true) goto 1009;
+1023: assume(!(false)); 
+1009: nop;
+
+1025: end_atomic;
+
+assert always ((pc{1} != 11) || (pc{2} != 11));
+
+

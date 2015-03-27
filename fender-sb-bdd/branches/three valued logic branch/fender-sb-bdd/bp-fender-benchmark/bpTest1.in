@@ -1,0 +1,146 @@
+shared B0;
+local t0;
+
+init
+51: store B0 = *;
+
+
+/* Statement: a = 0 */
+52: nop; 
+53:  load t0 = B0;
+
+ /* update predicate - B0: (a = 2) */
+58:  if (false) goto 57; 
+59:   if (true) goto 54;
+57:   store B0 = 1;
+60:   if (true) goto 56;
+54:  if ((t0 == 0) || (t0 != 0)) goto 61; 
+62:   if (true) goto 55;
+61:   store B0 = 0;
+63:   if (true) goto 56;
+55:   store B0 = *;
+56:   nop;
+
+/* Reset local variables */ 
+64: t0 = 0; 
+
+
+process 1
+
+/* Statement: b1 = a */
+1: nop; 
+65: begin_atomic;
+66:  load t0 = B0;
+
+ /* update predicate - B0: (a = 2) */
+71:  if ((t0 == 0)) goto 70; 
+72:   if (true) goto 67;
+70:   store B0 = 1;
+73:   if (true) goto 69;
+67:  if ((t0 != 0)) goto 74; 
+75:   if (true) goto 68;
+74:   store B0 = 0;
+76:   if (true) goto 69;
+68:   store B0 = *;
+69:   nop;
+
+77: end_atomic;
+
+/* Statement: b1 = b1 + 1 */
+2: nop; 
+78: begin_atomic;
+79:  load t0 = B0;
+
+ /* update predicate - B0: (a = 2) */
+84:  if ((t0 == 0)) goto 83; 
+85:   if (true) goto 80;
+83:   store B0 = 1;
+86:   if (true) goto 82;
+80:  if ((t0 != 0)) goto 87; 
+88:   if (true) goto 81;
+87:   store B0 = 0;
+89:   if (true) goto 82;
+81:   store B0 = *;
+82:   nop;
+
+90: end_atomic;
+
+/* Statement: a = b1 */
+3: nop; 
+91: begin_atomic;
+92:  load t0 = B0;
+
+ /* update predicate - B0: (a = 2) */
+97:  if (false) goto 96; 
+98:   if (true) goto 93;
+96:   store B0 = 1;
+99:   if (true) goto 95;
+93:  if (false) goto 100; 
+101:   if (true) goto 94;
+100:   store B0 = 0;
+102:   if (true) goto 95;
+94:   store B0 = *;
+95:   nop;
+
+103: end_atomic;
+
+process 2
+
+/* Statement: b2 = a */
+1: nop; 
+104: begin_atomic;
+105:  load t0 = B0;
+
+ /* update predicate - B0: (a = 2) */
+110:  if ((t0 == 0)) goto 109; 
+111:   if (true) goto 106;
+109:   store B0 = 1;
+112:   if (true) goto 108;
+106:  if ((t0 != 0)) goto 113; 
+114:   if (true) goto 107;
+113:   store B0 = 0;
+115:   if (true) goto 108;
+107:   store B0 = *;
+108:   nop;
+
+116: end_atomic;
+
+/* Statement: b2 = b2 + 1 */
+2: nop; 
+117: begin_atomic;
+118:  load t0 = B0;
+
+ /* update predicate - B0: (a = 2) */
+123:  if ((t0 == 0)) goto 122; 
+124:   if (true) goto 119;
+122:   store B0 = 1;
+125:   if (true) goto 121;
+119:  if ((t0 != 0)) goto 126; 
+127:   if (true) goto 120;
+126:   store B0 = 0;
+128:   if (true) goto 121;
+120:   store B0 = *;
+121:   nop;
+
+129: end_atomic;
+
+/* Statement: a = b2 */
+3: nop; 
+130: begin_atomic;
+131:  load t0 = B0;
+
+ /* update predicate - B0: (a = 2) */
+136:  if (false) goto 135; 
+137:   if (true) goto 132;
+135:   store B0 = 1;
+138:   if (true) goto 134;
+132:  if (false) goto 139; 
+140:   if (true) goto 133;
+139:   store B0 = 0;
+141:   if (true) goto 134;
+133:   store B0 = *;
+134:   nop;
+
+142: end_atomic;
+
+assert final (B0 == 1);

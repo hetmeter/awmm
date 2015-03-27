@@ -1,0 +1,15 @@
+shared x,y;
+local r1, r2;
+
+init
+1: store x = 5;
+2: store y = 5;
+
+process 1
+1: store x = 1;
+2: load r1 = y;
+3: if true goto 1;
+
+process 2
+101: store y = 1;
+102: load r2 = x;

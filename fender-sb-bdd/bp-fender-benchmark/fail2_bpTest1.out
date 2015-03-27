@@ -1,0 +1,30 @@
+--- Commencing parsing ---
+--- Finished parsing successfully. ---
+Printing out the parsed program:
+Shared: B0
+Local: t0
+[
+pid 0:
+[STORE B0 = *, /* Statement: a = 0 */, NOP, LOAD t0 = B0, /* update predicate - B0: (a = 2) */, IF false GOTO 57, IF true GOTO 54, STORE B0 = 1, IF true GOTO 56, IF ((t0 == 0) || (t0 != 0)) GOTO 61, IF true GOTO 55, STORE B0 = 0, IF true GOTO 56, STORE B0 = *, NOP, /* Reset local variables */, t0 = 0, BARRIER, END], 
+pid 1:
+[/* Statement: b1 = a */, NOP, BEGIN_ATOMIC, LOAD t0 = B0, /* update predicate - B0: (a = 2) */, IF (t0 == 0) GOTO 70, IF true GOTO 67, STORE B0 = 1, IF true GOTO 69, IF (t0 != 0) GOTO 74, IF true GOTO 68, STORE B0 = 0, IF true GOTO 69, STORE B0 = *, NOP, END_ATOMIC, /* Statement: b1 = b1 + 1 */, NOP, BEGIN_ATOMIC, LOAD t0 = B0, /* update predicate - B0: (a = 2) */, IF (t0 == 0) GOTO 83, IF true GOTO 80, STORE B0 = 1, IF true GOTO 82, IF (t0 != 0) GOTO 87, IF true GOTO 81, STORE B0 = 0, IF true GOTO 82, STORE B0 = *, NOP, END_ATOMIC, /* Statement: a = b1 */, NOP, BEGIN_ATOMIC, LOAD t0 = B0, /* update predicate - B0: (a = 2) */, IF false GOTO 96, IF true GOTO 93, STORE B0 = 1, IF true GOTO 95, IF false GOTO 100, IF true GOTO 94, STORE B0 = 0, IF true GOTO 95, STORE B0 = *, NOP, END_ATOMIC, END], 
+pid 2:
+[/* Statement: b2 = a */, NOP, BEGIN_ATOMIC, LOAD t0 = B0, /* update predicate - B0: (a = 2) */, IF (t0 == 0) GOTO 109, IF true GOTO 106, STORE B0 = 1, IF true GOTO 108, IF (t0 != 0) GOTO 113, IF true GOTO 107, STORE B0 = 0, IF true GOTO 108, STORE B0 = *, NOP, END_ATOMIC, /* Statement: b2 = b2 + 1 */, NOP, BEGIN_ATOMIC, LOAD t0 = B0, /* update predicate - B0: (a = 2) */, IF (t0 == 0) GOTO 122, IF true GOTO 119, STORE B0 = 1, IF true GOTO 121, IF (t0 != 0) GOTO 126, IF true GOTO 120, STORE B0 = 0, IF true GOTO 121, STORE B0 = *, NOP, END_ATOMIC, /* Statement: a = b2 */, NOP, BEGIN_ATOMIC, LOAD t0 = B0, /* update predicate - B0: (a = 2) */, IF false GOTO 135, IF true GOTO 132, STORE B0 = 1, IF true GOTO 134, IF false GOTO 139, IF true GOTO 133, STORE B0 = 0, IF true GOTO 134, STORE B0 = *, NOP, END_ATOMIC, END]]
+
+--- STARTING EXPLORATION --- 
+Pushing initial state:<Shared:[B0=0],<pid0, PC=51, [t0=0]> ,<pid1, PC=0, [t0=0]> ,<pid2, PC=0, [t0=0]> >
+
+0.0: /* Statement: a = 0 */
+1.0: /* Statement: b1 = a */
+2.0: /* Statement: b2 = a */
+2.0: /* Statement: b2 = b2 + 1 */
+2.0: /* Statement: a = b2 */
+1.0: /* Statement: b1 = b1 + 1 */
+1.0: /* Statement: a = b1 */
+<Shared:[B0=*a],<pid0, PC=-1, [t0=0]> ,<pid1, PC=-1, [t0=0]> ,<pid2, PC=-1, [t0=0]> >
+
+---FINISHED---
+States: 91, Edges : 90
+Error states: 1
+Running Time: 51 ms
+Memory usage: 2 MB

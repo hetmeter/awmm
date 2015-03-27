@@ -1,0 +1,40 @@
+digraph G {
+  1 [label = "<Shared:{B0=0},<pid0, PC=33, {t0=0}> ,<pid1, PC=1, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ color= "blue" ];
+  2 [label = "<Shared:{B0=0},<pid0, PC=-2, {t0=0}> ,<pid1, PC=1, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ ];
+  3 [label = "<Shared:{B0=1},<pid0, PC=-2, {t0=0}> ,<pid1, PC=1, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ ];
+  4 [label = "<Shared:{B0=1},<pid0, PC=-1, {t0=0}> ,<pid1, PC=1, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ ];
+  5 [label = "<Shared:{B0=1},<pid0, PC=-1, {t0=0}> ,<pid1, PC=108, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ ];
+  6 [label = "<Shared:{B0=1},<pid0, PC=-1, {t0=0}> ,<pid1, PC=108, {t0=0}> ,<pid2, PC=-1, {t0=0}> >
+ ];
+  7 [label = "<Shared:{B0=1},<pid0, PC=-1, {t0=0}> ,<pid1, PC=9, {t0=1}> ,<pid2, PC=-1, {t0=0}> >
+ ];
+  8 [label = "<Shared:{B0=1},<pid0, PC=-1, {t0=0}> ,<pid1, PC=-1, {t0=1}> ,<pid2, PC=-1, {t0=0}> >
+ color= "violet" ];
+  9 [label = "<Shared:{B0=0},<pid0, PC=-1, {t0=0}> ,<pid1, PC=1, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ ];
+  10 [label = "<Shared:{B0=0},<pid0, PC=-1, {t0=0}> ,<pid1, PC=108, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ ];
+  11 [label = "<Shared:{B0=0},<pid0, PC=-1, {t0=0}> ,<pid1, PC=108, {t0=0}> ,<pid2, PC=-1, {t0=0}> >
+ ];
+  12 [label = "<Shared:{B0=0},<pid0, PC=-1, {t0=0}> ,<pid1, PC=9, {t0=0}> ,<pid2, PC=-1, {t0=0}> >
+ ];
+  13 [label = "<Shared:{B0=0},<pid0, PC=-1, {t0=0}> ,<pid1, PC=-1, {t0=0}> ,<pid2, PC=-1, {t0=0}> >
+ color= "violet" ];
+  1 -> 2 [ label = "0.33: STORE B0 = *"];
+  1 -> 3 [ label = "0.33: STORE B0 = *"];
+  3 -> 4 [ label = "0.-2: BARRIER"];
+  4 -> 5 [ label = "1.1: NOP"];
+  5 -> 6 [ label = "2.29: NOP"];
+  6 -> 7 [ label = "1.108: LOAD t0 = B0"];
+  7 -> 8 [ label = "1.9: NOP"];
+  2 -> 9 [ label = "0.-2: BARRIER"];
+  9 -> 10 [ label = "1.1: NOP"];
+  10 -> 11 [ label = "2.29: NOP"];
+  11 -> 12 [ label = "1.108: LOAD t0 = B0"];
+  12 -> 13 [ label = "1.9: NOP"];
+}

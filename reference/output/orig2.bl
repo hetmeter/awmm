@@ -1,0 +1,397 @@
+shared B0, B1, B2, B3, B4, B5, B6;
+local t0, t1, t2, t3, t4, t5, t6;
+
+init
+51: store B0 = *;
+52: store B1 = *;
+53: store B2 = *;
+54: store B3 = *;
+55: store B4 = *;
+56: store B5 = *;
+57: store B6 = *;
+
+58: load t0 = B0;
+59: load t1 = B1;
+60: load t2 = B2;
+61: load t3 = B3;
+62: load t4 = B4;
+63: load t5 = B5;
+64: load t6 = B6;
+
+
+65: nop; 
+
+/* Statement turn = 0 */
+
+ /* update predicate - B6: (turn = 0) */
+66:   store B6 = choose(true, false);
+
+
+67: nop; 
+
+/* Statement flag0 = 0 */
+
+ /* update predicate - B4: (flag0 = 0) */
+68:   store B4 = choose(true, false);
+
+
+
+
+69: nop; 
+
+/* Statement flag1 = 0 */
+
+ /* update predicate - B5: (flag1 = 0) */
+70:   store B5 = choose(true, false);
+
+
+
+
+/* Reset local variables */ 
+71: t0 = 0; 
+72: t1 = 0; 
+73: t2 = 0; 
+74: t3 = 0; 
+75: t4 = 0; 
+76: t5 = 0; 
+77: t6 = 0; 
+78: assume(!(false)); 
+
+
+process 1
+1: nop; 
+
+/* Statement flag0 = 1 */
+79: begin_atomic;
+
+ /* update predicate - B4: (flag0 = 0) */
+80:   store B4 = choose(false, true);
+
+
+
+81: assume(!(false)); 
+
+82: end_atomic;
+2: nop; 
+
+/* Statement f1 = flag1 */
+83: begin_atomic;
+84:  load t5 = B5;
+
+ /* update predicate - B2: (f1 = 0) */
+85:   store B2 = choose((t5 != 0), (t5 == 0));
+
+
+86: t5 = 0;
+
+87: assume(!(false)); 
+
+88: end_atomic;
+3: nop; 
+
+/* Statement if (f1 = 0) */ 
+
+92: if (*) goto 90;
+89: assume(!((B2 == 0))); 
+
+/* Statement goto goto 11 */ 
+93:   if (true) goto 11; 
+
+94: if (true) goto 91;
+90: nop;
+95: assume(!((B2 != 0))); 
+
+91: nop;
+
+96: nop; 
+
+/* Statement t1 = turn */
+97: begin_atomic;
+98:  load t6 = B6;
+
+ /* update predicate - B1: (t1 = 0) */
+99:   store B1 = choose((t6 != 0), (t6 == 0));
+
+
+100: t6 = 0;
+
+101: assume(!(false)); 
+
+102: end_atomic;
+5: nop; 
+
+/* Statement if (t1 = 0) */ 
+
+106: if (*) goto 104;
+103: assume(!((B1 == 0))); 
+
+/* Statement goto goto 2 */ 
+107:   if (true) goto 2; 
+
+108: if (true) goto 105;
+104: nop;
+109: assume(!((B1 != 0))); 
+
+105: nop;
+
+6: nop; 
+
+/* Statement flag0 = 0 */
+110: begin_atomic;
+
+ /* update predicate - B4: (flag0 = 0) */
+111:   store B4 = choose(true, false);
+
+
+
+112: assume(!(false)); 
+
+113: end_atomic;
+7: nop; 
+
+/* Statement t1 = turn */
+114: begin_atomic;
+115:  load t6 = B6;
+
+ /* update predicate - B1: (t1 = 0) */
+116:   store B1 = choose((t6 != 0), (t6 == 0));
+
+
+117: t6 = 0;
+
+118: assume(!(false)); 
+
+119: end_atomic;
+8: nop; 
+
+/* Statement if (t1 != 0) */ 
+
+123: if (*) goto 121;
+120: assume(!((B1 != 0))); 
+
+/* Statement goto goto 7 */ 
+124:   if (true) goto 7; 
+
+125: if (true) goto 122;
+121: nop;
+126: assume(!((B1 == 0))); 
+
+122: nop;
+
+9: nop; 
+
+/* Statement flag0 = 1 */
+127: begin_atomic;
+
+ /* update predicate - B4: (flag0 = 0) */
+128:   store B4 = choose(false, true);
+
+
+
+129: assume(!(false)); 
+
+130: end_atomic;
+/* Statement 10: goto goto 2 */ 
+10:   if (true) goto 2; 
+
+11: nop; 
+
+12: nop; 
+
+/* Statement turn = 1 */
+131: begin_atomic;
+
+ /* update predicate - B6: (turn = 0) */
+132:   store B6 = choose(false, true);
+
+133: assume(!(false)); 
+
+134: end_atomic;
+13: nop; 
+
+/* Statement flag0 = 0 */
+135: begin_atomic;
+
+ /* update predicate - B4: (flag0 = 0) */
+136:   store B4 = choose(true, false);
+
+
+
+137: assume(!(false)); 
+
+138: end_atomic;
+/* Statement goto goto 1 */ 
+139:   if (true) goto 1; 
+
+
+process 2
+140: nop; 
+
+1: nop; 
+
+/* Statement flag1 = 1 */
+141: begin_atomic;
+
+ /* update predicate - B5: (flag1 = 0) */
+142:   store B5 = choose(false, true);
+
+
+
+143: assume(!(false)); 
+
+144: end_atomic;
+2: nop; 
+
+/* Statement f2 = flag0 */
+145: begin_atomic;
+146:  load t4 = B4;
+
+ /* update predicate - B3: (f2 = 0) */
+147:   store B3 = choose((t4 != 0), (t4 == 0));
+
+
+148: t4 = 0;
+
+149: assume(!(false)); 
+
+150: end_atomic;
+3: nop; 
+
+/* Statement if (f2 = 0) */ 
+
+154: if (*) goto 152;
+151: assume(!((B3 == 0))); 
+
+/* Statement goto goto 11 */ 
+155:   if (true) goto 11; 
+
+156: if (true) goto 153;
+152: nop;
+157: assume(!((B3 != 0))); 
+
+153: nop;
+
+4: nop; 
+
+/* Statement t2 = turn */
+158: begin_atomic;
+159:  load t6 = B6;
+
+ /* update predicate - B0: (t2 = 0) */
+160:   store B0 = choose((t6 != 0), (t6 == 0));
+
+
+161: t6 = 0;
+
+162: assume(!(false)); 
+
+163: end_atomic;
+5: nop; 
+
+/* Statement if (t2 != 0) */ 
+
+167: if (*) goto 165;
+164: assume(!((B0 != 0))); 
+
+/* Statement goto goto 2 */ 
+168:   if (true) goto 2; 
+
+169: if (true) goto 166;
+165: nop;
+170: assume(!((B0 == 0))); 
+
+166: nop;
+
+6: nop; 
+
+/* Statement flag1 = 0 */
+171: begin_atomic;
+
+ /* update predicate - B5: (flag1 = 0) */
+172:   store B5 = choose(true, false);
+
+
+
+173: assume(!(false)); 
+
+174: end_atomic;
+7: nop; 
+
+/* Statement t2 = turn */
+175: begin_atomic;
+176:  load t6 = B6;
+
+ /* update predicate - B0: (t2 = 0) */
+177:   store B0 = choose((t6 != 0), (t6 == 0));
+
+
+178: t6 = 0;
+
+179: assume(!(false)); 
+
+180: end_atomic;
+8: nop; 
+
+/* Statement if (t2 = 0) */ 
+
+184: if (*) goto 182;
+181: assume(!((B0 == 0))); 
+
+/* Statement goto goto 7 */ 
+185:   if (true) goto 7; 
+
+186: if (true) goto 183;
+182: nop;
+187: assume(!((B0 != 0))); 
+
+183: nop;
+
+9: nop; 
+
+/* Statement flag1 = 1 */
+188: begin_atomic;
+
+ /* update predicate - B5: (flag1 = 0) */
+189:   store B5 = choose(false, true);
+
+
+
+190: assume(!(false)); 
+
+191: end_atomic;
+/* Statement 10: goto goto 2 */ 
+10:   if (true) goto 2; 
+
+11: nop; 
+
+12: nop; 
+
+/* Statement turn = 0 */
+192: begin_atomic;
+
+ /* update predicate - B6: (turn = 0) */
+193:   store B6 = choose(true, false);
+
+194: assume(!(false)); 
+
+195: end_atomic;
+13: nop; 
+
+/* Statement flag1 = 0 */
+196: begin_atomic;
+
+ /* update predicate - B5: (flag1 = 0) */
+197:   store B5 = choose(true, false);
+
+
+
+198: assume(!(false)); 
+
+199: end_atomic;
+/* Statement goto goto 1 */ 
+200:   if (true) goto 1; 
+
+/* program counters: ((pc{1} != 11) || (pc{2} != 11)) */
+
+
+assert always (  ((pc{1} != 11) || (pc{2} != 11)) );

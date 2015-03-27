@@ -1,0 +1,22 @@
+shared x, y, z;
+local r1, r2;
+
+init
+1: store x = 0;
+2: store y = 0;
+3: store z = 0;
+
+process 1
+4: load r1 = z;
+5: load r2 = x;
+
+process 2
+6: store x = 1;
+7: store y = 1;
+
+process 3
+8: load r1 = y;
+9: store z = 1;
+
+assert !(r1{1}==1 && r2{1}==0 && r1{3}==1);
+

@@ -1,0 +1,55 @@
+shared count, sense;
+local localsense, temp;
+
+init
+1: store sense = 0;
+2: store count = 2;
+
+process 0
+1: nop;
+2: localsense = 1 - localsense;
+3: dec temp, count;
+4: if temp > 1 goto 8;
+5: store count = 2;
+100: nop;
+6: store sense = localsense;
+7: if true goto 11;
+8: load temp = sense;
+9: if temp != localsense goto 8;
+
+11: nop;
+12: localsense = 1 - localsense;
+13: dec temp, count;
+14: if temp > 1 goto 18;
+15: store count = 2;
+101: nop;
+16: store sense = localsense;
+17: if true goto 1;
+18: load temp = sense;
+19: if temp != localsense goto 18;
+20: if true goto 1;
+
+
+process 1
+1: nop;
+2: localsense = 1 - localsense;
+3: dec temp, count;
+4: if temp > 1 goto 8;
+5: store count = 2;
+100: nop;
+6: store sense = localsense;
+7: if true goto 11;
+8: load temp = sense;
+9: if temp != localsense goto 8;
+
+11: nop;
+12: localsense = 1 - localsense;
+13: dec temp, count;
+14: if temp > 1 goto 18;
+15: store count = 2;
+101: nop;
+16: store sense = localsense;
+17: if true goto 1;
+18: load temp = sense;
+19: if temp != localsense goto 18;
+20: if true goto 1;

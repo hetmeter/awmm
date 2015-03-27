@@ -1,0 +1,18 @@
+shared B0;
+local t0;
+
+init
+52: nop; 
+64: t0 = 0; 
+
+
+process 1
+
+1: nop; 
+
+process 2
+
+133:   store B0 = *;
+
+
+assert final (B0 == 0);

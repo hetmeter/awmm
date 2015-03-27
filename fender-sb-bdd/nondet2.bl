@@ -1,0 +1,12 @@
+shared x;
+local r;
+
+init
+1: store x = 0;
+
+process 0
+2: store x = *;
+3: load r = x;
+/* 4: assume(r == 1); */ 
+
+assert(x == 1);

@@ -1,0 +1,16 @@
+digraph G {
+  1 [label = "<Shared:{B0=0},<pid0, PC=33, {t0=0}> ,<pid1, PC=1, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ color= "blue" ];
+  2 [label = "<Shared:{B0=0},<pid0, PC=-2, {t0=0}> ,<pid1, PC=1, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ ];
+  3 [label = "<Shared:{B0=1},<pid0, PC=-2, {t0=0}> ,<pid1, PC=1, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ ];
+  4 [label = "<Shared:{B0=1},<pid0, PC=-1, {t0=0}> ,<pid1, PC=1, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ ];
+  5 [label = "<Shared:{B0=1},<pid0, PC=-1, {t0=0}> ,<pid1, PC=9, {t0=0}> ,<pid2, PC=29, {t0=0}> >
+ color= "red" ];
+  1 -> 2 [ label = "0.33: STORE B0 = *"];
+  1 -> 3 [ label = "0.33: STORE B0 = *"];
+  3 -> 4 [ label = "0.-2: BARRIER"];
+  4 -> 5 [  color = "red"  label = "1.1: NOP"];
+}

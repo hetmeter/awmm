@@ -1,0 +1,553 @@
+shared B0, B1, B2, B3, B4, B5;
+local t0, t1, t2, t3, t4, t5, ifvar6, ifvar11, ifvar17, ifvar22, ifvar34, ifvar39, ifvar45, ifvar50;
+
+init
+51: store B0 = *;
+52: store B1 = *;
+53: store B2 = *;
+54: store B3 = *;
+55: store B4 = *;
+56: store B5 = *;
+
+57: load t0 = B0;
+58: load t1 = B1;
+59: load t2 = B2;
+60: load t3 = B3;
+61: load t4 = B4;
+62: load t5 = B5;
+
+63: assume(!((t4 != 0 && t5 != 0))); 
+
+
+/* Statement: turn = 0 */
+64: nop; 
+65:  load t0 = B0;
+66:  load t1 = B1;
+67:  load t2 = B2;
+68:  load t3 = B3;
+69:  load t4 = B4;
+70:  load t5 = B5;
+
+ /* update predicate - B4: (turn = 1) */
+71:   store B4 = choose(false, true);
+
+
+ /* update predicate - B5: (turn = 0) */
+72:   store B5 = choose(true, false);
+73: assume(!((t4 != 0 && t5 != 0))); 
+
+/* Reset local variables */ 
+74: t0 = 0; 
+75: t1 = 0; 
+76: t2 = 0; 
+77: t3 = 0; 
+78: t4 = 0; 
+79: t5 = 0; 
+80: ifvar6 = 0; 
+81: ifvar11 = 0; 
+82: ifvar17 = 0; 
+83: ifvar22 = 0; 
+84: ifvar34 = 0; 
+85: ifvar39 = 0; 
+86: ifvar45 = 0; 
+87: ifvar50 = 0; 
+
+
+process 1
+
+/* Statement: flag0 = 1 */
+1: nop; 
+88: begin_atomic;
+89:  load t0 = B0;
+90:  load t1 = B1;
+91:  load t2 = B2;
+92:  load t3 = B3;
+93:  load t4 = B4;
+94:  load t5 = B5;
+
+ /* update predicate - B2: (flag0 = 1) */
+95:   store B2 = choose(true, false);
+
+
+96: assume(!((t4 != 0 && t5 != 0))); 
+
+97: end_atomic;
+
+/* Statement: f = flag1 */
+2: nop; 
+98: begin_atomic;
+99:  load t0 = B0;
+100:  load t1 = B1;
+101:  load t2 = B2;
+102:  load t3 = B3;
+103:  load t4 = B4;
+104:  load t5 = B5;
+
+ /* update predicate - B0: (f = 1) */
+105:   store B0 = choose((t3 != 0), (t3 == 0));
+
+
+106: assume(!((t4 != 0 && t5 != 0))); 
+
+107: end_atomic;
+
+/* Statement: if (f != 1) */ 
+3: nop; 
+111: begin_atomic;
+112: ifvar6 = 0;
+113: load t0 = B0;
+114: load t1 = B1;
+115: load t2 = B2;
+116: load t3 = B3;
+117: load t4 = B4;
+118: load t5 = B5;
+119: end_atomic;
+
+120: if (*) goto 108;
+121: if (true) goto 109;
+108: assume(!((t0 != 0))); 
+122: ifvar6 = 1;
+123:   if (true) goto 11; 
+
+109:  if (ifvar6 == 0) goto 124; 
+125: if (true) goto 110;
+124: assume(!((t0 == 0))); 
+110: nop;
+
+
+/* Statement: t = turn */
+126: nop; 
+127: begin_atomic;
+128:  load t0 = B0;
+129:  load t1 = B1;
+130:  load t2 = B2;
+131:  load t3 = B3;
+132:  load t4 = B4;
+133:  load t5 = B5;
+
+ /* update predicate - B1: (t = 0) */
+134:   store B1 = choose((t5 != 0), (t4 != 0) || (t5 == 0));
+
+
+135: assume(!((t4 != 0 && t5 != 0))); 
+
+136: end_atomic;
+
+/* Statement: if (t = 0) */ 
+5: nop; 
+140: begin_atomic;
+141: ifvar11 = 0;
+142: load t0 = B0;
+143: load t1 = B1;
+144: load t2 = B2;
+145: load t3 = B3;
+146: load t4 = B4;
+147: load t5 = B5;
+148: end_atomic;
+
+149: if (*) goto 137;
+150: if (true) goto 138;
+137: assume(!((t1 == 0))); 
+151: ifvar11 = 1;
+152:   if (true) goto 2; 
+
+138:  if (ifvar11 == 0) goto 153; 
+154: if (true) goto 139;
+153: assume(!((t1 != 0))); 
+139: nop;
+
+
+/* Statement: flag0 = 0 */
+6: nop; 
+155: begin_atomic;
+156:  load t0 = B0;
+157:  load t1 = B1;
+158:  load t2 = B2;
+159:  load t3 = B3;
+160:  load t4 = B4;
+161:  load t5 = B5;
+
+ /* update predicate - B2: (flag0 = 1) */
+162:   store B2 = choose(false, true);
+
+
+163: assume(!((t4 != 0 && t5 != 0))); 
+
+164: end_atomic;
+
+/* Statement: t = turn */
+7: nop; 
+165: begin_atomic;
+166:  load t0 = B0;
+167:  load t1 = B1;
+168:  load t2 = B2;
+169:  load t3 = B3;
+170:  load t4 = B4;
+171:  load t5 = B5;
+
+ /* update predicate - B1: (t = 0) */
+172:   store B1 = choose((t5 != 0), (t4 != 0) || (t5 == 0));
+
+
+173: assume(!((t4 != 0 && t5 != 0))); 
+
+174: end_atomic;
+
+/* Statement: if (t != 0) */ 
+8: nop; 
+178: begin_atomic;
+179: ifvar17 = 0;
+180: load t0 = B0;
+181: load t1 = B1;
+182: load t2 = B2;
+183: load t3 = B3;
+184: load t4 = B4;
+185: load t5 = B5;
+186: end_atomic;
+
+187: if (*) goto 175;
+188: if (true) goto 176;
+175: assume(!((t1 != 0))); 
+189: ifvar17 = 1;
+190:   if (true) goto 7; 
+
+176:  if (ifvar17 == 0) goto 191; 
+192: if (true) goto 177;
+191: assume(!((t1 == 0))); 
+177: nop;
+
+
+/* Statement: flag0 = 1 */
+9: nop; 
+193: begin_atomic;
+194:  load t0 = B0;
+195:  load t1 = B1;
+196:  load t2 = B2;
+197:  load t3 = B3;
+198:  load t4 = B4;
+199:  load t5 = B5;
+
+ /* update predicate - B2: (flag0 = 1) */
+200:   store B2 = choose(true, false);
+
+
+201: assume(!((t4 != 0 && t5 != 0))); 
+
+202: end_atomic;
+
+/* Statement: if (true) */ 
+10: nop; 
+206: begin_atomic;
+207: ifvar22 = 0;
+208: load t0 = B0;
+209: load t1 = B1;
+210: load t2 = B2;
+211: load t3 = B3;
+212: load t4 = B4;
+213: load t5 = B5;
+214: end_atomic;
+
+215: if (*) goto 203;
+216: if (true) goto 204;
+203: assume(!(false)); 
+217: ifvar22 = 1;
+218:   if (true) goto 2; 
+
+204:  if (ifvar22 == 0) goto 219; 
+220: if (true) goto 205;
+219: assume(!(true)); 
+205: nop;
+
+11: nop; 
+
+
+/* Statement: turn = 1 */
+12: nop; 
+221: begin_atomic;
+222:  load t0 = B0;
+223:  load t1 = B1;
+224:  load t2 = B2;
+225:  load t3 = B3;
+226:  load t4 = B4;
+227:  load t5 = B5;
+
+ /* update predicate - B4: (turn = 1) */
+228:   store B4 = choose(true, false);
+
+
+ /* update predicate - B5: (turn = 0) */
+229:   store B5 = choose(false, true);
+230: assume(!((t4 != 0 && t5 != 0))); 
+
+231: end_atomic;
+
+/* Statement: flag0 = 0 */
+13: nop; 
+232: begin_atomic;
+233:  load t0 = B0;
+234:  load t1 = B1;
+235:  load t2 = B2;
+236:  load t3 = B3;
+237:  load t4 = B4;
+238:  load t5 = B5;
+
+ /* update predicate - B2: (flag0 = 1) */
+239:   store B2 = choose(false, true);
+
+
+240: assume(!((t4 != 0 && t5 != 0))); 
+
+241: end_atomic;
+14:   if (true) goto 1; 
+
+
+process 2
+242: nop; 
+
+
+/* Statement: flag1 = 1 */
+1: nop; 
+243: begin_atomic;
+244:  load t0 = B0;
+245:  load t1 = B1;
+246:  load t2 = B2;
+247:  load t3 = B3;
+248:  load t4 = B4;
+249:  load t5 = B5;
+
+ /* update predicate - B3: (flag1 = 1) */
+250:   store B3 = choose(true, false);
+
+
+251: assume(!((t4 != 0 && t5 != 0))); 
+
+252: end_atomic;
+
+/* Statement: f = flag0 */
+2: nop; 
+253: begin_atomic;
+254:  load t0 = B0;
+255:  load t1 = B1;
+256:  load t2 = B2;
+257:  load t3 = B3;
+258:  load t4 = B4;
+259:  load t5 = B5;
+
+ /* update predicate - B0: (f = 1) */
+260:   store B0 = choose((t2 != 0), (t2 == 0));
+
+
+261: assume(!((t4 != 0 && t5 != 0))); 
+
+262: end_atomic;
+
+/* Statement: if (f != 1) */ 
+3: nop; 
+266: begin_atomic;
+267: ifvar34 = 0;
+268: load t0 = B0;
+269: load t1 = B1;
+270: load t2 = B2;
+271: load t3 = B3;
+272: load t4 = B4;
+273: load t5 = B5;
+274: end_atomic;
+
+275: if (*) goto 263;
+276: if (true) goto 264;
+263: assume(!((t0 != 0))); 
+277: ifvar34 = 1;
+278:   if (true) goto 11; 
+
+264:  if (ifvar34 == 0) goto 279; 
+280: if (true) goto 265;
+279: assume(!((t0 == 0))); 
+265: nop;
+
+
+/* Statement: t = turn */
+4: nop; 
+281: begin_atomic;
+282:  load t0 = B0;
+283:  load t1 = B1;
+284:  load t2 = B2;
+285:  load t3 = B3;
+286:  load t4 = B4;
+287:  load t5 = B5;
+
+ /* update predicate - B1: (t = 0) */
+288:   store B1 = choose((t5 != 0), (t4 != 0) || (t5 == 0));
+
+
+289: assume(!((t4 != 0 && t5 != 0))); 
+
+290: end_atomic;
+
+/* Statement: if (t = 1) */ 
+5: nop; 
+294: begin_atomic;
+295: ifvar39 = 0;
+296: load t0 = B0;
+297: load t1 = B1;
+298: load t2 = B2;
+299: load t3 = B3;
+300: load t4 = B4;
+301: load t5 = B5;
+302: end_atomic;
+
+303: if (*) goto 291;
+304: if (true) goto 292;
+291: assume(!((t1 != 0))); 
+305: ifvar39 = 1;
+306:   if (true) goto 2; 
+
+292:  if (ifvar39 == 0) goto 307; 
+308: if (true) goto 293;
+307: assume(!(false)); 
+293: nop;
+
+
+/* Statement: flag1 = 0 */
+6: nop; 
+309: begin_atomic;
+310:  load t0 = B0;
+311:  load t1 = B1;
+312:  load t2 = B2;
+313:  load t3 = B3;
+314:  load t4 = B4;
+315:  load t5 = B5;
+
+ /* update predicate - B3: (flag1 = 1) */
+316:   store B3 = choose(false, true);
+
+
+317: assume(!((t4 != 0 && t5 != 0))); 
+
+318: end_atomic;
+
+/* Statement: t = turn */
+7: nop; 
+319: begin_atomic;
+320:  load t0 = B0;
+321:  load t1 = B1;
+322:  load t2 = B2;
+323:  load t3 = B3;
+324:  load t4 = B4;
+325:  load t5 = B5;
+
+ /* update predicate - B1: (t = 0) */
+326:   store B1 = choose((t5 != 0), (t4 != 0) || (t5 == 0));
+
+
+327: assume(!((t4 != 0 && t5 != 0))); 
+
+328: end_atomic;
+
+/* Statement: if (t != 1) */ 
+8: nop; 
+332: begin_atomic;
+333: ifvar45 = 0;
+334: load t0 = B0;
+335: load t1 = B1;
+336: load t2 = B2;
+337: load t3 = B3;
+338: load t4 = B4;
+339: load t5 = B5;
+340: end_atomic;
+
+341: if (*) goto 329;
+342: if (true) goto 330;
+329: assume(!(false)); 
+343: ifvar45 = 1;
+344:   if (true) goto 7; 
+
+330:  if (ifvar45 == 0) goto 345; 
+346: if (true) goto 331;
+345: assume(!((t1 != 0))); 
+331: nop;
+
+
+/* Statement: flag1 = 1 */
+9: nop; 
+347: begin_atomic;
+348:  load t0 = B0;
+349:  load t1 = B1;
+350:  load t2 = B2;
+351:  load t3 = B3;
+352:  load t4 = B4;
+353:  load t5 = B5;
+
+ /* update predicate - B3: (flag1 = 1) */
+354:   store B3 = choose(true, false);
+
+
+355: assume(!((t4 != 0 && t5 != 0))); 
+
+356: end_atomic;
+
+/* Statement: if (true) */ 
+10: nop; 
+360: begin_atomic;
+361: ifvar50 = 0;
+362: load t0 = B0;
+363: load t1 = B1;
+364: load t2 = B2;
+365: load t3 = B3;
+366: load t4 = B4;
+367: load t5 = B5;
+368: end_atomic;
+
+369: if (*) goto 357;
+370: if (true) goto 358;
+357: assume(!(false)); 
+371: ifvar50 = 1;
+372:   if (true) goto 2; 
+
+358:  if (ifvar50 == 0) goto 373; 
+374: if (true) goto 359;
+373: assume(!(true)); 
+359: nop;
+
+11: nop; 
+
+
+/* Statement: turn = 0 */
+12: nop; 
+375: begin_atomic;
+376:  load t0 = B0;
+377:  load t1 = B1;
+378:  load t2 = B2;
+379:  load t3 = B3;
+380:  load t4 = B4;
+381:  load t5 = B5;
+
+ /* update predicate - B4: (turn = 1) */
+382:   store B4 = choose(false, true);
+
+
+ /* update predicate - B5: (turn = 0) */
+383:   store B5 = choose(true, false);
+384: assume(!((t4 != 0 && t5 != 0))); 
+
+385: end_atomic;
+
+/* Statement: flag1 = 0 */
+13: nop; 
+386: begin_atomic;
+387:  load t0 = B0;
+388:  load t1 = B1;
+389:  load t2 = B2;
+390:  load t3 = B3;
+391:  load t4 = B4;
+392:  load t5 = B5;
+
+ /* update predicate - B3: (flag1 = 1) */
+393:   store B3 = choose(false, true);
+
+
+394: assume(!((t4 != 0 && t5 != 0))); 
+
+395: end_atomic;
+14:   if (true) goto 1; 
+
+assert always ((pc{1} != 11) || (pc{2} != 11));

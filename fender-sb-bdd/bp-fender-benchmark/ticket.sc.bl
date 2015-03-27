@@ -1,0 +1,612 @@
+shared B0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, B13;
+local t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, ifvar1, ifvar2;
+
+init
+13: store B0 = *;
+14: store B1 = *;
+15: store B2 = *;
+16: store B3 = *;
+17: store B4 = *;
+18: store B5 = *;
+19: store B6 = *;
+20: store B7 = *;
+21: store B8 = *;
+22: store B9 = *;
+23: store B10 = *;
+24: store B11 = *;
+25: store B12 = *;
+26: store B13 = *;
+
+27: load t0 = B0;
+28: load t1 = B1;
+29: load t2 = B2;
+30: load t3 = B3;
+31: load t4 = B4;
+32: load t5 = B5;
+33: load t6 = B6;
+34: load t7 = B7;
+35: load t8 = B8;
+36: load t9 = B9;
+37: load t10 = B10;
+38: load t11 = B11;
+39: load t12 = B12;
+40: load t13 = B13;
+
+41: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+42: nop; 
+
+/* Statement que = 0 */
+43:  load t0 = B0;
+44:  load t1 = B1;
+45:  load t2 = B2;
+46:  load t3 = B3;
+47:  load t6 = B6;
+48:  load t7 = B7;
+49:  load t8 = B8;
+50:  load t9 = B9;
+51:  load t10 = B10;
+52:  load t11 = B11;
+
+ /* update predicate - B0: (que = 0) */
+53:   store B0 = choose(true, false);
+
+
+ /* update predicate - B1: (l1q = que) */
+54:   store B1 = choose((t0 != 0 && t1 != 0), (t0 != 0 && t1 == 0) || (t0 != 0 && t2 != 0) || (t0 != 0 && t3 != 0) || (t0 == 0 && t1 != 0));
+
+
+ /* update predicate - B2: (l1q = (que + 1)) */
+55:   store B2 = choose((t0 != 0 && t2 != 0), (t0 != 0 && t1 != 0) || (t0 != 0 && t2 == 0) || (t0 != 0 && t3 != 0) || (t0 == 0 && t2 != 0));
+
+
+ /* update predicate - B3: (l1q = (que - 1)) */
+56:   store B3 = choose((t0 != 0 && t3 != 0), (t0 != 0 && t1 != 0) || (t0 != 0 && t2 != 0) || (t0 != 0 && t3 == 0) || (t0 == 0 && t3 != 0));
+
+
+ /* update predicate - B6: (que = deq) */
+57:   store B6 = choose((t0 != 0 && t6 != 0), (t0 != 0 && t6 == 0) || (t0 != 0 && t7 != 0) || (t0 != 0 && t8 != 0) || (t0 == 0 && t6 != 0));
+
+
+ /* update predicate - B7: (que = (deq+1)) */
+58:   store B7 = choose((t0 != 0 && t7 != 0), (t0 != 0 && t6 != 0) || (t0 != 0 && t7 == 0) || (t0 != 0 && t8 != 0) || (t0 == 0 && t7 != 0));
+
+
+ /* update predicate - B8: (que = (deq+2)) */
+59:   store B8 = choose((t0 != 0 && t8 != 0), (t0 != 0 && t6 != 0) || (t0 != 0 && t7 != 0) || (t0 != 0 && t8 == 0) || (t0 == 0 && t8 != 0));
+
+
+ /* update predicate - B9: (l2q = que) */
+60:   store B9 = choose((t0 != 0 && t9 != 0), (t0 != 0 && t9 == 0) || (t0 != 0 && t10 != 0) || (t0 != 0 && t11 != 0) || (t0 == 0 && t9 != 0));
+
+
+ /* update predicate - B10: (l2q = (que + 1)) */
+61:   store B10 = choose((t0 != 0 && t10 != 0), (t0 != 0 && t9 != 0) || (t0 != 0 && t10 == 0) || (t0 != 0 && t11 != 0) || (t0 == 0 && t10 != 0));
+
+
+ /* update predicate - B11: (l2q = (que - 1)) */
+62:   store B11 = choose((t0 != 0 && t11 != 0), (t0 != 0 && t9 != 0) || (t0 != 0 && t10 != 0) || (t0 != 0 && t11 == 0) || (t0 == 0 && t11 != 0));
+
+
+63: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+64: nop; 
+
+/* Statement deq = 0 */
+65:  load t0 = B0;
+66:  load t4 = B4;
+67:  load t5 = B5;
+68:  load t6 = B6;
+69:  load t7 = B7;
+70:  load t8 = B8;
+71:  load t12 = B12;
+72:  load t13 = B13;
+
+ /* update predicate - B4: (l1deq = deq) */
+73:   store B4 = choose((t0 != 0 && t4 != 0 && t6 != 0) || (t0 != 0 && t5 != 0 && t7 != 0), (t0 != 0 && t4 != 0 && t6 == 0) || (t0 != 0 && t4 != 0 && t7 != 0) || (t0 != 0 && t4 != 0 && t8 != 0) || (t0 != 0 && t4 == 0 && t6 != 0) || (t0 != 0 && t5 != 0 && t6 != 0) || (t0 != 0 && t5 != 0 && t7 == 0) || (t0 != 0 && t5 != 0 && t8 != 0) || (t0 != 0 && t5 == 0 && t7 != 0) || (t0 == 0 && t4 != 0 && t6 != 0) || (t0 == 0 && t5 != 0 && t7 != 0));
+
+
+ /* update predicate - B5: (l1deq = (deq+1)) */
+74:   store B5 = choose((t0 != 0 && t5 != 0 && t6 != 0), (t0 != 0 && t4 != 0 && t6 != 0) || (t0 != 0 && t4 != 0 && t7 != 0) || (t0 != 0 && t4 != 0 && t8 != 0) || (t0 != 0 && t5 != 0 && t6 == 0) || (t0 != 0 && t5 != 0 && t7 != 0) || (t0 != 0 && t5 != 0 && t8 != 0) || (t0 != 0 && t5 == 0 && t6 != 0) || (t0 == 0 && t5 != 0 && t6 != 0));
+
+
+ /* update predicate - B6: (que = deq) */
+75:   store B6 = choose((t0 != 0), (t0 == 0));
+
+
+ /* update predicate - B7: (que = (deq+1)) */
+76:   store B7 = choose(false, (t0 != 0));
+
+
+ /* update predicate - B8: (que = (deq+2)) */
+77:   store B8 = choose(false, (t0 != 0));
+
+
+ /* update predicate - B12: (l2deq = deq)   */
+78:   store B12 = choose((t0 != 0 && t6 != 0 && t12 != 0) || (t0 != 0 && t7 != 0 && t13 != 0), (t0 != 0 && t6 != 0 && t12 == 0) || (t0 != 0 && t6 != 0 && t13 != 0) || (t0 != 0 && t6 == 0 && t12 != 0) || (t0 != 0 && t7 != 0 && t12 != 0) || (t0 != 0 && t7 != 0 && t13 == 0) || (t0 != 0 && t7 == 0 && t13 != 0) || (t0 != 0 && t8 != 0 && t12 != 0) || (t0 != 0 && t8 != 0 && t13 != 0) || (t0 == 0 && t6 != 0 && t12 != 0) || (t0 == 0 && t7 != 0 && t13 != 0));
+
+
+ /* update predicate - B13: (l2deq = (deq+1)) */
+79:   store B13 = choose((t0 != 0 && t6 != 0 && t13 != 0), (t0 != 0 && t6 != 0 && t12 != 0) || (t0 != 0 && t6 != 0 && t13 == 0) || (t0 != 0 && t6 == 0 && t13 != 0) || (t0 != 0 && t7 != 0 && t12 != 0) || (t0 != 0 && t7 != 0 && t13 != 0) || (t0 != 0 && t8 != 0 && t12 != 0) || (t0 != 0 && t8 != 0 && t13 != 0) || (t0 == 0 && t6 != 0 && t13 != 0));
+80: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+
+
+process 1
+1: begin_atomic;
+
+81: nop; 
+
+/* Statement l1q = que */
+
+ /* update predicate - B1: (l1q = que) */
+82:   store B1 = choose(true, false);
+
+
+ /* update predicate - B2: (l1q = (que + 1)) */
+83:   store B2 = choose(false, true);
+
+
+ /* update predicate - B3: (l1q = (que - 1)) */
+84:   store B3 = choose(false, true);
+
+
+85: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+86: nop; 
+
+/* Statement l1q = l1q + 1 */
+87:  load t1 = B1;
+88:  load t2 = B2;
+89:  load t3 = B3;
+
+ /* update predicate - B1: (l1q = que) */
+90:   store B1 = choose((t3 != 0), (t1 != 0) || (t2 != 0) || (t3 == 0));
+
+
+ /* update predicate - B2: (l1q = (que + 1)) */
+91:   store B2 = choose((t1 != 0), (t1 == 0) || (t2 != 0) || (t3 != 0));
+
+
+ /* update predicate - B3: (l1q = (que - 1)) */
+92:   store B3 = choose(false, (t1 != 0) || (t2 != 0) || (t3 != 0));
+
+
+93: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+94: nop; 
+
+/* Statement que = l1q */
+95:  load t0 = B0;
+96:  load t1 = B1;
+97:  load t2 = B2;
+98:  load t3 = B3;
+99:  load t6 = B6;
+100:  load t7 = B7;
+101:  load t8 = B8;
+102:  load t9 = B9;
+103:  load t10 = B10;
+104:  load t11 = B11;
+
+ /* update predicate - B0: (que = 0) */
+105:   store B0 = choose((t0 != 0 && t1 != 0), (t0 != 0 && t1 == 0) || (t0 != 0 && t2 != 0) || (t0 != 0 && t3 != 0) || (t0 == 0 && t1 != 0));
+
+
+ /* update predicate - B1: (l1q = que) */
+106:   store B1 = choose(true, false);
+
+
+ /* update predicate - B2: (l1q = (que + 1)) */
+107:   store B2 = choose(false, true);
+
+
+ /* update predicate - B3: (l1q = (que - 1)) */
+108:   store B3 = choose(false, true);
+
+
+ /* update predicate - B6: (que = deq) */
+109:   store B6 = choose((t1 != 0 && t6 != 0) || (t3 != 0 && t7 != 0), (t1 != 0 && t6 == 0) || (t1 != 0 && t7 != 0) || (t1 != 0 && t8 != 0) || (t1 == 0 && t6 != 0) || (t2 != 0 && t6 != 0) || (t2 != 0 && t7 != 0) || (t2 != 0 && t8 != 0) || (t3 != 0 && t6 != 0) || (t3 != 0 && t7 == 0) || (t3 != 0 && t8 != 0) || (t3 == 0 && t7 != 0));
+
+
+ /* update predicate - B7: (que = (deq+1)) */
+110:   store B7 = choose((t1 != 0 && t7 != 0) || (t2 != 0 && t6 != 0) || (t3 != 0 && t8 != 0), (t1 != 0 && t6 != 0) || (t1 != 0 && t7 == 0) || (t1 != 0 && t8 != 0) || (t1 == 0 && t7 != 0) || (t2 != 0 && t6 == 0) || (t2 != 0 && t7 != 0) || (t2 != 0 && t8 != 0) || (t2 == 0 && t6 != 0) || (t3 != 0 && t6 != 0) || (t3 != 0 && t7 != 0) || (t3 != 0 && t8 == 0) || (t3 == 0 && t8 != 0));
+
+
+ /* update predicate - B8: (que = (deq+2)) */
+111:   store B8 = choose((t1 != 0 && t8 != 0) || (t2 != 0 && t7 != 0), (t1 != 0 && t6 != 0) || (t1 != 0 && t7 != 0) || (t1 != 0 && t8 == 0) || (t1 == 0 && t8 != 0) || (t2 != 0 && t6 != 0) || (t2 != 0 && t7 == 0) || (t2 != 0 && t8 != 0) || (t2 == 0 && t7 != 0) || (t3 != 0 && t6 != 0) || (t3 != 0 && t7 != 0) || (t3 != 0 && t8 != 0));
+
+
+ /* update predicate - B9: (l2q = que) */
+112:   store B9 = choose((t1 != 0 && t9 != 0) || (t2 != 0 && t10 != 0) || (t3 != 0 && t11 != 0), (t1 != 0 && t9 == 0) || (t1 != 0 && t10 != 0) || (t1 != 0 && t11 != 0) || (t1 == 0 && t9 != 0) || (t2 != 0 && t9 != 0) || (t2 != 0 && t10 == 0) || (t2 != 0 && t11 != 0) || (t2 == 0 && t10 != 0) || (t3 != 0 && t9 != 0) || (t3 != 0 && t10 != 0) || (t3 != 0 && t11 == 0) || (t3 == 0 && t11 != 0));
+
+
+ /* update predicate - B10: (l2q = (que + 1)) */
+113:   store B10 = choose((t1 != 0 && t10 != 0) || (t3 != 0 && t9 != 0), (t1 != 0 && t9 != 0) || (t1 != 0 && t10 == 0) || (t1 != 0 && t11 != 0) || (t1 == 0 && t10 != 0) || (t2 != 0 && t9 != 0) || (t2 != 0 && t10 != 0) || (t2 != 0 && t11 != 0) || (t3 != 0 && t9 == 0) || (t3 != 0 && t10 != 0) || (t3 != 0 && t11 != 0) || (t3 == 0 && t9 != 0));
+
+
+ /* update predicate - B11: (l2q = (que - 1)) */
+114:   store B11 = choose((t1 != 0 && t11 != 0) || (t2 != 0 && t9 != 0), (t1 != 0 && t9 != 0) || (t1 != 0 && t10 != 0) || (t1 != 0 && t11 == 0) || (t1 == 0 && t11 != 0) || (t2 != 0 && t9 == 0) || (t2 != 0 && t10 != 0) || (t2 != 0 && t11 != 0) || (t2 == 0 && t9 != 0) || (t3 != 0 && t9 != 0) || (t3 != 0 && t10 != 0) || (t3 != 0 && t11 != 0));
+
+
+115: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+116: nop; 
+
+/* Statement l1q = l1q - 1 */
+117:  load t1 = B1;
+118:  load t2 = B2;
+119:  load t3 = B3;
+
+ /* update predicate - B1: (l1q = que) */
+120:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0) || (t3 != 0));
+
+
+ /* update predicate - B2: (l1q = (que + 1)) */
+121:   store B2 = choose(false, (t1 != 0) || (t2 != 0) || (t3 != 0));
+
+
+ /* update predicate - B3: (l1q = (que - 1)) */
+122:   store B3 = choose((t1 != 0), (t1 == 0) || (t2 != 0) || (t3 != 0));
+
+
+123: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+124: end_atomic;
+
+6: nop; 
+
+/* Statement l1deq = deq */
+125: begin_atomic;
+
+ /* update predicate - B4: (l1deq = deq) */
+126:   store B4 = choose(true, false);
+
+
+ /* update predicate - B5: (l1deq = (deq+1)) */
+127:   store B5 = choose(false, true);
+
+
+128: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+129: end_atomic;
+130: nop; 
+
+/* Statement if (l1q == l1deq) */ 
+134: begin_atomic;
+135: ifvar1 = 0;
+
+136: if (*) goto 131;
+137: if (true) goto 132;
+131: assume(!((B1 != 0 && B4 != 0 && B6 == 0) || (B1 != 0 && B4 != 0 && B7 != 0) || (B1 != 0 && B4 != 0 && B8 != 0) || (B1 != 0 && B4 == 0 && B6 != 0) || (B1 != 0 && B5 != 0 && B6 != 0) || (B1 != 0 && B5 != 0 && B7 == 0) || (B1 != 0 && B5 != 0 && B8 != 0) || (B1 != 0 && B5 == 0 && B7 != 0) || (B1 == 0 && B4 != 0 && B6 != 0) || (B1 == 0 && B5 != 0 && B7 != 0) || (B2 != 0 && B4 != 0 && B6 != 0) || (B2 != 0 && B4 != 0 && B7 != 0) || (B2 != 0 && B4 != 0 && B8 != 0) || (B2 != 0 && B5 != 0 && B6 == 0) || (B2 != 0 && B5 != 0 && B7 != 0) || (B2 != 0 && B5 != 0 && B8 != 0) || (B2 != 0 && B5 == 0 && B6 != 0) || (B2 == 0 && B5 != 0 && B6 != 0) || (B3 != 0 && B4 != 0 && B6 != 0) || (B3 != 0 && B4 != 0 && B7 == 0) || (B3 != 0 && B4 != 0 && B8 != 0) || (B3 != 0 && B4 == 0 && B7 != 0) || (B3 != 0 && B5 != 0 && B6 != 0) || (B3 != 0 && B5 != 0 && B7 != 0) || (B3 != 0 && B5 != 0 && B8 == 0) || (B3 != 0 && B5 == 0 && B8 != 0) || (B3 == 0 && B4 != 0 && B7 != 0) || (B3 == 0 && B5 != 0 && B8 != 0))); 
+138: ifvar1 = 1;
+139: end_atomic;
+
+/* Statement goto goto 11 */ 
+140:   if (true) goto 11; 
+
+142: begin_atomic;
+132:  if (ifvar1 == 0) goto 141; 
+143: if (true) goto 133;
+141: assume(!((B1 != 0 && B4 != 0 && B6 != 0) || (B1 != 0 && B5 != 0 && B7 != 0) || (B2 != 0 && B5 != 0 && B6 != 0) || (B3 != 0 && B4 != 0 && B7 != 0) || (B3 != 0 && B5 != 0 && B8 != 0))); 
+144: end_atomic;
+
+/* Statement goto goto 6 */ 
+145:   if (true) goto 6; 
+
+11: nop; 
+
+146: nop; 
+
+/* Statement l1deq = deq */
+147: begin_atomic;
+
+ /* update predicate - B4: (l1deq = deq) */
+148:   store B4 = choose(true, false);
+
+
+ /* update predicate - B5: (l1deq = (deq+1)) */
+149:   store B5 = choose(false, true);
+
+
+150: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+151: end_atomic;
+152: nop; 
+
+/* Statement l1deq = l1deq + 1 */
+153: begin_atomic;
+154:  load t4 = B4;
+155:  load t5 = B5;
+
+ /* update predicate - B4: (l1deq = deq) */
+156:   store B4 = choose(false, (t4 != 0) || (t5 != 0));
+
+
+ /* update predicate - B5: (l1deq = (deq+1)) */
+157:   store B5 = choose((t4 != 0), (t4 == 0) || (t5 != 0));
+
+
+158: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+159: end_atomic;
+160: nop; 
+
+/* Statement deq = l1deq */
+161: begin_atomic;
+162:  load t4 = B4;
+163:  load t5 = B5;
+164:  load t6 = B6;
+165:  load t7 = B7;
+166:  load t8 = B8;
+167:  load t12 = B12;
+168:  load t13 = B13;
+
+ /* update predicate - B4: (l1deq = deq) */
+169:   store B4 = choose(true, false);
+
+
+ /* update predicate - B5: (l1deq = (deq+1)) */
+170:   store B5 = choose(false, true);
+
+
+ /* update predicate - B6: (que = deq) */
+171:   store B6 = choose((t4 != 0 && t6 != 0) || (t5 != 0 && t7 != 0), (t4 != 0 && t6 == 0) || (t4 != 0 && t7 != 0) || (t4 != 0 && t8 != 0) || (t4 == 0 && t6 != 0) || (t5 != 0 && t6 != 0) || (t5 != 0 && t7 == 0) || (t5 != 0 && t8 != 0) || (t5 == 0 && t7 != 0));
+
+
+ /* update predicate - B7: (que = (deq+1)) */
+172:   store B7 = choose((t4 != 0 && t7 != 0) || (t5 != 0 && t8 != 0), (t4 != 0 && t6 != 0) || (t4 != 0 && t7 == 0) || (t4 != 0 && t8 != 0) || (t4 == 0 && t7 != 0) || (t5 != 0 && t6 != 0) || (t5 != 0 && t7 != 0) || (t5 != 0 && t8 == 0) || (t5 == 0 && t8 != 0));
+
+
+ /* update predicate - B8: (que = (deq+2)) */
+173:   store B8 = choose((t4 != 0 && t8 != 0), (t4 != 0 && t6 != 0) || (t4 != 0 && t7 != 0) || (t4 != 0 && t8 == 0) || (t4 == 0 && t8 != 0) || (t5 != 0 && t6 != 0) || (t5 != 0 && t7 != 0) || (t5 != 0 && t8 != 0));
+
+
+ /* update predicate - B12: (l2deq = deq)   */
+174:   store B12 = choose((t4 != 0 && t12 != 0) || (t5 != 0 && t13 != 0), (t4 != 0 && t12 == 0) || (t4 != 0 && t13 != 0) || (t4 == 0 && t12 != 0) || (t5 != 0 && t12 != 0) || (t5 != 0 && t13 == 0) || (t5 == 0 && t13 != 0));
+
+
+ /* update predicate - B13: (l2deq = (deq+1)) */
+175:   store B13 = choose((t4 != 0 && t13 != 0), (t4 != 0 && t12 != 0) || (t4 != 0 && t13 == 0) || (t4 == 0 && t13 != 0) || (t5 != 0 && t12 != 0) || (t5 != 0 && t13 != 0));
+176: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+177: end_atomic;
+/* Statement goto goto 1 */ 
+178:   if (true) goto 1; 
+
+
+process 2
+1: begin_atomic;
+
+179: nop; 
+
+/* Statement l2q = que */
+
+ /* update predicate - B9: (l2q = que) */
+180:   store B9 = choose(true, false);
+
+
+ /* update predicate - B10: (l2q = (que + 1)) */
+181:   store B10 = choose(false, true);
+
+
+ /* update predicate - B11: (l2q = (que - 1)) */
+182:   store B11 = choose(false, true);
+
+
+183: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+184: nop; 
+
+/* Statement l2q = l2q + 1 */
+185:  load t9 = B9;
+186:  load t10 = B10;
+187:  load t11 = B11;
+
+ /* update predicate - B9: (l2q = que) */
+188:   store B9 = choose((t11 != 0), (t9 != 0) || (t10 != 0) || (t11 == 0));
+
+
+ /* update predicate - B10: (l2q = (que + 1)) */
+189:   store B10 = choose((t9 != 0), (t9 == 0) || (t10 != 0) || (t11 != 0));
+
+
+ /* update predicate - B11: (l2q = (que - 1)) */
+190:   store B11 = choose(false, (t9 != 0) || (t10 != 0) || (t11 != 0));
+
+
+191: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+192: nop; 
+
+/* Statement que = l2q */
+193:  load t0 = B0;
+194:  load t1 = B1;
+195:  load t2 = B2;
+196:  load t3 = B3;
+197:  load t6 = B6;
+198:  load t7 = B7;
+199:  load t8 = B8;
+200:  load t9 = B9;
+201:  load t10 = B10;
+202:  load t11 = B11;
+
+ /* update predicate - B0: (que = 0) */
+203:   store B0 = choose((t0 != 0 && t9 != 0), (t0 != 0 && t9 == 0) || (t0 != 0 && t10 != 0) || (t0 != 0 && t11 != 0) || (t0 == 0 && t9 != 0));
+
+
+ /* update predicate - B1: (l1q = que) */
+204:   store B1 = choose((t1 != 0 && t9 != 0) || (t2 != 0 && t10 != 0) || (t3 != 0 && t11 != 0), (t1 != 0 && t9 == 0) || (t1 != 0 && t10 != 0) || (t1 != 0 && t11 != 0) || (t1 == 0 && t9 != 0) || (t2 != 0 && t9 != 0) || (t2 != 0 && t10 == 0) || (t2 != 0 && t11 != 0) || (t2 == 0 && t10 != 0) || (t3 != 0 && t9 != 0) || (t3 != 0 && t10 != 0) || (t3 != 0 && t11 == 0) || (t3 == 0 && t11 != 0));
+
+
+ /* update predicate - B2: (l1q = (que + 1)) */
+205:   store B2 = choose((t1 != 0 && t11 != 0) || (t2 != 0 && t9 != 0), (t1 != 0 && t9 != 0) || (t1 != 0 && t10 != 0) || (t1 != 0 && t11 == 0) || (t1 == 0 && t11 != 0) || (t2 != 0 && t9 == 0) || (t2 != 0 && t10 != 0) || (t2 != 0 && t11 != 0) || (t2 == 0 && t9 != 0) || (t3 != 0 && t9 != 0) || (t3 != 0 && t10 != 0) || (t3 != 0 && t11 != 0));
+
+
+ /* update predicate - B3: (l1q = (que - 1)) */
+206:   store B3 = choose((t1 != 0 && t10 != 0) || (t3 != 0 && t9 != 0), (t1 != 0 && t9 != 0) || (t1 != 0 && t10 == 0) || (t1 != 0 && t11 != 0) || (t1 == 0 && t10 != 0) || (t2 != 0 && t9 != 0) || (t2 != 0 && t10 != 0) || (t2 != 0 && t11 != 0) || (t3 != 0 && t9 == 0) || (t3 != 0 && t10 != 0) || (t3 != 0 && t11 != 0) || (t3 == 0 && t9 != 0));
+
+
+ /* update predicate - B6: (que = deq) */
+207:   store B6 = choose((t6 != 0 && t9 != 0) || (t7 != 0 && t11 != 0), (t6 != 0 && t9 == 0) || (t6 != 0 && t10 != 0) || (t6 != 0 && t11 != 0) || (t6 == 0 && t9 != 0) || (t7 != 0 && t9 != 0) || (t7 != 0 && t10 != 0) || (t7 != 0 && t11 == 0) || (t7 == 0 && t11 != 0) || (t8 != 0 && t9 != 0) || (t8 != 0 && t10 != 0) || (t8 != 0 && t11 != 0));
+
+
+ /* update predicate - B7: (que = (deq+1)) */
+208:   store B7 = choose((t6 != 0 && t10 != 0) || (t7 != 0 && t9 != 0) || (t8 != 0 && t11 != 0), (t6 != 0 && t9 != 0) || (t6 != 0 && t10 == 0) || (t6 != 0 && t11 != 0) || (t6 == 0 && t10 != 0) || (t7 != 0 && t9 == 0) || (t7 != 0 && t10 != 0) || (t7 != 0 && t11 != 0) || (t7 == 0 && t9 != 0) || (t8 != 0 && t9 != 0) || (t8 != 0 && t10 != 0) || (t8 != 0 && t11 == 0) || (t8 == 0 && t11 != 0));
+
+
+ /* update predicate - B8: (que = (deq+2)) */
+209:   store B8 = choose((t7 != 0 && t10 != 0) || (t8 != 0 && t9 != 0), (t6 != 0 && t9 != 0) || (t6 != 0 && t10 != 0) || (t6 != 0 && t11 != 0) || (t7 != 0 && t9 != 0) || (t7 != 0 && t10 == 0) || (t7 != 0 && t11 != 0) || (t7 == 0 && t10 != 0) || (t8 != 0 && t9 == 0) || (t8 != 0 && t10 != 0) || (t8 != 0 && t11 != 0) || (t8 == 0 && t9 != 0));
+
+
+ /* update predicate - B9: (l2q = que) */
+210:   store B9 = choose(true, false);
+
+
+ /* update predicate - B10: (l2q = (que + 1)) */
+211:   store B10 = choose(false, true);
+
+
+ /* update predicate - B11: (l2q = (que - 1)) */
+212:   store B11 = choose(false, true);
+
+
+213: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+214: nop; 
+
+/* Statement l2q = l2q - 1 */
+215:  load t9 = B9;
+216:  load t10 = B10;
+217:  load t11 = B11;
+
+ /* update predicate - B9: (l2q = que) */
+218:   store B9 = choose((t10 != 0), (t9 != 0) || (t10 == 0) || (t11 != 0));
+
+
+ /* update predicate - B10: (l2q = (que + 1)) */
+219:   store B10 = choose(false, (t9 != 0) || (t10 != 0) || (t11 != 0));
+
+
+ /* update predicate - B11: (l2q = (que - 1)) */
+220:   store B11 = choose((t9 != 0), (t9 == 0) || (t10 != 0) || (t11 != 0));
+
+
+221: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+222: end_atomic;
+
+6: nop; 
+
+/* Statement l2deq = deq */
+223: begin_atomic;
+
+ /* update predicate - B12: (l2deq = deq)   */
+224:   store B12 = choose(true, false);
+
+
+ /* update predicate - B13: (l2deq = (deq+1)) */
+225:   store B13 = choose(false, true);
+226: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+227: end_atomic;
+228: nop; 
+
+/* Statement if (l2q == l2deq) */ 
+232: begin_atomic;
+233: ifvar2 = 0;
+
+234: if (*) goto 229;
+235: if (true) goto 230;
+229: assume(!((B6 != 0 && B9 != 0 && B12 == 0) || (B6 != 0 && B9 != 0 && B13 != 0) || (B6 != 0 && B9 == 0 && B12 != 0) || (B6 != 0 && B10 != 0 && B12 != 0) || (B6 != 0 && B10 != 0 && B13 == 0) || (B6 != 0 && B10 == 0 && B13 != 0) || (B6 != 0 && B11 != 0 && B12 != 0) || (B6 != 0 && B11 != 0 && B13 != 0) || (B6 == 0 && B9 != 0 && B12 != 0) || (B6 == 0 && B10 != 0 && B13 != 0) || (B7 != 0 && B9 != 0 && B12 != 0) || (B7 != 0 && B9 != 0 && B13 == 0) || (B7 != 0 && B9 == 0 && B13 != 0) || (B7 != 0 && B10 != 0 && B12 != 0) || (B7 != 0 && B10 != 0 && B13 != 0) || (B7 != 0 && B11 != 0 && B12 == 0) || (B7 != 0 && B11 != 0 && B13 != 0) || (B7 != 0 && B11 == 0 && B12 != 0) || (B7 == 0 && B9 != 0 && B13 != 0) || (B7 == 0 && B11 != 0 && B12 != 0) || (B8 != 0 && B9 != 0 && B12 != 0) || (B8 != 0 && B9 != 0 && B13 != 0) || (B8 != 0 && B10 != 0 && B12 != 0) || (B8 != 0 && B10 != 0 && B13 != 0) || (B8 != 0 && B11 != 0 && B12 != 0) || (B8 != 0 && B11 != 0 && B13 == 0) || (B8 != 0 && B11 == 0 && B13 != 0) || (B8 == 0 && B11 != 0 && B13 != 0))); 
+236: ifvar2 = 1;
+237: end_atomic;
+
+/* Statement goto goto 11 */ 
+238:   if (true) goto 11; 
+
+240: begin_atomic;
+230:  if (ifvar2 == 0) goto 239; 
+241: if (true) goto 231;
+239: assume(!((B6 != 0 && B9 != 0 && B12 != 0) || (B6 != 0 && B10 != 0 && B13 != 0) || (B7 != 0 && B9 != 0 && B13 != 0) || (B7 != 0 && B11 != 0 && B12 != 0) || (B8 != 0 && B11 != 0 && B13 != 0))); 
+242: end_atomic;
+
+/* Statement goto goto 6 */ 
+243:   if (true) goto 6; 
+
+11: nop; 
+
+244: nop; 
+
+/* Statement l2deq = deq */
+245: begin_atomic;
+
+ /* update predicate - B12: (l2deq = deq)   */
+246:   store B12 = choose(true, false);
+
+
+ /* update predicate - B13: (l2deq = (deq+1)) */
+247:   store B13 = choose(false, true);
+248: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+249: end_atomic;
+250: nop; 
+
+/* Statement l2deq = l2deq + 1 */
+251: begin_atomic;
+252:  load t12 = B12;
+253:  load t13 = B13;
+
+ /* update predicate - B12: (l2deq = deq)   */
+254:   store B12 = choose(false, (t12 != 0) || (t13 != 0));
+
+
+ /* update predicate - B13: (l2deq = (deq+1)) */
+255:   store B13 = choose((t12 != 0), (t12 == 0) || (t13 != 0));
+256: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+257: end_atomic;
+258: nop; 
+
+/* Statement deq = l2deq */
+259: begin_atomic;
+260:  load t4 = B4;
+261:  load t5 = B5;
+262:  load t6 = B6;
+263:  load t7 = B7;
+264:  load t8 = B8;
+265:  load t12 = B12;
+266:  load t13 = B13;
+
+ /* update predicate - B4: (l1deq = deq) */
+267:   store B4 = choose((t4 != 0 && t12 != 0) || (t5 != 0 && t13 != 0), (t4 != 0 && t12 == 0) || (t4 != 0 && t13 != 0) || (t4 == 0 && t12 != 0) || (t5 != 0 && t12 != 0) || (t5 != 0 && t13 == 0) || (t5 == 0 && t13 != 0));
+
+
+ /* update predicate - B5: (l1deq = (deq+1)) */
+268:   store B5 = choose((t5 != 0 && t12 != 0), (t4 != 0 && t12 != 0) || (t4 != 0 && t13 != 0) || (t5 != 0 && t12 == 0) || (t5 != 0 && t13 != 0) || (t5 == 0 && t12 != 0));
+
+
+ /* update predicate - B6: (que = deq) */
+269:   store B6 = choose((t6 != 0 && t12 != 0) || (t7 != 0 && t13 != 0), (t6 != 0 && t12 == 0) || (t6 != 0 && t13 != 0) || (t6 == 0 && t12 != 0) || (t7 != 0 && t12 != 0) || (t7 != 0 && t13 == 0) || (t7 == 0 && t13 != 0) || (t8 != 0 && t12 != 0) || (t8 != 0 && t13 != 0));
+
+
+ /* update predicate - B7: (que = (deq+1)) */
+270:   store B7 = choose((t7 != 0 && t12 != 0) || (t8 != 0 && t13 != 0), (t6 != 0 && t12 != 0) || (t6 != 0 && t13 != 0) || (t7 != 0 && t12 == 0) || (t7 != 0 && t13 != 0) || (t7 == 0 && t12 != 0) || (t8 != 0 && t12 != 0) || (t8 != 0 && t13 == 0) || (t8 == 0 && t13 != 0));
+
+
+ /* update predicate - B8: (que = (deq+2)) */
+271:   store B8 = choose((t8 != 0 && t12 != 0), (t6 != 0 && t12 != 0) || (t6 != 0 && t13 != 0) || (t7 != 0 && t12 != 0) || (t7 != 0 && t13 != 0) || (t8 != 0 && t12 == 0) || (t8 != 0 && t13 != 0) || (t8 == 0 && t12 != 0));
+
+
+ /* update predicate - B12: (l2deq = deq)   */
+272:   store B12 = choose(true, false);
+
+
+ /* update predicate - B13: (l2deq = (deq+1)) */
+273:   store B13 = choose(false, true);
+274: assume(!((B1 != 0 && B2 != 0) || (B1 != 0 && B3 != 0) || (B2 != 0 && B3 != 0) || (B4 != 0 && B5 != 0) || (B6 != 0 && B7 != 0) || (B6 != 0 && B8 != 0) || (B7 != 0 && B8 != 0) || (B9 != 0 && B10 != 0) || (B9 != 0 && B11 != 0) || (B10 != 0 && B11 != 0) || (B12 != 0 && B13 != 0))); 
+
+275: end_atomic;
+/* Statement goto goto 1 */ 
+276:   if (true) goto 1; 
+
+assert always ((pc{1}!=11) || (pc{2}!=11));

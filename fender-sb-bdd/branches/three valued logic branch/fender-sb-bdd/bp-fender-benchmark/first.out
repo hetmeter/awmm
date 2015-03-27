@@ -1,0 +1,153 @@
+--- Commencing parsing ---
+--- Finished parsing successfully. ---
+Printing out the parsed program:
+Shared: [B0, B1]
+Local: [t0, t1]
+[
+pid 0:
+[STORE B0 = *, STORE B1 = *, NOP, LOAD t0 = B0, LOAD t1 = B1, IF ((((t0 != 0) || (t0 == 0)) || (t1 != 0)) || (t1 == 0)) GOTO 59, IF true GOTO 56, STORE B0 = 1, IF true GOTO 58, IF false GOTO 63, IF true GOTO 57, STORE B0 = 0, IF true GOTO 58, STORE B0 = *, NOP, IF (t1 != 0) GOTO 69, IF true GOTO 66, STORE B1 = 1, IF true GOTO 68, IF (t1 == 0) GOTO 73, IF true GOTO 67, STORE B1 = 0, IF true GOTO 68, STORE B1 = *, NOP, t0 = 0, t1 = 0, BARRIER, END], 
+pid 1:
+[NOP, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, IF (t0 != 0) GOTO 84, IF true GOTO 81, STORE B0 = 1, IF true GOTO 83, IF (t0 == 0) GOTO 88, IF true GOTO 82, STORE B0 = 0, IF true GOTO 83, STORE B0 = *, NOP, IF (t0 != 0) GOTO 94, IF true GOTO 91, STORE B1 = 1, IF true GOTO 93, IF (t0 == 0) GOTO 98, IF true GOTO 92, STORE B1 = 0, IF true GOTO 93, STORE B1 = *, NOP, END_ATOMIC, NOP, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, IF (t1 != 0) GOTO 108, IF true GOTO 105, STORE B0 = 1, IF true GOTO 107, IF (t1 == 0) GOTO 112, IF true GOTO 106, STORE B0 = 0, IF true GOTO 107, STORE B0 = *, NOP, IF (t1 != 0) GOTO 118, IF true GOTO 115, STORE B1 = 1, IF true GOTO 117, IF (t1 == 0) GOTO 122, IF true GOTO 116, STORE B1 = 0, IF true GOTO 117, STORE B1 = *, NOP, END_ATOMIC, END]]
+
+--- STARTING EXPLORATION --- 
+Pushing initial state:<Shared:{B0=0, B1=0},<pid0, PC=51, {t0=0, t1=0}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+<Shared:{B0=0, B1=0},<pid0, PC=51, {t0=0, t1=0}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.51: STORE B0 = *
+<Shared:{B0=1, B1=0},<pid0, PC=52, {t0=0, t1=0}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.52: STORE B1 = *
+<Shared:{B0=1, B1=1},<pid0, PC=53, {t0=0, t1=0}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.53: NOP
+<Shared:{B0=1, B1=1},<pid0, PC=54, {t0=0, t1=0}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.54: LOAD t0 = B0
+<Shared:{B0=1, B1=1},<pid0, PC=55, {t0=1, t1=0}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.55: LOAD t1 = B1
+<Shared:{B0=1, B1=1},<pid0, PC=60, {t0=1, t1=1}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.60: IF ((((t0 != 0) || (t0 == 0)) || (t1 != 0)) || (t1 == 0)) GOTO 59
+<Shared:{B0=1, B1=1},<pid0, PC=59, {t0=1, t1=1}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.59: STORE B0 = 1
+<Shared:{B0=1, B1=1},<pid0, PC=62, {t0=1, t1=1}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.62: IF true GOTO 58
+<Shared:{B0=1, B1=1},<pid0, PC=58, {t0=1, t1=1}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.58: NOP
+<Shared:{B0=1, B1=1},<pid0, PC=70, {t0=1, t1=1}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.70: IF (t1 != 0) GOTO 69
+<Shared:{B0=1, B1=1},<pid0, PC=69, {t0=1, t1=1}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.69: STORE B1 = 1
+<Shared:{B0=1, B1=1},<pid0, PC=72, {t0=1, t1=1}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.72: IF true GOTO 68
+<Shared:{B0=1, B1=1},<pid0, PC=68, {t0=1, t1=1}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.68: NOP
+<Shared:{B0=1, B1=1},<pid0, PC=76, {t0=1, t1=1}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.76: t0 = 0
+<Shared:{B0=1, B1=1},<pid0, PC=77, {t0=0, t1=1}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.77: t1 = 0
+<Shared:{B0=1, B1=1},<pid0, PC=-2, {t0=0, t1=0}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+0.-2: BARRIER
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=1, {t0=0, t1=0}> >
+
+1.1: NOP
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=78, {t0=0, t1=0}> >
+
+1.78: BEGIN_ATOMIC
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=79, {t0=0, t1=0}> >
+
+1.79: LOAD t0 = B0
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=80, {t0=1, t1=0}> >
+
+1.80: LOAD t1 = B1
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=85, {t0=1, t1=1}> >
+
+1.85: IF (t0 != 0) GOTO 84
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=84, {t0=1, t1=1}> >
+
+1.84: STORE B0 = 1
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=87, {t0=1, t1=1}> >
+
+1.87: IF true GOTO 83
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=83, {t0=1, t1=1}> >
+
+1.83: NOP
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=95, {t0=1, t1=1}> >
+
+1.95: IF (t0 != 0) GOTO 94
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=94, {t0=1, t1=1}> >
+
+1.94: STORE B1 = 1
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=97, {t0=1, t1=1}> >
+
+1.97: IF true GOTO 93
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=93, {t0=1, t1=1}> >
+
+1.93: NOP
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=101, {t0=1, t1=1}> >
+
+1.101: END_ATOMIC
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=2, {t0=1, t1=1}> >
+
+1.2: NOP
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=102, {t0=1, t1=1}> >
+
+1.102: BEGIN_ATOMIC
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=103, {t0=1, t1=1}> >
+
+1.103: LOAD t0 = B0
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=104, {t0=1, t1=1}> >
+
+1.104: LOAD t1 = B1
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=109, {t0=1, t1=1}> >
+
+1.109: IF (t1 != 0) GOTO 108
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=108, {t0=1, t1=1}> >
+
+1.108: STORE B0 = 1
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=111, {t0=1, t1=1}> >
+
+1.111: IF true GOTO 107
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=107, {t0=1, t1=1}> >
+
+1.107: NOP
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=119, {t0=1, t1=1}> >
+
+1.119: IF (t1 != 0) GOTO 118
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=118, {t0=1, t1=1}> >
+
+1.118: STORE B1 = 1
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=121, {t0=1, t1=1}> >
+
+1.121: IF true GOTO 117
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=117, {t0=1, t1=1}> >
+
+1.117: NOP
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=125, {t0=1, t1=1}> >
+
+1.125: END_ATOMIC
+<Shared:{B0=1, B1=1},<pid0, PC=-1, {t0=0, t1=0}> ,<pid1, PC=-1, {t0=1, t1=1}> >
+
+Total states : 103
+Error states : 1
+Start generation
+Minimum size of dequeue: 0
+Avoid formula: True
+Solution: []
+---FINISHED---
+States: 103, Edges : 105
+Error states: 1
+Running Time: 67 ms
+Memory usage: 3 MB

@@ -1,0 +1,23 @@
+shared slot, index, latest, reading;
+local pair, lindex, out;
+
+init
+1: allocate slot[4];
+2: allocate index[2];
+3: store latest = 0;
+4: store reading = 0;
+
+process 1
+1: load pair = reading;
+2: pair = 1 - pair;
+3: load lindex = index[pair];
+4: index = 1 - lindex;
+5: store slot[pair * 2 + lindex] = 42;
+6: store index[pair] = lindex;
+7: store latest = pair;
+
+process 2
+1: load pair = latest;
+2: store reading = pair;
+3: load lindex = index[pair];
+4: load out = slot[pair * 2 + lindex];

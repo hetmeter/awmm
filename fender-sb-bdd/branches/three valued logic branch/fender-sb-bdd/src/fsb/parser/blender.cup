@@ -1,0 +1,279 @@
+package fsb.parser;
+import java_cup.runtime.*;
+import fsb.ast.*;
+import java.util.ArrayList;
+
+scan with {: return lexer.next_token(); :};
+
+
+parser code {: 
+  public boolean syntaxErrors;
+
+
+  Lexer lexer;
+
+  public parser(Lexer lex) {
+      super(lex);
+      lexer = lex;
+  }
+
+  
+  public void report_error(String message, Object info) {
+    syntaxErrors = true;
+    
+    System.out.println(message);
+    
+    if ( !(info instanceof Symbol) ) return;
+    Symbol symbol = (Symbol) info;
+    
+    if ( symbol.left < 0 || symbol.right < 0 ) return;
+    
+    System.out.println(" at line "+symbol.left+", column "+symbol.right);
+  }
+:}; 
+
+terminal		PLUS, MINUS, MUL;
+terminal		EQUAL, NEQ, LESS, GREATER;
+terminal		AND, OR, NOT;
+terminal		SEMI, COLON, COMMA;
+terminal		ASSIGN;
+terminal		LEFTBRACE, RIGHTBRACE;
+terminal		LEFTPAREN, RIGHTPAREN;
+terminal		LEFTCURLY, RIGHTCURLY;
+terminal		LOCAL, SHARED;
+terminal		LOAD, STORE, IF, GOTO, BARRIER, NOP, ALLOCATE, CAS, SWAP, ATOMICDEC;
+terminal		PROCESS, INIT;
+terminal		ASSERT, FINAL, ALWAYS;
+terminal		PC;
+terminal		BEGINATOMIC, ENDATOMIC;
+terminal		ASSUME;
+terminal		CHOOSE;
+terminal	Boolean	TRUE, FALSE;
+terminal	Integer	NUMBER;
+terminal	String	IDENT;
+terminal	String	C_COMMENT;
+
+non terminal	Declarations	decl_area;
+non terminal	ArrayList<String> shared_decl, local_decl, var_list;
+non terminal	ArrayList<Code>	code_area;
+non terminal	Code		proc, init_code;
+non terminal	ArrayList<Statement> stat_list;
+non terminal	Statement	statement, load_stat, store_stat, assign_stat, branch_stat;
+non terminal	Statement   barrier_stat, nop_stat, allocate_stat, cas_stat, swap_stat;
+non terminal	Statement	dec_stat, begin_atomic_stat, end_atomic_stat, assume_stat, choose_assign_stat, choose_store_stat;
+non terminal	BoolExpr	bool_expr;
+non terminal	AritExpr	arit_expr;
+non terminal 	AssertBoolExpr 	assert_bool_expr;
+non terminal 	AssertAritExpr 	assert_arit_expr;
+non terminal    SharedVal   shared_val;
+non terminal	Assert		assert_block;
+non terminal	MProgram	program;
+non terminal	Comment	c_comment;
+
+precedence left OR;
+precedence left AND;
+precedence left NOT;
+precedence left PLUS, MINUS;
+precedence left MUL;
+
+program ::= decl_area:d code_area:c
+	{: RESULT = new MProgram(d, c); :} 
+	| decl_area:d code_area:c assert_block:a
+	{: RESULT = new MProgram(d, c, a); :};
+	
+decl_area ::= shared_decl:s local_decl:l
+	{: RESULT = new Declarations(s, l); :};
+
+shared_decl ::= SHARED var_list:v SEMI
+	{: RESULT = v; :};
+local_decl ::= LOCAL var_list:v SEMI
+	{: RESULT = v; :};
+
+var_list ::= var_list:v COMMA IDENT:i
+	{: v.add(i); RESULT = v; :}
+	| IDENT:i
+	{: RESULT = new ArrayList<String>(); RESULT.add(i); :};
+	
+code_area ::= code_area:c proc:p
+	{: c.add(p); RESULT = c; :}
+	| init_code:p
+	{: RESULT = new ArrayList<Code>(); RESULT.add(p); :};
+
+init_code ::= INIT stat_list:s
+	  {: Statement barrier = new Barrier(); barrier.setLabel(-2); s.add(barrier); 
+	  Statement end = new End(); end.setLabel(-1); s.add(end); RESULT = new Code(0, s); :};
+
+proc ::= PROCESS NUMBER:n stat_list:s
+	{: Statement end = new End(); end.setLabel(-1); s.add(end); RESULT = new Code(n, s); :};
+
+stat_list ::= stat_list:l NUMBER:i COLON statement:s SEMI	
+	{: s.setLabel(i); l.add(s); RESULT = l; :}
+	    | NUMBER:i COLON statement:s SEMI
+	{: RESULT = new ArrayList<Statement>(); s.setLabel(i); RESULT.add(s); :}
+	    | stat_list:l c_comment:s
+	{: l.add(s); RESULT = l; :}
+		    | c_comment:s
+	{: RESULT = new ArrayList<Statement>(); RESULT.add(s); :}
+	;
+
+statement ::= load_stat:s 
+	{: RESULT = s; :}
+	| store_stat:s
+	{: RESULT = s; :}
+	| assign_stat:s
+	{: RESULT = s; :}
+	| branch_stat:s 
+	{: RESULT = s; :}
+	| nop_stat:s 
+	{: RESULT = s; :}
+	| allocate_stat:s 
+	{: RESULT = s; :}
+	| cas_stat:s 
+	{: RESULT = s; :}
+	| swap_stat:s 
+	{: RESULT = s; :}
+	| dec_stat:s 
+	{: RESULT = s; :}
+	| begin_atomic_stat:s 
+	{: RESULT = s; :}
+	| end_atomic_stat:s 
+	{: RESULT = s; :}
+	| assume_stat:s 
+	{: RESULT = s; :}
+	| choose_assign_stat:s
+	{: RESULT = s; :}
+	| choose_store_stat:s
+	{: RESULT = s; :}
+	| barrier_stat:s
+	{: RESULT = s; :};
+
+c_comment ::= C_COMMENT:s
+{: RESULT = new Comment(s); :};
+
+load_stat ::= LOAD IDENT:dst ASSIGN shared_val:src
+	{: RESULT = new Load(src, dst); :};
+
+store_stat ::= STORE shared_val:dst ASSIGN arit_expr:src
+	{: RESULT = new Store(src, dst); :}
+	| STORE shared_val:dst ASSIGN MUL
+	{: RESULT = new Store(new NondetArit(), dst); :};
+
+shared_val ::= IDENT:i
+        {: RESULT = new PrimitiveSharedVal(i); :}
+	| LEFTBRACE arit_expr:a RIGHTBRACE
+	{: RESULT = new DerefSharedVal(a); :};
+
+allocate_stat ::= ALLOCATE IDENT:dst LEFTBRACE arit_expr:num RIGHTBRACE
+	{: RESULT = new Allocate(dst, num); :};
+
+choose_assign_stat ::= IDENT:dst ASSIGN CHOOSE LEFTPAREN bool_expr:b1 COMMA bool_expr:b2 RIGHTPAREN
+	{: RESULT = new ChooseAssign(b1,b2, dst); :};
+
+choose_store_stat ::= STORE shared_val:dst ASSIGN CHOOSE LEFTPAREN bool_expr:b1 COMMA bool_expr:b2 RIGHTPAREN
+	{: RESULT = new ChooseStore(b1,b2, dst); :};
+
+assign_stat ::= IDENT:dst ASSIGN arit_expr:src
+	{: RESULT = new Assign(src, dst); :};
+
+branch_stat ::= IF bool_expr:cond GOTO NUMBER:label
+	{: RESULT = new Branch(cond, label); :}
+	| IF LEFTPAREN MUL RIGHTPAREN GOTO NUMBER:label
+	{: RESULT = new Branch(new NondetBool(), label); :};
+
+barrier_stat ::= BARRIER
+	{: RESULT = new Barrier(); :};
+
+cas_stat ::= CAS IDENT:dst COMMA shared_val:shared EQUAL arit_expr:val COMMA arit_expr:newval
+	{: RESULT = new CAS(dst, shared, val, newval); :};
+
+swap_stat ::= SWAP IDENT:dst COMMA shared_val:shared COMMA arit_expr:newval
+	{: RESULT = new Swap(dst, shared, newval); :};
+
+dec_stat ::= ATOMICDEC IDENT:dst COMMA shared_val:shared
+	{: RESULT = new AtomicDec(dst, shared); :};
+
+nop_stat ::= NOP
+	{: RESULT = new Nop(); :};
+
+begin_atomic_stat ::= BEGINATOMIC
+	{: RESULT = new BeginAtomic(); :};
+
+begin_atomic_stat ::= ENDATOMIC
+	{: RESULT = new EndAtomic(); :};
+
+assume_stat ::= ASSUME bool_expr:cond
+	{: RESULT = new Assume(cond); :};
+
+bool_expr ::= TRUE
+	{: RESULT = new ConstBool(true); :} 
+	| FALSE
+	{: RESULT = new ConstBool(false); :} 
+	| LEFTPAREN bool_expr:e RIGHTPAREN
+	{: RESULT = e; :}
+	| bool_expr:l OR bool_expr:r
+	{: RESULT = new ComplexBool(l, r, BoolExpr.BXType.OR); :}
+	| bool_expr:l AND bool_expr:r
+	{: RESULT = new ComplexBool(l, r, BoolExpr.BXType.AND); :}
+	| NOT bool_expr:l
+	{: RESULT = new NotBool(l); :}
+	| arit_expr:l EQUAL arit_expr:r
+	{: RESULT = new ComparsionBool(l, r, BoolExpr.BXType.EQUAL); :}
+	| arit_expr:l NEQ arit_expr:r
+	{: RESULT = new ComparsionBool(l, r, BoolExpr.BXType.NEQ); :}
+	| arit_expr:l LESS arit_expr:r
+	{: RESULT = new ComparsionBool(l, r, BoolExpr.BXType.LESS); :}
+	| arit_expr:l GREATER arit_expr:r
+	{: RESULT = new ComparsionBool(l, r, BoolExpr.BXType.GREATER); :};
+
+arit_expr ::= IDENT:i
+	{: RESULT = new LocalExpr(i); :}
+	| NUMBER:i
+	{: RESULT = new ConstExpr(i); :}
+	| LEFTPAREN arit_expr:e RIGHTPAREN
+	{: RESULT = e; :}
+	| arit_expr:l PLUS arit_expr:r
+	{: RESULT = new ComplexAritExpr(l, r, AritExpr.AXType.PLUS); :}
+	| arit_expr:l MINUS arit_expr:r
+	{: RESULT = new ComplexAritExpr(l, r, AritExpr.AXType.MINUS); :}
+	| arit_expr:l MUL arit_expr:r
+	{: RESULT = new ComplexAritExpr(l, r, AritExpr.AXType.MUL); :};
+	
+assert_block ::= ASSERT FINAL assert_bool_expr:e SEMI
+	{: RESULT = new Assert(e, false); :}
+	| ASSERT ALWAYS assert_bool_expr:e SEMI
+	{: RESULT = new Assert(e, true); :};
+		
+	
+assert_bool_expr ::= TRUE
+	{: RESULT = new AssertConstBool(true); :} 
+	| FALSE
+	{: RESULT = new AssertConstBool(false); :} 
+	| LEFTPAREN assert_bool_expr:e RIGHTPAREN
+	{: RESULT = e; :}
+	| assert_bool_expr:l OR assert_bool_expr:r
+	{: RESULT = new AssertComplexBool(l, r, BoolExpr.BXType.OR); :}
+	| assert_bool_expr:l AND assert_bool_expr:r
+	{: RESULT = new AssertComplexBool(l, r, BoolExpr.BXType.AND); :}
+	| NOT assert_bool_expr:l
+	{: RESULT = new AssertNotBool(l); :}
+	| assert_arit_expr:l EQUAL assert_arit_expr:r
+	{: RESULT = new AssertComparsionBool(l, r, BoolExpr.BXType.EQUAL); :}
+	| assert_arit_expr:l NEQ assert_arit_expr:r
+	{: RESULT = new AssertComparsionBool(l, r, BoolExpr.BXType.NEQ); :}
+	| assert_arit_expr:l LESS assert_arit_expr:r
+	{: RESULT = new AssertComparsionBool(l, r, BoolExpr.BXType.LESS); :}
+	| assert_arit_expr:l GREATER assert_arit_expr:r
+	{: RESULT = new AssertComparsionBool(l, r, BoolExpr.BXType.GREATER); :};
+
+assert_arit_expr ::= IDENT:i
+	{: RESULT = new AssertGlobal(i); :}
+	| IDENT:i LEFTCURLY NUMBER:p RIGHTCURLY
+	{: RESULT = new AssertLocal(i, p); :}	
+	| PC LEFTCURLY NUMBER:p RIGHTCURLY
+	{: RESULT = new AssertPC(p); :}	
+	| LEFTBRACE assert_arit_expr:a RIGHTBRACE
+	{: RESULT = new AssertIndirectGlobal(a); :}	
+	| NUMBER:i
+	{: RESULT = new AssertConstExpr(i); :}
+	| LEFTPAREN assert_arit_expr:e RIGHTPAREN
+	{: RESULT = e; :};

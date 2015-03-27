@@ -1,0 +1,35 @@
+shared lock;
+local pred, I, temp;
+
+init
+1: allocate lock[2];
+
+process 1
+1: allocate I[2];
+2: store [I+1] = 1;
+100: barrier;
+3: swap pred, lock, I;
+4: store [I] = pred;
+101: barrier;
+5: load temp = [pred + 1];
+6: if temp == 1 goto 5;
+7: nop;
+8: load pred = [I];
+9: store [I+1] = 0;
+10: I = pred;
+11: if true goto 2;
+
+process 2
+1: allocate I[2];
+2: store [I+1] = 1;
+100: barrier;
+3: swap pred, lock, I;
+4: store [I] = pred;
+101: barrier;
+5: load temp = [pred + 1];
+6: if temp == 1 goto 5;
+7: nop;
+8: load pred = [I];
+9: store [I+1] = 0;
+10: I = pred;
+11: if true goto 2;

@@ -1,0 +1,22 @@
+shared head;
+local node, temphead, b, ret, next;
+
+process 0
+1: allocate node[2];
+2: store [node] = 42;
+3: load temphead = head;
+4: store [node + 1] = temphead;
+5: cas b, head == temphead, node;
+6: if b == 0 goto 3;
+
+
+process 1
+1: load temphead = head;
+2: if temphead == 0 goto 100;
+3: load next = [temphead + 1];
+4: cas b, head == temphead, next;
+5: if b == 0 goto 1;
+6: load ret = [temphead];
+7: if true goto 101;
+100: ret = 0;
+101: nop;

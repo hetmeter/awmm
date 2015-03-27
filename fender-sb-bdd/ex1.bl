@@ -1,0 +1,16 @@
+shared x, y;
+local r;
+
+init
+1: store x=7;
+2: store y=5;
+
+process 1
+11: store x = 1;
+12: load r = y;
+
+process 2
+21: store y = 1;
+22: load r = x;
+
+assert !(x == 1 && y == 1 && r{1} == 5 && r{2} == 7);

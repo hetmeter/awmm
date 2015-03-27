@@ -1,0 +1,1318 @@
+shared B0, B1, B2, B3, B4, B5, B6;
+local t0, t1, t2, t3, t4, t5, t6, ifvar10, ifvar22;
+
+init
+51: store B0 = *;
+52: store B1 = *;
+53: store B2 = *;
+54: store B3 = *;
+55: store B4 = *;
+56: store B5 = *;
+57: store B6 = *;
+
+
+/* Statement: n1 = 0 */
+58: nop; 
+59:  load t0 = B0;
+60:  load t1 = B1;
+61:  load t2 = B2;
+62:  load t3 = B3;
+63:  load t4 = B4;
+64:  load t5 = B5;
+65:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+70:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0 && t4 == 0)) goto 69; 
+71:   if (true) goto 66;
+69:   store B0 = 1;
+72:   if (true) goto 68;
+66:  if ((t0 == 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0)) goto 73; 
+74:   if (true) goto 67;
+73:   store B0 = 0;
+75:   if (true) goto 68;
+67:   store B0 = *;
+68:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+80:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0 && t4 == 0)) goto 79; 
+81:   if (true) goto 76;
+79:   store B1 = 1;
+82:   if (true) goto 78;
+76:  if ((t0 == 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0)) goto 83; 
+84:   if (true) goto 77;
+83:   store B1 = 0;
+85:   if (true) goto 78;
+77:   store B1 = *;
+78:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+90:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 89; 
+91:   if (true) goto 86;
+89:   store B2 = 1;
+92:   if (true) goto 88;
+86:  if (false) goto 93; 
+94:   if (true) goto 87;
+93:   store B2 = 0;
+95:   if (true) goto 88;
+87:   store B2 = *;
+88:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+100:  if ((t0 == 0 && t2 != 0 && t4 == 0) || (t1 == 0 && t2 != 0 && t4 == 0) || (t2 != 0 && t3 != 0)) goto 99; 
+101:   if (true) goto 96;
+99:   store B3 = 1;
+102:   if (true) goto 98;
+96:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0) || (t2 != 0 && t4 != 0)) goto 103; 
+104:   if (true) goto 97;
+103:   store B3 = 0;
+105:   if (true) goto 98;
+97:   store B3 = *;
+98:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+110:  if ((t0 == 0 && t2 != 0 && t3 == 0) || (t1 == 0 && t2 != 0 && t3 == 0) || (t2 != 0 && t4 != 0)) goto 109; 
+111:   if (true) goto 106;
+109:   store B4 = 1;
+112:   if (true) goto 108;
+106:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 == 0)) goto 113; 
+114:   if (true) goto 107;
+113:   store B4 = 0;
+115:   if (true) goto 108;
+107:   store B4 = *;
+108:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+120:  if ((t0 != 0 && t5 != 0) || (t0 == 0 && t5 != 0) || (t1 != 0 && t2 != 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 != 0) || (t0 != 0 && t1 != 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 == 0 && t6 != 0)) goto 119; 
+121:   if (true) goto 116;
+119:   store B5 = 1;
+122:   if (true) goto 118;
+116:  if ((t0 != 0 && t5 == 0) || (t0 == 0 && t5 == 0) || (t1 != 0 && t2 != 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 == 0) || (t0 != 0 && t1 != 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 != 0 && t6 == 0) ) goto 123; 
+124:   if (true) goto 117;
+123:   store B5 = 0;
+125:   if (true) goto 118;
+117:   store B5 = *;
+118:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+130:  if ((t6 != 0)) goto 129; 
+131:   if (true) goto 126;
+129:   store B6 = 1;
+132:   if (true) goto 128;
+126:  if ((t6 == 0)) goto 133; 
+134:   if (true) goto 127;
+133:   store B6 = 0;
+135:   if (true) goto 128;
+127:   store B6 = *;
+128:   nop;
+
+
+/* Statement: n2 = 0 */
+136: nop; 
+137:  load t0 = B0;
+138:  load t1 = B1;
+139:  load t2 = B2;
+140:  load t3 = B3;
+141:  load t4 = B4;
+142:  load t5 = B5;
+143:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+148:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 147; 
+149:   if (true) goto 144;
+147:   store B0 = 1;
+150:   if (true) goto 146;
+144:  if (false) goto 151; 
+152:   if (true) goto 145;
+151:   store B0 = 0;
+153:   if (true) goto 146;
+145:   store B0 = *;
+146:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+158:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0 && t4 == 0) || (t2 != 0)) goto 157; 
+159:   if (true) goto 154;
+157:   store B1 = 1;
+160:   if (true) goto 156;
+154:  if ((t0 != 0 && t1 == 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t2 == 0)) goto 161; 
+162:   if (true) goto 155;
+161:   store B1 = 0;
+163:   if (true) goto 156;
+155:   store B1 = *;
+156:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+168:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0 && t4 == 0) || (t2 != 0)) goto 167; 
+169:   if (true) goto 164;
+167:   store B2 = 1;
+170:   if (true) goto 166;
+164:  if ((t0 != 0 && t1 == 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t2 == 0)) goto 171; 
+172:   if (true) goto 165;
+171:   store B2 = 0;
+173:   if (true) goto 166;
+165:   store B2 = *;
+166:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+178:  if ((t0 != 0 && t1 == 0 && t4 == 0) || (t0 != 0 && t2 == 0 && t4 == 0) || (t0 != 0 && t3 != 0)) goto 177; 
+179:   if (true) goto 174;
+177:   store B3 = 1;
+180:   if (true) goto 176;
+174:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0) || (t0 != 0 && t4 != 0) || (t2 != 0)) goto 181; 
+182:   if (true) goto 175;
+181:   store B3 = 0;
+183:   if (true) goto 176;
+175:   store B3 = *;
+176:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+188:  if ((t0 != 0 && t1 == 0 && t3 == 0) || (t0 != 0 && t2 == 0 && t3 == 0) || (t0 != 0 && t4 != 0)) goto 187; 
+189:   if (true) goto 184;
+187:   store B4 = 1;
+190:   if (true) goto 186;
+184:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 == 0) || (t2 != 0)) goto 191; 
+192:   if (true) goto 185;
+191:   store B4 = 0;
+193:   if (true) goto 186;
+185:   store B4 = *;
+186:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+198:  if ((t0 != 0 && t5 != 0) || (t0 == 0 && t5 != 0) || (t1 != 0 && t2 != 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 != 0) || (t0 != 0 && t1 != 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 == 0 && t6 != 0)) goto 197; 
+199:   if (true) goto 194;
+197:   store B5 = 1;
+200:   if (true) goto 196;
+194:  if ((t0 != 0 && t5 == 0) || (t0 == 0 && t5 == 0) || (t1 != 0 && t2 != 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 == 0) || (t0 != 0 && t1 != 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 != 0 && t6 == 0)  ) goto 201; 
+202:   if (true) goto 195;
+201:   store B5 = 0;
+203:   if (true) goto 196;
+195:   store B5 = *;
+196:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+208:  if ((t6 != 0)) goto 207; 
+209:   if (true) goto 204;
+207:   store B6 = 1;
+210:   if (true) goto 206;
+204:  if ((t6 == 0)) goto 211; 
+212:   if (true) goto 205;
+211:   store B6 = 0;
+213:   if (true) goto 206;
+205:   store B6 = *;
+206:   nop;
+
+
+/* Statement: ch1 = 0 */
+214: nop; 
+215:  load t0 = B0;
+216:  load t1 = B1;
+217:  load t2 = B2;
+218:  load t3 = B3;
+219:  load t4 = B4;
+220:  load t5 = B5;
+221:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+226:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0 && t4 == 0)) goto 225; 
+227:   if (true) goto 222;
+225:   store B0 = 1;
+228:   if (true) goto 224;
+222:  if ((t0 == 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0)) goto 229; 
+230:   if (true) goto 223;
+229:   store B0 = 0;
+231:   if (true) goto 224;
+223:   store B0 = *;
+224:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+236:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0 && t4 == 0)) goto 235; 
+237:   if (true) goto 232;
+235:   store B1 = 1;
+238:   if (true) goto 234;
+232:  if ((t0 != 0 && t2 == 0) || (t0 == 0 && t2 != 0) || (t1 == 0) || (t3 != 0) || (t4 != 0)) goto 239; 
+240:   if (true) goto 233;
+239:   store B1 = 0;
+241:   if (true) goto 234;
+233:   store B1 = *;
+234:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+246:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0 && t4 == 0) || (t2 != 0)) goto 245; 
+247:   if (true) goto 242;
+245:   store B2 = 1;
+248:   if (true) goto 244;
+242:  if ((t0 != 0 && t1 == 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t2 == 0)) goto 249; 
+250:   if (true) goto 243;
+249:   store B2 = 0;
+251:   if (true) goto 244;
+243:   store B2 = *;
+244:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+256:  if ((t0 != 0 && t2 == 0 && t4 == 0) || (t0 == 0 && t2 != 0 && t4 == 0) || (t1 == 0 && t4 == 0) || (t3 != 0)) goto 255; 
+257:   if (true) goto 252;
+255:   store B3 = 1;
+258:   if (true) goto 254;
+252:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0) || (t4 != 0)) goto 259; 
+260:   if (true) goto 253;
+259:   store B3 = 0;
+261:   if (true) goto 254;
+253:   store B3 = *;
+254:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+266:  if ((t0 != 0 && t2 == 0 && t3 == 0) || (t0 == 0 && t2 != 0 && t3 == 0) || (t1 == 0 && t3 == 0) || (t4 != 0)) goto 265; 
+267:   if (true) goto 262;
+265:   store B4 = 1;
+268:   if (true) goto 264;
+262:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 != 0) || (t4 == 0)) goto 269; 
+270:   if (true) goto 263;
+269:   store B4 = 0;
+271:   if (true) goto 264;
+263:   store B4 = *;
+264:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+276:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 275; 
+277:   if (true) goto 272;
+275:   store B5 = 1;
+278:   if (true) goto 274;
+272:  if (false) goto 279; 
+280:   if (true) goto 273;
+279:   store B5 = 0;
+281:   if (true) goto 274;
+273:   store B5 = *;
+274:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+286:  if ((t6 != 0)) goto 285; 
+287:   if (true) goto 282;
+285:   store B6 = 1;
+288:   if (true) goto 284;
+282:  if ((t6 == 0)) goto 289; 
+290:   if (true) goto 283;
+289:   store B6 = 0;
+291:   if (true) goto 284;
+283:   store B6 = *;
+284:   nop;
+
+
+/* Statement: ch2 = 0 */
+292: nop; 
+293:  load t0 = B0;
+294:  load t1 = B1;
+295:  load t2 = B2;
+296:  load t3 = B3;
+297:  load t4 = B4;
+298:  load t5 = B5;
+299:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+304:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0 && t4 == 0)) goto 303; 
+305:   if (true) goto 300;
+303:   store B0 = 1;
+306:   if (true) goto 302;
+300:  if ((t0 == 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0)) goto 307; 
+308:   if (true) goto 301;
+307:   store B0 = 0;
+309:   if (true) goto 302;
+301:   store B0 = *;
+302:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+314:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0 && t4 == 0)) goto 313; 
+315:   if (true) goto 310;
+313:   store B1 = 1;
+316:   if (true) goto 312;
+310:  if ((t0 != 0 && t2 == 0) || (t0 == 0 && t2 != 0) || (t1 == 0) || (t3 != 0) || (t4 != 0)) goto 317; 
+318:   if (true) goto 311;
+317:   store B1 = 0;
+319:   if (true) goto 312;
+311:   store B1 = *;
+312:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+324:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0 && t4 == 0) || (t2 != 0)) goto 323; 
+325:   if (true) goto 320;
+323:   store B2 = 1;
+326:   if (true) goto 322;
+320:  if ((t0 != 0 && t1 == 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t2 == 0)) goto 327; 
+328:   if (true) goto 321;
+327:   store B2 = 0;
+329:   if (true) goto 322;
+321:   store B2 = *;
+322:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+334:  if ((t0 != 0 && t2 == 0 && t4 == 0) || (t0 == 0 && t2 != 0 && t4 == 0) || (t1 == 0 && t4 == 0) || (t3 != 0)) goto 333; 
+335:   if (true) goto 330;
+333:   store B3 = 1;
+336:   if (true) goto 332;
+330:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0) || (t4 != 0)) goto 337; 
+338:   if (true) goto 331;
+337:   store B3 = 0;
+339:   if (true) goto 332;
+331:   store B3 = *;
+332:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+344:  if ((t0 != 0 && t2 == 0 && t3 == 0) || (t0 == 0 && t2 != 0 && t3 == 0) || (t1 == 0 && t3 == 0) || (t4 != 0)) goto 343; 
+345:   if (true) goto 340;
+343:   store B4 = 1;
+346:   if (true) goto 342;
+340:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 != 0) || (t4 == 0)) goto 347; 
+348:   if (true) goto 341;
+347:   store B4 = 0;
+349:   if (true) goto 342;
+341:   store B4 = *;
+342:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+354:  if ((t5 == 0) || (t6 != 0) || (t6 == 0)  ) goto 353; 
+355:   if (true) goto 350;
+353:   store B5 = 1;
+356:   if (true) goto 352;
+350:  if ((t5 == 0)) goto 357; 
+358:   if (true) goto 351;
+357:   store B5 = 0;
+359:   if (true) goto 352;
+351:   store B5 = *;
+352:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+364:  if ((t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 363; 
+365:   if (true) goto 360;
+363:   store B6 = 1;
+366:   if (true) goto 362;
+360:  if (false) goto 367; 
+368:   if (true) goto 361;
+367:   store B6 = 0;
+369:   if (true) goto 362;
+361:   store B6 = *;
+362:   nop;
+
+/* Reset local variables */ 
+370: t0 = 0; 
+371: t1 = 0; 
+372: t2 = 0; 
+373: t3 = 0; 
+374: t4 = 0; 
+375: t5 = 0; 
+376: t6 = 0; 
+377: ifvar10 = 0; 
+378: ifvar22 = 0; 
+
+
+process 0
+
+/* Statement: ch1 = 1 */
+379: nop; 
+380: begin_atomic;
+381:  load t0 = B0;
+382:  load t1 = B1;
+383:  load t2 = B2;
+384:  load t3 = B3;
+385:  load t4 = B4;
+386:  load t5 = B5;
+387:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+392:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0 && t4 == 0)) goto 391; 
+393:   if (true) goto 388;
+391:   store B0 = 1;
+394:   if (true) goto 390;
+388:  if ((t0 == 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0)) goto 395; 
+396:   if (true) goto 389;
+395:   store B0 = 0;
+397:   if (true) goto 390;
+389:   store B0 = *;
+390:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+402:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0 && t4 == 0)) goto 401; 
+403:   if (true) goto 398;
+401:   store B1 = 1;
+404:   if (true) goto 400;
+398:  if ((t0 != 0 && t2 == 0) || (t0 == 0 && t2 != 0) || (t1 == 0) || (t3 != 0) || (t4 != 0)) goto 405; 
+406:   if (true) goto 399;
+405:   store B1 = 0;
+407:   if (true) goto 400;
+399:   store B1 = *;
+400:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+412:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0 && t4 == 0) || (t2 != 0)) goto 411; 
+413:   if (true) goto 408;
+411:   store B2 = 1;
+414:   if (true) goto 410;
+408:  if ((t0 != 0 && t1 == 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t2 == 0)) goto 415; 
+416:   if (true) goto 409;
+415:   store B2 = 0;
+417:   if (true) goto 410;
+409:   store B2 = *;
+410:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+422:  if ((t0 != 0 && t2 == 0 && t4 == 0) || (t0 == 0 && t2 != 0 && t4 == 0) || (t1 == 0 && t4 == 0) || (t3 != 0)) goto 421; 
+423:   if (true) goto 418;
+421:   store B3 = 1;
+424:   if (true) goto 420;
+418:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0) || (t4 != 0)) goto 425; 
+426:   if (true) goto 419;
+425:   store B3 = 0;
+427:   if (true) goto 420;
+419:   store B3 = *;
+420:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+432:  if ((t0 != 0 && t2 == 0 && t3 == 0) || (t0 == 0 && t2 != 0 && t3 == 0) || (t1 == 0 && t3 == 0) || (t4 != 0)) goto 431; 
+433:   if (true) goto 428;
+431:   store B4 = 1;
+434:   if (true) goto 430;
+428:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 != 0) || (t4 == 0)) goto 435; 
+436:   if (true) goto 429;
+435:   store B4 = 0;
+437:   if (true) goto 430;
+429:   store B4 = *;
+430:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+442:  if (false) goto 441; 
+443:   if (true) goto 438;
+441:   store B5 = 1;
+444:   if (true) goto 440;
+438:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 445; 
+446:   if (true) goto 439;
+445:   store B5 = 0;
+447:   if (true) goto 440;
+439:   store B5 = *;
+440:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+452:  if ((t6 != 0)) goto 451; 
+453:   if (true) goto 448;
+451:   store B6 = 1;
+454:   if (true) goto 450;
+448:  if ((t6 == 0)) goto 455; 
+456:   if (true) goto 449;
+455:   store B6 = 0;
+457:   if (true) goto 450;
+449:   store B6 = *;
+450:   nop;
+
+458: end_atomic;
+
+/* Statement: n1 = n2 + 1 */
+1: nop; 
+459: begin_atomic;
+460:  load t0 = B0;
+461:  load t1 = B1;
+462:  load t2 = B2;
+463:  load t3 = B3;
+464:  load t4 = B4;
+465:  load t5 = B5;
+466:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+471:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0 && t4 == 0)) goto 470; 
+472:   if (true) goto 467;
+470:   store B0 = 1;
+473:   if (true) goto 469;
+467:  if ((t0 == 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0)) goto 474; 
+475:   if (true) goto 468;
+474:   store B0 = 0;
+476:   if (true) goto 469;
+468:   store B0 = *;
+469:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+481:  if (false) goto 480; 
+482:   if (true) goto 477;
+480:   store B1 = 1;
+483:   if (true) goto 479;
+477:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 484; 
+485:   if (true) goto 478;
+484:   store B1 = 0;
+486:   if (true) goto 479;
+478:   store B1 = *;
+479:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+491:  if (false) goto 490; 
+492:   if (true) goto 487;
+490:   store B2 = 1;
+493:   if (true) goto 489;
+487:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 == 0)) goto 494; 
+495:   if (true) goto 488;
+494:   store B2 = 0;
+496:   if (true) goto 489;
+488:   store B2 = *;
+489:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+501:  if (false) goto 500; 
+502:   if (true) goto 497;
+500:   store B3 = 1;
+503:   if (true) goto 499;
+497:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 504; 
+505:   if (true) goto 498;
+504:   store B3 = 0;
+506:   if (true) goto 499;
+498:   store B3 = *;
+499:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+511:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 510; 
+512:   if (true) goto 507;
+510:   store B4 = 1;
+513:   if (true) goto 509;
+507:  if (false) goto 514; 
+515:   if (true) goto 508;
+514:   store B4 = 0;
+516:   if (true) goto 509;
+508:   store B4 = *;
+509:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+521:  if ((t0 != 0 && t5 != 0) || (t0 == 0 && t5 != 0) || (t1 != 0 && t2 != 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 != 0) || (t0 != 0 && t1 != 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 == 0 && t6 != 0)) goto 520; 
+522:   if (true) goto 517;
+520:   store B5 = 1;
+523:   if (true) goto 519;
+517:  if ((t0 != 0 && t5 == 0) || (t0 == 0 && t5 == 0) || (t1 != 0 && t2 != 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 == 0) || (t0 != 0 && t1 != 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 != 0 && t6 == 0)  ) goto 524; 
+525:   if (true) goto 518;
+524:   store B5 = 0;
+526:   if (true) goto 519;
+518:   store B5 = *;
+519:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+531:  if ((t6 != 0)) goto 530; 
+532:   if (true) goto 527;
+530:   store B6 = 1;
+533:   if (true) goto 529;
+527:  if ((t6 == 0)) goto 534; 
+535:   if (true) goto 528;
+534:   store B6 = 0;
+536:   if (true) goto 529;
+528:   store B6 = *;
+529:   nop;
+
+537: end_atomic;
+
+/* Statement: ch1 = 0 */
+538: nop; 
+539: begin_atomic;
+540:  load t0 = B0;
+541:  load t1 = B1;
+542:  load t2 = B2;
+543:  load t3 = B3;
+544:  load t4 = B4;
+545:  load t5 = B5;
+546:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+551:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0 && t4 == 0)) goto 550; 
+552:   if (true) goto 547;
+550:   store B0 = 1;
+553:   if (true) goto 549;
+547:  if ((t0 == 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0)) goto 554; 
+555:   if (true) goto 548;
+554:   store B0 = 0;
+556:   if (true) goto 549;
+548:   store B0 = *;
+549:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+561:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0 && t4 == 0)) goto 560; 
+562:   if (true) goto 557;
+560:   store B1 = 1;
+563:   if (true) goto 559;
+557:  if ((t0 != 0 && t2 == 0) || (t0 == 0 && t2 != 0) || (t1 == 0) || (t3 != 0) || (t4 != 0)) goto 564; 
+565:   if (true) goto 558;
+564:   store B1 = 0;
+566:   if (true) goto 559;
+558:   store B1 = *;
+559:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+571:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0 && t4 == 0) || (t2 != 0)) goto 570; 
+572:   if (true) goto 567;
+570:   store B2 = 1;
+573:   if (true) goto 569;
+567:  if ((t0 != 0 && t1 == 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t2 == 0)) goto 574; 
+575:   if (true) goto 568;
+574:   store B2 = 0;
+576:   if (true) goto 569;
+568:   store B2 = *;
+569:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+581:  if ((t0 != 0 && t2 == 0 && t4 == 0) || (t0 == 0 && t2 != 0 && t4 == 0) || (t1 == 0 && t4 == 0) || (t3 != 0)) goto 580; 
+582:   if (true) goto 577;
+580:   store B3 = 1;
+583:   if (true) goto 579;
+577:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0) || (t4 != 0)) goto 584; 
+585:   if (true) goto 578;
+584:   store B3 = 0;
+586:   if (true) goto 579;
+578:   store B3 = *;
+579:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+591:  if ((t0 != 0 && t2 == 0 && t3 == 0) || (t0 == 0 && t2 != 0 && t3 == 0) || (t1 == 0 && t3 == 0) || (t4 != 0)) goto 590; 
+592:   if (true) goto 587;
+590:   store B4 = 1;
+593:   if (true) goto 589;
+587:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 != 0) || (t4 == 0)) goto 594; 
+595:   if (true) goto 588;
+594:   store B4 = 0;
+596:   if (true) goto 589;
+588:   store B4 = *;
+589:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+601:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 600; 
+602:   if (true) goto 597;
+600:   store B5 = 1;
+603:   if (true) goto 599;
+597:  if (false) goto 604; 
+605:   if (true) goto 598;
+604:   store B5 = 0;
+606:   if (true) goto 599;
+598:   store B5 = *;
+599:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+611:  if ((t6 != 0)) goto 610; 
+612:   if (true) goto 607;
+610:   store B6 = 1;
+613:   if (true) goto 609;
+607:  if ((t6 == 0)) goto 614; 
+615:   if (true) goto 608;
+614:   store B6 = 0;
+616:   if (true) goto 609;
+608:   store B6 = *;
+609:   nop;
+
+617: end_atomic;
+
+/* Statement: if ((n2 = 0) | (n1 < n2)) */ 
+2: nop; 
+621: begin_atomic;
+622: ifvar10 = 0;
+623: load t0 = B0;
+624: load t1 = B1;
+625: load t2 = B2;
+626: load t3 = B3;
+627: load t4 = B4;
+628: load t5 = B5;
+629: load t6 = B6;
+630: end_atomic;
+
+631: if (*) goto 618;
+632: if (true) goto 619;
+618: assume(!((t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0) || (t0 == 0 && t4 != 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0 && t3 == 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0))); 
+633: ifvar10 = 1;
+3:   if (true) goto 5; 
+
+619:  if (ifvar10 == 0) goto 634; 
+635: if (true) goto 620;
+634: assume(!((t0 != 0) || (t1 != 0 && t2 != 0) || (t1 == 0 && t4 == 0) || (t2 != 0 && t4 == 0) || (t3 != 0))); 
+4:   if (true) goto 2; 
+
+620: nop;
+
+5: nop; 
+
+
+/* Statement: n1 = 0 */
+6: nop; 
+636: begin_atomic;
+637:  load t0 = B0;
+638:  load t1 = B1;
+639:  load t2 = B2;
+640:  load t3 = B3;
+641:  load t4 = B4;
+642:  load t5 = B5;
+643:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+648:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0 && t4 == 0)) goto 647; 
+649:   if (true) goto 644;
+647:   store B0 = 1;
+650:   if (true) goto 646;
+644:  if ((t0 == 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0)) goto 651; 
+652:   if (true) goto 645;
+651:   store B0 = 0;
+653:   if (true) goto 646;
+645:   store B0 = *;
+646:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+658:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0 && t4 == 0)) goto 657; 
+659:   if (true) goto 654;
+657:   store B1 = 1;
+660:   if (true) goto 656;
+654:  if ((t0 == 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0)) goto 661; 
+662:   if (true) goto 655;
+661:   store B1 = 0;
+663:   if (true) goto 656;
+655:   store B1 = *;
+656:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+668:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 667; 
+669:   if (true) goto 664;
+667:   store B2 = 1;
+670:   if (true) goto 666;
+664:  if (false) goto 671; 
+672:   if (true) goto 665;
+671:   store B2 = 0;
+673:   if (true) goto 666;
+665:   store B2 = *;
+666:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+678:  if ((t0 == 0 && t2 != 0 && t4 == 0) || (t1 == 0 && t2 != 0 && t4 == 0) || (t2 != 0 && t3 != 0)) goto 677; 
+679:   if (true) goto 674;
+677:   store B3 = 1;
+680:   if (true) goto 676;
+674:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0) || (t2 != 0 && t4 != 0)) goto 681; 
+682:   if (true) goto 675;
+681:   store B3 = 0;
+683:   if (true) goto 676;
+675:   store B3 = *;
+676:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+688:  if ((t0 == 0 && t2 != 0 && t3 == 0) || (t1 == 0 && t2 != 0 && t3 == 0) || (t2 != 0 && t4 != 0)) goto 687; 
+689:   if (true) goto 684;
+687:   store B4 = 1;
+690:   if (true) goto 686;
+684:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 == 0)) goto 691; 
+692:   if (true) goto 685;
+691:   store B4 = 0;
+693:   if (true) goto 686;
+685:   store B4 = *;
+686:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+698:  if ((t0 != 0 && t5 != 0) || (t0 == 0 && t5 != 0) || (t1 != 0 && t2 != 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 != 0) || (t0 != 0 && t1 != 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 == 0 && t6 != 0)) goto 697; 
+699:   if (true) goto 694;
+697:   store B5 = 1;
+700:   if (true) goto 696;
+694:  if ((t0 != 0 && t5 == 0) || (t0 == 0 && t5 == 0) || (t1 != 0 && t2 != 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 == 0) || (t0 != 0 && t1 != 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 != 0 && t6 == 0)  ) goto 701; 
+702:   if (true) goto 695;
+701:   store B5 = 0;
+703:   if (true) goto 696;
+695:   store B5 = *;
+696:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+708:  if ((t6 != 0)) goto 707; 
+709:   if (true) goto 704;
+707:   store B6 = 1;
+710:   if (true) goto 706;
+704:  if ((t6 == 0)) goto 711; 
+712:   if (true) goto 705;
+711:   store B6 = 0;
+713:   if (true) goto 706;
+705:   store B6 = *;
+706:   nop;
+
+714: end_atomic;
+7:   if (true) goto 1; 
+
+
+process 1
+
+/* Statement: ch2 = 1 */
+715: nop; 
+716: begin_atomic;
+717:  load t0 = B0;
+718:  load t1 = B1;
+719:  load t2 = B2;
+720:  load t3 = B3;
+721:  load t4 = B4;
+722:  load t5 = B5;
+723:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+728:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0 && t4 == 0)) goto 727; 
+729:   if (true) goto 724;
+727:   store B0 = 1;
+730:   if (true) goto 726;
+724:  if ((t0 == 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0)) goto 731; 
+732:   if (true) goto 725;
+731:   store B0 = 0;
+733:   if (true) goto 726;
+725:   store B0 = *;
+726:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+738:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0 && t4 == 0)) goto 737; 
+739:   if (true) goto 734;
+737:   store B1 = 1;
+740:   if (true) goto 736;
+734:  if ((t0 != 0 && t2 == 0) || (t0 == 0 && t2 != 0) || (t1 == 0) || (t3 != 0) || (t4 != 0)) goto 741; 
+742:   if (true) goto 735;
+741:   store B1 = 0;
+743:   if (true) goto 736;
+735:   store B1 = *;
+736:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+748:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0 && t4 == 0) || (t2 != 0)) goto 747; 
+749:   if (true) goto 744;
+747:   store B2 = 1;
+750:   if (true) goto 746;
+744:  if ((t0 != 0 && t1 == 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t2 == 0)) goto 751; 
+752:   if (true) goto 745;
+751:   store B2 = 0;
+753:   if (true) goto 746;
+745:   store B2 = *;
+746:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+758:  if ((t0 != 0 && t2 == 0 && t4 == 0) || (t0 == 0 && t2 != 0 && t4 == 0) || (t1 == 0 && t4 == 0) || (t3 != 0)) goto 757; 
+759:   if (true) goto 754;
+757:   store B3 = 1;
+760:   if (true) goto 756;
+754:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0) || (t4 != 0)) goto 761; 
+762:   if (true) goto 755;
+761:   store B3 = 0;
+763:   if (true) goto 756;
+755:   store B3 = *;
+756:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+768:  if ((t0 != 0 && t2 == 0 && t3 == 0) || (t0 == 0 && t2 != 0 && t3 == 0) || (t1 == 0 && t3 == 0) || (t4 != 0)) goto 767; 
+769:   if (true) goto 764;
+767:   store B4 = 1;
+770:   if (true) goto 766;
+764:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 != 0) || (t4 == 0)) goto 771; 
+772:   if (true) goto 765;
+771:   store B4 = 0;
+773:   if (true) goto 766;
+765:   store B4 = *;
+766:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+778:  if ((t5 != 0)) goto 777; 
+779:   if (true) goto 774;
+777:   store B5 = 1;
+780:   if (true) goto 776;
+774:  if ((t5 != 0) || (t6 != 0) || (t6 == 0)  ) goto 781; 
+782:   if (true) goto 775;
+781:   store B5 = 0;
+783:   if (true) goto 776;
+775:   store B5 = *;
+776:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+788:  if (false) goto 787; 
+789:   if (true) goto 784;
+787:   store B6 = 1;
+790:   if (true) goto 786;
+784:  if ((t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 791; 
+792:   if (true) goto 785;
+791:   store B6 = 0;
+793:   if (true) goto 786;
+785:   store B6 = *;
+786:   nop;
+
+794: end_atomic;
+
+/* Statement: n2 = n1 + 1 */
+1: nop; 
+795: begin_atomic;
+796:  load t0 = B0;
+797:  load t1 = B1;
+798:  load t2 = B2;
+799:  load t3 = B3;
+800:  load t4 = B4;
+801:  load t5 = B5;
+802:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+807:  if (false) goto 806; 
+808:   if (true) goto 803;
+806:   store B0 = 1;
+809:   if (true) goto 805;
+803:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0) || (t0 != 0 && t4 != 0) || (t2 != 0)) goto 810; 
+811:   if (true) goto 804;
+810:   store B0 = 0;
+812:   if (true) goto 805;
+804:   store B0 = *;
+805:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+817:  if (false) goto 816; 
+818:   if (true) goto 813;
+816:   store B1 = 1;
+819:   if (true) goto 815;
+813:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 820; 
+821:   if (true) goto 814;
+820:   store B1 = 0;
+822:   if (true) goto 815;
+814:   store B1 = *;
+815:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+827:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0 && t4 == 0) || (t2 != 0)) goto 826; 
+828:   if (true) goto 823;
+826:   store B2 = 1;
+829:   if (true) goto 825;
+823:  if ((t0 != 0 && t1 == 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t2 == 0)) goto 830; 
+831:   if (true) goto 824;
+830:   store B2 = 0;
+832:   if (true) goto 825;
+824:   store B2 = *;
+825:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+837:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 836; 
+838:   if (true) goto 833;
+836:   store B3 = 1;
+839:   if (true) goto 835;
+833:  if (false) goto 840; 
+841:   if (true) goto 834;
+840:   store B3 = 0;
+842:   if (true) goto 835;
+834:   store B3 = *;
+835:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+847:  if (false) goto 846; 
+848:   if (true) goto 843;
+846:   store B4 = 1;
+849:   if (true) goto 845;
+843:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 850; 
+851:   if (true) goto 844;
+850:   store B4 = 0;
+852:   if (true) goto 845;
+844:   store B4 = *;
+845:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+857:  if ((t0 != 0 && t5 != 0) || (t0 == 0 && t5 != 0) || (t1 != 0 && t2 != 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 != 0) || (t0 != 0 && t1 != 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 == 0 && t6 != 0)) goto 856; 
+858:   if (true) goto 853;
+856:   store B5 = 1;
+859:   if (true) goto 855;
+853:  if ((t0 != 0 && t5 == 0) || (t0 == 0 && t5 == 0) || (t1 != 0 && t2 != 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 == 0) || (t0 != 0 && t1 != 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 != 0 && t6 == 0)  ) goto 860; 
+861:   if (true) goto 854;
+860:   store B5 = 0;
+862:   if (true) goto 855;
+854:   store B5 = *;
+855:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+867:  if ((t6 != 0)) goto 866; 
+868:   if (true) goto 863;
+866:   store B6 = 1;
+869:   if (true) goto 865;
+863:  if ((t6 == 0)) goto 870; 
+871:   if (true) goto 864;
+870:   store B6 = 0;
+872:   if (true) goto 865;
+864:   store B6 = *;
+865:   nop;
+
+873: end_atomic;
+
+/* Statement: ch2 = 0 */
+874: nop; 
+875: begin_atomic;
+876:  load t0 = B0;
+877:  load t1 = B1;
+878:  load t2 = B2;
+879:  load t3 = B3;
+880:  load t4 = B4;
+881:  load t5 = B5;
+882:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+887:  if ((t0 != 0) || (t1 != 0 && t2 != 0) || (t2 != 0 && t3 == 0 && t4 == 0)) goto 886; 
+888:   if (true) goto 883;
+886:   store B0 = 1;
+889:   if (true) goto 885;
+883:  if ((t0 == 0) || (t1 != 0 && t2 == 0) || (t1 == 0 && t2 != 0) || (t2 != 0 && t3 != 0) || (t2 != 0 && t4 != 0) || (t2 == 0 && t3 == 0 && t4 == 0)) goto 890; 
+891:   if (true) goto 884;
+890:   store B0 = 0;
+892:   if (true) goto 885;
+884:   store B0 = *;
+885:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+897:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0 && t4 == 0)) goto 896; 
+898:   if (true) goto 893;
+896:   store B1 = 1;
+899:   if (true) goto 895;
+893:  if ((t0 != 0 && t2 == 0) || (t0 == 0 && t2 != 0) || (t1 == 0) || (t3 != 0) || (t4 != 0)) goto 900; 
+901:   if (true) goto 894;
+900:   store B1 = 0;
+902:   if (true) goto 895;
+894:   store B1 = *;
+895:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+907:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0 && t4 == 0) || (t2 != 0)) goto 906; 
+908:   if (true) goto 903;
+906:   store B2 = 1;
+909:   if (true) goto 905;
+903:  if ((t0 != 0 && t1 == 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t2 == 0)) goto 910; 
+911:   if (true) goto 904;
+910:   store B2 = 0;
+912:   if (true) goto 905;
+904:   store B2 = *;
+905:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+917:  if ((t0 != 0 && t2 == 0 && t4 == 0) || (t0 == 0 && t2 != 0 && t4 == 0) || (t1 == 0 && t4 == 0) || (t3 != 0)) goto 916; 
+918:   if (true) goto 913;
+916:   store B3 = 1;
+919:   if (true) goto 915;
+913:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 == 0) || (t4 != 0)) goto 920; 
+921:   if (true) goto 914;
+920:   store B3 = 0;
+922:   if (true) goto 915;
+914:   store B3 = *;
+915:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+927:  if ((t0 != 0 && t2 == 0 && t3 == 0) || (t0 == 0 && t2 != 0 && t3 == 0) || (t1 == 0 && t3 == 0) || (t4 != 0)) goto 926; 
+928:   if (true) goto 923;
+926:   store B4 = 1;
+929:   if (true) goto 925;
+923:  if ((t0 != 0 && t2 != 0) || (t1 != 0) || (t3 != 0) || (t4 == 0)) goto 930; 
+931:   if (true) goto 924;
+930:   store B4 = 0;
+932:   if (true) goto 925;
+924:   store B4 = *;
+925:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+937:  if ((t5 == 0) || (t6 != 0) || (t6 == 0)  ) goto 936; 
+938:   if (true) goto 933;
+936:   store B5 = 1;
+939:   if (true) goto 935;
+933:  if ((t5 == 0)) goto 940; 
+941:   if (true) goto 934;
+940:   store B5 = 0;
+942:   if (true) goto 935;
+934:   store B5 = *;
+935:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+947:  if ((t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 946; 
+948:   if (true) goto 943;
+946:   store B6 = 1;
+949:   if (true) goto 945;
+943:  if (false) goto 950; 
+951:   if (true) goto 944;
+950:   store B6 = 0;
+952:   if (true) goto 945;
+944:   store B6 = *;
+945:   nop;
+
+953: end_atomic;
+
+/* Statement: if ((n1 = 0) | (n2 < n1)) */ 
+2: nop; 
+957: begin_atomic;
+958: ifvar22 = 0;
+959: load t0 = B0;
+960: load t1 = B1;
+961: load t2 = B2;
+962: load t3 = B3;
+963: load t4 = B4;
+964: load t5 = B5;
+965: load t6 = B6;
+966: end_atomic;
+
+967: if (*) goto 954;
+968: if (true) goto 955;
+954: assume(!((t0 != 0 && t1 == 0 && t4 == 0) || (t0 != 0 && t3 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t1 != 0 && t2 == 0) || (t2 == 0 && t3 != 0) || (t2 == 0 && t4 == 0))); 
+969: ifvar22 = 1;
+3:   if (true) goto 5; 
+
+955:  if (ifvar22 == 0) goto 970; 
+971: if (true) goto 956;
+970: assume(!((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0) || (t1 == 0 && t3 == 0) || (t2 != 0) || (t4 != 0))); 
+4:   if (true) goto 2; 
+
+956: nop;
+
+5: nop; 
+
+
+/* Statement: n2 = 0 */
+6: nop; 
+972: begin_atomic;
+973:  load t0 = B0;
+974:  load t1 = B1;
+975:  load t2 = B2;
+976:  load t3 = B3;
+977:  load t4 = B4;
+978:  load t5 = B5;
+979:  load t6 = B6;
+
+ /* update predicate - B0: (n2 = 0) */
+984:  if ((t0 != 0) || (t0 == 0) || (t1 != 0) || (t1 == 0) || (t2 != 0) || (t2 == 0) || (t3 != 0) || (t3 == 0) || (t4 != 0) || (t4 == 0) || (t5 != 0) || (t5 == 0) || (t6 != 0) || (t6 == 0)) goto 983; 
+985:   if (true) goto 980;
+983:   store B0 = 1;
+986:   if (true) goto 982;
+980:  if (false) goto 987; 
+988:   if (true) goto 981;
+987:   store B0 = 0;
+989:   if (true) goto 982;
+981:   store B0 = *;
+982:   nop;
+
+
+ /* update predicate - B1: (n1 = n2) */
+994:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0 && t4 == 0) || (t2 != 0)) goto 993; 
+995:   if (true) goto 990;
+993:   store B1 = 1;
+996:   if (true) goto 992;
+990:  if ((t0 != 0 && t1 == 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t2 == 0)) goto 997; 
+998:   if (true) goto 991;
+997:   store B1 = 0;
+999:   if (true) goto 992;
+991:   store B1 = *;
+992:   nop;
+
+
+ /* update predicate - B2: (n1 = 0) */
+1004:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0 && t4 == 0) || (t2 != 0)) goto 1003; 
+1005:   if (true) goto 1000;
+1003:   store B2 = 1;
+1006:   if (true) goto 1002;
+1000:  if ((t0 != 0 && t1 == 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 != 0) || (t0 == 0 && t1 != 0) || (t0 == 0 && t3 == 0 && t4 == 0) || (t2 == 0)) goto 1007; 
+1008:   if (true) goto 1001;
+1007:   store B2 = 0;
+1009:   if (true) goto 1002;
+1001:   store B2 = *;
+1002:   nop;
+
+
+ /* update predicate - B3: (n1 < n2) */
+1014:  if ((t0 != 0 && t1 == 0 && t4 == 0) || (t0 != 0 && t2 == 0 && t4 == 0) || (t0 != 0 && t3 != 0)) goto 1013; 
+1015:   if (true) goto 1010;
+1013:   store B3 = 1;
+1016:   if (true) goto 1012;
+1010:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 == 0) || (t0 != 0 && t4 != 0) || (t2 != 0)) goto 1017; 
+1018:   if (true) goto 1011;
+1017:   store B3 = 0;
+1019:   if (true) goto 1012;
+1011:   store B3 = *;
+1012:   nop;
+
+
+ /* update predicate - B4: (n2 < n1) */
+1024:  if ((t0 != 0 && t1 == 0 && t3 == 0) || (t0 != 0 && t2 == 0 && t3 == 0) || (t0 != 0 && t4 != 0)) goto 1023; 
+1025:   if (true) goto 1020;
+1023:   store B4 = 1;
+1026:   if (true) goto 1022;
+1020:  if ((t0 != 0 && t1 != 0) || (t0 != 0 && t3 != 0) || (t0 != 0 && t4 == 0) || (t2 != 0)) goto 1027; 
+1028:   if (true) goto 1021;
+1027:   store B4 = 0;
+1029:   if (true) goto 1022;
+1021:   store B4 = *;
+1022:   nop;
+
+
+ /* update predicate - B5: (ch1 = 0) */
+1034:  if ((t0 != 0 && t5 != 0) || (t0 == 0 && t5 != 0) || (t1 != 0 && t2 != 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 != 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 != 0) || (t0 != 0 && t1 != 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 != 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 == 0 && t6 != 0)) goto 1033; 
+1035:   if (true) goto 1030;
+1033:   store B5 = 1;
+1036:   if (true) goto 1032;
+1030:  if ((t0 != 0 && t5 == 0) || (t0 == 0 && t5 == 0) || (t1 != 0 && t2 != 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t3 == 0 && t5 == 0) || (t1 != 0 && t2 == 0 && t4 == 0 && t5 == 0) || (t0 != 0 && t1 != 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t2 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t4 == 0 && t6 == 0) || (t0 != 0 && t1 == 0 && t3 != 0 && t5 != 0 && t6 == 0)  ) goto 1037; 
+1038:   if (true) goto 1031;
+1037:   store B5 = 0;
+1039:   if (true) goto 1032;
+1031:   store B5 = *;
+1032:   nop;
+
+
+ /* update predicate - B6: (ch2 = 0) */
+1044:  if ((t6 != 0)) goto 1043; 
+1045:   if (true) goto 1040;
+1043:   store B6 = 1;
+1046:   if (true) goto 1042;
+1040:  if ((t6 == 0)) goto 1047; 
+1048:   if (true) goto 1041;
+1047:   store B6 = 0;
+1049:   if (true) goto 1042;
+1041:   store B6 = *;
+1042:   nop;
+
+1050: end_atomic;
+7:   if (true) goto 1; 
+
+assert final (B2 != 0);

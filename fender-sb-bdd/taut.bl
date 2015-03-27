@@ -1,0 +1,16 @@
+shared x, y;
+local r;
+
+init
+1: store x=0;
+2: store y=0;
+
+process 1
+11: store x = 1;
+12: load r = y;
+
+process 2
+21: store y = 1;
+22: load r = x;
+
+assert !(r{0} == 0 && r{1} == 0);

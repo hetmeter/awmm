@@ -1,0 +1,44 @@
+--- Commencing parsing ---
+--- Finished parsing successfully. ---
+Printing out the parsed program:
+Shared: B0, B1, B2, B3, B4, B5, B6
+Local: t0, t1, t2, t3, t4, t5, t6, ifvar8, ifvar13, ifvar19, ifvar32, ifvar37, ifvar43
+[
+pid 0:
+[STORE B0 = *, STORE B1 = *, STORE B2 = *, STORE B3 = *, STORE B4 = *, STORE B5 = *, STORE B6 = *, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, ASSUME !(false), NOP, /* Statement turn = 0 */, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B6: (turn = 0) */, STORE B6 = CHOOSE(true, false); , ASSUME !(false), NOP, /* Statement flag0 = 0 */, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B4: (flag0 = 0) */, STORE B4 = CHOOSE(true, false); , ASSUME !(false), NOP, /* Statement flag1 = 0 */, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B5: (flag1 = 0) */, STORE B5 = CHOOSE(true, false); , ASSUME !(false), /* Reset local variables */, t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, ifvar8 = 0, ifvar13 = 0, ifvar19 = 0, ifvar32 = 0, ifvar37 = 0, ifvar43 = 0, BARRIER, END], 
+pid 1:
+[NOP, /* Statement flag0 = 1 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B4: (flag0 = 0) */, STORE B4 = CHOOSE(false, true); , ASSUME !(false), END_ATOMIC, NOP, /* Statement f1 = flag1 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B2: (f1 = 0) */, STORE B2 = CHOOSE((t5 != 0), (t5 == 0)); , ASSUME !(false), END_ATOMIC, NOP, /* Statement if (f1 = 0) */, BEGIN_ATOMIC, ifvar8 = 0, IF * GOTO 131, IF true GOTO 132, ASSUME !((B2 == 0)), ifvar8 = 1, END_ATOMIC, /* Statement goto goto 11 */, IF true GOTO 11, BEGIN_ATOMIC, IF (ifvar8 == 0) GOTO 141, IF true GOTO 133, ASSUME !((B2 != 0)), END_ATOMIC, NOP, NOP, /* Statement t1 = turn */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B1: (t1 = 0) */, STORE B1 = CHOOSE((t6 != 0), (t6 == 0)); , ASSUME !(false), END_ATOMIC, NOP, /* Statement if (t1 = 0) */, BEGIN_ATOMIC, ifvar13 = 0, IF * GOTO 157, IF true GOTO 158, ASSUME !((B1 == 0)), ifvar13 = 1, END_ATOMIC, /* Statement goto goto 2 */, IF true GOTO 2, BEGIN_ATOMIC, IF (ifvar13 == 0) GOTO 167, IF true GOTO 159, ASSUME !((B1 != 0)), END_ATOMIC, NOP, NOP, /* Statement flag0 = 0 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B4: (flag0 = 0) */, STORE B4 = CHOOSE(true, false); , ASSUME !(false), END_ATOMIC, NOP, /* Statement t1 = turn */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B1: (t1 = 0) */, STORE B1 = CHOOSE((t6 != 0), (t6 == 0)); , ASSUME !(false), END_ATOMIC, NOP, /* Statement if (t != 0) */, BEGIN_ATOMIC, ifvar19 = 0, IF * GOTO 193, IF true GOTO 194, ASSUME !(false), ifvar19 = 1, END_ATOMIC, /* Statement goto goto 7 */, IF true GOTO 7, BEGIN_ATOMIC, IF (ifvar19 == 0) GOTO 203, IF true GOTO 195, ASSUME !(false), END_ATOMIC, NOP, NOP, /* Statement flag0 = 1 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B4: (flag0 = 0) */, STORE B4 = CHOOSE(false, true); , ASSUME !(false), END_ATOMIC, /* Statement 10: goto goto 2 */, IF true GOTO 2, NOP, NOP, /* Statement turn = 1 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B6: (turn = 0) */, STORE B6 = CHOOSE(false, true); , ASSUME !(false), END_ATOMIC, NOP, /* Statement flag0 = 0 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B4: (flag0 = 0) */, STORE B4 = CHOOSE(true, false); , ASSUME !(false), END_ATOMIC, END], 
+pid 2:
+[NOP, NOP, /* Statement flag1 = 1 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B5: (flag1 = 0) */, STORE B5 = CHOOSE(false, true); , ASSUME !(false), END_ATOMIC, NOP, /* Statement f2 = flag0 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B3: (f2 = 0) */, STORE B3 = CHOOSE((t4 != 0), (t4 == 0)); , ASSUME !(false), END_ATOMIC, NOP, /* Statement if (f2 = 0) */, BEGIN_ATOMIC, ifvar32 = 0, IF * GOTO 263, IF true GOTO 264, ASSUME !((B3 == 0)), ifvar32 = 1, END_ATOMIC, /* Statement goto goto 11 */, IF true GOTO 11, BEGIN_ATOMIC, IF (ifvar32 == 0) GOTO 273, IF true GOTO 265, ASSUME !((B3 != 0)), END_ATOMIC, NOP, NOP, /* Statement t2 = turn */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B0: (t2 = 0) */, STORE B0 = CHOOSE((t6 != 0), (t6 == 0)); , ASSUME !(false), END_ATOMIC, NOP, /* Statement if (t2 != 0) */, BEGIN_ATOMIC, ifvar37 = 0, IF * GOTO 288, IF true GOTO 289, ASSUME !((B0 != 0)), ifvar37 = 1, END_ATOMIC, /* Statement goto goto 2 */, IF true GOTO 2, BEGIN_ATOMIC, IF (ifvar37 == 0) GOTO 298, IF true GOTO 290, ASSUME !((B0 == 0)), END_ATOMIC, NOP, NOP, /* Statement flag1 = 0 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B5: (flag1 = 0) */, STORE B5 = CHOOSE(true, false); , ASSUME !(false), END_ATOMIC, NOP, /* Statement t2 = turn */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B0: (t2 = 0) */, STORE B0 = CHOOSE((t6 != 0), (t6 == 0)); , ASSUME !(false), END_ATOMIC, NOP, /* Statement if (t2 = 0) */, BEGIN_ATOMIC, ifvar43 = 0, IF * GOTO 324, IF true GOTO 325, ASSUME !((B0 == 0)), ifvar43 = 1, END_ATOMIC, /* Statement goto goto 7 */, IF true GOTO 7, BEGIN_ATOMIC, IF (ifvar43 == 0) GOTO 334, IF true GOTO 326, ASSUME !((B0 != 0)), END_ATOMIC, NOP, NOP, /* Statement flag1 = 1 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B5: (flag1 = 0) */, STORE B5 = CHOOSE(false, true); , ASSUME !(false), END_ATOMIC, /* Statement 10: goto goto 2 */, IF true GOTO 2, NOP, NOP, /* Statement turn = 0 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B6: (turn = 0) */, STORE B6 = CHOOSE(true, false); , ASSUME !(false), END_ATOMIC, NOP, /* Statement flag1 = 0 */, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, /* update predicate - B5: (flag1 = 0) */, STORE B5 = CHOOSE(true, false); , ASSUME !(false), END_ATOMIC, END]]
+
+--- STARTING EXPLORATION --- 
+Pushing initial state:<Shared:[B0=0, B1=0, B2=0, B3=0, B4=0, B5=0, B6=0],<pid0, PC=51, [t0=0, t1=0, t2=0, t3=0, t4=0, t5=0, t6=0, ifvar8=0, ifvar13=0, ifvar19=0, ifvar32=0, ifvar37=0, ifvar43=0]> ,<pid1, PC=1, [t0=0, t1=0, t2=0, t3=0, t4=0, t5=0, t6=0, ifvar8=0, ifvar13=0, ifvar19=0, ifvar32=0, ifvar37=0, ifvar43=0]> ,<pid2, PC=240, [t0=0, t1=0, t2=0, t3=0, t4=0, t5=0, t6=0, ifvar8=0, ifvar13=0, ifvar19=0, ifvar32=0, ifvar37=0, ifvar43=0]> >
+
+Depth: 13 Space: 1012 Edges: 1052
+Depth: 13 Space: 2012 Edges: 2165
+Depth: 11 Space: 3010 Edges: 3263
+Depth: 59 Space: 4058 Edges: 4354
+Depth: 19 Space: 5018 Edges: 5411
+Depth: 111 Space: 6110 Edges: 6541
+Depth: 57 Space: 7056 Edges: 7568
+Depth: 18 Space: 8017 Edges: 8643
+Depth: 20 Space: 9019 Edges: 9740
+Depth: 18 Space: 10017 Edges: 10839
+Depth: 11 Space: 11010 Edges: 11942
+Depth: 14 Space: 12013 Edges: 13064
+Depth: 14 Space: 13013 Edges: 14174
+Depth: 26 Space: 14025 Edges: 15291
+Depth: 6 Space: 15005 Edges: 16396
+Depth: 8 Space: 16007 Edges: 17520
+Depth: 11 Space: 17010 Edges: 18619
+Depth: 16 Space: 18015 Edges: 19734
+Depth: 8 Space: 19007 Edges: 20843
+Depth: 8 Space: 20007 Edges: 21952
+Depth: 18 Space: 21017 Edges: 23059
+Depth: 8 Space: 22007 Edges: 24133
+Depth: 10 Space: 23009 Edges: 25229
+---FINISHED---
+States: 23318, Edges : 25569
+Error states: 0
+Running Time: 812 ms
+Memory usage: 15 MB

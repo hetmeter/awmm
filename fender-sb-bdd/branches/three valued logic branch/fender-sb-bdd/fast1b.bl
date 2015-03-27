@@ -1,0 +1,64 @@
+shared b1, b2, x, y;
+local r;
+
+init
+1: store b1 = 0;
+2: store b2 = 0;
+3: store x = 0;
+4: store y = 0;
+
+process 1
+1: store b1 = 1;
+2: store x = 1;
+100: nop;
+3: load r = y;
+4: if r == 0 goto 9;
+5: store b1 = 0;
+6: load r = y;
+7: if r != 0 goto 6;
+8: if true goto 1;
+9: store y = 1;
+101: barrier;
+10: load r = x;
+11: if r == 1 goto 20;
+12: store b1 = 0;
+13: load r = b2;
+14: if r != 0 goto 13;
+15: load r = y;
+16: if r == 1 goto 20;
+17: load r = y;
+18: if r != 0 goto 17;
+19: if true goto 1;
+20: nop;
+21: store y = 0;
+102: nop;
+22: store b1 = 0;
+23: if true goto 1;
+
+process 2
+1: store b2 = 1;
+2: store x = 2;
+100: nop;
+3: load r = y;
+4: if r == 0 goto 9;
+5: store b2 = 0;
+6: load r = y;
+7: if r != 0 goto 6;
+8: if true goto 1;
+9: store y = 2;
+101: barrier;
+10: load r = x;
+11: if r == 2 goto 20;
+12: store b2 = 0;
+13: load r = b1;
+14: if r != 0 goto 13;
+15: load r = y;
+16: if r == 2 goto 20;
+17: load r = y;
+18: if r != 0 goto 17;
+19: if true goto 1;
+20: nop;
+21: store y = 0;
+102: nop;
+22: store b2 = 0;
+23: if true goto 1;

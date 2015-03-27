@@ -1,0 +1,54 @@
+1. To compile:
+
+ a) install gmp library
+ b) download and install yices 1.0
+ c) gcc -o c2bp -I $YICES/include -L $YICES/lib c2bp.c -lyices -lgmp
+
+2. To run:
+
+c2bp <code> <predicates>
+
+3. For code:
+
+   -- beginit: denotes the start of the initialization section
+   -- endinit: denotes the end of the initialization section
+
+   -- all statements should be on separate lines, e.g.:
+      x = 1
+      2 = 5
+      x = 5;
+   -- commas are optional (it should work with them or without them).
+   -- labels as numbers are allowed, e.g.:
+   
+      5: z = 5;
+
+   -- there can be multiple variables referenced in the RHS, e.g: x = y + z is allowed.
+   -- if statements are:
+
+		if (...) 
+			{...} 
+		else 
+			{...} 
+		endif
+
+   -- (...) is just a predicate:  if we want: x > 0 and y < 5, we write:
+
+     ( (x > 0) & (y < 5) )
+
+    that is, use the proper nestedness of brackets. This is NOT allowed:
+
+      (x > 0 & y < 5)
+
+   -- operators: AND is '&' and OR is '|', equality is '=', disequalities are allowed: '<=', '>=', '<', '>'.
+
+   -- the if statement needs to be layed out as shown above (i.e. on separate lines).
+   -- the '{' and '}' brackets are ignored.
+   -- nested ifs are NOT allowed.
+
+   -- 'initial:', see example, denotes the initialization section.
+   -- 'process <num>:', denotes the process number, see example
+
+4. For predicate file:
+   -- each predicate on a separate line, surrounded by braces, e.g. (x > 0) is ok, but x > 0 is not.
+
+5. The files 'code' and 'pred' contain examples. 

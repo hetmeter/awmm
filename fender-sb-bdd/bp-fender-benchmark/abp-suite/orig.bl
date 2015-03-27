@@ -1,0 +1,252 @@
+shared B0, B1, B2, B3, B4, B5, B6, B7;
+local t0, t1, t2, t3, t4, t5, t6, t7;
+
+init
+3: store B0 = *;
+4: store B1 = *;
+5: store B2 = *;
+6: store B3 = *;
+7: store B4 = *;
+8: store B5 = *;
+9: store B6 = *;
+10: store B7 = *;
+
+11: load t0 = B0;
+12: load t1 = B1;
+13: load t2 = B2;
+14: load t3 = B3;
+15: load t4 = B4;
+16: load t5 = B5;
+17: load t6 = B6;
+18: load t7 = B7;
+
+
+19: nop; 
+
+/* Statement msg = 0 */
+
+ /* update predicate - B0: (msg = 0) */
+20:   store B0 = choose(true, false);
+
+
+
+21: nop; 
+
+/* Statement ack = 0 */
+
+ /* update predicate - B1: (ack = 0) */
+22:   store B1 = choose(true, false);
+
+
+
+23: nop; 
+
+/* Statement lSCnt = lRCnt */
+
+ /* update predicate - B6: (lRCnt = lSCnt) */
+24:   store B6 = choose(true, false);
+
+
+ /* update predicate - B7: ((lRCnt + 1) = lSCnt) */
+25:   store B7 = choose(false, true);
+
+26: nop; 
+
+/* Statement lSSt = 0 */
+
+ /* update predicate - B2: (lSSt = 0) */
+27:   store B2 = choose(true, false);
+
+
+
+28: nop; 
+
+/* Statement lRSt = 0 */
+
+ /* update predicate - B5: (lRSt = 0) */
+29:   store B5 = choose(true, false);
+
+
+
+/* Reset local variables */ 
+30: t0 = 0; 
+31: t1 = 0; 
+32: t2 = 0; 
+33: t3 = 0; 
+34: t4 = 0; 
+35: t5 = 0; 
+36: t6 = 0; 
+37: t7 = 0; 
+38: assume(!((B6 != 0 && B7 != 0))); 
+
+
+process 1
+1: nop; 
+
+/* Statement lAck = ack */
+39: begin_atomic;
+40:  load t1 = B1;
+
+ /* update predicate - B3: (lAck = 0) */
+41:   store B3 = choose((t1 != 0), (t1 == 0));
+
+
+42: assume(!((B6 != 0 && B7 != 0))); 
+
+43: end_atomic;
+44: nop; 
+
+/* Statement if (((lAck = 0) & (lSSt = 0)) | ((lAck != 0) & (lSSt != 0))) */ 
+
+48: if (*) goto 46;
+45: assume(!((B2 != 0 && B3 == 0) || (B2 == 0 && B3 != 0))); 
+
+49: begin_atomic;
+
+50: nop; 
+
+/* Statement if (lSSt != 0) */ 
+
+54: if (*) goto 52;
+51: assume(!((B2 != 0))); 
+
+55: nop; 
+
+/* Statement lSSt = 0 */
+
+ /* update predicate - B2: (lSSt = 0) */
+56:   store B2 = choose(true, false);
+
+
+57: assume(!((B6 != 0 && B7 != 0))); 
+
+58: if (true) goto 53;
+52: nop;
+59: assume(!((B2 == 0))); 
+
+60: nop; 
+
+/* Statement lSSt = 1 */
+
+ /* update predicate - B2: (lSSt = 0) */
+61:   store B2 = choose(false, true);
+
+
+62: assume(!((B6 != 0 && B7 != 0))); 
+
+53: nop;
+
+63: end_atomic;
+
+64: nop; 
+
+/* Statement lSCnt = lSCnt + 1 */
+65: begin_atomic;
+66:  load t6 = B6;
+67:  load t7 = B7;
+
+ /* update predicate - B6: (lRCnt = lSCnt) */
+68:   store B6 = choose(false, (t6 != 0) || (t7 != 0));
+
+
+ /* update predicate - B7: ((lRCnt + 1) = lSCnt) */
+69:   store B7 = choose((t6 != 0), (t6 == 0) || (t7 != 0));
+70: assume(!((B6 != 0 && B7 != 0))); 
+
+71: end_atomic;
+72: nop; 
+
+/* Statement msg = lSSt */
+73: begin_atomic;
+74:  load t2 = B2;
+
+ /* update predicate - B0: (msg = 0) */
+75:   store B0 = choose((t2 != 0), (t2 == 0));
+
+
+76: assume(!((B6 != 0 && B7 != 0))); 
+
+77: end_atomic;
+78: if (true) goto 47;
+46: nop;
+79: assume(!((B2 != 0 && B3 != 0) || (B2 == 0 && B3 == 0))); 
+
+47: nop;
+
+/* Statement goto goto 1 */ 
+80:   if (true) goto 1; 
+
+
+process 2
+1: nop; 
+
+/* Statement lMsg = msg */
+81: begin_atomic;
+82:  load t0 = B0;
+
+ /* update predicate - B4: (lMsg = 0) */
+83:   store B4 = choose((t0 != 0), (t0 == 0));
+
+
+84: assume(!((B6 != 0 && B7 != 0))); 
+
+85: end_atomic;
+86: nop; 
+
+/* Statement if (((lMsg = 0) & (lRSt != 0)) | ((lMsg = 0) & (lRSt != 0))) */ 
+
+90: if (*) goto 88;
+87: assume(!((B4 == 0) || (B5 != 0))); 
+
+91: nop; 
+
+/* Statement lRSt = lMsg */
+92: begin_atomic;
+93:  load t4 = B4;
+
+ /* update predicate - B5: (lRSt = 0) */
+94:   store B5 = choose((t4 != 0), (t4 == 0));
+
+
+95: assume(!((B6 != 0 && B7 != 0))); 
+
+96: end_atomic;
+97: nop; 
+
+/* Statement lRCnt = lRCnt + 1 */
+98: begin_atomic;
+99:  load t6 = B6;
+100:  load t7 = B7;
+
+ /* update predicate - B6: (lRCnt = lSCnt) */
+101:   store B6 = choose((t7 != 0), (t6 != 0) || (t7 == 0));
+
+
+ /* update predicate - B7: ((lRCnt + 1) = lSCnt) */
+102:   store B7 = choose(false, (t6 != 0) || (t7 != 0));
+103: assume(!((B6 != 0 && B7 != 0))); 
+
+104: end_atomic;
+105: nop; 
+
+/* Statement ack = lRSt */
+106: begin_atomic;
+107:  load t5 = B5;
+
+ /* update predicate - B1: (ack = 0) */
+108:   store B1 = choose((t5 != 0), (t5 == 0));
+
+
+109: assume(!((B6 != 0 && B7 != 0))); 
+
+110: end_atomic;
+111: if (true) goto 89;
+88: nop;
+112: assume(!((B4 != 0 && B5 == 0))); 
+
+89: nop;
+
+/* Statement goto goto 1 */ 
+113:   if (true) goto 1; 
+
+assert always ( (B6 != 0) || (B7 != 0) );

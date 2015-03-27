@@ -1,0 +1,2119 @@
+shared B0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, B13, B14;
+local t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14;
+
+init
+26: store B0 = *;
+27: store B1 = *;
+28: store B2 = *;
+29: store B3 = *;
+30: store B4 = *;
+31: store B5 = *;
+32: store B6 = *;
+33: store B7 = *;
+34: store B8 = *;
+35: store B9 = *;
+36: store B10 = *;
+37: store B11 = *;
+38: store B12 = *;
+39: store B13 = *;
+40: store B14 = *;
+
+41: load t0 = B0;
+42: load t1 = B1;
+43: load t2 = B2;
+44: load t3 = B3;
+45: load t4 = B4;
+46: load t5 = B5;
+47: load t6 = B6;
+48: load t7 = B7;
+49: load t8 = B8;
+50: load t9 = B9;
+51: load t10 = B10;
+52: load t11 = B11;
+53: load t12 = B12;
+54: load t13 = B13;
+55: load t14 = B14;
+
+
+56: nop; 
+
+/* Statement msg = 0 */
+
+ /* update predicate - B5: (msg = 0) */
+57:   store B5 = choose(true, false);
+
+
+
+58: nop; 
+
+/* Statement ack = 0 */
+
+ /* update predicate - B7: (ack = 0) */
+59:   store B7 = choose(true, false);
+
+
+
+60: nop; 
+
+/* Statement lSCnt = lRCnt */
+
+ /* update predicate - B13: (lRCnt = lSCnt) */
+61:   store B13 = choose(true, false);
+
+
+ /* update predicate - B14: ((lRCnt + 1) = lSCnt) */
+62:   store B14 = choose(false, true);
+
+63: nop; 
+
+/* Statement lSSt = 0 */
+
+ /* update predicate - B9: (lSSt = 0) */
+64:   store B9 = choose(true, false);
+
+
+
+65: nop; 
+
+/* Statement lRSt = 0 */
+
+ /* update predicate - B12: (lRSt = 0) */
+66:   store B12 = choose(true, false);
+
+
+
+67: nop; 
+
+/* Statement overflow = 0 */
+
+ /* update predicate - B0: (overflow = 0) */
+68:   store B0 = choose(true, false);
+
+
+
+/* Reset local variables */ 
+69: t0 = 0; 
+70: t1 = 0; 
+71: t2 = 0; 
+72: t3 = 0; 
+73: t4 = 0; 
+74: t5 = 0; 
+75: t6 = 0; 
+76: t7 = 0; 
+77: t8 = 0; 
+78: t9 = 0; 
+79: t10 = 0; 
+80: t11 = 0; 
+81: t12 = 0; 
+82: t13 = 0; 
+83: t14 = 0; 
+84: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+
+process 1
+/* initialize counters */
+
+
+85: begin_atomic;
+
+86: nop; 
+
+/* Statement msg_cnt_p1 = 0 */
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+87:   store B1 = choose(true, false);
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+88:   store B2 = choose(false, true);
+
+
+89: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+90: end_atomic;
+
+ /* flush_start */
+
+
+91: begin_atomic;
+
+3: nop; 
+
+92: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+96: if (*) goto 94;
+93: assume(!((B1 != 0))); 
+
+97: nop; 
+
+/* Statement if (*) */ 
+
+100: if (*) goto 98;
+
+101: nop; 
+
+/* Statement msg = msg_1_p1 */
+102:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+103:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+104: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+105: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+106:  load t1 = B1;
+107:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+108:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+109:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+110: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+111: if (true) goto 99;
+98: nop;
+
+99: nop;
+
+112: if (true) goto 95;
+94: nop;
+113: assume(!((B1 == 0) || (B2 != 0))); 
+
+95: nop;
+
+114: nop; 
+
+/* Statement if (*) */ 
+
+117: if (*) goto 115;
+
+/* Statement goto goto 3 */ 
+118:   if (true) goto 3; 
+
+119: if (true) goto 116;
+115: nop;
+
+116: nop;
+
+120: end_atomic;
+
+ /* flush_end */
+
+
+1: nop; 
+
+121: nop; 
+
+/* Statement lAck = ack */
+122: begin_atomic;
+123:  load t7 = B7;
+
+ /* update predicate - B10: (lAck = 0) */
+124:   store B10 = choose((t7 != 0), (t7 == 0));
+
+
+125: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+126: end_atomic;
+ /* flush_start */
+
+
+127: begin_atomic;
+
+4: nop; 
+
+128: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+132: if (*) goto 130;
+129: assume(!((B1 != 0))); 
+
+133: nop; 
+
+/* Statement if (*) */ 
+
+136: if (*) goto 134;
+
+137: nop; 
+
+/* Statement msg = msg_1_p1 */
+138:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+139:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+140: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+141: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+142:  load t1 = B1;
+143:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+144:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+145:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+146: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+147: if (true) goto 135;
+134: nop;
+
+135: nop;
+
+148: if (true) goto 131;
+130: nop;
+149: assume(!((B1 == 0) || (B2 != 0))); 
+
+131: nop;
+
+150: nop; 
+
+/* Statement if (*) */ 
+
+153: if (*) goto 151;
+
+/* Statement goto goto 4 */ 
+154:   if (true) goto 4; 
+
+155: if (true) goto 152;
+151: nop;
+
+152: nop;
+
+156: end_atomic;
+
+ /* flush_end */
+
+
+157: nop; 
+
+/* Statement if ((((lAck = 0) & (lSSt = 0)) | ((lAck != 0) & (lSSt != 0)))) */ 
+
+161: if (*) goto 159;
+158: assume(!((B9 == 0 && B10 != 0) || (B9 != 0 && B10 == 0))); 
+
+ /* flush_start */
+
+
+162: begin_atomic;
+
+5: nop; 
+
+163: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+167: if (*) goto 165;
+164: assume(!((B1 != 0))); 
+
+168: nop; 
+
+/* Statement if (*) */ 
+
+171: if (*) goto 169;
+
+172: nop; 
+
+/* Statement msg = msg_1_p1 */
+173:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+174:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+175: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+176: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+177:  load t1 = B1;
+178:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+179:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+180:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+181: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+182: if (true) goto 170;
+169: nop;
+
+170: nop;
+
+183: if (true) goto 166;
+165: nop;
+184: assume(!((B1 == 0) || (B2 != 0))); 
+
+166: nop;
+
+185: nop; 
+
+/* Statement if (*) */ 
+
+188: if (*) goto 186;
+
+/* Statement goto goto 5 */ 
+189:   if (true) goto 5; 
+
+190: if (true) goto 187;
+186: nop;
+
+187: nop;
+
+191: end_atomic;
+
+ /* flush_end */
+
+
+192: begin_atomic;
+
+193: nop; 
+
+/* Statement if ((lSSt != 0)) */ 
+
+197: if (*) goto 195;
+194: assume(!((B9 != 0))); 
+
+ /* flush_start */
+
+
+6: nop; 
+
+198: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+202: if (*) goto 200;
+199: assume(!((B1 != 0))); 
+
+203: nop; 
+
+/* Statement if (*) */ 
+
+206: if (*) goto 204;
+
+207: nop; 
+
+/* Statement msg = msg_1_p1 */
+208:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+209:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+210: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+211: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+212:  load t1 = B1;
+213:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+214:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+215:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+216: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+217: if (true) goto 205;
+204: nop;
+
+205: nop;
+
+218: if (true) goto 201;
+200: nop;
+219: assume(!((B1 == 0) || (B2 != 0))); 
+
+201: nop;
+
+220: nop; 
+
+/* Statement if (*) */ 
+
+223: if (*) goto 221;
+
+/* Statement goto goto 6 */ 
+224:   if (true) goto 6; 
+
+225: if (true) goto 222;
+221: nop;
+
+222: nop;
+
+ /* flush_end */
+
+
+226: nop; 
+
+/* Statement lSSt = 0 */
+
+ /* update predicate - B9: (lSSt = 0) */
+227:   store B9 = choose(true, false);
+
+
+228: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+ /* flush_start */
+
+
+7: nop; 
+
+229: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+233: if (*) goto 231;
+230: assume(!((B1 != 0))); 
+
+234: nop; 
+
+/* Statement if (*) */ 
+
+237: if (*) goto 235;
+
+238: nop; 
+
+/* Statement msg = msg_1_p1 */
+239:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+240:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+241: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+242: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+243:  load t1 = B1;
+244:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+245:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+246:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+247: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+248: if (true) goto 236;
+235: nop;
+
+236: nop;
+
+249: if (true) goto 232;
+231: nop;
+250: assume(!((B1 == 0) || (B2 != 0))); 
+
+232: nop;
+
+251: nop; 
+
+/* Statement if (*) */ 
+
+254: if (*) goto 252;
+
+/* Statement goto goto 7 */ 
+255:   if (true) goto 7; 
+
+256: if (true) goto 253;
+252: nop;
+
+253: nop;
+
+ /* flush_end */
+
+
+257: if (true) goto 196;
+195: nop;
+258: assume(!((B9 == 0))); 
+
+ /* flush_start */
+
+
+8: nop; 
+
+259: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+263: if (*) goto 261;
+260: assume(!((B1 != 0))); 
+
+264: nop; 
+
+/* Statement if (*) */ 
+
+267: if (*) goto 265;
+
+268: nop; 
+
+/* Statement msg = msg_1_p1 */
+269:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+270:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+271: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+272: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+273:  load t1 = B1;
+274:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+275:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+276:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+277: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+278: if (true) goto 266;
+265: nop;
+
+266: nop;
+
+279: if (true) goto 262;
+261: nop;
+280: assume(!((B1 == 0) || (B2 != 0))); 
+
+262: nop;
+
+281: nop; 
+
+/* Statement if (*) */ 
+
+284: if (*) goto 282;
+
+/* Statement goto goto 8 */ 
+285:   if (true) goto 8; 
+
+286: if (true) goto 283;
+282: nop;
+
+283: nop;
+
+ /* flush_end */
+
+
+287: nop; 
+
+/* Statement lSSt = 1 */
+
+ /* update predicate - B9: (lSSt = 0) */
+288:   store B9 = choose(false, true);
+
+
+289: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+ /* flush_start */
+
+
+9: nop; 
+
+290: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+294: if (*) goto 292;
+291: assume(!((B1 != 0))); 
+
+295: nop; 
+
+/* Statement if (*) */ 
+
+298: if (*) goto 296;
+
+299: nop; 
+
+/* Statement msg = msg_1_p1 */
+300:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+301:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+302: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+303: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+304:  load t1 = B1;
+305:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+306:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+307:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+308: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+309: if (true) goto 297;
+296: nop;
+
+297: nop;
+
+310: if (true) goto 293;
+292: nop;
+311: assume(!((B1 == 0) || (B2 != 0))); 
+
+293: nop;
+
+312: nop; 
+
+/* Statement if (*) */ 
+
+315: if (*) goto 313;
+
+/* Statement goto goto 9 */ 
+316:   if (true) goto 9; 
+
+317: if (true) goto 314;
+313: nop;
+
+314: nop;
+
+ /* flush_end */
+
+
+196: nop;
+
+ /* flush_start */
+
+
+10: nop; 
+
+318: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+322: if (*) goto 320;
+319: assume(!((B1 != 0))); 
+
+323: nop; 
+
+/* Statement if (*) */ 
+
+326: if (*) goto 324;
+
+327: nop; 
+
+/* Statement msg = msg_1_p1 */
+328:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+329:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+330: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+331: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+332:  load t1 = B1;
+333:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+334:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+335:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+336: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+337: if (true) goto 325;
+324: nop;
+
+325: nop;
+
+338: if (true) goto 321;
+320: nop;
+339: assume(!((B1 == 0) || (B2 != 0))); 
+
+321: nop;
+
+340: nop; 
+
+/* Statement if (*) */ 
+
+343: if (*) goto 341;
+
+/* Statement goto goto 10 */ 
+344:   if (true) goto 10; 
+
+345: if (true) goto 342;
+341: nop;
+
+342: nop;
+
+ /* flush_end */
+
+
+346: end_atomic;
+
+347: nop; 
+
+/* Statement lSCnt = lSCnt + 1 */
+348: begin_atomic;
+349:  load t13 = B13;
+350:  load t14 = B14;
+
+ /* update predicate - B13: (lRCnt = lSCnt) */
+351:   store B13 = choose(false, (t13 != 0) || (t14 != 0));
+
+
+ /* update predicate - B14: ((lRCnt + 1) = lSCnt) */
+352:   store B14 = choose((t13 != 0), (t13 == 0) || (t14 != 0));
+353: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+354: end_atomic;
+ /* flush_start */
+
+
+355: begin_atomic;
+
+11: nop; 
+
+356: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+360: if (*) goto 358;
+357: assume(!((B1 != 0))); 
+
+361: nop; 
+
+/* Statement if (*) */ 
+
+364: if (*) goto 362;
+
+365: nop; 
+
+/* Statement msg = msg_1_p1 */
+366:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+367:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+368: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+369: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+370:  load t1 = B1;
+371:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+372:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+373:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+374: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+375: if (true) goto 363;
+362: nop;
+
+363: nop;
+
+376: if (true) goto 359;
+358: nop;
+377: assume(!((B1 == 0) || (B2 != 0))); 
+
+359: nop;
+
+378: nop; 
+
+/* Statement if (*) */ 
+
+381: if (*) goto 379;
+
+/* Statement goto goto 11 */ 
+382:   if (true) goto 11; 
+
+383: if (true) goto 380;
+379: nop;
+
+380: nop;
+
+384: end_atomic;
+
+ /* flush_end */
+
+
+385: begin_atomic;
+
+  /* Statement: store msg = lSSt; */
+
+
+386: nop; 
+
+/* Statement if (msg_cnt_p1 = 1) */ 
+
+390: if (*) goto 388;
+387: assume(!((B1 != 0) || (B2 == 0))); 
+
+391: nop; 
+
+/* Statement overflow = 1 */
+
+ /* update predicate - B0: (overflow = 0) */
+392:   store B0 = choose(false, true);
+
+
+393: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+394: if (true) goto 389;
+388: nop;
+395: assume(!((B2 != 0))); 
+
+389: nop;
+
+396: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 + 1 */
+397:  load t1 = B1;
+398:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+399:   store B1 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+400:   store B2 = choose((t1 != 0), (t1 == 0) || (t2 != 0));
+
+
+401: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+402: nop; 
+
+/* Statement if (msg_cnt_p1 = 1) */ 
+
+406: if (*) goto 404;
+403: assume(!((B1 != 0) || (B2 == 0))); 
+
+407: nop; 
+
+/* Statement msg_1_p1 = lSSt */
+408:  load t9 = B9;
+409:  load t10 = B10;
+
+ /* update predicate - B6: (msg_1_p1 = 0) */
+410:   store B6 = choose((t9 != 0), (t9 == 0));
+
+
+411: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+412: if (true) goto 405;
+404: nop;
+413: assume(!((B2 != 0))); 
+
+405: nop;
+
+414: end_atomic;
+
+ /* flush_start */
+
+
+415: begin_atomic;
+
+12: nop; 
+
+416: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+420: if (*) goto 418;
+417: assume(!((B1 != 0))); 
+
+421: nop; 
+
+/* Statement if (*) */ 
+
+424: if (*) goto 422;
+
+425: nop; 
+
+/* Statement msg = msg_1_p1 */
+426:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+427:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+428: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+429: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+430:  load t1 = B1;
+431:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+432:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+433:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+434: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+435: if (true) goto 423;
+422: nop;
+
+423: nop;
+
+436: if (true) goto 419;
+418: nop;
+437: assume(!((B1 == 0) || (B2 != 0))); 
+
+419: nop;
+
+438: nop; 
+
+/* Statement if (*) */ 
+
+441: if (*) goto 439;
+
+/* Statement goto goto 12 */ 
+442:   if (true) goto 12; 
+
+443: if (true) goto 440;
+439: nop;
+
+440: nop;
+
+444: end_atomic;
+
+ /* flush_end */
+
+
+445: if (true) goto 160;
+159: nop;
+446: assume(!((B9 == 0 && B10 == 0) || (B9 != 0 && B10 != 0))); 
+
+ /* flush_start */
+
+
+447: begin_atomic;
+
+13: nop; 
+
+448: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+452: if (*) goto 450;
+449: assume(!((B1 != 0))); 
+
+453: nop; 
+
+/* Statement if (*) */ 
+
+456: if (*) goto 454;
+
+457: nop; 
+
+/* Statement msg = msg_1_p1 */
+458:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+459:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+460: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+461: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+462:  load t1 = B1;
+463:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+464:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+465:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+466: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+467: if (true) goto 455;
+454: nop;
+
+455: nop;
+
+468: if (true) goto 451;
+450: nop;
+469: assume(!((B1 == 0) || (B2 != 0))); 
+
+451: nop;
+
+470: nop; 
+
+/* Statement if (*) */ 
+
+473: if (*) goto 471;
+
+/* Statement goto goto 13 */ 
+474:   if (true) goto 13; 
+
+475: if (true) goto 472;
+471: nop;
+
+472: nop;
+
+476: end_atomic;
+
+ /* flush_end */
+
+
+160: nop;
+
+ /* flush_start */
+
+
+477: begin_atomic;
+
+14: nop; 
+
+478: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+482: if (*) goto 480;
+479: assume(!((B1 != 0))); 
+
+483: nop; 
+
+/* Statement if (*) */ 
+
+486: if (*) goto 484;
+
+487: nop; 
+
+/* Statement msg = msg_1_p1 */
+488:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+489:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+490: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+491: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+492:  load t1 = B1;
+493:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+494:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+495:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+496: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+497: if (true) goto 485;
+484: nop;
+
+485: nop;
+
+498: if (true) goto 481;
+480: nop;
+499: assume(!((B1 == 0) || (B2 != 0))); 
+
+481: nop;
+
+500: nop; 
+
+/* Statement if (*) */ 
+
+503: if (*) goto 501;
+
+/* Statement goto goto 14 */ 
+504:   if (true) goto 14; 
+
+505: if (true) goto 502;
+501: nop;
+
+502: nop;
+
+506: end_atomic;
+
+ /* flush_end */
+
+
+/* Statement goto goto 1 */ 
+507:   if (true) goto 1; 
+
+ /* flush_start */
+
+
+508: begin_atomic;
+
+15: nop; 
+
+509: nop; 
+
+/* Statement if (msg_cnt_p1 != 0) */ 
+
+513: if (*) goto 511;
+510: assume(!((B1 != 0))); 
+
+514: nop; 
+
+/* Statement if (*) */ 
+
+517: if (*) goto 515;
+
+518: nop; 
+
+/* Statement msg = msg_1_p1 */
+519:  load t6 = B6;
+
+ /* update predicate - B5: (msg = 0) */
+520:   store B5 = choose((t6 != 0), (t6 == 0));
+
+
+521: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+522: nop; 
+
+/* Statement msg_cnt_p1 = msg_cnt_p1 - 1 */
+523:  load t1 = B1;
+524:  load t2 = B2;
+
+ /* update predicate - B1: (msg_cnt_p1 = 0) */
+525:   store B1 = choose((t2 != 0), (t1 != 0) || (t2 == 0));
+
+
+ /* update predicate - B2: (msg_cnt_p1 = 1) */
+526:   store B2 = choose(false, (t1 != 0) || (t2 != 0));
+
+
+527: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+528: if (true) goto 516;
+515: nop;
+
+516: nop;
+
+529: if (true) goto 512;
+511: nop;
+530: assume(!((B1 == 0) || (B2 != 0))); 
+
+512: nop;
+
+531: nop; 
+
+/* Statement if (*) */ 
+
+534: if (*) goto 532;
+
+/* Statement goto goto 15 */ 
+535:   if (true) goto 15; 
+
+536: if (true) goto 533;
+532: nop;
+
+533: nop;
+
+537: end_atomic;
+
+ /* flush_end */
+
+
+
+process 2
+/* initialize counters */
+
+
+538: begin_atomic;
+
+539: nop; 
+
+/* Statement ack_cnt_p2 = 0 */
+
+ /* update predicate - B3: (ack_cnt_p2 = 0) */
+540:   store B3 = choose(true, false);
+
+
+ /* update predicate - B4: (ack_cnt_p2 = 1) */
+541:   store B4 = choose(false, true);
+
+
+542: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+543: end_atomic;
+
+ /* flush_start */
+
+
+544: begin_atomic;
+
+16: nop; 
+
+545: nop; 
+
+/* Statement if (ack_cnt_p2 != 0) */ 
+
+549: if (*) goto 547;
+546: assume(!((B3 != 0))); 
+
+550: nop; 
+
+/* Statement if (*) */ 
+
+553: if (*) goto 551;
+
+554: nop; 
+
+/* Statement ack = ack_1_p2 */
+555:  load t8 = B8;
+
+ /* update predicate - B7: (ack = 0) */
+556:   store B7 = choose((t8 != 0), (t8 == 0));
+
+
+557: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+558: nop; 
+
+/* Statement ack_cnt_p2 = ack_cnt_p2 - 1 */
+559:  load t3 = B3;
+560:  load t4 = B4;
+
+ /* update predicate - B3: (ack_cnt_p2 = 0) */
+561:   store B3 = choose((t4 != 0), (t3 != 0) || (t4 == 0));
+
+
+ /* update predicate - B4: (ack_cnt_p2 = 1) */
+562:   store B4 = choose(false, (t3 != 0) || (t4 != 0));
+
+
+563: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+564: if (true) goto 552;
+551: nop;
+
+552: nop;
+
+565: if (true) goto 548;
+547: nop;
+566: assume(!((B3 == 0) || (B4 != 0))); 
+
+548: nop;
+
+567: nop; 
+
+/* Statement if (*) */ 
+
+570: if (*) goto 568;
+
+/* Statement goto goto 16 */ 
+571:   if (true) goto 16; 
+
+572: if (true) goto 569;
+568: nop;
+
+569: nop;
+
+573: end_atomic;
+
+ /* flush_end */
+
+
+1: nop; 
+
+574: nop; 
+
+/* Statement lMsg = msg */
+575: begin_atomic;
+576:  load t5 = B5;
+
+ /* update predicate - B11: (lMsg = 0) */
+577:   store B11 = choose((t5 != 0), (t5 == 0));
+
+
+578: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+579: end_atomic;
+ /* flush_start */
+
+
+580: begin_atomic;
+
+17: nop; 
+
+581: nop; 
+
+/* Statement if (ack_cnt_p2 != 0) */ 
+
+585: if (*) goto 583;
+582: assume(!((B3 != 0))); 
+
+586: nop; 
+
+/* Statement if (*) */ 
+
+589: if (*) goto 587;
+
+590: nop; 
+
+/* Statement ack = ack_1_p2 */
+591:  load t8 = B8;
+
+ /* update predicate - B7: (ack = 0) */
+592:   store B7 = choose((t8 != 0), (t8 == 0));
+
+
+593: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+594: nop; 
+
+/* Statement ack_cnt_p2 = ack_cnt_p2 - 1 */
+595:  load t3 = B3;
+596:  load t4 = B4;
+
+ /* update predicate - B3: (ack_cnt_p2 = 0) */
+597:   store B3 = choose((t4 != 0), (t3 != 0) || (t4 == 0));
+
+
+ /* update predicate - B4: (ack_cnt_p2 = 1) */
+598:   store B4 = choose(false, (t3 != 0) || (t4 != 0));
+
+
+599: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+600: if (true) goto 588;
+587: nop;
+
+588: nop;
+
+601: if (true) goto 584;
+583: nop;
+602: assume(!((B3 == 0) || (B4 != 0))); 
+
+584: nop;
+
+603: nop; 
+
+/* Statement if (*) */ 
+
+606: if (*) goto 604;
+
+/* Statement goto goto 17 */ 
+607:   if (true) goto 17; 
+
+608: if (true) goto 605;
+604: nop;
+
+605: nop;
+
+609: end_atomic;
+
+ /* flush_end */
+
+
+610: nop; 
+
+/* Statement if ((((lMsg = 0) & (lRSt != 0)) | ((lMsg = 0) & (lRSt != 0)))) */ 
+
+614: if (*) goto 612;
+611: assume(!((B11 == 0) || (B12 != 0))); 
+
+ /* flush_start */
+
+
+615: begin_atomic;
+
+18: nop; 
+
+616: nop; 
+
+/* Statement if (ack_cnt_p2 != 0) */ 
+
+620: if (*) goto 618;
+617: assume(!((B3 != 0))); 
+
+621: nop; 
+
+/* Statement if (*) */ 
+
+624: if (*) goto 622;
+
+625: nop; 
+
+/* Statement ack = ack_1_p2 */
+626:  load t8 = B8;
+
+ /* update predicate - B7: (ack = 0) */
+627:   store B7 = choose((t8 != 0), (t8 == 0));
+
+
+628: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+629: nop; 
+
+/* Statement ack_cnt_p2 = ack_cnt_p2 - 1 */
+630:  load t3 = B3;
+631:  load t4 = B4;
+
+ /* update predicate - B3: (ack_cnt_p2 = 0) */
+632:   store B3 = choose((t4 != 0), (t3 != 0) || (t4 == 0));
+
+
+ /* update predicate - B4: (ack_cnt_p2 = 1) */
+633:   store B4 = choose(false, (t3 != 0) || (t4 != 0));
+
+
+634: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+635: if (true) goto 623;
+622: nop;
+
+623: nop;
+
+636: if (true) goto 619;
+618: nop;
+637: assume(!((B3 == 0) || (B4 != 0))); 
+
+619: nop;
+
+638: nop; 
+
+/* Statement if (*) */ 
+
+641: if (*) goto 639;
+
+/* Statement goto goto 18 */ 
+642:   if (true) goto 18; 
+
+643: if (true) goto 640;
+639: nop;
+
+640: nop;
+
+644: end_atomic;
+
+ /* flush_end */
+
+
+645: nop; 
+
+/* Statement lRSt = lMsg */
+646: begin_atomic;
+647:  load t11 = B11;
+648:  load t12 = B12;
+
+ /* update predicate - B12: (lRSt = 0) */
+649:   store B12 = choose((t11 != 0), (t11 == 0));
+
+
+650: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+651: end_atomic;
+ /* flush_start */
+
+
+652: begin_atomic;
+
+19: nop; 
+
+653: nop; 
+
+/* Statement if (ack_cnt_p2 != 0) */ 
+
+657: if (*) goto 655;
+654: assume(!((B3 != 0))); 
+
+658: nop; 
+
+/* Statement if (*) */ 
+
+661: if (*) goto 659;
+
+662: nop; 
+
+/* Statement ack = ack_1_p2 */
+663:  load t8 = B8;
+
+ /* update predicate - B7: (ack = 0) */
+664:   store B7 = choose((t8 != 0), (t8 == 0));
+
+
+665: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+666: nop; 
+
+/* Statement ack_cnt_p2 = ack_cnt_p2 - 1 */
+667:  load t3 = B3;
+668:  load t4 = B4;
+
+ /* update predicate - B3: (ack_cnt_p2 = 0) */
+669:   store B3 = choose((t4 != 0), (t3 != 0) || (t4 == 0));
+
+
+ /* update predicate - B4: (ack_cnt_p2 = 1) */
+670:   store B4 = choose(false, (t3 != 0) || (t4 != 0));
+
+
+671: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+672: if (true) goto 660;
+659: nop;
+
+660: nop;
+
+673: if (true) goto 656;
+655: nop;
+674: assume(!((B3 == 0) || (B4 != 0))); 
+
+656: nop;
+
+675: nop; 
+
+/* Statement if (*) */ 
+
+678: if (*) goto 676;
+
+/* Statement goto goto 19 */ 
+679:   if (true) goto 19; 
+
+680: if (true) goto 677;
+676: nop;
+
+677: nop;
+
+681: end_atomic;
+
+ /* flush_end */
+
+
+682: nop; 
+
+/* Statement lRCnt = lRCnt + 1 */
+683: begin_atomic;
+684:  load t13 = B13;
+685:  load t14 = B14;
+
+ /* update predicate - B13: (lRCnt = lSCnt) */
+686:   store B13 = choose((t14 != 0), (t13 != 0) || (t14 == 0));
+
+
+ /* update predicate - B14: ((lRCnt + 1) = lSCnt) */
+687:   store B14 = choose(false, (t13 != 0) || (t14 != 0));
+688: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+689: end_atomic;
+ /* flush_start */
+
+
+690: begin_atomic;
+
+20: nop; 
+
+691: nop; 
+
+/* Statement if (ack_cnt_p2 != 0) */ 
+
+695: if (*) goto 693;
+692: assume(!((B3 != 0))); 
+
+696: nop; 
+
+/* Statement if (*) */ 
+
+699: if (*) goto 697;
+
+700: nop; 
+
+/* Statement ack = ack_1_p2 */
+701:  load t8 = B8;
+
+ /* update predicate - B7: (ack = 0) */
+702:   store B7 = choose((t8 != 0), (t8 == 0));
+
+
+703: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+704: nop; 
+
+/* Statement ack_cnt_p2 = ack_cnt_p2 - 1 */
+705:  load t3 = B3;
+706:  load t4 = B4;
+
+ /* update predicate - B3: (ack_cnt_p2 = 0) */
+707:   store B3 = choose((t4 != 0), (t3 != 0) || (t4 == 0));
+
+
+ /* update predicate - B4: (ack_cnt_p2 = 1) */
+708:   store B4 = choose(false, (t3 != 0) || (t4 != 0));
+
+
+709: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+710: if (true) goto 698;
+697: nop;
+
+698: nop;
+
+711: if (true) goto 694;
+693: nop;
+712: assume(!((B3 == 0) || (B4 != 0))); 
+
+694: nop;
+
+713: nop; 
+
+/* Statement if (*) */ 
+
+716: if (*) goto 714;
+
+/* Statement goto goto 20 */ 
+717:   if (true) goto 20; 
+
+718: if (true) goto 715;
+714: nop;
+
+715: nop;
+
+719: end_atomic;
+
+ /* flush_end */
+
+
+720: begin_atomic;
+
+  /* Statement: store ack = lRSt; */
+
+
+721: nop; 
+
+/* Statement if (ack_cnt_p2 = 1) */ 
+
+725: if (*) goto 723;
+722: assume(!((B3 != 0) || (B4 == 0))); 
+
+726: nop; 
+
+/* Statement overflow = 1 */
+
+ /* update predicate - B0: (overflow = 0) */
+727:   store B0 = choose(false, true);
+
+
+728: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+729: if (true) goto 724;
+723: nop;
+730: assume(!((B4 != 0))); 
+
+724: nop;
+
+731: nop; 
+
+/* Statement ack_cnt_p2 = ack_cnt_p2 + 1 */
+732:  load t3 = B3;
+733:  load t4 = B4;
+
+ /* update predicate - B3: (ack_cnt_p2 = 0) */
+734:   store B3 = choose(false, (t3 != 0) || (t4 != 0));
+
+
+ /* update predicate - B4: (ack_cnt_p2 = 1) */
+735:   store B4 = choose((t3 != 0), (t3 == 0) || (t4 != 0));
+
+
+736: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+737: nop; 
+
+/* Statement if (ack_cnt_p2 = 1) */ 
+
+741: if (*) goto 739;
+738: assume(!((B3 != 0) || (B4 == 0))); 
+
+742: nop; 
+
+/* Statement ack_1_p2 = lRSt */
+743:  load t11 = B11;
+744:  load t12 = B12;
+
+ /* update predicate - B8: (ack_1_p2 = 0) */
+745:   store B8 = choose((t12 != 0), (t12 == 0));
+
+
+746: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+747: if (true) goto 740;
+739: nop;
+748: assume(!((B4 != 0))); 
+
+740: nop;
+
+749: end_atomic;
+
+ /* flush_start */
+
+
+750: begin_atomic;
+
+21: nop; 
+
+751: nop; 
+
+/* Statement if (ack_cnt_p2 != 0) */ 
+
+755: if (*) goto 753;
+752: assume(!((B3 != 0))); 
+
+756: nop; 
+
+/* Statement if (*) */ 
+
+759: if (*) goto 757;
+
+760: nop; 
+
+/* Statement ack = ack_1_p2 */
+761:  load t8 = B8;
+
+ /* update predicate - B7: (ack = 0) */
+762:   store B7 = choose((t8 != 0), (t8 == 0));
+
+
+763: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+764: nop; 
+
+/* Statement ack_cnt_p2 = ack_cnt_p2 - 1 */
+765:  load t3 = B3;
+766:  load t4 = B4;
+
+ /* update predicate - B3: (ack_cnt_p2 = 0) */
+767:   store B3 = choose((t4 != 0), (t3 != 0) || (t4 == 0));
+
+
+ /* update predicate - B4: (ack_cnt_p2 = 1) */
+768:   store B4 = choose(false, (t3 != 0) || (t4 != 0));
+
+
+769: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+770: if (true) goto 758;
+757: nop;
+
+758: nop;
+
+771: if (true) goto 754;
+753: nop;
+772: assume(!((B3 == 0) || (B4 != 0))); 
+
+754: nop;
+
+773: nop; 
+
+/* Statement if (*) */ 
+
+776: if (*) goto 774;
+
+/* Statement goto goto 21 */ 
+777:   if (true) goto 21; 
+
+778: if (true) goto 775;
+774: nop;
+
+775: nop;
+
+779: end_atomic;
+
+ /* flush_end */
+
+
+780: if (true) goto 613;
+612: nop;
+781: assume(!((B11 != 0 && B12 == 0))); 
+
+ /* flush_start */
+
+
+782: begin_atomic;
+
+22: nop; 
+
+783: nop; 
+
+/* Statement if (ack_cnt_p2 != 0) */ 
+
+787: if (*) goto 785;
+784: assume(!((B3 != 0))); 
+
+788: nop; 
+
+/* Statement if (*) */ 
+
+791: if (*) goto 789;
+
+792: nop; 
+
+/* Statement ack = ack_1_p2 */
+793:  load t8 = B8;
+
+ /* update predicate - B7: (ack = 0) */
+794:   store B7 = choose((t8 != 0), (t8 == 0));
+
+
+795: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+796: nop; 
+
+/* Statement ack_cnt_p2 = ack_cnt_p2 - 1 */
+797:  load t3 = B3;
+798:  load t4 = B4;
+
+ /* update predicate - B3: (ack_cnt_p2 = 0) */
+799:   store B3 = choose((t4 != 0), (t3 != 0) || (t4 == 0));
+
+
+ /* update predicate - B4: (ack_cnt_p2 = 1) */
+800:   store B4 = choose(false, (t3 != 0) || (t4 != 0));
+
+
+801: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+802: if (true) goto 790;
+789: nop;
+
+790: nop;
+
+803: if (true) goto 786;
+785: nop;
+804: assume(!((B3 == 0) || (B4 != 0))); 
+
+786: nop;
+
+805: nop; 
+
+/* Statement if (*) */ 
+
+808: if (*) goto 806;
+
+/* Statement goto goto 22 */ 
+809:   if (true) goto 22; 
+
+810: if (true) goto 807;
+806: nop;
+
+807: nop;
+
+811: end_atomic;
+
+ /* flush_end */
+
+
+613: nop;
+
+ /* flush_start */
+
+
+812: begin_atomic;
+
+23: nop; 
+
+813: nop; 
+
+/* Statement if (ack_cnt_p2 != 0) */ 
+
+817: if (*) goto 815;
+814: assume(!((B3 != 0))); 
+
+818: nop; 
+
+/* Statement if (*) */ 
+
+821: if (*) goto 819;
+
+822: nop; 
+
+/* Statement ack = ack_1_p2 */
+823:  load t8 = B8;
+
+ /* update predicate - B7: (ack = 0) */
+824:   store B7 = choose((t8 != 0), (t8 == 0));
+
+
+825: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+826: nop; 
+
+/* Statement ack_cnt_p2 = ack_cnt_p2 - 1 */
+827:  load t3 = B3;
+828:  load t4 = B4;
+
+ /* update predicate - B3: (ack_cnt_p2 = 0) */
+829:   store B3 = choose((t4 != 0), (t3 != 0) || (t4 == 0));
+
+
+ /* update predicate - B4: (ack_cnt_p2 = 1) */
+830:   store B4 = choose(false, (t3 != 0) || (t4 != 0));
+
+
+831: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+832: if (true) goto 820;
+819: nop;
+
+820: nop;
+
+833: if (true) goto 816;
+815: nop;
+834: assume(!((B3 == 0) || (B4 != 0))); 
+
+816: nop;
+
+835: nop; 
+
+/* Statement if (*) */ 
+
+838: if (*) goto 836;
+
+/* Statement goto goto 23 */ 
+839:   if (true) goto 23; 
+
+840: if (true) goto 837;
+836: nop;
+
+837: nop;
+
+841: end_atomic;
+
+ /* flush_end */
+
+
+/* Statement goto goto 1 */ 
+842:   if (true) goto 1; 
+
+ /* flush_start */
+
+
+843: begin_atomic;
+
+24: nop; 
+
+844: nop; 
+
+/* Statement if (ack_cnt_p2 != 0) */ 
+
+848: if (*) goto 846;
+845: assume(!((B3 != 0))); 
+
+849: nop; 
+
+/* Statement if (*) */ 
+
+852: if (*) goto 850;
+
+853: nop; 
+
+/* Statement ack = ack_1_p2 */
+854:  load t8 = B8;
+
+ /* update predicate - B7: (ack = 0) */
+855:   store B7 = choose((t8 != 0), (t8 == 0));
+
+
+856: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+857: nop; 
+
+/* Statement ack_cnt_p2 = ack_cnt_p2 - 1 */
+858:  load t3 = B3;
+859:  load t4 = B4;
+
+ /* update predicate - B3: (ack_cnt_p2 = 0) */
+860:   store B3 = choose((t4 != 0), (t3 != 0) || (t4 == 0));
+
+
+ /* update predicate - B4: (ack_cnt_p2 = 1) */
+861:   store B4 = choose(false, (t3 != 0) || (t4 != 0));
+
+
+862: assume(!((B1 != 0 && B2 != 0) || (B3 != 0 && B4 != 0) || (B13 != 0 && B14 != 0))); 
+
+863: if (true) goto 851;
+850: nop;
+
+851: nop;
+
+864: if (true) goto 847;
+846: nop;
+865: assume(!((B3 == 0) || (B4 != 0))); 
+
+847: nop;
+
+866: nop; 
+
+/* Statement if (*) */ 
+
+869: if (*) goto 867;
+
+/* Statement goto goto 24 */ 
+870:   if (true) goto 24; 
+
+871: if (true) goto 868;
+867: nop;
+
+868: nop;
+
+872: end_atomic;
+
+ /* flush_end */
+
+
+assert always ( (B13 != 0) || (B14 != 0) ) && (B0 == 1);

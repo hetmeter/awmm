@@ -1,0 +1,24 @@
+--- Commencing parsing ---
+--- Finished parsing successfully. ---
+Printing out the parsed program:
+Shared: B0, B1
+Local: t0, t1
+[
+pid 0:
+[STORE B0 = *, STORE B1 = *, /* Statement: a = 1 */, NOP, LOAD t0 = B0, LOAD t1 = B1, /* update predicate - B0: (a = 1) */, IF ((((t0 != 0) || (t0 == 0)) || (t1 != 0)) || (t1 == 0)) GOTO 59, IF true GOTO 56, STORE B0 = 1, IF true GOTO 58, IF false GOTO 63, IF true GOTO 57, STORE B0 = 0, IF true GOTO 58, STORE B0 = *, NOP, /* update predicate - B1: (b1 = 1) */, IF (t1 != 0) GOTO 69, IF true GOTO 66, STORE B1 = 1, IF true GOTO 68, IF (t1 == 0) GOTO 73, IF true GOTO 67, STORE B1 = 0, IF true GOTO 68, STORE B1 = *, NOP, /* Reset local variables */, t0 = 0, t1 = 0, BARRIER, END], 
+pid 1:
+[/* Statement: b1 = a */, NOP, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, /* update predicate - B0: (a = 1) */, IF (t0 != 0) GOTO 84, IF true GOTO 81, STORE B0 = 1, IF true GOTO 83, IF (t0 == 0) GOTO 88, IF true GOTO 82, STORE B0 = 0, IF true GOTO 83, STORE B0 = *, NOP, /* update predicate - B1: (b1 = 1) */, IF (t0 != 0) GOTO 94, IF true GOTO 91, STORE B1 = 1, IF true GOTO 93, IF (t0 == 0) GOTO 98, IF true GOTO 92, STORE B1 = 0, IF true GOTO 93, STORE B1 = *, NOP, END_ATOMIC, /* Statement: a = b1 */, NOP, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, /* update predicate - B0: (a = 1) */, t0= CHOOSE((t1 != 0), (t1 != 0)); , STORE B0 = t0, NOP, /* update predicate - B1: (b1 = 1) */, IF (t1 != 0) GOTO 118, IF true GOTO 115, STORE B1 = 1, IF true GOTO 117, IF (t1 == 0) GOTO 122, IF true GOTO 116, STORE B1 = 0, IF true GOTO 117, STORE B1 = *, NOP, END_ATOMIC, END]]
+
+--- STARTING EXPLORATION --- 
+Pushing initial state:<Shared:[B0=0, B1=0],<pid0, PC=51, [t0=0, t1=0]> ,<pid1, PC=0, [t0=0, t1=0]> >
+
+0.0: /* Statement: a = 1 */
+1.0: /* Statement: b1 = a */
+1.0: /* Statement: a = b1 */
+<Shared:[B0=*a, B1=0],<pid0, PC=-1, [t0=0, t1=0]> ,<pid1, PC=-1, [t0=*a, t1=0]> >
+
+---FINISHED---
+States: 171, Edges : 173
+Error states: 1
+Running Time: 79 ms
+Memory usage: 2 MB

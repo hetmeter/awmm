@@ -1,0 +1,980 @@
+shared B0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11;
+local t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, ifvar7, ifvar8, ifvar12, ifvar18, ifvar22, ifvar26, ifvar28, ifvar32, ifvar38, ifvar42, ifvar48, ifvar52, ifvar58, ifvar64;
+
+init
+51: store B0 = *;
+52: store B1 = *;
+53: store B2 = *;
+54: store B3 = *;
+55: store B4 = *;
+56: store B5 = *;
+57: store B6 = *;
+58: store B7 = *;
+59: store B8 = *;
+60: store B9 = *;
+61: store B10 = *;
+62: store B11 = *;
+
+63: load t0 = B0;
+64: load t1 = B1;
+65: load t2 = B2;
+66: load t3 = B3;
+67: load t4 = B4;
+68: load t5 = B5;
+69: load t6 = B6;
+70: load t7 = B7;
+71: load t8 = B8;
+72: load t9 = B9;
+73: load t10 = B10;
+74: load t11 = B11;
+
+75: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+
+/* Statement: a = 1 */
+76: nop; 
+77:  load t0 = B0;
+78:  load t1 = B1;
+79:  load t2 = B2;
+80:  load t3 = B3;
+81:  load t4 = B4;
+82:  load t5 = B5;
+83:  load t6 = B6;
+84:  load t7 = B7;
+85:  load t8 = B8;
+86:  load t9 = B9;
+87:  load t10 = B10;
+88:  load t11 = B11;
+
+ /* update predicate - B0: (a = 1) */
+89:   store B0 = choose(true, false);
+
+
+ /* update predicate - B2: (a = 2) */
+90:   store B2 = choose(false, true);
+
+
+91: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+
+/* Statement: overflow = 0 */
+92: nop; 
+93:  load t0 = B0;
+94:  load t1 = B1;
+95:  load t2 = B2;
+96:  load t3 = B3;
+97:  load t4 = B4;
+98:  load t5 = B5;
+99:  load t6 = B6;
+100:  load t7 = B7;
+101:  load t8 = B8;
+102:  load t9 = B9;
+103:  load t10 = B10;
+104:  load t11 = B11;
+
+ /* update predicate - B11: (overflow = 0) */
+105:   store B11 = choose(true, false);
+106: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+/* Reset local variables */ 
+107: t0 = 0; 
+108: t1 = 0; 
+109: t2 = 0; 
+110: t3 = 0; 
+111: t4 = 0; 
+112: t5 = 0; 
+113: t6 = 0; 
+114: t7 = 0; 
+115: t8 = 0; 
+116: t9 = 0; 
+117: t10 = 0; 
+118: t11 = 0; 
+119: ifvar7 = 0; 
+120: ifvar8 = 0; 
+121: ifvar12 = 0; 
+122: ifvar18 = 0; 
+123: ifvar22 = 0; 
+124: ifvar26 = 0; 
+125: ifvar28 = 0; 
+126: ifvar32 = 0; 
+127: ifvar38 = 0; 
+128: ifvar42 = 0; 
+129: ifvar48 = 0; 
+130: ifvar52 = 0; 
+131: ifvar58 = 0; 
+132: ifvar64 = 0; 
+
+
+process 1
+
+/* Statement: a_cnt_p1 = 0 */
+133: nop; 
+134: begin_atomic;
+135:  load t0 = B0;
+136:  load t1 = B1;
+137:  load t2 = B2;
+138:  load t3 = B3;
+139:  load t4 = B4;
+140:  load t5 = B5;
+141:  load t6 = B6;
+142:  load t7 = B7;
+143:  load t8 = B8;
+144:  load t9 = B9;
+145:  load t10 = B10;
+146:  load t11 = B11;
+
+ /* update predicate - B3: (a_cnt_p1 = 1) */
+147:   store B3 = choose(false, true);
+
+
+ /* update predicate - B4: (a_cnt_p1 = 0) */
+148:   store B4 = choose(true, false);
+
+
+149: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+150: end_atomic;
+
+/* Statement: a_cnt_p1 = 0 */
+151: nop; 
+152: begin_atomic;
+153:  load t0 = B0;
+154:  load t1 = B1;
+155:  load t2 = B2;
+156:  load t3 = B3;
+157:  load t4 = B4;
+158:  load t5 = B5;
+159:  load t6 = B6;
+160:  load t7 = B7;
+161:  load t8 = B8;
+162:  load t9 = B9;
+163:  load t10 = B10;
+164:  load t11 = B11;
+
+ /* update predicate - B3: (a_cnt_p1 = 1) */
+165:   store B3 = choose(false, true);
+
+
+ /* update predicate - B4: (a_cnt_p1 = 0) */
+166:   store B4 = choose(true, false);
+
+
+167: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+168: end_atomic;
+
+/* Statement: if ((a_cnt_p1 = 0)) */ 
+1: nop; 
+172: begin_atomic;
+173: ifvar7 = 0;
+174: load t0 = B0;
+175: load t1 = B1;
+176: load t2 = B2;
+177: load t3 = B3;
+178: load t4 = B4;
+179: load t5 = B5;
+180: load t6 = B6;
+181: load t7 = B7;
+182: load t8 = B8;
+183: load t9 = B9;
+184: load t10 = B10;
+185: load t11 = B11;
+186: end_atomic;
+
+187: if (*) goto 169;
+188: if (true) goto 170;
+169: assume(!((t3 != 0) || (t4 == 0))); 
+189: ifvar7 = 1;
+
+/* Statement: if (a_cnt_p1 = 0) */ 
+190: nop; 
+194: begin_atomic;
+195: ifvar8 = 0;
+196: load t0 = B0;
+197: load t1 = B1;
+198: load t2 = B2;
+199: load t3 = B3;
+200: load t4 = B4;
+201: load t5 = B5;
+202: load t6 = B6;
+203: load t7 = B7;
+204: load t8 = B8;
+205: load t9 = B9;
+206: load t10 = B10;
+207: load t11 = B11;
+208: end_atomic;
+
+209: if (*) goto 191;
+210: if (true) goto 192;
+191: assume(!((t3 != 0) || (t4 == 0))); 
+211: ifvar8 = 1;
+
+/* Statement: b1 = a */
+212: nop; 
+213: begin_atomic;
+214:  load t0 = B0;
+215:  load t1 = B1;
+216:  load t2 = B2;
+217:  load t3 = B3;
+218:  load t4 = B4;
+219:  load t5 = B5;
+220:  load t6 = B6;
+221:  load t7 = B7;
+222:  load t8 = B8;
+223:  load t9 = B9;
+224:  load t10 = B10;
+225:  load t11 = B11;
+
+ /* update predicate - B1: (b1 = 1) */
+226:   store B1 = choose((t0 != 0), (t0 == 0) || (t2 != 0));
+
+
+227: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+228: end_atomic;
+192:  if (ifvar8 == 0) goto 229; 
+230: if (true) goto 193;
+229: assume(!((t4 != 0))); 
+193: nop;
+
+
+/* Statement: if (a_cnt_p1 = 1) */ 
+231: nop; 
+235: begin_atomic;
+236: ifvar12 = 0;
+237: load t0 = B0;
+238: load t1 = B1;
+239: load t2 = B2;
+240: load t3 = B3;
+241: load t4 = B4;
+242: load t5 = B5;
+243: load t6 = B6;
+244: load t7 = B7;
+245: load t8 = B8;
+246: load t9 = B9;
+247: load t10 = B10;
+248: load t11 = B11;
+249: end_atomic;
+
+250: if (*) goto 232;
+251: if (true) goto 233;
+232: assume(!((t3 == 0) || (t4 != 0))); 
+252: ifvar12 = 1;
+
+/* Statement: b1 = a_1_p1 */
+253: nop; 
+254: begin_atomic;
+255:  load t0 = B0;
+256:  load t1 = B1;
+257:  load t2 = B2;
+258:  load t3 = B3;
+259:  load t4 = B4;
+260:  load t5 = B5;
+261:  load t6 = B6;
+262:  load t7 = B7;
+263:  load t8 = B8;
+264:  load t9 = B9;
+265:  load t10 = B10;
+266:  load t11 = B11;
+
+ /* update predicate - B1: (b1 = 1) */
+267:   store B1 = choose(false, false);
+
+
+268: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+269: end_atomic;
+233:  if (ifvar12 == 0) goto 270; 
+271: if (true) goto 234;
+270: assume(!((t3 != 0))); 
+234: nop;
+
+170:  if (ifvar7 == 0) goto 272; 
+273: if (true) goto 171;
+272: assume(!((t4 != 0))); 
+171: nop;
+
+
+/* Statement: if ((a_cnt_p1 = 1)) */ 
+274: nop; 
+278: begin_atomic;
+279: ifvar18 = 0;
+280: load t0 = B0;
+281: load t1 = B1;
+282: load t2 = B2;
+283: load t3 = B3;
+284: load t4 = B4;
+285: load t5 = B5;
+286: load t6 = B6;
+287: load t7 = B7;
+288: load t8 = B8;
+289: load t9 = B9;
+290: load t10 = B10;
+291: load t11 = B11;
+292: end_atomic;
+
+293: if (*) goto 275;
+294: if (true) goto 276;
+275: assume(!((t3 == 0) || (t4 != 0))); 
+295: ifvar18 = 1;
+
+/* Statement: 	b1 = a_1_p1 */
+296: nop; 
+297: begin_atomic;
+298:  load t0 = B0;
+299:  load t1 = B1;
+300:  load t2 = B2;
+301:  load t3 = B3;
+302:  load t4 = B4;
+303:  load t5 = B5;
+304:  load t6 = B6;
+305:  load t7 = B7;
+306:  load t8 = B8;
+307:  load t9 = B9;
+308:  load t10 = B10;
+309:  load t11 = B11;
+
+310: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+311: end_atomic;
+276:  if (ifvar18 == 0) goto 312; 
+313: if (true) goto 277;
+312: assume(!((t3 != 0))); 
+277: nop;
+
+
+/* Statement: if ((a_cnt_p1 = 2)) */ 
+314: nop; 
+318: begin_atomic;
+319: ifvar22 = 0;
+320: load t0 = B0;
+321: load t1 = B1;
+322: load t2 = B2;
+323: load t3 = B3;
+324: load t4 = B4;
+325: load t5 = B5;
+326: load t6 = B6;
+327: load t7 = B7;
+328: load t8 = B8;
+329: load t9 = B9;
+330: load t10 = B10;
+331: load t11 = B11;
+332: end_atomic;
+
+333: if (*) goto 315;
+334: if (true) goto 316;
+315: assume(!((t3 != 0) || (t4 != 0))); 
+335: ifvar22 = 1;
+
+/* Statement: 	b1 = a_2_p1 */
+336: nop; 
+337: begin_atomic;
+338:  load t0 = B0;
+339:  load t1 = B1;
+340:  load t2 = B2;
+341:  load t3 = B3;
+342:  load t4 = B4;
+343:  load t5 = B5;
+344:  load t6 = B6;
+345:  load t7 = B7;
+346:  load t8 = B8;
+347:  load t9 = B9;
+348:  load t10 = B10;
+349:  load t11 = B11;
+
+350: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+351: end_atomic;
+316:  if (ifvar22 == 0) goto 352; 
+353: if (true) goto 317;
+352: assume(!(false)); 
+317: nop;
+
+
+/* Statement: if (((b1 = 1))) */ 
+2: nop; 
+357: begin_atomic;
+358: ifvar26 = 0;
+359: load t0 = B0;
+360: load t1 = B1;
+361: load t2 = B2;
+362: load t3 = B3;
+363: load t4 = B4;
+364: load t5 = B5;
+365: load t6 = B6;
+366: load t7 = B7;
+367: load t8 = B8;
+368: load t9 = B9;
+369: load t10 = B10;
+370: load t11 = B11;
+371: end_atomic;
+
+372: if (*) goto 354;
+373: if (true) goto 355;
+354: assume(!((t1 == 0))); 
+374: ifvar26 = 1;
+
+/* Statement: 	a_cnt_p1 = a_cnt_p1 + 1 */
+3: nop; 
+375: begin_atomic;
+376:  load t0 = B0;
+377:  load t1 = B1;
+378:  load t2 = B2;
+379:  load t3 = B3;
+380:  load t4 = B4;
+381:  load t5 = B5;
+382:  load t6 = B6;
+383:  load t7 = B7;
+384:  load t8 = B8;
+385:  load t9 = B9;
+386:  load t10 = B10;
+387:  load t11 = B11;
+
+388: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+389: end_atomic;
+
+/* Statement: if ((a_cnt_p1 = 1)) */ 
+390: nop; 
+394: begin_atomic;
+395: ifvar28 = 0;
+396: load t0 = B0;
+397: load t1 = B1;
+398: load t2 = B2;
+399: load t3 = B3;
+400: load t4 = B4;
+401: load t5 = B5;
+402: load t6 = B6;
+403: load t7 = B7;
+404: load t8 = B8;
+405: load t9 = B9;
+406: load t10 = B10;
+407: load t11 = B11;
+408: end_atomic;
+
+409: if (*) goto 391;
+410: if (true) goto 392;
+391: assume(!((t3 == 0) || (t4 != 0))); 
+411: ifvar28 = 1;
+
+/* Statement: 		a_1_p1 = b1 */
+412: nop; 
+413: begin_atomic;
+414:  load t0 = B0;
+415:  load t1 = B1;
+416:  load t2 = B2;
+417:  load t3 = B3;
+418:  load t4 = B4;
+419:  load t5 = B5;
+420:  load t6 = B6;
+421:  load t7 = B7;
+422:  load t8 = B8;
+423:  load t9 = B9;
+424:  load t10 = B10;
+425:  load t11 = B11;
+
+426: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+427: end_atomic;
+392:  if (ifvar28 == 0) goto 428; 
+429: if (true) goto 393;
+428: assume(!((t3 != 0))); 
+393: nop;
+
+
+/* Statement: if ((a_cnt_p1 = 2)) */ 
+430: nop; 
+434: begin_atomic;
+435: ifvar32 = 0;
+436: load t0 = B0;
+437: load t1 = B1;
+438: load t2 = B2;
+439: load t3 = B3;
+440: load t4 = B4;
+441: load t5 = B5;
+442: load t6 = B6;
+443: load t7 = B7;
+444: load t8 = B8;
+445: load t9 = B9;
+446: load t10 = B10;
+447: load t11 = B11;
+448: end_atomic;
+
+449: if (*) goto 431;
+450: if (true) goto 432;
+431: assume(!((t3 != 0) || (t4 != 0))); 
+451: ifvar32 = 1;
+
+/* Statement: 		a_2_p1 = b1 */
+452: nop; 
+453: begin_atomic;
+454:  load t0 = B0;
+455:  load t1 = B1;
+456:  load t2 = B2;
+457:  load t3 = B3;
+458:  load t4 = B4;
+459:  load t5 = B5;
+460:  load t6 = B6;
+461:  load t7 = B7;
+462:  load t8 = B8;
+463:  load t9 = B9;
+464:  load t10 = B10;
+465:  load t11 = B11;
+
+466: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+467: end_atomic;
+432:  if (ifvar32 == 0) goto 468; 
+469: if (true) goto 433;
+468: assume(!(false)); 
+433: nop;
+
+355:  if (ifvar26 == 0) goto 470; 
+471: if (true) goto 356;
+470: assume(!((t1 != 0))); 
+
+/* Statement: 	a_cnt_p1 = a_cnt_p1 + 1 */
+4: nop; 
+472: begin_atomic;
+473:  load t0 = B0;
+474:  load t1 = B1;
+475:  load t2 = B2;
+476:  load t3 = B3;
+477:  load t4 = B4;
+478:  load t5 = B5;
+479:  load t6 = B6;
+480:  load t7 = B7;
+481:  load t8 = B8;
+482:  load t9 = B9;
+483:  load t10 = B10;
+484:  load t11 = B11;
+
+485: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+486: end_atomic;
+
+/* Statement: if ((a_cnt_p1 = 1)) */ 
+487: nop; 
+491: begin_atomic;
+492: ifvar38 = 0;
+493: load t0 = B0;
+494: load t1 = B1;
+495: load t2 = B2;
+496: load t3 = B3;
+497: load t4 = B4;
+498: load t5 = B5;
+499: load t6 = B6;
+500: load t7 = B7;
+501: load t8 = B8;
+502: load t9 = B9;
+503: load t10 = B10;
+504: load t11 = B11;
+505: end_atomic;
+
+506: if (*) goto 488;
+507: if (true) goto 489;
+488: assume(!((t3 == 0) || (t4 != 0))); 
+508: ifvar38 = 1;
+
+/* Statement: 		a_1_p1 = 2 */
+509: nop; 
+510: begin_atomic;
+511:  load t0 = B0;
+512:  load t1 = B1;
+513:  load t2 = B2;
+514:  load t3 = B3;
+515:  load t4 = B4;
+516:  load t5 = B5;
+517:  load t6 = B6;
+518:  load t7 = B7;
+519:  load t8 = B8;
+520:  load t9 = B9;
+521:  load t10 = B10;
+522:  load t11 = B11;
+
+523: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+524: end_atomic;
+489:  if (ifvar38 == 0) goto 525; 
+526: if (true) goto 490;
+525: assume(!((t3 != 0))); 
+490: nop;
+
+
+/* Statement: if ((a_cnt_p1 = 2)) */ 
+527: nop; 
+531: begin_atomic;
+532: ifvar42 = 0;
+533: load t0 = B0;
+534: load t1 = B1;
+535: load t2 = B2;
+536: load t3 = B3;
+537: load t4 = B4;
+538: load t5 = B5;
+539: load t6 = B6;
+540: load t7 = B7;
+541: load t8 = B8;
+542: load t9 = B9;
+543: load t10 = B10;
+544: load t11 = B11;
+545: end_atomic;
+
+546: if (*) goto 528;
+547: if (true) goto 529;
+528: assume(!((t3 != 0) || (t4 != 0))); 
+548: ifvar42 = 1;
+
+/* Statement: 		a_2_p1 = 2 */
+549: nop; 
+550: begin_atomic;
+551:  load t0 = B0;
+552:  load t1 = B1;
+553:  load t2 = B2;
+554:  load t3 = B3;
+555:  load t4 = B4;
+556:  load t5 = B5;
+557:  load t6 = B6;
+558:  load t7 = B7;
+559:  load t8 = B8;
+560:  load t9 = B9;
+561:  load t10 = B10;
+562:  load t11 = B11;
+
+563: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+564: end_atomic;
+529:  if (ifvar42 == 0) goto 565; 
+566: if (true) goto 530;
+565: assume(!(false)); 
+530: nop;
+
+356: nop;
+
+5: nop; 
+
+
+/* Statement: if ((a_cnt_p1 = 1)) */ 
+567: nop; 
+571: begin_atomic;
+572: ifvar48 = 0;
+573: load t0 = B0;
+574: load t1 = B1;
+575: load t2 = B2;
+576: load t3 = B3;
+577: load t4 = B4;
+578: load t5 = B5;
+579: load t6 = B6;
+580: load t7 = B7;
+581: load t8 = B8;
+582: load t9 = B9;
+583: load t10 = B10;
+584: load t11 = B11;
+585: end_atomic;
+
+586: if (*) goto 568;
+587: if (true) goto 569;
+568: assume(!((t3 == 0) || (t4 != 0))); 
+588: ifvar48 = 1;
+
+/* Statement: 	a = a_1_p1 */
+589: nop; 
+590: begin_atomic;
+591:  load t0 = B0;
+592:  load t1 = B1;
+593:  load t2 = B2;
+594:  load t3 = B3;
+595:  load t4 = B4;
+596:  load t5 = B5;
+597:  load t6 = B6;
+598:  load t7 = B7;
+599:  load t8 = B8;
+600:  load t9 = B9;
+601:  load t10 = B10;
+602:  load t11 = B11;
+
+603: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+604: end_atomic;
+569:  if (ifvar48 == 0) goto 605; 
+606: if (true) goto 570;
+605: assume(!((t3 != 0))); 
+570: nop;
+
+
+/* Statement: if ((a_cnt_p1 = 2)) */ 
+607: nop; 
+611: begin_atomic;
+612: ifvar52 = 0;
+613: load t0 = B0;
+614: load t1 = B1;
+615: load t2 = B2;
+616: load t3 = B3;
+617: load t4 = B4;
+618: load t5 = B5;
+619: load t6 = B6;
+620: load t7 = B7;
+621: load t8 = B8;
+622: load t9 = B9;
+623: load t10 = B10;
+624: load t11 = B11;
+625: end_atomic;
+
+626: if (*) goto 608;
+627: if (true) goto 609;
+608: assume(!((t3 != 0) || (t4 != 0))); 
+628: ifvar52 = 1;
+
+/* Statement: 	a = a_2_p1 */
+629: nop; 
+630: begin_atomic;
+631:  load t0 = B0;
+632:  load t1 = B1;
+633:  load t2 = B2;
+634:  load t3 = B3;
+635:  load t4 = B4;
+636:  load t5 = B5;
+637:  load t6 = B6;
+638:  load t7 = B7;
+639:  load t8 = B8;
+640:  load t9 = B9;
+641:  load t10 = B10;
+642:  load t11 = B11;
+
+643: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+644: end_atomic;
+609:  if (ifvar52 == 0) goto 645; 
+646: if (true) goto 610;
+645: assume(!(false)); 
+610: nop;
+
+
+/* Statement: a_cnt_p1 = 0 */
+647: nop; 
+648: begin_atomic;
+649:  load t0 = B0;
+650:  load t1 = B1;
+651:  load t2 = B2;
+652:  load t3 = B3;
+653:  load t4 = B4;
+654:  load t5 = B5;
+655:  load t6 = B6;
+656:  load t7 = B7;
+657:  load t8 = B8;
+658:  load t9 = B9;
+659:  load t10 = B10;
+660:  load t11 = B11;
+
+ /* update predicate - B3: (a_cnt_p1 = 1) */
+661:   store B3 = choose(false, true);
+
+
+ /* update predicate - B4: (a_cnt_p1 = 0) */
+662:   store B4 = choose(true, false);
+
+
+663: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+664: end_atomic;
+
+/* Statement: a = a_1_p1 */
+6: nop; 
+665: begin_atomic;
+666:  load t0 = B0;
+667:  load t1 = B1;
+668:  load t2 = B2;
+669:  load t3 = B3;
+670:  load t4 = B4;
+671:  load t5 = B5;
+672:  load t6 = B6;
+673:  load t7 = B7;
+674:  load t8 = B8;
+675:  load t9 = B9;
+676:  load t10 = B10;
+677:  load t11 = B11;
+
+ /* update predicate - B0: (a = 1) */
+678:   store B0 = choose(false, false);
+
+
+ /* update predicate - B2: (a = 2) */
+679:   store B2 = choose(false, false);
+
+
+680: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+681: end_atomic;
+
+/* Statement: if ((a_cnt_p1 >= 2)) */ 
+682: nop; 
+686: begin_atomic;
+687: ifvar58 = 0;
+688: load t0 = B0;
+689: load t1 = B1;
+690: load t2 = B2;
+691: load t3 = B3;
+692: load t4 = B4;
+693: load t5 = B5;
+694: load t6 = B6;
+695: load t7 = B7;
+696: load t8 = B8;
+697: load t9 = B9;
+698: load t10 = B10;
+699: load t11 = B11;
+700: end_atomic;
+
+701: if (*) goto 683;
+702: if (true) goto 684;
+683: assume(!((t3 != 0) || (t4 != 0))); 
+703: ifvar58 = 1;
+
+/* Statement: 	a_1_p1 = a_2_p1 */
+704: nop; 
+705: begin_atomic;
+706:  load t0 = B0;
+707:  load t1 = B1;
+708:  load t2 = B2;
+709:  load t3 = B3;
+710:  load t4 = B4;
+711:  load t5 = B5;
+712:  load t6 = B6;
+713:  load t7 = B7;
+714:  load t8 = B8;
+715:  load t9 = B9;
+716:  load t10 = B10;
+717:  load t11 = B11;
+
+718: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+719: end_atomic;
+684:  if (ifvar58 == 0) goto 720; 
+721: if (true) goto 685;
+720: assume(!(false)); 
+685: nop;
+
+
+/* Statement: a_cnt_p1 = a_cnt_p1 - 1 */
+722: nop; 
+723: begin_atomic;
+724:  load t0 = B0;
+725:  load t1 = B1;
+726:  load t2 = B2;
+727:  load t3 = B3;
+728:  load t4 = B4;
+729:  load t5 = B5;
+730:  load t6 = B6;
+731:  load t7 = B7;
+732:  load t8 = B8;
+733:  load t9 = B9;
+734:  load t10 = B10;
+735:  load t11 = B11;
+
+ /* update predicate - B3: (a_cnt_p1 = 1) */
+736:   store B3 = choose(false, (t3 != 0) || (t4 != 0));
+
+
+ /* update predicate - B4: (a_cnt_p1 = 0) */
+737:   store B4 = choose((t3 != 0), (t3 == 0) || (t4 != 0));
+
+
+738: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+739: end_atomic;
+
+/* Statement: b = b_1_p1 */
+740: nop; 
+741: begin_atomic;
+742:  load t0 = B0;
+743:  load t1 = B1;
+744:  load t2 = B2;
+745:  load t3 = B3;
+746:  load t4 = B4;
+747:  load t5 = B5;
+748:  load t6 = B6;
+749:  load t7 = B7;
+750:  load t8 = B8;
+751:  load t9 = B9;
+752:  load t10 = B10;
+753:  load t11 = B11;
+
+754: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+755: end_atomic;
+
+/* Statement: if ((b_cnt_p1 >= 2)) */ 
+756: nop; 
+760: begin_atomic;
+761: ifvar64 = 0;
+762: load t0 = B0;
+763: load t1 = B1;
+764: load t2 = B2;
+765: load t3 = B3;
+766: load t4 = B4;
+767: load t5 = B5;
+768: load t6 = B6;
+769: load t7 = B7;
+770: load t8 = B8;
+771: load t9 = B9;
+772: load t10 = B10;
+773: load t11 = B11;
+774: end_atomic;
+
+775: if (*) goto 757;
+776: if (true) goto 758;
+757: assume(!((t7 != 0) || (t8 != 0))); 
+777: ifvar64 = 1;
+
+/* Statement: 	b_1_p1 = b_2_p1 */
+778: nop; 
+779: begin_atomic;
+780:  load t0 = B0;
+781:  load t1 = B1;
+782:  load t2 = B2;
+783:  load t3 = B3;
+784:  load t4 = B4;
+785:  load t5 = B5;
+786:  load t6 = B6;
+787:  load t7 = B7;
+788:  load t8 = B8;
+789:  load t9 = B9;
+790:  load t10 = B10;
+791:  load t11 = B11;
+
+792: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+793: end_atomic;
+758:  if (ifvar64 == 0) goto 794; 
+795: if (true) goto 759;
+794: assume(!(false)); 
+759: nop;
+
+
+/* Statement: b_cnt_p1 = b_cnt_p1 - 1 */
+796: nop; 
+797: begin_atomic;
+798:  load t0 = B0;
+799:  load t1 = B1;
+800:  load t2 = B2;
+801:  load t3 = B3;
+802:  load t4 = B4;
+803:  load t5 = B5;
+804:  load t6 = B6;
+805:  load t7 = B7;
+806:  load t8 = B8;
+807:  load t9 = B9;
+808:  load t10 = B10;
+809:  load t11 = B11;
+
+ /* update predicate - B7: (b_cnt_p1 = 1) */
+810:   store B7 = choose(false, (t7 != 0) || (t8 != 0));
+
+
+ /* update predicate - B8: (b_cnt_p1 = 0) */
+811:   store B8 = choose((t7 != 0), (t7 == 0) || (t8 != 0));
+
+
+812: assume(!((t0 != 0 && t2 != 0) || (t3 != 0 && t4 != 0) || (t5 != 0 && t6 != 0) || (t7 != 0 && t8 != 0) || (t9 != 0 && t10 != 0))); 
+
+813: end_atomic;
+assert always (B0 != 0) || (B2 != 0); 
+

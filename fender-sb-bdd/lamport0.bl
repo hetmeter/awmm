@@ -1,0 +1,72 @@
+shared choosing, number;
+local pid, cur, max, temp, chbase, numbase;
+
+init
+1: allocate number[2];
+2: allocate choosing[2];
+
+process 0
+1: pid = 0;
+2: load chbase = choosing;
+3: load numbase = number;
+4: store [chbase + pid] = 1;
+99: nop;
+5: load max = [numbase];
+6: cur = 1;
+7: load temp = [numbase + cur];
+8: if temp < max goto 10;
+9: max = temp;
+10: cur = cur + 1;
+11: if cur < 2 goto 7;
+12: max = max + 1;
+13: store [numbase + pid] = max;
+100: nop;
+14: store [chbase + pid] = 0;
+200: nop;
+15: cur = 0;
+16: load temp = [chbase + cur];
+17: if temp != 0 goto 16;
+18: load temp = [numbase + cur];
+19: if temp == 0 goto 23;
+20: if temp < max goto 18;
+21: if temp > max goto 23;
+22: if cur < pid goto 18;
+23: cur = cur + 1;
+24: if cur < 2 goto 16;
+25: nop;
+26: store [numbase + pid] = 0;
+27: if max < 2 goto 4;
+
+process 1
+1: pid = 1;
+2: load chbase = choosing;
+3: load numbase = number;
+4: store [chbase + pid] = 1;
+99: nop;
+5: load max = [numbase];
+6: cur = 1;
+7: load temp = [numbase + cur];
+8: if temp < max goto 10;
+9: max = temp;
+10: cur = cur + 1;
+11: if cur < 2 goto 7;
+12: max = max + 1;
+13: store [numbase + pid] = max;
+100: nop;
+14: store [chbase + pid] = 0;
+200: nop;
+15: cur = 0;
+16: load temp = [chbase + cur];
+17: if temp != 0 goto 16;
+18: load temp = [numbase + cur];
+19: if temp == 0 goto 23;
+20: if temp < max goto 18;
+21: if temp > max goto 23;
+22: if cur < pid goto 18;
+23: cur = cur + 1;
+24: if cur < 2 goto 16;
+25: nop;
+26: store [numbase + pid] = 0;
+27: if max < 2 goto 4;
+
+assert final (1 == 1);

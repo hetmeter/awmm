@@ -1,0 +1,54 @@
+shared B0;
+local t0;
+
+init
+1:   store B0 = 1;
+
+/* Reset local variables */ 
+6: t0 = 0; 
+
+
+process 1
+
+/* Statement: b1 = a */
+1: nop; 
+65: begin_atomic;
+66:  load t0 = B0;
+
+ /* update predicate - B0: (a = 2) */
+71:  if ((t0 == 0)) goto 70; 
+72:   if (true) goto 67;
+70:   store B0 = 1;
+73:   if (true) goto 69;
+67:  if ((t0 != 0)) goto 74; 
+75:   if (true) goto 68;
+74:   store B0 = 0;
+76:   if (true) goto 69;
+68:   store B0 = *;
+69:   nop;
+
+77: end_atomic;
+
+process 2
+
+/* Statement: b2 = a */
+1: nop; 
+104: begin_atomic;
+105:  load t0 = B0;
+
+ /* update predicate - B0: (a = 2) */
+110:  if ((t0 == 0)) goto 109; 
+111:   if (true) goto 106;
+109:   store B0 = 1;
+112:   if (true) goto 108;
+106:  if ((t0 != 0)) goto 113; 
+114:   if (true) goto 107;
+113:   store B0 = 0;
+115:   if (true) goto 108;
+107:   store B0 = *;
+108:   nop;
+
+116: end_atomic;
+
+
+assert final (B0 == 0);

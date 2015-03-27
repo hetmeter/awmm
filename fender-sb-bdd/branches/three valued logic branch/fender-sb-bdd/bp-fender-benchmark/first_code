@@ -1,0 +1,11 @@
+beginit
+
+store a = 1;
+
+endinit
+
+process 1:
+
+1: load b1 = a;
+2: store a = b1;
+

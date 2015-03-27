@@ -1,0 +1,27 @@
+shared B0,B1;
+local t0,t1;
+
+init
+52: nop; 
+64: t0 = 0; 
+65: store B0 = 0; 
+66: store B1 = *; 
+
+
+process 1
+
+1: nop; 
+2: load t0=B0;
+3: if (t0==0) goto 6;
+4: store B1=1;
+5: if (true) goto 7;
+6: store B1=*;
+7: nop;
+
+
+process 2
+
+133:   store B0 = *;
+
+
+assert final (B1 != 1);

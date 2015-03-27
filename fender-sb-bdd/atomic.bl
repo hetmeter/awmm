@@ -1,0 +1,21 @@
+shared x, y;
+local r1, r2;
+
+init
+1: store x = 0;
+2: store y = 0;
+
+process 1
+10: begin_atomic;
+11: store x = 1;
+12: store y = 1;
+13: end_atomic;
+
+process 2
+20: begin_atomic;
+21: load r1 = x;
+22: load r2 = y;
+23: end_atomic;
+
+assert final (r1{2} == r2{2});
+

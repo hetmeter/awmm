@@ -1,0 +1,26 @@
+shared x, y;
+local r;
+
+init
+1: store x = 0;
+2: store y = 0;
+
+process 0
+1: store x = 1;
+2: store x = 2;
+3: store x = 3;
+4: store x = 4;
+5: store x = 5;
+6: store x = 6;
+7: load r = y;
+8: if true goto 1;
+
+process 1
+1: store y = 1;
+2: store y = 2;
+3: store y = 3;
+4: store y = 4;
+5: store y = 5;
+6: store y = 6;
+7: load r = x;
+8: if true goto 1;

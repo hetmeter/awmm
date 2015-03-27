@@ -1,0 +1,16 @@
+shared x;
+local r;
+
+init
+1: store x = 0;
+
+process 0
+2: if (*) goto 5;
+3: r = 1;
+4: if (true) goto 6;
+5: r = 2;
+6: nop;
+/* 7: assume(r == 2); */
+8: store x = r;
+
+assert(x != 1);

@@ -1,0 +1,13 @@
+shared x;
+local r;
+
+init
+1: store x = 0;
+
+process 0
+1: store x = 1;
+2: store x = 1;
+
+process 1
+1: store x = 2;
+2: cas r, x == 1, 0;

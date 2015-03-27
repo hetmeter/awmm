@@ -1,0 +1,247 @@
+shared B0, B1, B2, B3;
+local t0, t1, t2, t3, ifvar10, ifvar23;
+
+init
+51: store B0 = *;
+52: store B1 = *;
+53: store B2 = *;
+54: store B3 = *;
+
+55: load t0 = B0;
+56: load t1 = B1;
+57: load t2 = B2;
+58: load t3 = B3;
+
+59: assume(!(false)); 
+
+
+/* Statement: flag0 = 0 */
+60: nop; 
+61:  load t0 = B0;
+62:  load t1 = B1;
+63:  load t2 = B2;
+64:  load t3 = B3;
+
+65: assume(!(false)); 
+
+
+/* Statement: flag1 = 0 */
+66: nop; 
+67:  load t0 = B0;
+68:  load t1 = B1;
+69:  load t2 = B2;
+70:  load t3 = B3;
+
+71: assume(!(false)); 
+
+
+/* Statement: turn = 0 */
+72: nop; 
+73:  load t0 = B0;
+74:  load t1 = B1;
+75:  load t2 = B2;
+76:  load t3 = B3;
+
+77: assume(!(false)); 
+
+/* Reset local variables */ 
+78: t0 = 0; 
+79: t1 = 0; 
+80: t2 = 0; 
+81: t3 = 0; 
+82: ifvar10 = 0; 
+83: ifvar23 = 0; 
+
+
+process 1
+
+/* Statement: flag0 = 1 */
+1: nop; 
+84: begin_atomic;
+85:  load t0 = B0;
+86:  load t1 = B1;
+87:  load t2 = B2;
+88:  load t3 = B3;
+
+89: assume(!(false)); 
+
+90: end_atomic;
+
+/* Statement: turn = 1 */
+91: nop; 
+92: begin_atomic;
+93:  load t0 = B0;
+94:  load t1 = B1;
+95:  load t2 = B2;
+96:  load t3 = B3;
+
+97: assume(!(false)); 
+
+98: end_atomic;
+
+/* Statement: lf0 = flag1 */
+3: nop; 
+99: begin_atomic;
+100:  load t0 = B0;
+101:  load t1 = B1;
+102:  load t2 = B2;
+103:  load t3 = B3;
+
+ /* update predicate - B0: (lf0 = 1) */
+104:   store B0 = choose(false, false);
+
+
+105: assume(!(false)); 
+
+106: end_atomic;
+
+/* Statement: lt0 = turn */
+107: nop; 
+108: begin_atomic;
+109:  load t0 = B0;
+110:  load t1 = B1;
+111:  load t2 = B2;
+112:  load t3 = B3;
+
+ /* update predicate - B1: (lt0 = 1) */
+113:   store B1 = choose(false, false);
+
+
+114: assume(!(false)); 
+
+115: end_atomic;
+
+/* Statement: if ((lf0 = 1) & (lt0 = 1)) */ 
+116: nop; 
+120: begin_atomic;
+121: ifvar10 = 0;
+122: load t0 = B0;
+123: load t1 = B1;
+124: load t2 = B2;
+125: load t3 = B3;
+126: end_atomic;
+
+127: if (*) goto 117;
+128: if (true) goto 118;
+117: assume(!((t0 == 0) || (t1 == 0))); 
+129: ifvar10 = 1;
+130:   if (true) goto 3; 
+
+118:  if (ifvar10 == 0) goto 131; 
+132: if (true) goto 119;
+131: assume(!((t0 != 0 && t1 != 0))); 
+119: nop;
+
+11: nop; 
+
+
+/* Statement: flag0 = 0 */
+133: nop; 
+134: begin_atomic;
+135:  load t0 = B0;
+136:  load t1 = B1;
+137:  load t2 = B2;
+138:  load t3 = B3;
+
+139: assume(!(false)); 
+
+140: end_atomic;
+14:   if (true) goto 1; 
+
+
+process 2
+141: nop; 
+
+
+/* Statement: flag1 = 1 */
+1: nop; 
+142: begin_atomic;
+143:  load t0 = B0;
+144:  load t1 = B1;
+145:  load t2 = B2;
+146:  load t3 = B3;
+
+147: assume(!(false)); 
+
+148: end_atomic;
+
+/* Statement: turn = 0 */
+149: nop; 
+150: begin_atomic;
+151:  load t0 = B0;
+152:  load t1 = B1;
+153:  load t2 = B2;
+154:  load t3 = B3;
+
+155: assume(!(false)); 
+
+156: end_atomic;
+
+/* Statement: lf1 = flag0 */
+3: nop; 
+157: begin_atomic;
+158:  load t0 = B0;
+159:  load t1 = B1;
+160:  load t2 = B2;
+161:  load t3 = B3;
+
+ /* update predicate - B2: (lf1 = 1) */
+162:   store B2 = choose(false, false);
+
+
+163: assume(!(false)); 
+
+164: end_atomic;
+
+/* Statement: lt1 = turn */
+165: nop; 
+166: begin_atomic;
+167:  load t0 = B0;
+168:  load t1 = B1;
+169:  load t2 = B2;
+170:  load t3 = B3;
+
+ /* update predicate - B3: (lt1 = 1) */
+171:   store B3 = choose(false, false);
+172: assume(!(false)); 
+
+173: end_atomic;
+
+/* Statement: if ((lf1 = 1) & (lt1 = 1)) */ 
+174: nop; 
+178: begin_atomic;
+179: ifvar23 = 0;
+180: load t0 = B0;
+181: load t1 = B1;
+182: load t2 = B2;
+183: load t3 = B3;
+184: end_atomic;
+
+185: if (*) goto 175;
+186: if (true) goto 176;
+175: assume(!((t2 == 0) || (t3 == 0))); 
+187: ifvar23 = 1;
+188:   if (true) goto 3; 
+
+176:  if (ifvar23 == 0) goto 189; 
+190: if (true) goto 177;
+189: assume(!((t2 != 0 && t3 != 0))); 
+177: nop;
+
+11: nop; 
+
+
+/* Statement: flag1 = 0 */
+191: nop; 
+192: begin_atomic;
+193:  load t0 = B0;
+194:  load t1 = B1;
+195:  load t2 = B2;
+196:  load t3 = B3;
+
+197: assume(!(false)); 
+
+198: end_atomic;
+14:   if (true) goto 1; 
+
+assert always ((pc{1} != 11) || (pc{2} != 11));

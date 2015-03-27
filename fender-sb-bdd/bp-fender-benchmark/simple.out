@@ -1,0 +1,53 @@
+--- Commencing parsing ---
+--- Finished parsing successfully. ---
+Printing out the parsed program:
+Shared: [B0, B1, B2, B3, B4, B5, B6, B7, B8]
+Local: [t0, t1, t2, t3, t4, t5, t6, t7, t8]
+[
+pid 0:
+[STORE B0 = *, STORE B1 = *, STORE B2 = *, STORE B3 = *, STORE B4 = *, STORE B5 = *, STORE B6 = *, STORE B7 = *, STORE B8 = *, NOP, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, LOAD t7 = B7, LOAD t8 = B8, STORE B0 = CHOOSE(((((((((((((((((((t0 != 0) || (t0 == 0)) || (t1 != 0)) || (t1 == 0)) || (t2 != 0)) || (t2 == 0)) || (t3 != 0)) || (t3 == 0)) || (t4 != 0)) || (t4 == 0)) || (t5 != 0)) || (t5 == 0)) || (t6 != 0)) || (t6 == 0)) || (t7 != 0)) || (t7 == 0)) || (t8 != 0)) || (t8 == 0)), false); , STORE B1 = CHOOSE(false, ((((((((((((((((((t0 != 0) || (t0 == 0)) || (t1 != 0)) || (t1 == 0)) || (t2 != 0)) || (t2 == 0)) || (t3 != 0)) || (t3 == 0)) || (t4 != 0)) || (t4 == 0)) || (t5 != 0)) || (t5 == 0)) || (t6 != 0)) || (t6 == 0)) || (t7 != 0)) || (t7 == 0)) || (t8 != 0)) || (t8 == 0))); , STORE B2 = CHOOSE(false, ((((((((((((((((((t0 != 0) || (t0 == 0)) || (t1 != 0)) || (t1 == 0)) || (t2 != 0)) || (t2 == 0)) || (t3 != 0)) || (t3 == 0)) || (t4 != 0)) || (t4 == 0)) || (t5 != 0)) || (t5 == 0)) || (t6 != 0)) || (t6 == 0)) || (t7 != 0)) || (t7 == 0)) || (t8 != 0)) || (t8 == 0))); , STORE B3 = CHOOSE((t3 != 0), (((t3 == 0) || (t4 != 0)) || (t5 != 0))); , STORE B4 = CHOOSE((t4 != 0), (((t3 != 0) || (t4 == 0)) || (t5 != 0))); , STORE B5 = CHOOSE((t5 != 0), (((t3 != 0) || (t4 != 0)) || (t5 == 0))); , STORE B6 = CHOOSE((t6 != 0), (((t6 == 0) || (t7 != 0)) || (t8 != 0))); , STORE B7 = CHOOSE((t7 != 0), (((t6 != 0) || (t7 == 0)) || (t8 != 0))); , STORE B8 = CHOOSE((t8 != 0), (((t6 != 0) || (t7 != 0)) || (t8 == 0))); , t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0, t8 = 0, BARRIER, END], 
+pid 1:
+[NOP, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, LOAD t7 = B7, LOAD t8 = B8, STORE B0 = CHOOSE((t0 != 0), (((t0 == 0) || (t1 != 0)) || (t2 != 0))); , STORE B1 = CHOOSE((t1 != 0), (((t0 != 0) || (t1 == 0)) || (t2 != 0))); , STORE B2 = CHOOSE((t2 != 0), (((t0 != 0) || (t1 != 0)) || (t2 == 0))); , STORE B3 = CHOOSE((t0 != 0), (((t0 == 0) || (t1 != 0)) || (t2 != 0))); , STORE B4 = CHOOSE((t1 != 0), (((t0 != 0) || (t1 == 0)) || (t2 != 0))); , STORE B5 = CHOOSE((t2 != 0), (((t0 != 0) || (t1 != 0)) || (t2 == 0))); , STORE B6 = CHOOSE((t6 != 0), (((t6 == 0) || (t7 != 0)) || (t8 != 0))); , STORE B7 = CHOOSE((t7 != 0), (((t6 != 0) || (t7 == 0)) || (t8 != 0))); , STORE B8 = CHOOSE((t8 != 0), (((t6 != 0) || (t7 != 0)) || (t8 == 0))); , END_ATOMIC, NOP, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, LOAD t7 = B7, LOAD t8 = B8, STORE B0 = CHOOSE((t0 != 0), (((t0 == 0) || (t1 != 0)) || (t2 != 0))); , STORE B1 = CHOOSE((t1 != 0), (((t0 != 0) || (t1 == 0)) || (t2 != 0))); , STORE B2 = CHOOSE((t2 != 0), (((t0 != 0) || (t1 != 0)) || (t2 == 0))); , STORE B3 = CHOOSE(false, (((t3 != 0) || (t4 != 0)) || (t5 != 0))); , STORE B4 = CHOOSE((t3 != 0), (((t3 == 0) || (t4 != 0)) || (t5 != 0))); , STORE B5 = CHOOSE((t4 != 0), (((t3 != 0) || (t4 == 0)) || (t5 != 0))); , STORE B6 = CHOOSE((t6 != 0), (((t6 == 0) || (t7 != 0)) || (t8 != 0))); , STORE B7 = CHOOSE((t7 != 0), (((t6 != 0) || (t7 == 0)) || (t8 != 0))); , STORE B8 = CHOOSE((t8 != 0), (((t6 != 0) || (t7 != 0)) || (t8 == 0))); , END_ATOMIC, NOP, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, LOAD t7 = B7, LOAD t8 = B8, STORE B0 = CHOOSE((t3 != 0), (((t3 == 0) || (t4 != 0)) || (t5 != 0))); , STORE B1 = CHOOSE((t4 != 0), (((t3 != 0) || (t4 == 0)) || (t5 != 0))); , STORE B2 = CHOOSE((t5 != 0), (((t3 != 0) || (t4 != 0)) || (t5 == 0))); , STORE B3 = CHOOSE((t3 != 0), (((t3 == 0) || (t4 != 0)) || (t5 != 0))); , STORE B4 = CHOOSE((t4 != 0), (((t3 != 0) || (t4 == 0)) || (t5 != 0))); , STORE B5 = CHOOSE((t5 != 0), (((t3 != 0) || (t4 != 0)) || (t5 == 0))); , STORE B6 = CHOOSE((t6 != 0), (((t6 == 0) || (t7 != 0)) || (t8 != 0))); , STORE B7 = CHOOSE((t7 != 0), (((t6 != 0) || (t7 == 0)) || (t8 != 0))); , STORE B8 = CHOOSE((t8 != 0), (((t6 != 0) || (t7 != 0)) || (t8 == 0))); , END_ATOMIC, END], 
+pid 2:
+[NOP, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, LOAD t7 = B7, LOAD t8 = B8, STORE B0 = CHOOSE((t0 != 0), (((t0 == 0) || (t1 != 0)) || (t2 != 0))); , STORE B1 = CHOOSE((t1 != 0), (((t0 != 0) || (t1 == 0)) || (t2 != 0))); , STORE B2 = CHOOSE((t2 != 0), (((t0 != 0) || (t1 != 0)) || (t2 == 0))); , STORE B3 = CHOOSE((t3 != 0), (((t3 == 0) || (t4 != 0)) || (t5 != 0))); , STORE B4 = CHOOSE((t4 != 0), (((t3 != 0) || (t4 == 0)) || (t5 != 0))); , STORE B5 = CHOOSE((t5 != 0), (((t3 != 0) || (t4 != 0)) || (t5 == 0))); , STORE B6 = CHOOSE((t0 != 0), (((t0 == 0) || (t1 != 0)) || (t2 != 0))); , STORE B7 = CHOOSE((t1 != 0), (((t0 != 0) || (t1 == 0)) || (t2 != 0))); , STORE B8 = CHOOSE((t2 != 0), (((t0 != 0) || (t1 != 0)) || (t2 == 0))); , END_ATOMIC, NOP, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, LOAD t7 = B7, LOAD t8 = B8, STORE B0 = CHOOSE((t0 != 0), (((t0 == 0) || (t1 != 0)) || (t2 != 0))); , STORE B1 = CHOOSE((t1 != 0), (((t0 != 0) || (t1 == 0)) || (t2 != 0))); , STORE B2 = CHOOSE((t2 != 0), (((t0 != 0) || (t1 != 0)) || (t2 == 0))); , STORE B3 = CHOOSE((t3 != 0), (((t3 == 0) || (t4 != 0)) || (t5 != 0))); , STORE B4 = CHOOSE((t4 != 0), (((t3 != 0) || (t4 == 0)) || (t5 != 0))); , STORE B5 = CHOOSE((t5 != 0), (((t3 != 0) || (t4 != 0)) || (t5 == 0))); , STORE B6 = CHOOSE(false, (((t6 != 0) || (t7 != 0)) || (t8 != 0))); , STORE B7 = CHOOSE((t6 != 0), (((t6 == 0) || (t7 != 0)) || (t8 != 0))); , STORE B8 = CHOOSE((t7 != 0), (((t6 != 0) || (t7 == 0)) || (t8 != 0))); , END_ATOMIC, NOP, BEGIN_ATOMIC, LOAD t0 = B0, LOAD t1 = B1, LOAD t2 = B2, LOAD t3 = B3, LOAD t4 = B4, LOAD t5 = B5, LOAD t6 = B6, LOAD t7 = B7, LOAD t8 = B8, STORE B0 = CHOOSE((t6 != 0), (((t6 == 0) || (t7 != 0)) || (t8 != 0))); , STORE B1 = CHOOSE((t7 != 0), (((t6 != 0) || (t7 == 0)) || (t8 != 0))); , STORE B2 = CHOOSE((t8 != 0), (((t6 != 0) || (t7 != 0)) || (t8 == 0))); , STORE B3 = CHOOSE((t3 != 0), (((t3 == 0) || (t4 != 0)) || (t5 != 0))); , STORE B4 = CHOOSE((t4 != 0), (((t3 != 0) || (t4 == 0)) || (t5 != 0))); , STORE B5 = CHOOSE((t5 != 0), (((t3 != 0) || (t4 != 0)) || (t5 == 0))); , STORE B6 = CHOOSE((t6 != 0), (((t6 == 0) || (t7 != 0)) || (t8 != 0))); , STORE B7 = CHOOSE((t7 != 0), (((t6 != 0) || (t7 == 0)) || (t8 != 0))); , STORE B8 = CHOOSE((t8 != 0), (((t6 != 0) || (t7 != 0)) || (t8 == 0))); , END_ATOMIC, END]]
+
+--- STARTING EXPLORATION --- 
+Pushing initial state:<Shared:{B0=0, B1=0, B2=0, B3=0, B4=0, B5=0, B6=0, B7=0, B8=0},<pid0, PC=51, {t0=0, t1=0, t2=0, t3=0, t4=0, t5=0, t6=0, t7=0, t8=0}> ,<pid1, PC=1, {t0=0, t1=0, t2=0, t3=0, t4=0, t5=0, t6=0, t7=0, t8=0}> ,<pid2, PC=1, {t0=0, t1=0, t2=0, t3=0, t4=0, t5=0, t6=0, t7=0, t8=0}> >
+
+Depth: 9 Space: 1008 Edges: 1019
+Depth: 9 Space: 2008 Edges: 2041
+Depth: 9 Space: 3008 Edges: 3063
+Depth: 7 Space: 4006 Edges: 4085
+Depth: 8 Space: 5007 Edges: 5108
+Depth: 7 Space: 6006 Edges: 6141
+Depth: 8 Space: 7007 Edges: 7170
+Depth: 9 Space: 8008 Edges: 8203
+Depth: 10 Space: 9009 Edges: 9233
+Depth: 7 Space: 10006 Edges: 10266
+Depth: 10 Space: 11009 Edges: 11297
+Depth: 8 Space: 12007 Edges: 12331
+Depth: 8 Space: 13007 Edges: 13360
+Depth: 6 Space: 14005 Edges: 14396
+Depth: 10 Space: 15009 Edges: 15427
+Depth: 8 Space: 16007 Edges: 16461
+Depth: 6 Space: 17005 Edges: 17489
+Depth: 5 Space: 18004 Edges: 18523
+Depth: 5 Space: 19004 Edges: 19562
+Depth: 7 Space: 20006 Edges: 20608
+Depth: 7 Space: 21006 Edges: 21653
+Depth: 4 Space: 22003 Edges: 22696
+Depth: 6 Space: 23005 Edges: 23744
+Depth: 4 Space: 24003 Edges: 24789
+Depth: 4 Space: 25003 Edges: 25837
+Depth: 5 Space: 26004 Edges: 26885
+Depth: 5 Space: 27004 Edges: 27933
+Depth: 3 Space: 28002 Edges: 28979
+Total states : 28117
+Error states : 0
+No error states, nothing to infer!
+Avoid formula: True
+---FINISHED---
+States: 28117, Edges : 29100
+Error states: 0
+Running Time: 997 ms
+Memory usage: 32 MB

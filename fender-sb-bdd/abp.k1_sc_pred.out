@@ -1,0 +1,2 @@
+Usage : java Main <inputfile> <abstraction> <k>
+Possible values for abstraction: sc/pso/set/must/may
