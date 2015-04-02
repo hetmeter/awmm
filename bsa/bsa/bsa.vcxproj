@@ -84,16 +84,17 @@
     <ClCompile Include="ControlFlowVisitor.cpp" />
     <ClCompile Include="GlobalVariable.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="z3code.cpp" />
+    <ClCompile Include="Predicate.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ast.h" />
+    <ClInclude Include="BooleanTerm.h" />
     <ClInclude Include="bufferSizeMap.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="ControlFlowEdge.h" />
     <ClInclude Include="ControlFlowVisitor.h" />
     <ClInclude Include="GlobalVariable.h" />
-    <ClInclude Include="z3code.h" />
+    <ClInclude Include="Predicate.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

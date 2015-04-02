@@ -36,7 +36,7 @@
     <ClCompile Include="GlobalVariable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="z3code.cpp">
+    <ClCompile Include="Predicate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,7 +59,10 @@
     <ClInclude Include="GlobalVariable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="z3code.h">
+    <ClInclude Include="Predicate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BooleanTerm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,6 +6,7 @@
 #include <regex>
 
 class Ast;
+class Predicate;
 class GlobalVariable;
 
 namespace config
@@ -27,6 +28,13 @@ namespace config
 	const extern std::vector<std::string> UNARY_OPERATORS;
 	const extern std::vector<std::string> BINARY_OPERATORS;
 	const extern std::string EQUALS;
+	const extern std::string LESS_THAN;
+	const extern std::string LESS_EQUALS;
+	const extern std::string GREATER_EQUALS;
+	const extern std::string NOT_EQUALS;
+	const extern std::string NOT;
+	const extern std::string AND;
+	const extern std::string OR;
 	const extern std::string COMMENT_PREFIX;
 	const extern std::string REPLACING_CAPTION;
 	const extern std::string FINISHED_REPLACING_CAPTION;
@@ -86,8 +94,8 @@ namespace config
 	extern language currentLanguage;
 	extern std::map<std::string, Ast*> labelLookupMap;
 	extern std::vector<std::string> variableNames;
-	extern std::vector<z3code::Predicate> predicates;
 	extern std::map<std::string, GlobalVariable*> globalVariables;
+	extern std::vector<Predicate*> globalPredicates;
 	extern int K;
 
 	extern std::string replicateString(std::string s, int n);
@@ -95,4 +103,9 @@ namespace config
 	extern void throwError(std::string msg);
 	extern void throwCriticalError(std::string msg);
 	extern bool stringVectorContains(std::vector<std::string> container, std::string element);
+
+	extern Ast* stringToAst(std::string parsedProgramString);
+
+	enum booleanOperator { EQUALS, LESS_THAN, LESS_EQUALS, GREATER_THAN, GREATER_EQUALS, NOT_EQUALS, NOT, AND, OR, INVALID };
+	extern booleanOperator stringToBooleanOperator(std::string operatorString);
 }
