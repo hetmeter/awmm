@@ -56,6 +56,9 @@ namespace config
 	const std::string INITIALIZATION_BLOCK_TOKEN_NAME = "initializationBlock";
 	const std::string LOCAL_ASSIGN_TOKEN_NAME = "localAssign";
 	const std::string ASSUME_TOKEN_NAME = "assume";
+	const std::string BEGIN_ATOMIC_TOKEN_NAME = "begin_atomic";
+	const std::string END_ATOMIC_TOKEN_NAME = "end_atomic";
+	const std::string CHOOSE_TOKEN_NAME = "choose";
 
 	const std::string BEGINIT_TAG_NAME = "beginit";
 	const std::string ENDINIT_TAG_NAME = "endinit";
@@ -94,8 +97,72 @@ namespace config
 	std::map<std::string, Ast*> labelLookupMap;
 	std::vector<std::string> variableNames;
 	std::map<std::string, GlobalVariable*> globalVariables;
-	std::vector<Predicate*> globalPredicates;
+	std::vector<Ast*> globalPredicates;
+	std::vector<std::string> auxiliaryBooleanVariableNames;
+	std::vector<std::string> auxiliaryTemporaryVariableNames;
+	int currentAuxiliaryLabel = -1;
 	int K;
+	std::map<Ast*, std::vector<Ast*>> lazyReplacements;
+
+	void carryOutLazyReplacements()
+	{
+		for (std::map<Ast*, std::vector<Ast*>>::iterator iterator = lazyReplacements.begin(); iterator != lazyReplacements.end(); iterator++)
+		{
+			Ast::replaceNode(iterator->second, iterator->first);
+		}
+	}
+
+	void initializeAuxiliaryVariables()
+	{
+		int globalPredicateCount = globalPredicates.size();
+		std::string currentVariableName;
+
+		for (int ctr = 0; ctr < globalPredicateCount; ctr++)
+		{
+			srand(time(NULL));
+			currentVariableName = "b_" + std::to_string(ctr);
+
+			while (stringVectorContains(variableNames, currentVariableName))
+			{
+				currentVariableName = "b_" + std::to_string(ctr) + "_" + std::to_string(rand());
+			}
+
+			auxiliaryBooleanVariableNames[ctr] = currentVariableName;
+			variableNames.push_back(currentVariableName);
+
+			currentVariableName = "t_" + std::to_string(ctr);
+
+			while (stringVectorContains(variableNames, currentVariableName))
+			{
+				currentVariableName = "t_" + std::to_string(ctr) + "_" + std::to_string(rand());
+			}
+
+			auxiliaryTemporaryVariableNames[ctr] = currentVariableName;
+			variableNames.push_back(currentVariableName);
+		}
+	}
+
+	int getCurrentAuxiliaryLabel()
+	{
+		if (currentAuxiliaryLabel == -1)
+		{
+			int maxLabel = -1;
+			int currentLabel;
+
+			for (std::map<std::string, Ast*>::iterator iterator = labelLookupMap.begin(); iterator != labelLookupMap.end(); iterator++)
+			{
+				currentLabel = std::stoi(iterator->first);
+				if (currentLabel > maxLabel)
+				{
+					maxLabel = currentLabel;
+				}
+			}
+
+			currentAuxiliaryLabel = currentLabel;
+		}
+
+		return ++currentAuxiliaryLabel;
+	}
 
 	void throwError(std::string msg)
 	{

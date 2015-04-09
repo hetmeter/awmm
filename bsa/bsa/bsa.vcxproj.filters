@@ -36,12 +36,6 @@
     <ClCompile Include="GlobalVariable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Predicate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BooleanTerm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ast.h">
@@ -60,12 +54,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GlobalVariable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Predicate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BooleanTerm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

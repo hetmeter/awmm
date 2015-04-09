@@ -15,6 +15,7 @@ Ast::Ast()
 {
 	// The index by which this node can be referred to from its parent's children vector. The root always has an index of -1
 	indexAsChild = -1;
+	name = "";
 }
 
 // Initializes an ID node
@@ -25,7 +26,7 @@ Ast::Ast(string variableName)
 	children.at(0)->name = variableName;
 }
 
-// Initializes an ID node
+// Initializes an INT node
 Ast::Ast(int value)
 {
 	name = config::INT_TOKEN_NAME;
@@ -114,6 +115,71 @@ Ast::Ast(Ast* operand, string operation)
 
 Ast::~Ast()
 {
+}
+
+Ast* Ast::newBeginAtomic()
+{
+	Ast* result = new Ast();
+	result->name = config::BEGIN_ATOMIC_TOKEN_NAME;
+	return result;
+}
+
+Ast* Ast::newEndAtomic()
+{
+	Ast* result = new Ast();
+	result->name = config::END_ATOMIC_TOKEN_NAME;
+	return result;
+}
+
+Ast* Ast::newNop()
+{
+	Ast* result = new Ast();
+	result->name = config::NOP_TOKEN_NAME;
+	return result;
+}
+
+Ast* Ast::newAsterisk()
+{
+	Ast* result = new Ast();
+	result->name = config::ASTERISK_TOKEN_NAME;
+	return result;
+}
+
+Ast* Ast::newLabel(int value, Ast* statement)
+{
+	Ast* result = new Ast();
+	result->name = config::LABEL_TOKEN_NAME;
+	result->children.push_back(new Ast());
+	result->children.at(0)->name = to_string(value);
+	result->addChild(statement);
+	return result;
+}
+
+Ast* Ast::newLoad(std::string variableName, Ast* rightSide)
+{
+	Ast* result = new Ast();
+	result->name = config::PSO_TSO_LOAD_TOKEN_NAME;
+	result->addChild(new Ast(variableName));
+	result->addChild(rightSide);
+	return result;
+}
+
+Ast* Ast::newStore(std::string variableName, Ast* rightSide)
+{
+	Ast* result = new Ast();
+	result->name = config::PSO_TSO_STORE_TOKEN_NAME;
+	result->addChild(new Ast(variableName));
+	result->addChild(rightSide);
+	return result;
+}
+
+Ast* Ast::newChoose(Ast* firstChoice, Ast* secondChoice)
+{
+	Ast* result = new Ast();
+	result->name = config::CHOOSE_TOKEN_NAME;
+	result->addChild(firstChoice);
+	result->addChild(secondChoice);
+	return result;
 }
 
 // Contains all buffer size maps
@@ -998,6 +1064,17 @@ void Ast::visitAllProgramPoints()
 	}
 }
 
+void Ast::cascadingPerformPredicateAbstraction()
+{
+	if (!performPredicateAbstraction())
+	{
+		for (Ast* child : children)
+		{
+			child->cascadingPerformPredicateAbstraction();
+		}
+	}
+}
+
 // Adds a child node and sets its variables connecting it to this node
 void Ast::addChild(Ast* child)
 {
@@ -1141,6 +1218,28 @@ string Ast::astToString()
 	result = regex_replace(result, indentationRegex, "\n|");
 
 	return result;
+}
+
+vector<Ast*> Ast::search(string soughtName)
+{
+	vector<Ast*> results;
+
+	if (name != soughtName)
+	{
+		vector<Ast*> subResults;
+
+		for (Ast* child : children)
+		{
+			subResults = child->search(soughtName);
+			results.insert(results.end(), subResults.begin(), subResults.end());
+		}
+	}
+	else
+	{
+		results.push_back(this);
+	}
+
+	return results;
 }
 
 string Ast::emitCode()
@@ -1526,6 +1625,17 @@ void Ast::replaceNode(vector<Ast*> nodes, Ast* oldNode)
 	newParent->refreshChildIndices();
 }
 
+void Ast::replaceNode(Ast* newNode, Ast* oldNode)
+{
+	Ast* newParent = oldNode->parent;
+	int newIndex = oldNode->indexAsChild;
+
+	newParent->children.erase(newParent->children.begin() + newIndex);
+	newParent->children.insert(newParent->children.begin() + newIndex, newNode);
+
+	newParent->refreshChildIndices();
+}
+
 void Ast::initializeAuxiliaryVariables()
 {
 	if (config::currentLanguage == config::language::RMA)
@@ -1582,7 +1692,164 @@ vector<Ast*> Ast::reportBack()
 	return result;
 }
 
-Ast* Ast::weakestLiberalPrecondition(Ast* statement, Ast* predicate)
+bool Ast::performPredicateAbstraction()
 {
-	return NULL;
+	bool result = false;
+
+	if (config::currentLanguage == config::language::RMA)
+	{
+		// TODO
+		config::throwError("Predicate abstraction operations not implemented for RMA");
+	}
+	else
+	{
+		if (name == config::PSO_TSO_STORE_TOKEN_NAME || name == config::PSO_TSO_LOAD_TOKEN_NAME
+			|| name == config::LOCAL_ASSIGN_TOKEN_NAME)
+		{
+			Ast* positiveWeakestLiberalPrecondition;
+			Ast* negativeWeakestLiberalPrecondition;
+			vector<Ast*> replacementStatements;
+			int numberOfPredicates = config::globalPredicates.size();
+
+			replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(), Ast::newNop()));
+			replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(), Ast::newBeginAtomic()));
+
+			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+			{
+				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
+						Ast::newLoad(
+							config::auxiliaryTemporaryVariableNames[ctr],
+							new Ast(config::auxiliaryBooleanVariableNames[ctr])
+						))
+					);
+			}
+
+			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+			{
+				positiveWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]);
+				negativeWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]->negate());
+
+				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
+						Ast::newStore(
+							config::auxiliaryBooleanVariableNames[ctr],
+							Ast::newChoose(
+								new Ast(),		// should be: F_V(positiveWeakestLiberalPrecondition)
+								new Ast()		// should be: F_V(negativeWeakestLiberalPrecondition)
+							)
+						))
+					);
+			}
+
+			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+			{
+				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
+						Ast::newLoad(
+							config::auxiliaryTemporaryVariableNames[ctr],
+							new Ast(0)
+						))
+					);
+			}
+
+			replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(), Ast::newEndAtomic()));
+			
+			config::lazyReplacements[this] = replacementStatements;
+
+			result = true;
+		}
+		else if (name == config::IF_ELSE_TOKEN_NAME)
+		{
+			// Since an ifElse node would be replaced by another ifElse node with a slight modification, just replace
+			// the conditional with * and add an assume to each statement block, then return false, causing the
+			// cascading function to spread to the node's children. Since assume statements and boolean literals are
+			// ignored anyway, this achieves the intended effect.
+
+			Ast* positiveConditional = children.at(0);
+			Ast* negativeConditional = children.at(0)->negate();
+			Ast* G_positive = new Ast();	// should be: G_V(positiveConditional)
+			Ast* G_negative = new Ast();	// should be: G_V(negativeConditional)
+
+			children.at(1)->children.insert(children.at(1)->children.begin(), new Ast(positiveConditional));
+			children.at(1)->children.at(0)->parent = children.at(1);
+			children.at(1)->refreshChildIndices();
+
+			if (children.at(2)->name != config::NONE_TOKEN_NAME)
+			{
+				children.at(2)->children.insert(children.at(2)->children.begin(), new Ast(negativeConditional));
+				children.at(2)->children.at(0)->parent = children.at(1);
+				children.at(2)->refreshChildIndices();
+			}
+
+			replaceNode(Ast::newAsterisk(), children.at(0));
+		}
+	}
+
+	return result;
+}
+
+// Creates a clone of this and all successor nodes, all of which correspond to their source in all but bufferSizeMaps, comments and control flow data
+Ast* Ast::clone()
+{
+	Ast* result = new Ast();
+	result->name = name;
+
+	for (Ast* child : children)
+	{
+		result->addChild(child->clone());
+	}
+
+	return result;
+}
+
+Ast* Ast::weakestLiberalPrecondition(Ast* predicate)
+{
+	Ast* result;
+
+	if (config::currentLanguage == config::language::RMA)
+	{
+		// TODO
+		config::throwError("Predicate abstraction operations not implemented for RMA");
+	}
+	else
+	{
+		if (name == config::PSO_TSO_STORE_TOKEN_NAME || name == config::PSO_TSO_LOAD_TOKEN_NAME
+			|| name == config::LOCAL_ASSIGN_TOKEN_NAME)
+		{
+			string leftVariable = children.at(0)->children.at(0)->name;
+			Ast* rightExpression = children.at(1);
+			result = predicate->clone();
+			vector<Ast*> toBeReplaced = result->search(leftVariable);
+
+			for (Ast* oldId : toBeReplaced)
+			{
+				replaceNode(rightExpression->clone(), oldId);
+			}
+		}
+		else
+		{
+			result = new Ast();
+		}
+	}
+
+	return result;
+}
+
+Ast* Ast::negate()
+{
+	Ast* result;
+
+	if (name == config::EQUALS || name == config::LESS_THAN || name == config::LESS_EQUALS ||
+		name == config::GREATER_EQUALS || name == config::NOT_EQUALS ||
+		name == config::AND || name == config::OR)
+	{
+		Ast* selfClone = clone();
+		result = new Ast();
+		result->name == config::NOT;
+		result->addChild(selfClone);
+	}
+	else if (name == config::NOT)
+	{
+		result = children.at(0)->clone();
+	}
+
+	return result;
 }

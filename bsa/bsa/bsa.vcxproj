@@ -54,6 +54,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\Programs\z3-master\src\api;E:\Programs\z3-master\src\api\c++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -81,24 +82,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Ast.cpp" />
-    <ClCompile Include="BooleanTerm.cpp" />
     <ClCompile Include="bufferSizeMap.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="ControlFlowEdge.cpp" />
     <ClCompile Include="ControlFlowVisitor.cpp" />
     <ClCompile Include="GlobalVariable.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Predicate.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ast.h" />
-    <ClInclude Include="BooleanTerm.h" />
     <ClInclude Include="bufferSizeMap.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="ControlFlowEdge.h" />
     <ClInclude Include="ControlFlowVisitor.h" />
     <ClInclude Include="GlobalVariable.h" />
-    <ClInclude Include="Predicate.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

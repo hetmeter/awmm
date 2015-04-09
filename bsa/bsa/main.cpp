@@ -17,13 +17,11 @@ Buffer Size Analysis:
 
 #include "config.h"
 #include "Ast.h"
-#include "Predicate.h"
 
 using namespace std;
 
 int main(int argc, char** argv)
 {
-	z3::solver s();
 	string parsedProgramPath;
 	string outputPath;
 
@@ -102,6 +100,18 @@ int main(int argc, char** argv)
 		config::throwCriticalError("Invalid parsed program extension");
 	}
 
+	Ast* rootAstRef = config::stringToAst(parsedProgramString);
+
+	rootAstRef->cascadingUnifyVariableNames();		// Send a cascading command to the root node that results in all variable identifiers registering their variable names in a global vector
+	rootAstRef->getCostsFromChildren();				// Send a cascading command to the root node that results in all program points storing the buffer size increases they cause
+	rootAstRef->initializePersistentCosts();		// Prompt the AST to gather all globally initialized variables and have all program point nodes keep track of their buffer sizes
+	rootAstRef->topDownCascadingRegisterLabels();	// Send a cascading command to the root node that results in all label AST nodes registering themselves in a global map
+	rootAstRef->cascadingGenerateOutgoingEdges();	// Send a cascading command to the root node that results in all program points estabilishing outgoing program flow edges to their possible successor nodes in the control flow graph
+	rootAstRef->visitAllProgramPoints();			// Generate one control flow visitor in the first program point nodes of each process declaration and prompt them to start traversing the AST
+	rootAstRef->cascadingUnifyVariableNames();
+	rootAstRef->cascadingInitializeAuxiliaryVariables();
+	rootAstRef->carryOutReplacements();
+
 	ifstream parsedPredicateFile(fileNameStub + "." + config::PREDICATE_EXTENSION + "." + extension + "." + config::OUT_EXTENSION);
 	string parsedPredicateLine, parsedPredicateString;
 	Ast* predicateAstRef;
@@ -122,15 +132,11 @@ int main(int argc, char** argv)
 
 			for (Ast* child : predicateAstRef->children)
 			{
-				config::globalPredicates.push_back(new Predicate(child));
+				config::globalPredicates.push_back(child);
 			}
 
-			for (Predicate* globalPredicate : config::globalPredicates)
-			{
-				cout << "\n" << globalPredicate->toString();
-			}
-
-			cout << "\n";
+			config::initializeAuxiliaryVariables();
+			rootAstRef->cascadingPerformPredicateAbstraction();
 		}
 		else
 		{
@@ -139,18 +145,6 @@ int main(int argc, char** argv)
 	}
 
 	parsedPredicateFile.close();
-
-	Ast* rootAstRef = config::stringToAst(parsedProgramString);
-
-	rootAstRef->cascadingUnifyVariableNames();		// Send a cascading command to the root node that results in all variable identifiers registering their variable names in a global vector
-	rootAstRef->getCostsFromChildren();				// Send a cascading command to the root node that results in all program points storing the buffer size increases they cause
-	rootAstRef->initializePersistentCosts();		// Prompt the AST to gather all globally initialized variables and have all program point nodes keep track of their buffer sizes
-	rootAstRef->topDownCascadingRegisterLabels();	// Send a cascading command to the root node that results in all label AST nodes registering themselves in a global map
-	rootAstRef->cascadingGenerateOutgoingEdges();	// Send a cascading command to the root node that results in all program points estabilishing outgoing program flow edges to their possible successor nodes in the control flow graph
-	rootAstRef->visitAllProgramPoints();			// Generate one control flow visitor in the first program point nodes of each process declaration and prompt them to start traversing the AST
-	rootAstRef->cascadingUnifyVariableNames();
-	rootAstRef->cascadingInitializeAuxiliaryVariables();
-	rootAstRef->carryOutReplacements();
 
 	cout << rootAstRef->astToString();
 	cout << "\n---\n";

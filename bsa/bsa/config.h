@@ -6,7 +6,6 @@
 #include <regex>
 
 class Ast;
-class Predicate;
 class GlobalVariable;
 
 namespace config
@@ -59,6 +58,9 @@ namespace config
 	const extern std::string INITIALIZATION_BLOCK_TOKEN_NAME;
 	const extern std::string LOCAL_ASSIGN_TOKEN_NAME;
 	const extern std::string ASSUME_TOKEN_NAME;
+	const extern std::string BEGIN_ATOMIC_TOKEN_NAME;
+	const extern std::string END_ATOMIC_TOKEN_NAME;
+	const extern std::string CHOOSE_TOKEN_NAME;
 
 	const extern std::string BEGINIT_TAG_NAME;
 	const extern std::string ENDINIT_TAG_NAME;
@@ -98,9 +100,16 @@ namespace config
 	extern std::map<std::string, Ast*> labelLookupMap;
 	extern std::vector<std::string> variableNames;
 	extern std::map<std::string, GlobalVariable*> globalVariables;
-	extern std::vector<Predicate*> globalPredicates;
+	extern std::vector<Ast*> globalPredicates;
+	extern std::vector<std::string> auxiliaryBooleanVariableNames;
+	extern std::vector<std::string> auxiliaryTemporaryVariableNames;
+	extern int currentAuxiliaryLabel;
+	extern int getCurrentAuxiliaryLabel();
 	extern int K;
+	extern std::map<Ast*, std::vector<Ast*>> lazyReplacements;
 
+	extern void carryOutLazyReplacements();
+	extern void initializeAuxiliaryVariables();
 	extern std::string replicateString(std::string s, int n);
 	extern std::string addTabs(std::string s, int numberOfTabs);
 	extern void throwError(std::string msg);
