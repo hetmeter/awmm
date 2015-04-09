@@ -1,0 +1,153 @@
+beginit
+
+	store y1 = 0;
+	store y2 = 0;
+	store ch1 = 0;
+	store ch2 = 0;
+
+endinit
+
+process 1:
+
+	y2_fst_1 = 0;
+	y2_cnt_1 = 0;
+	y1_fst_1 = 0;
+	y1_cnt_1 = 0;
+	y1_1_1 = 0;
+	y1_2_1 = 0;
+	y1_3_1 = 0;
+	y1_4_1 = 0;
+	y1_5_1 = 0;
+	ch2_fst_1 = 0;
+	ch2_cnt_1 = 0;
+	ch1_fst_1 = 0;
+	ch1_cnt_1 = 0;
+	ch1_1_1 = 0;
+	ch1_2_1 = 0;
+	ch1_3_1 = 0;
+	ch1_4_1 = 0;
+	ch1_5_1 = 0;
+	// Replacing "store ch1 = 1;"
+	1: ch1_fst_1 = 1;
+	// Replacing "load t12 = y2;"
+	2: if (y2_cnt_1 == 0)
+		load t12 = y2;
+	endif;
+	// Finished replacing "load t12 = y2;"
+	
+	// Replacing "store y1 = t12 + 1;"
+	4: y1_fst_1 = 1;
+	// Replacing "store ch1 = 0;"
+	5: if (ch1_fst_1 == 0)
+		ch1_fst_1 = 1;
+		ch1_1_1 = 0;
+	endif;
+	
+	// Replacing "load t13 = ch2;"
+	6: if (ch2_cnt_1 == 0)
+		load t13 = ch2;
+	endif;
+	// Finished replacing "load t13 = ch2;"
+	
+	7: if (t13 == 0)
+		8: goto 10;
+	else
+		9: goto 6;
+	endif;
+	
+	// Replacing "load t11 = y1;"
+	10: if (y1_cnt_1 == 0)
+		load t11 = y1;
+	endif;
+	
+	// Replacing "load t12 = y2;"
+	11: if (y2_cnt_1 == 0)
+		load t12 = y2;
+	endif;
+	// Finished replacing "load t12 = y2;"
+	
+	12: if ((t12 == 0) | (t11 < t12))
+		13: goto 15;
+	else
+		14: goto 10;
+	endif;
+	
+	15: nop;
+	// Replacing "store y1 = 0;"
+	16: if (y1_cnt_1 == 5)
+		abort("overflow");
+	endif;
+	
+
+process 2:
+
+	y2_fst_2 = 0;
+	y2_cnt_2 = 0;
+	y2_1_2 = 0;
+	y2_2_2 = 0;
+	y2_3_2 = 0;
+	y2_4_2 = 0;
+	y2_5_2 = 0;
+	y1_fst_2 = 0;
+	y1_cnt_2 = 0;
+	ch2_fst_2 = 0;
+	ch2_cnt_2 = 0;
+	ch2_1_2 = 0;
+	ch2_2_2 = 0;
+	ch2_3_2 = 0;
+	ch2_4_2 = 0;
+	ch2_5_2 = 0;
+	ch1_fst_2 = 0;
+	ch1_cnt_2 = 0;
+	// Replacing "store ch2 = 1;"
+	1: ch2_fst_2 = 1;
+	// Replacing "load t21 = y1;"
+	2: if (y1_cnt_2 == 0)
+		load t21 = y1;
+	endif;
+	// Finished replacing "load t21 = y1;"
+	
+	// Replacing "store y2 = t21 + 1;"
+	4: y2_fst_2 = 1;
+	// Replacing "store ch2 = 0;"
+	5: if (ch2_fst_2 == 0)
+		ch2_fst_2 = 1;
+		ch2_1_2 = 0;
+	endif;
+	
+	// Replacing "load t23 = ch1;"
+	6: if (ch1_cnt_2 == 0)
+		load t23 = ch1;
+	endif;
+	// Finished replacing "load t23 = ch1;"
+	
+	7: if (t23 == 0)
+		8: goto 10;
+	else
+		9: goto 6;
+	endif;
+	
+	// Replacing "load t21 = y1;"
+	10: if (y1_cnt_2 == 0)
+		load t21 = y1;
+	endif;
+	// Finished replacing "load t21 = y1;"
+	
+	// Replacing "load t22 = y2;"
+	11: if (y2_cnt_2 == 0)
+		load t22 = y2;
+	endif;
+	
+	12: if ((t21 == 0) | (t22 <= t21))
+		13: goto 15;
+	else
+		14: goto 10;
+	endif;
+	
+	15: nop;
+	// Replacing "store y2 = 0;"
+	16: if (y2_cnt_2 == 5)
+		abort("overflow");
+	endif;
+	
+

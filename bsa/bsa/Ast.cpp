@@ -1581,3 +1581,8 @@ vector<Ast*> Ast::reportBack()
 
 	return result;
 }
+
+Ast* Ast::weakestLiberalPrecondition(Ast* statement, Ast* predicate)
+{
+	return NULL;
+}

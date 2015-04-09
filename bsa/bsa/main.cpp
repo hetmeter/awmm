@@ -13,6 +13,7 @@ Buffer Size Analysis:
 #include <fstream>
 #include <regex>
 #include <map>
+#include <z3++.h>
 
 #include "config.h"
 #include "Ast.h"
@@ -22,6 +23,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+	z3::solver s();
 	string parsedProgramPath;
 	string outputPath;
 
@@ -37,7 +39,7 @@ int main(int argc, char** argv)
 
 	if (argc > 2)
 	{
-		config::K = stoi(argv[2]);
+		config::K = stoi(argv[argc - 1]);
 	}
 	else
 	{
@@ -100,7 +102,7 @@ int main(int argc, char** argv)
 		config::throwCriticalError("Invalid parsed program extension");
 	}
 
-	ifstream parsedPredicateFile(parsedProgramPath);
+	ifstream parsedPredicateFile(fileNameStub + "." + config::PREDICATE_EXTENSION + "." + extension + "." + config::OUT_EXTENSION);
 	string parsedPredicateLine, parsedPredicateString;
 	Ast* predicateAstRef;
 
@@ -111,6 +113,7 @@ int main(int argc, char** argv)
 	else
 	{
 		// Check if the predicates are in an accepting state, prompt an error otherwise
+		programInputRegex = regex(config::ACCEPTING_STATE_REGEX);
 		regex_search(parsedPredicateLine, stringMatch, programInputRegex);
 
 		if (stringMatch.size() == 2)
@@ -154,7 +157,7 @@ int main(int argc, char** argv)
 	cout << rootAstRef->emitCode();
 
 	// Generate the output
-	outputPath = fileNameStub + ".bsa." + extension;
+	outputPath = fileNameStub + "." + config::BSA_EXTENSION + "." + extension;
 	ofstream programOut(outputPath);
 	programOut << rootAstRef->emitCode();
 	programOut.close();

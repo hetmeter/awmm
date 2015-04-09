@@ -39,6 +39,9 @@
     <ClCompile Include="Predicate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BooleanTerm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ast.h">

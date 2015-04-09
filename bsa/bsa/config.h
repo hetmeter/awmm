@@ -89,6 +89,9 @@ namespace config
 	const extern std::string PSO_EXTENSION;
 	const extern std::string TSO_EXTENSION;
 	const extern std::string RMA_EXTENSION;
+	const extern std::string PREDICATE_EXTENSION;
+	const extern std::string BSA_EXTENSION;
+	const extern std::string OUT_EXTENSION;
 	enum language { PSO, TSO, RMA };
 
 	extern language currentLanguage;
@@ -106,6 +109,7 @@ namespace config
 
 	extern Ast* stringToAst(std::string parsedProgramString);
 
-	enum booleanOperator { EQUALS, LESS_THAN, LESS_EQUALS, GREATER_THAN, GREATER_EQUALS, NOT_EQUALS, NOT, AND, OR, INVALID };
+	enum booleanOperator { BOP_EQUALS, BOP_LESS_THAN, BOP_LESS_EQUALS, BOP_GREATER_THAN, BOP_GREATER_EQUALS, BOP_NOT_EQUALS, BOP_NOT, BOP_AND, BOP_OR, BOP_INVALID };
 	extern booleanOperator stringToBooleanOperator(std::string operatorString);
+	extern std::string booleanOperatorToString(booleanOperator boolOp);
 }

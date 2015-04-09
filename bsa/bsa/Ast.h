@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <z3++.h>
 
 #include "config.h"
 #include "bufferSizeMap.h"
@@ -86,5 +87,7 @@ private:
 	void replaceNode(std::vector<Ast*> nodes, Ast* oldNode);
 	void initializeAuxiliaryVariables();
 	std::vector<Ast*> reportBack();
+
+	Ast* weakestLiberalPrecondition(Ast* statement, Ast* predicate);
 };
 

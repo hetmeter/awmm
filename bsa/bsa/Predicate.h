@@ -10,6 +10,7 @@ class Predicate
 public:
 	Predicate(config::booleanOperator op, BooleanTerm* leftTerm, BooleanTerm* rightTerm);
 	Predicate(Ast* node);
+	Predicate(Ast* statement, Predicate* predicate);
 
 	~Predicate();
 

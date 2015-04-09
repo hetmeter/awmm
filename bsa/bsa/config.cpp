@@ -86,6 +86,9 @@ namespace config
 	const std::string PSO_EXTENSION = "pso";
 	const std::string TSO_EXTENSION = "tso";
 	const std::string RMA_EXTENSION = "rma";
+	const std::string PREDICATE_EXTENSION = "predicate";
+	const std::string BSA_EXTENSION = "bsa";
+	const std::string OUT_EXTENSION = "out";
 
 	language currentLanguage;
 	std::map<std::string, Ast*> labelLookupMap;
@@ -138,6 +141,7 @@ namespace config
 	{
 		// Parse through the AST representation string character by character
 		Ast* currentAst = new Ast();
+		Ast* result = currentAst;
 		char currentChar;
 		std::string currentName = "";
 		int parsedProgramStringLength = parsedProgramString.length();
@@ -180,49 +184,95 @@ namespace config
 				currentName += currentChar;
 			}
 		}
+
+		return result;
 	}
 
 	booleanOperator stringToBooleanOperator(std::string operatorString)
 	{
 		if (operatorString == EQUALS)
 		{
-			return booleanOperator::EQUALS;
+			return booleanOperator::BOP_EQUALS;
 		}
 		else if (operatorString == LESS_THAN)
 		{
-			return booleanOperator::LESS_THAN;
+			return booleanOperator::BOP_LESS_THAN;
 		}
 		else if (operatorString == LESS_EQUALS)
 		{
-			return booleanOperator::LESS_EQUALS;
+			return booleanOperator::BOP_LESS_EQUALS;
 		}
 		else if (operatorString == std::string(1, GREATER_THAN))
 		{
-			return booleanOperator::GREATER_THAN;
+			return booleanOperator::BOP_GREATER_THAN;
 		}
 		else if (operatorString == GREATER_EQUALS)
 		{
-			return booleanOperator::GREATER_EQUALS;
+			return booleanOperator::BOP_GREATER_EQUALS;
 		}
 		else if (operatorString == NOT_EQUALS)
 		{
-			return booleanOperator::NOT_EQUALS;
+			return booleanOperator::BOP_NOT_EQUALS;
 		}
 		else if (operatorString == NOT)
 		{
-			return booleanOperator::NOT;
+			return booleanOperator::BOP_NOT;
 		}
 		else if (operatorString == AND)
 		{
-			return booleanOperator::AND;
+			return booleanOperator::BOP_AND;
 		}
 		else if (operatorString == OR)
 		{
-			return booleanOperator::OR;
+			return booleanOperator::BOP_OR;
 		}
 		else
 		{
-			return booleanOperator::INVALID;
+			return booleanOperator::BOP_INVALID;
+		}
+	}
+
+	std::string booleanOperatorToString(booleanOperator boolOp)
+	{
+		if (boolOp == booleanOperator::BOP_EQUALS)
+		{
+			return EQUALS;
+		}
+		else if (boolOp == booleanOperator::BOP_LESS_THAN)
+		{
+			return LESS_THAN;
+		}
+		else if (boolOp == booleanOperator::BOP_LESS_EQUALS)
+		{
+			return LESS_EQUALS;
+		}
+		else if (boolOp == booleanOperator::BOP_GREATER_THAN)
+		{
+			return std::string(1, GREATER_THAN);
+		}
+		else if (boolOp == booleanOperator::BOP_GREATER_EQUALS)
+		{
+			return GREATER_EQUALS;
+		}
+		else if (boolOp == booleanOperator::BOP_NOT_EQUALS)
+		{
+			return NOT_EQUALS;
+		}
+		else if (boolOp == booleanOperator::BOP_NOT)
+		{
+			return NOT;
+		}
+		else if (boolOp == booleanOperator::BOP_AND)
+		{
+			return AND;
+		}
+		else if (boolOp == booleanOperator::BOP_OR)
+		{
+			return OR;
+		}
+		else
+		{
+			return "INVALID";
 		}
 	}
 }

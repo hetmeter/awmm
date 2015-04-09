@@ -2,6 +2,8 @@
 #include "Ast.h"
 #include "BooleanTerm.h"
 
+using namespace std;
+
 Predicate::Predicate(config::booleanOperator op, BooleanTerm* leftTerm, BooleanTerm* rightTerm)
 {
 	boolOp = op;
@@ -13,14 +15,14 @@ Predicate::Predicate(Ast* node)
 {
 	boolOp = config::stringToBooleanOperator(node->name);
 
-	if (boolOp == config::booleanOperator::INVALID)
+	if (boolOp == config::booleanOperator::BOP_INVALID)
 	{
 		config::throwCriticalError("Invalid boolean operator: \"" + node->name + "\"");
 	}
 
 	left = new BooleanTerm(node->children.at(0));
 	
-	if (boolOp != config::booleanOperator::NOT)
+	if (boolOp != config::booleanOperator::BOP_NOT)
 	{
 		right = new BooleanTerm(node->children.at(1));
 	}
@@ -28,4 +30,14 @@ Predicate::Predicate(Ast* node)
 	{
 		right = NULL;
 	}
+}
+
+Predicate::Predicate(Ast* statement, Predicate* predicate)
+{
+
+}
+
+string Predicate::toString()
+{
+	return "(" + left->toString() + " " + config::booleanOperatorToString(boolOp) + " " + right->toString() + ")";
 }
