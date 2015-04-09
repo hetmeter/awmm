@@ -15,6 +15,7 @@ Ast::Ast()
 {
 	// The index by which this node can be referred to from its parent's children vector. The root always has an index of -1
 	indexAsChild = -1;
+	name = "";
 }
 
 // Initializes an ID node
@@ -25,7 +26,7 @@ Ast::Ast(string variableName)
 	children.at(0)->name = variableName;
 }
 
-// Initializes an ID node
+// Initializes an INT node
 Ast::Ast(int value)
 {
 	name = config::INT_TOKEN_NAME;
@@ -114,6 +115,71 @@ Ast::Ast(Ast* operand, string operation)
 
 Ast::~Ast()
 {
+}
+
+Ast* Ast::newBeginAtomic()
+{
+	Ast* result = new Ast();
+	result->name = config::BEGIN_ATOMIC_TOKEN_NAME;
+	return result;
+}
+
+Ast* Ast::newEndAtomic()
+{
+	Ast* result = new Ast();
+	result->name = config::END_ATOMIC_TOKEN_NAME;
+	return result;
+}
+
+Ast* Ast::newNop()
+{
+	Ast* result = new Ast();
+	result->name = config::NOP_TOKEN_NAME;
+	return result;
+}
+
+Ast* Ast::newAsterisk()
+{
+	Ast* result = new Ast();
+	result->name = config::ASTERISK_TOKEN_NAME;
+	return result;
+}
+
+Ast* Ast::newLabel(int value, Ast* statement)
+{
+	Ast* result = new Ast();
+	result->name = config::LABEL_TOKEN_NAME;
+	result->children.push_back(new Ast());
+	result->children.at(0)->name = to_string(value);
+	result->addChild(statement);
+	return result;
+}
+
+Ast* Ast::newLoad(std::string variableName, Ast* rightSide)
+{
+	Ast* result = new Ast();
+	result->name = config::PSO_TSO_LOAD_TOKEN_NAME;
+	result->addChild(new Ast(variableName));
+	result->addChild(rightSide);
+	return result;
+}
+
+Ast* Ast::newStore(std::string variableName, Ast* rightSide)
+{
+	Ast* result = new Ast();
+	result->name = config::PSO_TSO_STORE_TOKEN_NAME;
+	result->addChild(new Ast(variableName));
+	result->addChild(rightSide);
+	return result;
+}
+
+Ast* Ast::newChoose(Ast* firstChoice, Ast* secondChoice)
+{
+	Ast* result = new Ast();
+	result->name = config::CHOOSE_TOKEN_NAME;
+	result->addChild(firstChoice);
+	result->addChild(secondChoice);
+	return result;
 }
 
 // Contains all buffer size maps
@@ -998,6 +1064,17 @@ void Ast::visitAllProgramPoints()
 	}
 }
 
+void Ast::cascadingPerformPredicateAbstraction()
+{
+	if (!performPredicateAbstraction())
+	{
+		for (Ast* child : children)
+		{
+			child->cascadingPerformPredicateAbstraction();
+		}
+	}
+}
+
 // Adds a child node and sets its variables connecting it to this node
 void Ast::addChild(Ast* child)
 {
@@ -1141,6 +1218,28 @@ string Ast::astToString()
 	result = regex_replace(result, indentationRegex, "\n|");
 
 	return result;
+}
+
+vector<Ast*> Ast::search(string soughtName)
+{
+	vector<Ast*> results;
+
+	if (name != soughtName)
+	{
+		vector<Ast*> subResults;
+
+		for (Ast* child : children)
+		{
+			subResults = child->search(soughtName);
+			results.insert(results.end(), subResults.begin(), subResults.end());
+		}
+	}
+	else
+	{
+		results.push_back(this);
+	}
+
+	return results;
 }
 
 string Ast::emitCode()
@@ -1487,350 +1586,6 @@ string Ast::emitCode()
 	return result;
 }
 
-string Ast::emitBooleanCode()
-{
-	string result = "";
-
-	if (config::currentLanguage == config::language::RMA)
-	{
-		if (name == config::PROGRAM_DECLARATION_TOKEN_NAME)
-		{
-			for (Ast* child : children)
-			{
-				result += child->emitCode() + "\n\n";
-			}
-		}
-		else if (name == config::INITIALIZATION_BLOCK_TOKEN_NAME)
-		{
-			result += config::BEGINIT_TAG_NAME + "\n\n";
-
-			for (Ast* child : children)
-			{
-				result += config::addTabs(child->emitCode(), 1) + "\n";
-			}
-
-			result += "\n" + config::ENDINIT_TAG_NAME;
-		}
-		else if (name == config::RMA_PROCESS_INITIALIZATION_TOKEN_NAME)
-		{
-			result += children.at(0)->emitCode() + "\n" + config::addTabs(children.at(1)->emitCode(), 1);
-		}
-		else if (name == config::PROCESS_DECLARATION_TOKEN_NAME)
-		{
-			result += children.at(0)->emitCode() + "\n\n" + config::addTabs(children.at(1)->emitCode(), 1);
-		}
-		else if (name == config::PROCESS_HEADER_TOKEN_NAME)
-		{
-			result += config::PROCESS_TAG_NAME + config::SPACE + children.at(0)->name + config::COLON;
-		}
-		else if (name == config::STATEMENTS_TOKEN_NAME)
-		{
-			for (Ast* child : children)
-			{
-				result += child->emitCode() + "\n";
-			}
-
-			if (!result.empty())
-			{
-				result = result.substr(0, result.length() - 1);
-			}
-		}
-		else if (name == config::LABEL_TOKEN_NAME)
-		{
-			if (children.at(0)->name == config::IF_ELSE_TOKEN_NAME)
-			{
-				result.insert(result.begin(), '\n');
-			}
-
-			result += children.at(0)->name + config::COLON + config::SPACE + children.at(1)->emitCode();
-		}
-		else if (name == config::LOCAL_ASSIGN_TOKEN_NAME)
-		{
-			result += children.at(0)->emitCode() + config::SPACE + config::ASSIGN_OPERATOR + config::LEFT_PARENTHESIS +
-				children.at(1)->name + config::RIGHT_PARENTHESIS + config::SPACE +
-				children.at(2)->emitCode() + config::SEMICOLON;
-		}
-		else if (name == config::ID_TOKEN_NAME)
-		{
-			result += children.at(0)->name;
-		}
-		else if (name == config::INT_TOKEN_NAME)
-		{
-			result += children.at(0)->name;
-		}
-		else if (name == config::RMA_PUT_TOKEN_NAME)
-		{
-			result += config::RMA_PUT_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(0)->name +
-				config::COMMA + config::SPACE + children.at(1)->name + config::RIGHT_PARENTHESIS +
-				config::SPACE + config::LEFT_PARENTHESIS + children.at(2)->name + config::COMMA +
-				config::SPACE + children.at(3)->name + config::COMMA + config::SPACE + children.at(4)->name +
-				config::RIGHT_PARENTHESIS + config::SEMICOLON;
-		}
-		else if (name == config::RMA_GET_TOKEN_NAME)
-		{
-			result += children.at(0)->name + config::SPACE + config::EQUALS + config::SPACE +
-				config::RMA_GET_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(1)->name +
-				config::COMMA + config::SPACE + children.at(2)->name + config::RIGHT_PARENTHESIS +
-				config::SPACE + config::LEFT_PARENTHESIS + children.at(3)->name + config::COMMA +
-				config::SPACE + children.at(4)->name + config::RIGHT_PARENTHESIS + config::SEMICOLON;
-		}
-		else if (name == config::IF_ELSE_TOKEN_NAME)
-		{
-			if (parent->name != config::LABEL_TOKEN_NAME)
-			{
-				result.insert(result.begin(), '\n');
-			}
-
-			result += config::IF_TAG_NAME + config::SPACE + config::LEFT_PARENTHESIS +
-				children.at(0)->emitCode() + config::RIGHT_PARENTHESIS + "\n" +
-				config::addTabs(children.at(1)->emitCode(), 1) + "\n";
-
-			if (children.at(2)->name != config::NONE_TOKEN_NAME)
-			{
-				result += config::ELSE_TAG_NAME + "\n" + config::addTabs(children.at(2)->emitCode(), 1) + "\n";
-			}
-
-			result += config::ENDIF_TAG_NAME + config::SEMICOLON;
-		}
-		else if (find(config::UNARY_OPERATORS.begin(), config::UNARY_OPERATORS.end(), name) != config::UNARY_OPERATORS.end())
-		{
-			result += name + config::LEFT_PARENTHESIS + children.at(0)->emitCode() + config::RIGHT_PARENTHESIS;
-		}
-		else if (find(config::BINARY_OPERATORS.begin(), config::BINARY_OPERATORS.end(), name) != config::BINARY_OPERATORS.end())
-		{
-			if (name == config::ASTERISK_TOKEN_NAME && children.size() == 0)
-			{
-				result += name;
-			}
-			else
-			{
-				if (children.at(0)->name == config::ID_TOKEN_NAME || children.at(0)->name == config::INT_TOKEN_NAME)
-				{
-					result += children.at(0)->children.at(0)->name;
-				}
-				else
-				{
-					result += config::LEFT_PARENTHESIS + children.at(0)->emitCode() + config::RIGHT_PARENTHESIS;
-				}
-
-				result += config::SPACE + name + config::SPACE;
-
-				if (children.at(1)->name == config::ID_TOKEN_NAME || children.at(1)->name == config::INT_TOKEN_NAME)
-				{
-					result += children.at(1)->children.at(0)->name;
-				}
-				else
-				{
-					result += config::LEFT_PARENTHESIS + children.at(1)->emitCode() + config::RIGHT_PARENTHESIS;
-				}
-			}
-		}
-		else if (name == config::ABORT_TOKEN_NAME)
-		{
-			result += config::ABORT_TOKEN_NAME + config::LEFT_PARENTHESIS + config::QUOTATION +
-				children.at(0)->name + config::QUOTATION + config::RIGHT_PARENTHESIS + config::SEMICOLON;
-		}
-		else if (name == config::FLUSH_TOKEN_NAME)
-		{
-			result += config::FLUSH_TOKEN_NAME + config::SEMICOLON;
-		}
-		else if (name == config::FENCE_TOKEN_NAME)
-		{
-			result += config::FENCE_TOKEN_NAME + config::SEMICOLON;
-		}
-		else if (name == config::GOTO_TOKEN_NAME)
-		{
-			result += config::GOTO_TOKEN_NAME + config::SPACE + children.at(0)->name + config::SEMICOLON;
-		}
-		else if (name == config::NOP_TOKEN_NAME)
-		{
-			result += config::NOP_TOKEN_NAME + config::SEMICOLON;
-		}
-		else if (name == config::ASSUME_TOKEN_NAME)
-		{
-			result += config::ASSUME_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(0)->emitCode() +
-				config::RIGHT_PARENTHESIS + config::SEMICOLON;
-		}
-		else
-		{
-			config::throwError("Can't emit node: " + name);
-		}
-	}
-	else
-	{
-		if (name == config::PROGRAM_DECLARATION_TOKEN_NAME)
-		{
-			for (Ast* child : children)
-			{
-				if (child->name == config::PROCESS_DECLARATION_TOKEN_NAME)
-				{
-					if (!result.empty())
-					{
-						result += "\n";
-					}
-
-					result += z3code::push(stoi(child->children.at(0)->name));
-				}
-			}
-		}
-		else if (name == config::INITIALIZATION_BLOCK_TOKEN_NAME)
-		{
-			//
-		}
-		// Output (ite (weakestPrecondition(left = right, predicate)) (true) ((ite (weakestPrecondition(left = right, !predicate)) (false) (Unknown))))
-		else if (name == config::PSO_TSO_STORE_TOKEN_NAME)
-		{
-			for (z3code::Predicate predicate : config::predicates)
-			{
-
-			}
-
-			result += z3code::ite(
-					z3code::weakestPrecondition(
-						new z3code::Predicate(
-							z3code::booleanOperator.EQUALS,
-							new z3code::Term(children.at(0)),
-							new z3code::Term(children.at(1))
-						)
-					),
-					(true),
-					((ite(weakestPrecondition(left = right, !predicate)) (false) (Unknown)))
-				);
-		}
-		else if (name == config::PSO_TSO_LOAD_TOKEN_NAME)
-		{
-			result += config::PSO_TSO_LOAD_TOKEN_NAME + config::SPACE +
-				children.at(0)->emitCode() + config::SPACE + config::ASSIGN_OPERATOR +
-				config::SPACE + children.at(1)->emitCode() + config::SEMICOLON;
-		}
-		else if (name == config::LOCAL_ASSIGN_TOKEN_NAME)
-		{
-			result += children.at(0)->emitCode() + config::SPACE + config::ASSIGN_OPERATOR +
-				config::SPACE + children.at(1)->emitCode() + config::SEMICOLON;
-		}
-		else if (name == config::ID_TOKEN_NAME)
-		{
-			result += children.at(0)->name;
-		}
-		else if (name == config::INT_TOKEN_NAME)
-		{
-			result += children.at(0)->name;
-		}
-		else if (name == config::PROCESS_DECLARATION_TOKEN_NAME)
-		{
-			result += children.at(0)->emitCode() + "\n\n" + config::addTabs(children.at(1)->emitCode(), 1);
-		}
-		else if (name == config::PROCESS_HEADER_TOKEN_NAME)
-		{
-			result += config::PROCESS_TAG_NAME + config::SPACE + children.at(0)->name + config::COLON;
-		}
-		else if (name == config::STATEMENTS_TOKEN_NAME)
-		{
-			for (Ast* child : children)
-			{
-				result += child->emitCode() + "\n";
-			}
-
-			if (!result.empty())
-			{
-				result = result.substr(0, result.length() - 1);
-			}
-		}
-		else if (name == config::LABEL_TOKEN_NAME)
-		{
-			if (children.at(0)->name == config::IF_ELSE_TOKEN_NAME)
-			{
-				result.insert(result.begin(), '\n');
-			}
-
-			result += children.at(0)->name + config::COLON + config::SPACE + children.at(1)->emitCode();
-		}
-		else if (name == config::IF_ELSE_TOKEN_NAME)
-		{
-			if (parent->name != config::LABEL_TOKEN_NAME)
-			{
-				result.insert(result.begin(), '\n');
-			}
-
-			result += config::IF_TAG_NAME + config::SPACE + config::LEFT_PARENTHESIS +
-				children.at(0)->emitCode() + config::RIGHT_PARENTHESIS + "\n" +
-				config::addTabs(children.at(1)->emitCode(), 1) + "\n";
-
-			if (children.at(2)->name != config::NONE_TOKEN_NAME)
-			{
-				result += config::ELSE_TAG_NAME + "\n" + config::addTabs(children.at(2)->emitCode(), 1) + "\n";
-			}
-
-			result += config::ENDIF_TAG_NAME + config::SEMICOLON;
-		}
-		else if (find(config::UNARY_OPERATORS.begin(), config::UNARY_OPERATORS.end(), name) != config::UNARY_OPERATORS.end())
-		{
-			result += name + config::LEFT_PARENTHESIS + children.at(0)->emitCode() + config::RIGHT_PARENTHESIS;
-		}
-		else if (find(config::BINARY_OPERATORS.begin(), config::BINARY_OPERATORS.end(), name) != config::BINARY_OPERATORS.end())
-		{
-			if (name == config::ASTERISK_TOKEN_NAME && children.size() == 0)
-			{
-				result += name;
-			}
-			else
-			{
-				if (children.at(0)->name == config::ID_TOKEN_NAME || children.at(0)->name == config::INT_TOKEN_NAME)
-				{
-					result += children.at(0)->children.at(0)->name;
-				}
-				else
-				{
-					result += config::LEFT_PARENTHESIS + children.at(0)->emitCode() + config::RIGHT_PARENTHESIS;
-				}
-
-				result += config::SPACE + name + config::SPACE;
-
-				if (children.at(1)->name == config::ID_TOKEN_NAME || children.at(1)->name == config::INT_TOKEN_NAME)
-				{
-					result += children.at(1)->children.at(0)->name;
-				}
-				else
-				{
-					result += config::LEFT_PARENTHESIS + children.at(1)->emitCode() + config::RIGHT_PARENTHESIS;
-				}
-			}
-		}
-		else if (name == config::ABORT_TOKEN_NAME)
-		{
-			result += config::ABORT_TOKEN_NAME + config::LEFT_PARENTHESIS + config::QUOTATION +
-				children.at(0)->name + config::QUOTATION + config::RIGHT_PARENTHESIS + config::SEMICOLON;
-		}
-		else if (name == config::FLUSH_TOKEN_NAME)
-		{
-			result += config::FLUSH_TOKEN_NAME + config::SEMICOLON;
-		}
-		else if (name == config::FENCE_TOKEN_NAME)
-		{
-			result += config::FENCE_TOKEN_NAME + config::SEMICOLON;
-		}
-		else if (name == config::GOTO_TOKEN_NAME)
-		{
-			result += config::GOTO_TOKEN_NAME + config::SPACE + children.at(0)->name + config::SEMICOLON;
-		}
-		else if (name == config::NOP_TOKEN_NAME)
-		{
-			result += config::NOP_TOKEN_NAME + config::SEMICOLON;
-		}
-		else if (name == config::ASSUME_TOKEN_NAME)
-		{
-			result += config::ASSUME_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(0)->emitCode() +
-				config::RIGHT_PARENTHESIS + config::SEMICOLON;
-		}
-		else
-		{
-			config::throwError("Can't emit node: " + name);
-		}
-	}
-
-	return result;
-}
-
 int Ast::effectiveMaxWriteBufferSize(string variableName)
 {
 	if (bufferSizeMapContains(&persistentWriteCost, variableName))
@@ -1866,6 +1621,17 @@ void Ast::replaceNode(vector<Ast*> nodes, Ast* oldNode)
 		nodes[ctr - newIndex]->parent = newParent;
 		newParent->children.insert(newParent->children.begin() + newIndex, nodes[ctr - newIndex]);
 	}
+
+	newParent->refreshChildIndices();
+}
+
+void Ast::replaceNode(Ast* newNode, Ast* oldNode)
+{
+	Ast* newParent = oldNode->parent;
+	int newIndex = oldNode->indexAsChild;
+
+	newParent->children.erase(newParent->children.begin() + newIndex);
+	newParent->children.insert(newParent->children.begin() + newIndex, newNode);
 
 	newParent->refreshChildIndices();
 }
@@ -1921,6 +1687,168 @@ vector<Ast*> Ast::reportBack()
 				result.push_back(reported);
 			}
 		}
+	}
+
+	return result;
+}
+
+bool Ast::performPredicateAbstraction()
+{
+	bool result = false;
+
+	if (config::currentLanguage == config::language::RMA)
+	{
+		// TODO
+		config::throwError("Predicate abstraction operations not implemented for RMA");
+	}
+	else
+	{
+		if (name == config::PSO_TSO_STORE_TOKEN_NAME || name == config::PSO_TSO_LOAD_TOKEN_NAME
+			|| name == config::LOCAL_ASSIGN_TOKEN_NAME)
+		{
+			Ast* positiveWeakestLiberalPrecondition;
+			Ast* negativeWeakestLiberalPrecondition;
+			vector<Ast*> replacementStatements;
+			int numberOfPredicates = config::globalPredicates.size();
+
+			replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(), Ast::newNop()));
+			replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(), Ast::newBeginAtomic()));
+
+			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+			{
+				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
+						Ast::newLoad(
+							config::auxiliaryTemporaryVariableNames[ctr],
+							new Ast(config::auxiliaryBooleanVariableNames[ctr])
+						))
+					);
+			}
+
+			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+			{
+				positiveWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]);
+				negativeWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]->negate());
+
+				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
+						Ast::newStore(
+							config::auxiliaryBooleanVariableNames[ctr],
+							Ast::newChoose(
+								new Ast(),		// should be: F_V(positiveWeakestLiberalPrecondition)
+								new Ast()		// should be: F_V(negativeWeakestLiberalPrecondition)
+							)
+						))
+					);
+			}
+
+			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+			{
+				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
+						Ast::newLoad(
+							config::auxiliaryTemporaryVariableNames[ctr],
+							new Ast(0)
+						))
+					);
+			}
+
+			replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(), Ast::newEndAtomic()));
+			
+			config::lazyReplacements[this] = replacementStatements;
+
+			result = true;
+		}
+		else if (name == config::IF_ELSE_TOKEN_NAME)
+		{
+			// Since an ifElse node would be replaced by another ifElse node with a slight modification, just replace
+			// the conditional with * and add an assume to each statement block, then return false, causing the
+			// cascading function to spread to the node's children. Since assume statements and boolean literals are
+			// ignored anyway, this achieves the intended effect.
+
+			Ast* positiveConditional = children.at(0);
+			Ast* negativeConditional = children.at(0)->negate();
+			Ast* G_positive = new Ast();	// should be: G_V(positiveConditional)
+			Ast* G_negative = new Ast();	// should be: G_V(negativeConditional)
+
+			children.at(1)->children.insert(children.at(1)->children.begin(), new Ast(positiveConditional));
+			children.at(1)->children.at(0)->parent = children.at(1);
+			children.at(1)->refreshChildIndices();
+
+			if (children.at(2)->name != config::NONE_TOKEN_NAME)
+			{
+				children.at(2)->children.insert(children.at(2)->children.begin(), new Ast(negativeConditional));
+				children.at(2)->children.at(0)->parent = children.at(1);
+				children.at(2)->refreshChildIndices();
+			}
+
+			replaceNode(Ast::newAsterisk(), children.at(0));
+		}
+	}
+
+	return result;
+}
+
+// Creates a clone of this and all successor nodes, all of which correspond to their source in all but bufferSizeMaps, comments and control flow data
+Ast* Ast::clone()
+{
+	Ast* result = new Ast();
+	result->name = name;
+
+	for (Ast* child : children)
+	{
+		result->addChild(child->clone());
+	}
+
+	return result;
+}
+
+Ast* Ast::weakestLiberalPrecondition(Ast* predicate)
+{
+	Ast* result;
+
+	if (config::currentLanguage == config::language::RMA)
+	{
+		// TODO
+		config::throwError("Predicate abstraction operations not implemented for RMA");
+	}
+	else
+	{
+		if (name == config::PSO_TSO_STORE_TOKEN_NAME || name == config::PSO_TSO_LOAD_TOKEN_NAME
+			|| name == config::LOCAL_ASSIGN_TOKEN_NAME)
+		{
+			string leftVariable = children.at(0)->children.at(0)->name;
+			Ast* rightExpression = children.at(1);
+			result = predicate->clone();
+			vector<Ast*> toBeReplaced = result->search(leftVariable);
+
+			for (Ast* oldId : toBeReplaced)
+			{
+				replaceNode(rightExpression->clone(), oldId);
+			}
+		}
+		else
+		{
+			result = new Ast();
+		}
+	}
+
+	return result;
+}
+
+Ast* Ast::negate()
+{
+	Ast* result;
+
+	if (name == config::EQUALS || name == config::LESS_THAN || name == config::LESS_EQUALS ||
+		name == config::GREATER_EQUALS || name == config::NOT_EQUALS ||
+		name == config::AND || name == config::OR)
+	{
+		Ast* selfClone = clone();
+		result = new Ast();
+		result->name == config::NOT;
+		result->addChild(selfClone);
+	}
+	else if (name == config::NOT)
+	{
+		result = children.at(0)->clone();
 	}
 
 	return result;

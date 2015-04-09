@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <z3++.h>
 
 #include "config.h"
-#include "z3code.h"
 #include "bufferSizeMap.h"
 #include "ControlFlowVisitor.h"
 
@@ -33,6 +33,7 @@ public:
 	void addChildren(std::vector<Ast*> newChildren);
 	void refreshChildIndices();
 	std::string astToString();
+	std::vector<Ast*> search(std::string soughtName);
 
 	std::string getLabelCode();
 
@@ -45,8 +46,11 @@ public:
 	void getCostsFromChildren();
 	void initializePersistentCosts();
 	void visitAllProgramPoints();
+	void cascadingPerformPredicateAbstraction();
 	std::string emitCode();
-	std::string emitBooleanCode();
+
+	Ast* weakestLiberalPrecondition(Ast* predicate);
+	Ast* negate();
 
 	Ast();
 	Ast(std::string variableName);
@@ -59,6 +63,18 @@ public:
 	Ast(Ast* leftOperand, Ast* rightOperand, std::string operation);
 	Ast(Ast* operand, std::string operation);
 	~Ast();
+
+	static Ast* newBeginAtomic();
+	static Ast* newEndAtomic();
+	static Ast* newNop();
+	static Ast* newAsterisk();
+	static Ast* newLabel(int value, Ast* statement);
+	static Ast* newLoad(std::string variableName, Ast* rightSide);
+	static Ast* newStore(std::string variableName, Ast* rightSide);
+	static Ast* newChoose(Ast* firstChoice, Ast* secondChoice);
+
+	static void replaceNode(std::vector<Ast*> nodes, Ast* oldNode);
+	static void replaceNode(Ast* newNode, Ast* oldNode);
 
 private:
 
@@ -85,8 +101,9 @@ private:
 	Ast* tryGetLastStatement();
 	int effectiveMaxWriteBufferSize(std::string variableName);
 	int numberOfVariablesInPersistentWriteBuffer();
-	void replaceNode(std::vector<Ast*> nodes, Ast* oldNode);
+	bool performPredicateAbstraction();
 	void initializeAuxiliaryVariables();
 	std::vector<Ast*> reportBack();
+	Ast* clone();
 };
 

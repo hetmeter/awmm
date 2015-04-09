@@ -13,6 +13,7 @@ Buffer Size Analysis:
 #include <fstream>
 #include <regex>
 #include <map>
+#include <z3++.h>
 
 #include "config.h"
 #include "Ast.h"
@@ -36,7 +37,7 @@ int main(int argc, char** argv)
 
 	if (argc > 2)
 	{
-		config::K = stoi(argv[2]);
+		config::K = stoi(argv[argc - 1]);
 	}
 	else
 	{
@@ -52,11 +53,12 @@ int main(int argc, char** argv)
 		config::throwCriticalError("Empty parsed program file");
 	}
 
+	parsedProgramFile.close();
+
 	// Extract AST representation from the input file
 	regex programInputRegex(config::ACCEPTING_STATE_REGEX);
 	smatch stringMatch;
 	string parsedProgramString;
-	Ast rootAst;
 
 	// Check if the program is in an accepting state, prompt an error otherwise
 	regex_search(parsedProgramLine, stringMatch, programInputRegex);
@@ -98,52 +100,7 @@ int main(int argc, char** argv)
 		config::throwCriticalError("Invalid parsed program extension");
 	}
 
-	// Parse through the AST representation string character by character
-	Ast* currentAst = &rootAst;
-	char currentChar;
-	string currentName = "";
-	int parsedProgramStringLength = parsedProgramString.length();
-
-	for (int ctr = 0; ctr < parsedProgramStringLength; ctr++)
-	{
-		currentChar = parsedProgramString.at(ctr);
-
-		if (currentChar == config::LEFT_PARENTHESIS)	// Create a new node with the word parsed so far as its name.
-		{												// Subsequently found nodes are to be added as this one's children
-			currentAst->name = currentName;				// until the corresponding ')' is found.
-			currentName = "";
-			currentAst->addChild(new Ast);
-			currentAst = currentAst->children.at(0);
-		}
-		else if (currentChar == config::COMMA)			// Add the currently parsed node as the previous one's sibling
-		{
-			if (!currentName.empty())
-			{
-				currentAst->name = currentName;
-				currentName = "";
-			}
-
-			currentAst = currentAst->parent;
-			currentAst->addChild(new Ast);
-			currentAst = currentAst->children.at(currentAst->children.size() - 1);
-		}
-		else if (currentChar == config::RIGHT_PARENTHESIS)	// Move up one level
-		{
-			if (!currentName.empty())
-			{
-				currentAst->name = currentName;
-				currentName = "";
-			}
-
-			currentAst = currentAst->parent;
-		}
-		else // Continue parsing the name of the next node
-		{
-			currentName += currentChar;
-		}
-	}
-
-	Ast* rootAstRef = &rootAst;
+	Ast* rootAstRef = config::stringToAst(parsedProgramString);
 
 	rootAstRef->cascadingUnifyVariableNames();		// Send a cascading command to the root node that results in all variable identifiers registering their variable names in a global vector
 	rootAstRef->getCostsFromChildren();				// Send a cascading command to the root node that results in all program points storing the buffer size increases they cause
@@ -155,14 +112,48 @@ int main(int argc, char** argv)
 	rootAstRef->cascadingInitializeAuxiliaryVariables();
 	rootAstRef->carryOutReplacements();
 
-	cout << rootAst.astToString();
+	ifstream parsedPredicateFile(fileNameStub + "." + config::PREDICATE_EXTENSION + "." + extension + "." + config::OUT_EXTENSION);
+	string parsedPredicateLine, parsedPredicateString;
+	Ast* predicateAstRef;
+
+	if (!getline(parsedPredicateFile, parsedPredicateLine))
+	{
+		config::throwError("Empty or invaldid parsed predicate file");
+	}
+	else
+	{
+		// Check if the predicates are in an accepting state, prompt an error otherwise
+		programInputRegex = regex(config::ACCEPTING_STATE_REGEX);
+		regex_search(parsedPredicateLine, stringMatch, programInputRegex);
+
+		if (stringMatch.size() == 2)
+		{
+			predicateAstRef = config::stringToAst(stringMatch[1].str());
+
+			for (Ast* child : predicateAstRef->children)
+			{
+				config::globalPredicates.push_back(child);
+			}
+
+			config::initializeAuxiliaryVariables();
+			rootAstRef->cascadingPerformPredicateAbstraction();
+		}
+		else
+		{
+			config::throwError("Invalid parsed predicate format or predicates in a non-accepting state");
+		}
+	}
+
+	parsedPredicateFile.close();
+
+	cout << rootAstRef->astToString();
 	cout << "\n---\n";
-	cout << rootAst.emitCode();
+	cout << rootAstRef->emitCode();
 
 	// Generate the output
-	outputPath = fileNameStub + ".bsa." + extension;
+	outputPath = fileNameStub + "." + config::BSA_EXTENSION + "." + extension;
 	ofstream programOut(outputPath);
-	programOut << rootAst.emitCode();
+	programOut << rootAstRef->emitCode();
 	programOut.close();
 
 	return 0;

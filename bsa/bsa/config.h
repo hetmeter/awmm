@@ -27,6 +27,13 @@ namespace config
 	const extern std::vector<std::string> UNARY_OPERATORS;
 	const extern std::vector<std::string> BINARY_OPERATORS;
 	const extern std::string EQUALS;
+	const extern std::string LESS_THAN;
+	const extern std::string LESS_EQUALS;
+	const extern std::string GREATER_EQUALS;
+	const extern std::string NOT_EQUALS;
+	const extern std::string NOT;
+	const extern std::string AND;
+	const extern std::string OR;
 	const extern std::string COMMENT_PREFIX;
 	const extern std::string REPLACING_CAPTION;
 	const extern std::string FINISHED_REPLACING_CAPTION;
@@ -51,6 +58,9 @@ namespace config
 	const extern std::string INITIALIZATION_BLOCK_TOKEN_NAME;
 	const extern std::string LOCAL_ASSIGN_TOKEN_NAME;
 	const extern std::string ASSUME_TOKEN_NAME;
+	const extern std::string BEGIN_ATOMIC_TOKEN_NAME;
+	const extern std::string END_ATOMIC_TOKEN_NAME;
+	const extern std::string CHOOSE_TOKEN_NAME;
 
 	const extern std::string BEGINIT_TAG_NAME;
 	const extern std::string ENDINIT_TAG_NAME;
@@ -81,18 +91,34 @@ namespace config
 	const extern std::string PSO_EXTENSION;
 	const extern std::string TSO_EXTENSION;
 	const extern std::string RMA_EXTENSION;
+	const extern std::string PREDICATE_EXTENSION;
+	const extern std::string BSA_EXTENSION;
+	const extern std::string OUT_EXTENSION;
 	enum language { PSO, TSO, RMA };
 
 	extern language currentLanguage;
 	extern std::map<std::string, Ast*> labelLookupMap;
 	extern std::vector<std::string> variableNames;
-	extern std::vector<z3code::Predicate> predicates;
 	extern std::map<std::string, GlobalVariable*> globalVariables;
+	extern std::vector<Ast*> globalPredicates;
+	extern std::vector<std::string> auxiliaryBooleanVariableNames;
+	extern std::vector<std::string> auxiliaryTemporaryVariableNames;
+	extern int currentAuxiliaryLabel;
+	extern int getCurrentAuxiliaryLabel();
 	extern int K;
+	extern std::map<Ast*, std::vector<Ast*>> lazyReplacements;
 
+	extern void carryOutLazyReplacements();
+	extern void initializeAuxiliaryVariables();
 	extern std::string replicateString(std::string s, int n);
 	extern std::string addTabs(std::string s, int numberOfTabs);
 	extern void throwError(std::string msg);
 	extern void throwCriticalError(std::string msg);
 	extern bool stringVectorContains(std::vector<std::string> container, std::string element);
+
+	extern Ast* stringToAst(std::string parsedProgramString);
+
+	enum booleanOperator { BOP_EQUALS, BOP_LESS_THAN, BOP_LESS_EQUALS, BOP_GREATER_THAN, BOP_GREATER_EQUALS, BOP_NOT_EQUALS, BOP_NOT, BOP_AND, BOP_OR, BOP_INVALID };
+	extern booleanOperator stringToBooleanOperator(std::string operatorString);
+	extern std::string booleanOperatorToString(booleanOperator boolOp);
 }

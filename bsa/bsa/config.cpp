@@ -3,6 +3,7 @@ Global variables, constants, and methods
 */
 
 #include "config.h"
+#include "Ast.h"
 
 namespace config
 {
@@ -24,6 +25,13 @@ namespace config
 	const std::vector<std::string> BINARY_OPERATORS = { "+", "-", "*", "/", "&", "|", "<", ">", "<=", ">=", "=",
 		"==", "!=" };
 	const std::string EQUALS = "==";
+	const std::string LESS_THAN = "<";
+	const std::string LESS_EQUALS = "<=";
+	const std::string GREATER_EQUALS = ">=";
+	const std::string NOT_EQUALS = "!=";
+	const std::string NOT = "!";
+	const std::string AND = "&";
+	const std::string OR = "|";
 	const std::string COMMENT_PREFIX = "//";
 	const std::string REPLACING_CAPTION = "Replacing";
 	const std::string FINISHED_REPLACING_CAPTION = "Finished replacing";
@@ -48,6 +56,9 @@ namespace config
 	const std::string INITIALIZATION_BLOCK_TOKEN_NAME = "initializationBlock";
 	const std::string LOCAL_ASSIGN_TOKEN_NAME = "localAssign";
 	const std::string ASSUME_TOKEN_NAME = "assume";
+	const std::string BEGIN_ATOMIC_TOKEN_NAME = "begin_atomic";
+	const std::string END_ATOMIC_TOKEN_NAME = "end_atomic";
+	const std::string CHOOSE_TOKEN_NAME = "choose";
 
 	const std::string BEGINIT_TAG_NAME = "beginit";
 	const std::string ENDINIT_TAG_NAME = "endinit";
@@ -78,12 +89,80 @@ namespace config
 	const std::string PSO_EXTENSION = "pso";
 	const std::string TSO_EXTENSION = "tso";
 	const std::string RMA_EXTENSION = "rma";
+	const std::string PREDICATE_EXTENSION = "predicate";
+	const std::string BSA_EXTENSION = "bsa";
+	const std::string OUT_EXTENSION = "out";
 
 	language currentLanguage;
 	std::map<std::string, Ast*> labelLookupMap;
 	std::vector<std::string> variableNames;
 	std::map<std::string, GlobalVariable*> globalVariables;
+	std::vector<Ast*> globalPredicates;
+	std::vector<std::string> auxiliaryBooleanVariableNames;
+	std::vector<std::string> auxiliaryTemporaryVariableNames;
+	int currentAuxiliaryLabel = -1;
 	int K;
+	std::map<Ast*, std::vector<Ast*>> lazyReplacements;
+
+	void carryOutLazyReplacements()
+	{
+		for (std::map<Ast*, std::vector<Ast*>>::iterator iterator = lazyReplacements.begin(); iterator != lazyReplacements.end(); iterator++)
+		{
+			Ast::replaceNode(iterator->second, iterator->first);
+		}
+	}
+
+	void initializeAuxiliaryVariables()
+	{
+		int globalPredicateCount = globalPredicates.size();
+		std::string currentVariableName;
+
+		for (int ctr = 0; ctr < globalPredicateCount; ctr++)
+		{
+			srand(time(NULL));
+			currentVariableName = "b_" + std::to_string(ctr);
+
+			while (stringVectorContains(variableNames, currentVariableName))
+			{
+				currentVariableName = "b_" + std::to_string(ctr) + "_" + std::to_string(rand());
+			}
+
+			auxiliaryBooleanVariableNames[ctr] = currentVariableName;
+			variableNames.push_back(currentVariableName);
+
+			currentVariableName = "t_" + std::to_string(ctr);
+
+			while (stringVectorContains(variableNames, currentVariableName))
+			{
+				currentVariableName = "t_" + std::to_string(ctr) + "_" + std::to_string(rand());
+			}
+
+			auxiliaryTemporaryVariableNames[ctr] = currentVariableName;
+			variableNames.push_back(currentVariableName);
+		}
+	}
+
+	int getCurrentAuxiliaryLabel()
+	{
+		if (currentAuxiliaryLabel == -1)
+		{
+			int maxLabel = -1;
+			int currentLabel;
+
+			for (std::map<std::string, Ast*>::iterator iterator = labelLookupMap.begin(); iterator != labelLookupMap.end(); iterator++)
+			{
+				currentLabel = std::stoi(iterator->first);
+				if (currentLabel > maxLabel)
+				{
+					maxLabel = currentLabel;
+				}
+			}
+
+			currentAuxiliaryLabel = currentLabel;
+		}
+
+		return ++currentAuxiliaryLabel;
+	}
 
 	void throwError(std::string msg)
 	{
@@ -123,5 +202,144 @@ namespace config
 	bool stringVectorContains(std::vector<std::string> container, std::string element)
 	{
 		return find(container.begin(), container.end(), element) != container.end();
+	}
+
+	Ast* stringToAst(std::string parsedProgramString)
+	{
+		// Parse through the AST representation string character by character
+		Ast* currentAst = new Ast();
+		Ast* result = currentAst;
+		char currentChar;
+		std::string currentName = "";
+		int parsedProgramStringLength = parsedProgramString.length();
+
+		for (int ctr = 0; ctr < parsedProgramStringLength; ctr++)
+		{
+			currentChar = parsedProgramString.at(ctr);
+
+			if (currentChar == config::LEFT_PARENTHESIS)	// Create a new node with the word parsed so far as its name.
+			{												// Subsequently found nodes are to be added as this one's children
+				currentAst->name = currentName;				// until the corresponding ')' is found.
+				currentName = "";
+				currentAst->addChild(new Ast);
+				currentAst = currentAst->children.at(0);
+			}
+			else if (currentChar == config::COMMA)			// Add the currently parsed node as the previous one's sibling
+			{
+				if (!currentName.empty())
+				{
+					currentAst->name = currentName;
+					currentName = "";
+				}
+
+				currentAst = currentAst->parent;
+				currentAst->addChild(new Ast);
+				currentAst = currentAst->children.at(currentAst->children.size() - 1);
+			}
+			else if (currentChar == config::RIGHT_PARENTHESIS)	// Move up one level
+			{
+				if (!currentName.empty())
+				{
+					currentAst->name = currentName;
+					currentName = "";
+				}
+
+				currentAst = currentAst->parent;
+			}
+			else // Continue parsing the name of the next node
+			{
+				currentName += currentChar;
+			}
+		}
+
+		return result;
+	}
+
+	booleanOperator stringToBooleanOperator(std::string operatorString)
+	{
+		if (operatorString == EQUALS)
+		{
+			return booleanOperator::BOP_EQUALS;
+		}
+		else if (operatorString == LESS_THAN)
+		{
+			return booleanOperator::BOP_LESS_THAN;
+		}
+		else if (operatorString == LESS_EQUALS)
+		{
+			return booleanOperator::BOP_LESS_EQUALS;
+		}
+		else if (operatorString == std::string(1, GREATER_THAN))
+		{
+			return booleanOperator::BOP_GREATER_THAN;
+		}
+		else if (operatorString == GREATER_EQUALS)
+		{
+			return booleanOperator::BOP_GREATER_EQUALS;
+		}
+		else if (operatorString == NOT_EQUALS)
+		{
+			return booleanOperator::BOP_NOT_EQUALS;
+		}
+		else if (operatorString == NOT)
+		{
+			return booleanOperator::BOP_NOT;
+		}
+		else if (operatorString == AND)
+		{
+			return booleanOperator::BOP_AND;
+		}
+		else if (operatorString == OR)
+		{
+			return booleanOperator::BOP_OR;
+		}
+		else
+		{
+			return booleanOperator::BOP_INVALID;
+		}
+	}
+
+	std::string booleanOperatorToString(booleanOperator boolOp)
+	{
+		if (boolOp == booleanOperator::BOP_EQUALS)
+		{
+			return EQUALS;
+		}
+		else if (boolOp == booleanOperator::BOP_LESS_THAN)
+		{
+			return LESS_THAN;
+		}
+		else if (boolOp == booleanOperator::BOP_LESS_EQUALS)
+		{
+			return LESS_EQUALS;
+		}
+		else if (boolOp == booleanOperator::BOP_GREATER_THAN)
+		{
+			return std::string(1, GREATER_THAN);
+		}
+		else if (boolOp == booleanOperator::BOP_GREATER_EQUALS)
+		{
+			return GREATER_EQUALS;
+		}
+		else if (boolOp == booleanOperator::BOP_NOT_EQUALS)
+		{
+			return NOT_EQUALS;
+		}
+		else if (boolOp == booleanOperator::BOP_NOT)
+		{
+			return NOT;
+		}
+		else if (boolOp == booleanOperator::BOP_AND)
+		{
+			return AND;
+		}
+		else if (boolOp == booleanOperator::BOP_OR)
+		{
+			return OR;
+		}
+		else
+		{
+			return "INVALID";
+		}
 	}
 }
