@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <regex>
-#include <z3++.h>
 
 #include "config.h"
 #include "bufferSizeMap.h"
@@ -34,6 +33,7 @@ public:
 	void refreshChildIndices();
 	std::string astToString();
 	std::vector<Ast*> search(std::string soughtName);
+	std::vector<std::string> getIDs();
 
 	std::string getLabelCode();
 
@@ -76,6 +76,13 @@ public:
 	static Ast* newStore(std::string variableName, Ast* rightSide);
 	static Ast* newChoose(Ast* firstChoice, Ast* secondChoice);
 
+	static Ast* newMultipleOperation(std::vector<Ast*> operands, std::string operation);
+	static std::vector<std::vector<Ast*>> allCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit);
+	static Ast* newLargestImplicativeDisjunctionOfCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate);
+	static Ast* newReverseLargestImplicativeDisjunctionOfCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate);
+
+	static std::vector<std::vector<Ast*>> allNegationPatterns(std::vector<Ast*> idSet);
+
 	static void replaceNode(std::vector<Ast*> nodes, Ast* oldNode);
 	static void replaceNode(Ast* newNode, Ast* oldNode);
 
@@ -87,7 +94,6 @@ private:
 	void resetBufferSizes();
 	void copyPersistentBufferSizes(Ast* source);
 	bool propagateTops();
-	std::vector<std::string> getIDs();
 	void topDownCascadingCopyPersistentBufferSizes(Ast* source);
 	void topDownCascadingAddInitializedCausedCostsToPersistentCosts();
 	bool hasElse();

@@ -199,6 +199,68 @@ Ast* Ast::newChoose(Ast* firstChoice, Ast* secondChoice)
 	return result;
 }
 
+Ast* Ast::newMultipleOperation(std::vector<Ast*> operands, string operation)
+{
+	int operandCount = operands.size();
+
+	if (operandCount > 1)
+	{
+		return newBinaryOp(operands[0], newMultipleOperation(vector<Ast*>(operands.begin() + 1, operands.end()), operation), operation);
+	}
+	else if (operandCount == 1)
+	{
+		return operands[0];
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+vector<vector<Ast*>> Ast::allCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit)
+{
+	int numberOfVariables = relevantAuxiliaryTemporaryVariableIndices.size();
+	vector<Ast*> allVariables;
+
+	for (int ctr = 0; ctr < numberOfVariables; ctr++)
+	{
+		allVariables.push_back(newID(config::auxiliaryTemporaryVariableNames[relevantAuxiliaryTemporaryVariableIndices[ctr]]));
+	}
+
+	vector<vector<Ast*>> limitedPowerSet = config::powerSetOfLimitedCardinality(allVariables, cubeSizeUpperLimit);
+	vector<vector<Ast*>> negationPatterns;
+	vector<vector<Ast*>> allCubeSets;
+
+	for (vector<Ast*> subset : limitedPowerSet)
+	{
+		negationPatterns = allNegationPatterns(subset);
+		allCubeSets.insert(allCubeSets.end(), negationPatterns.begin(), negationPatterns.end());
+	}
+
+	return allCubeSets;
+}
+
+Ast* Ast::newLargestImplicativeDisjunctionOfCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate)
+{
+	vector<vector<Ast*>> cubes = allCubes(relevantAuxiliaryTemporaryVariableIndices, cubeSizeUpperLimit);
+	vector<Ast*> implicativeCubeNodes;
+
+	for (vector<Ast*> cube : cubes)
+	{
+		if (config::cubeImpliesPredicate(cube, predicate))
+		{
+			implicativeCubeNodes.push_back(newMultipleOperation(cube, config::AND));
+		}
+	}
+
+	return newMultipleOperation(implicativeCubeNodes, config::OR);
+}
+
+Ast* Ast::newReverseLargestImplicativeDisjunctionOfCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate)
+{
+	return newLargestImplicativeDisjunctionOfCubes(relevantAuxiliaryTemporaryVariableIndices, cubeSizeUpperLimit, predicate->negate())->negate();
+}
+
 // Contains all buffer size maps
 vector<bufferSizeMap*> Ast::allBufferSizeContainers()
 {
@@ -1617,6 +1679,36 @@ int Ast::effectiveMaxWriteBufferSize(string variableName)
 	}
 }
 
+vector<vector<Ast*>> Ast::allNegationPatterns(std::vector<Ast*> idSet)
+{
+	int numberOfVariables = idSet.size();
+	string firstMask = string('0', numberOfVariables);
+	string mask = string(firstMask);
+	vector<vector<Ast*>> result;
+	vector<Ast*> subResult;
+
+	do {
+		subResult.clear();
+
+		for (int ctr = 0; ctr < numberOfVariables; ctr++)
+		{
+			if (mask[ctr] == '0')
+			{
+				subResult.push_back(idSet[ctr]->clone());
+			}
+			else
+			{
+				subResult.push_back(idSet[ctr]->negate());
+			}
+		}
+
+		result.push_back(subResult);
+		mask = config::nextBinaryRepresentation(mask, numberOfVariables);
+	} while (mask.compare(firstMask) != 0);
+
+	return result;
+}
+
 void Ast::replaceNode(vector<Ast*> nodes, Ast* oldNode)
 {
 	Ast* newParent = oldNode->parent;
@@ -1743,8 +1835,14 @@ bool Ast::performPredicateAbstraction()
 						newStore(
 							config::auxiliaryBooleanVariableNames[ctr],
 							newChoose(
-								new Ast(),		// should be: F_V(positiveWeakestLiberalPrecondition)
-								new Ast()		// should be: F_V(negativeWeakestLiberalPrecondition)
+								newLargestImplicativeDisjunctionOfCubes(
+									config::getRelevantAuxiliaryTemporaryVariableIndices(positiveWeakestLiberalPrecondition),
+									config::globalCubeSizeLimit, positiveWeakestLiberalPrecondition
+								),
+								newLargestImplicativeDisjunctionOfCubes(
+									config::getRelevantAuxiliaryTemporaryVariableIndices(negativeWeakestLiberalPrecondition),
+									config::globalCubeSizeLimit, negativeWeakestLiberalPrecondition
+								)
 							)
 						))
 					);
@@ -1775,8 +1873,14 @@ bool Ast::performPredicateAbstraction()
 
 			Ast* positiveConditional = children.at(0);
 			Ast* negativeConditional = children.at(0)->negate();
-			Ast* G_positive = new Ast();	// should be: G_V(positiveConditional)
-			Ast* G_negative = new Ast();	// should be: G_V(negativeConditional)
+			Ast* G_positive = newReverseLargestImplicativeDisjunctionOfCubes(
+					config::getRelevantAuxiliaryTemporaryVariableIndices(positiveConditional),
+					config::globalCubeSizeLimit, positiveConditional
+				);
+			Ast* G_negative = newReverseLargestImplicativeDisjunctionOfCubes(
+				config::getRelevantAuxiliaryTemporaryVariableIndices(negativeConditional),
+					config::globalCubeSizeLimit, negativeConditional
+				);
 
 			children.at(1)->children.insert(children.at(1)->children.begin(), newAssume(positiveConditional));
 			children.at(1)->children.at(0)->parent = children.at(1);

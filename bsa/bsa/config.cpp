@@ -101,6 +101,7 @@ namespace config
 	std::vector<std::string> auxiliaryBooleanVariableNames;
 	std::vector<std::string> auxiliaryTemporaryVariableNames;
 	int currentAuxiliaryLabel = -1;
+	int globalCubeSizeLimit;
 	int K;
 	std::map<Ast*, std::vector<Ast*>> lazyReplacements;
 
@@ -341,5 +342,105 @@ namespace config
 		{
 			return "INVALID";
 		}
+	}
+
+	std::vector<std::vector<Ast*>> allSubsetsOfLengthK(std::vector<Ast*> superset, int K)
+	{
+		std::vector<std::vector<Ast*>> result;
+		std::vector<Ast*> subResult;
+		int superSetCardinality = superset.size();
+		std::string currentMask = std::string('0', superSetCardinality - K) + std::string('1', K);
+
+		do {
+			subResult.clear();
+
+			for (int ctr = 0; ctr < superSetCardinality; ctr++)
+			{
+				if (currentMask[ctr] == '1')
+				{
+					subResult.push_back(superset[ctr]);
+				}
+			}
+
+			result.push_back(subResult);
+		} while (std::next_permutation(currentMask.begin(), currentMask.end()));
+
+		return result;
+	}
+
+	std::vector<std::vector<Ast*>> powerSetOfLimitedCardinality(std::vector<Ast*> superset, int cardinalityLimit)
+	{
+		std::vector<std::vector<Ast*>> result;
+		std::vector<std::vector<Ast*>> subResult;
+
+		for (int ctr = 1; ctr <= cardinalityLimit; ctr++)
+		{
+			subResult = allSubsetsOfLengthK(superset, ctr);
+			result.insert(result.end(), subResult.begin(), subResult.end());
+		}
+
+		return result;
+	}
+
+	std::string nextBinaryRepresentation(std::string currentBinaryRepresentation, int length)
+	{
+		char** endptr;
+		unsigned long long number = strtoull(currentBinaryRepresentation.c_str(), endptr, 2);
+		std::string result = std::bitset<sizeof(unsigned long long)>(number).to_string();
+		return result.substr(sizeof(unsigned long long) - length, std::string::npos);
+	}
+
+	bool cubeImpliesPredicate(std::vector<Ast*> cube, Ast* predicate)
+	{
+		z3::context c;
+		z3::expr e = c.bool_const("x");
+
+		z3::solver s(c);
+
+		z3::check_result satisfiability = s.check();
+
+		if (satisfiability == z3::check_result::sat)
+		{
+			return true;
+		}
+		else if (satisfiability == z3::check_result::unknown)
+		{
+			throwError("Couldn't determine satisfiability of the cube's implication of the predicate.");
+		}
+
+		return false;
+	}
+
+	bool stringVectorIsSubset(std::vector<std::string> possibleSubset, std::vector<std::string> possibleSuperset)
+	{
+		for (std::string member : possibleSubset)
+		{
+			if (!stringVectorContains(possibleSuperset, member))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate)
+	{
+		std::vector<int> result;
+		std::vector<std::string> predicateTerms = predicate->getIDs();
+		std::vector<std::string> currentGlobalPredicateTerms;
+		int ctr = 0;
+
+		for (Ast* globalPredicate : globalPredicates)
+		{
+			if (stringVectorIsSubset(predicateTerms, globalPredicate->getIDs()))
+			{
+				result.push_back(ctr);
+			}
+
+			ctr++;
+		}
+
+		return result;
 	}
 }

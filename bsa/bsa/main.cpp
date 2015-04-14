@@ -13,7 +13,6 @@ Buffer Size Analysis:
 #include <fstream>
 #include <regex>
 #include <map>
-#include <z3++.h>
 
 #include "config.h"
 #include "Ast.h"
@@ -37,11 +36,20 @@ int main(int argc, char** argv)
 
 	if (argc > 2)
 	{
-		config::K = stoi(argv[argc - 1]);
+		config::K = stoi(argv[2]);
 	}
 	else
 	{
 		config::throwCriticalError("No K specified");
+	}
+
+	if (argc > 3)
+	{
+		config::globalCubeSizeLimit = stoi(argv[3]);
+	}
+	else
+	{
+		config::throwCriticalError("No cube size limit specified");
 	}
 
 	// Parse input file (no line breaks are expected)

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <map>
 #include <regex>
+#include <bitset>
+#include <z3++.h>
 
 class Ast;
 class GlobalVariable;
@@ -106,6 +108,7 @@ namespace config
 	extern int currentAuxiliaryLabel;
 	extern int getCurrentAuxiliaryLabel();
 	extern int K;
+	extern int globalCubeSizeLimit;
 	extern std::map<Ast*, std::vector<Ast*>> lazyReplacements;
 
 	extern void carryOutLazyReplacements();
@@ -121,4 +124,11 @@ namespace config
 	enum booleanOperator { BOP_EQUALS, BOP_LESS_THAN, BOP_LESS_EQUALS, BOP_GREATER_THAN, BOP_GREATER_EQUALS, BOP_NOT_EQUALS, BOP_NOT, BOP_AND, BOP_OR, BOP_INVALID };
 	extern booleanOperator stringToBooleanOperator(std::string operatorString);
 	extern std::string booleanOperatorToString(booleanOperator boolOp);
+
+	extern std::vector<std::vector<Ast*>> allSubsetsOfLengthK(std::vector<Ast*> superset, int K);
+	extern std::vector<std::vector<Ast*>> powerSetOfLimitedCardinality(std::vector<Ast*> superset, int cardinalityLimit);
+	extern std::string nextBinaryRepresentation(std::string currentBinaryRepresentation, int length);
+	extern bool cubeImpliesPredicate(std::vector<Ast*> cube, Ast* predicate);
+	extern bool stringVectorIsSubset(std::vector<std::string> possibleSubset, std::vector<std::string> possibleSuperset);
+	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate);
 }
