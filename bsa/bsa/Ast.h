@@ -53,21 +53,24 @@ public:
 	Ast* negate();
 
 	Ast();
-	Ast(std::string variableName);
-	Ast(int value);
-	Ast(std::string variableName, int initialValue);
-	Ast(std::string variableName, Ast* assignmentNode);
-	Ast(Ast* ifConditionalNode, std::vector<Ast*> statements);
-	Ast(Ast* ifConditionalNode, std::vector<Ast*> ifStatements, std::vector<Ast*> elseStatements);
-	Ast(Ast* assumeConditionalNode);
-	Ast(Ast* leftOperand, Ast* rightOperand, std::string operation);
-	Ast(Ast* operand, std::string operation);
+	Ast(std::string initialName);
 	~Ast();
 
+	static Ast* newID(std::string variableName);
+	static Ast* newINT(int value);
+	static Ast* newLocalAssign(std::string variableName, int initialValue);
+	static Ast* newLocalAssign(std::string variableName, Ast* assignmentNode);
+	static Ast* newIfElse(Ast* ifConditionalNode, std::vector<Ast*> statements);
+	static Ast* newIfElse(Ast* ifConditionalNode, std::vector<Ast*> ifStatements, std::vector<Ast*> elseStatements);
+	static Ast* newBinaryOp(Ast* leftOperand, Ast* rightOperand, std::string operation);
+	static Ast* newUnaryOp(Ast* operand, std::string operation);
+	static Ast* newAssume(Ast* assumeConditionalNode);
 	static Ast* newBeginAtomic();
 	static Ast* newEndAtomic();
 	static Ast* newNop();
 	static Ast* newAsterisk();
+	static Ast* newNone();
+	static Ast* newStatements(std::vector<Ast*> statements);
 	static Ast* newLabel(int value, Ast* statement);
 	static Ast* newLoad(std::string variableName, Ast* rightSide);
 	static Ast* newStore(std::string variableName, Ast* rightSide);
