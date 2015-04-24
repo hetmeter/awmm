@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <z3++.h>
 
 #include "config.h"
 #include "bufferSizeMap.h"
@@ -14,6 +15,8 @@ class Ast
 {
 public:
 
+	std::string shortStringRepresentation;
+	void updateShortStringRepresentation();
 	std::string name;
 
 	bufferSizeMap causedWriteCost;
@@ -32,8 +35,10 @@ public:
 	void addChildren(std::vector<Ast*> newChildren);
 	void refreshChildIndices();
 	std::string astToString();
+	z3::expr astToZ3Expression(z3::context* c);
 	std::vector<Ast*> search(std::string soughtName);
 	std::vector<std::string> getIDs();
+	bool equals(Ast* other);
 
 	std::string getLabelCode();
 
@@ -75,9 +80,11 @@ public:
 	static Ast* newLoad(std::string variableName, Ast* rightSide);
 	static Ast* newStore(std::string variableName, Ast* rightSide);
 	static Ast* newChoose(Ast* firstChoice, Ast* secondChoice);
+	static Ast* newAbstractAssignmentFragment(Ast* assignment, Ast* predicate);
 
 	static Ast* newMultipleOperation(std::vector<Ast*> operands, std::string operation);
 	static std::vector<std::vector<Ast*>> allCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit);
+	static Ast* newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate);
 	static Ast* newLargestImplicativeDisjunctionOfCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate);
 	static Ast* newReverseLargestImplicativeDisjunctionOfCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate);
 

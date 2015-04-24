@@ -6,6 +6,7 @@
 #include <regex>
 #include <bitset>
 #include <z3++.h>
+#include <algorithm>
 
 class Ast;
 class GlobalVariable;
@@ -103,8 +104,11 @@ namespace config
 	extern std::vector<std::string> variableNames;
 	extern std::map<std::string, GlobalVariable*> globalVariables;
 	extern std::vector<Ast*> globalPredicates;
+	extern int indexOf(Ast* predicate);
 	extern std::vector<std::string> auxiliaryBooleanVariableNames;
 	extern std::vector<std::string> auxiliaryTemporaryVariableNames;
+	extern std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
+	extern std::vector<int> getPredicateVariableTransitiveClosure(int index);
 	extern int currentAuxiliaryLabel;
 	extern int getCurrentAuxiliaryLabel();
 	extern int K;
@@ -118,6 +122,7 @@ namespace config
 	extern void throwError(std::string msg);
 	extern void throwCriticalError(std::string msg);
 	extern bool stringVectorContains(std::vector<std::string> container, std::string element);
+	extern std::vector<int> intVectorUnion(std::vector<int> first, std::vector<int> second);
 
 	extern Ast* stringToAst(std::string parsedProgramString);
 

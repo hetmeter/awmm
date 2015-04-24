@@ -98,8 +98,85 @@ namespace config
 	std::vector<std::string> variableNames;
 	std::map<std::string, GlobalVariable*> globalVariables;
 	std::vector<Ast*> globalPredicates;
+
+	int indexOf(Ast* predicate)
+	{
+		int result = -1;
+
+		for (Ast* globalPredicate : globalPredicates)
+		{
+			result++;
+
+			if (predicate->astToString().compare(globalPredicate->astToString()) == 0)
+			{
+				break;
+			}
+		}
+
+		return result;
+	}
+
 	std::vector<std::string> auxiliaryBooleanVariableNames;
 	std::vector<std::string> auxiliaryTemporaryVariableNames;
+	std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
+
+	std::vector<int> getPredicateVariableTransitiveClosure(int index)
+	{
+		if (predicateVariableTransitiveClosures.find(index) == predicateVariableTransitiveClosures.end())
+		{
+			std::map<int, std::vector<std::string>> remainingGlobalPredicateTerms;
+			std::map<int, std::vector<std::string>> toBeTransferred;
+			std::map<int, std::vector<std::string>> unhandledClosureElements;
+			int currentClosureElement;
+			std::vector<std::string> currentTempClosure;
+			std::vector<int> handledClosureElements;
+
+			unhandledClosureElements[index] = globalPredicates[index]->getIDs();
+
+			int ctr = 0;
+			for (Ast* globalPredicate : globalPredicates)
+			{
+				if (ctr != index)
+				{
+					remainingGlobalPredicateTerms[ctr] = globalPredicate->getIDs();
+				}
+
+				ctr++;
+			}
+
+			while (!unhandledClosureElements.empty())
+			{
+				currentClosureElement = unhandledClosureElements.begin()->first;
+				currentTempClosure = unhandledClosureElements.begin()->second;
+				toBeTransferred.clear();
+
+				for (std::vector<std::string>::iterator termIterator = currentTempClosure.begin(); termIterator != currentTempClosure.end(); termIterator++)
+				{
+					for (std::map<int, std::vector<std::string>>::iterator predicateIterator = remainingGlobalPredicateTerms.begin(); predicateIterator != remainingGlobalPredicateTerms.end(); predicateIterator++)
+					{
+						if (stringVectorContains(predicateIterator->second, *termIterator))
+						{
+							toBeTransferred[predicateIterator->first] = predicateIterator->second;
+						}
+					}
+				}
+
+				for (std::map<int, std::vector<std::string>>::iterator transferIterator = toBeTransferred.begin(); transferIterator != toBeTransferred.end(); transferIterator++)
+				{
+					unhandledClosureElements[transferIterator->first] = transferIterator->second;
+					remainingGlobalPredicateTerms.erase(transferIterator->first);
+				}
+
+				handledClosureElements.push_back(currentClosureElement);
+				unhandledClosureElements.erase(currentClosureElement);
+			}
+
+			predicateVariableTransitiveClosures[index] = handledClosureElements;
+		}
+
+		return predicateVariableTransitiveClosures[index];
+	}
+
 	int currentAuxiliaryLabel = -1;
 	int globalCubeSizeLimit;
 	int K;
@@ -128,7 +205,7 @@ namespace config
 				currentVariableName = "b_" + std::to_string(ctr) + "_" + std::to_string(rand());
 			}
 
-			auxiliaryBooleanVariableNames[ctr] = currentVariableName;
+			auxiliaryBooleanVariableNames.push_back(currentVariableName);
 			variableNames.push_back(currentVariableName);
 
 			currentVariableName = "t_" + std::to_string(ctr);
@@ -138,7 +215,7 @@ namespace config
 				currentVariableName = "t_" + std::to_string(ctr) + "_" + std::to_string(rand());
 			}
 
-			auxiliaryTemporaryVariableNames[ctr] = currentVariableName;
+			auxiliaryTemporaryVariableNames.push_back(currentVariableName);
 			variableNames.push_back(currentVariableName);
 		}
 	}
@@ -349,21 +426,31 @@ namespace config
 		std::vector<std::vector<Ast*>> result;
 		std::vector<Ast*> subResult;
 		int superSetCardinality = superset.size();
-		std::string currentMask = std::string('0', superSetCardinality - K) + std::string('1', K);
 
-		do {
-			subResult.clear();
+		if (superSetCardinality >= K)
+		{
+			std::string currentMask = std::string(K, '0') + std::string(superSetCardinality - K, '1');
+			//std::cout << currentMask << "\n";
 
-			for (int ctr = 0; ctr < superSetCardinality; ctr++)
-			{
-				if (currentMask[ctr] == '1')
+			// For debug purposes
+			int iterCtr = 0;
+
+			do {
+				subResult.clear();
+
+				for (int ctr = 0; ctr < superSetCardinality; ctr++)
 				{
-					subResult.push_back(superset[ctr]);
+					if (currentMask[ctr] == '1')
+					{
+						subResult.push_back(superset[ctr]);
+					}
 				}
-			}
 
-			result.push_back(subResult);
-		} while (std::next_permutation(currentMask.begin(), currentMask.end()));
+				std::cout << iterCtr++ << ": " << currentMask << "\n";
+
+				result.push_back(subResult);
+			} while (std::next_permutation(currentMask.begin(), currentMask.end()));
+		}
 
 		return result;
 	}
@@ -372,6 +459,8 @@ namespace config
 	{
 		std::vector<std::vector<Ast*>> result;
 		std::vector<std::vector<Ast*>> subResult;
+
+		int minimumLimit = std::min((int)superset.size(), cardinalityLimit);
 
 		for (int ctr = 1; ctr <= cardinalityLimit; ctr++)
 		{
@@ -384,7 +473,7 @@ namespace config
 
 	std::string nextBinaryRepresentation(std::string currentBinaryRepresentation, int length)
 	{
-		char** endptr;
+		char** endptr = NULL;
 		unsigned long long number = strtoull(currentBinaryRepresentation.c_str(), endptr, 2);
 		std::string result = std::bitset<sizeof(unsigned long long)>(number).to_string();
 		return result.substr(sizeof(unsigned long long) - length, std::string::npos);
@@ -393,9 +482,11 @@ namespace config
 	bool cubeImpliesPredicate(std::vector<Ast*> cube, Ast* predicate)
 	{
 		z3::context c;
-		z3::expr e = c.bool_const("x");
-
+		z3::expr cubeExpression = (Ast::newMultipleOperation(cube, AND))->astToZ3Expression(&c);
+		z3::expr predicateExpression = predicate->astToZ3Expression(&c);
 		z3::solver s(c);
+		z3::expr implication = z3::implies(cubeExpression, (bool)predicateExpression);
+		s.add(implication);
 
 		z3::check_result satisfiability = s.check();
 
@@ -426,21 +517,6 @@ namespace config
 
 	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate)
 	{
-		std::vector<int> result;
-		std::vector<std::string> predicateTerms = predicate->getIDs();
-		std::vector<std::string> currentGlobalPredicateTerms;
-		int ctr = 0;
-
-		for (Ast* globalPredicate : globalPredicates)
-		{
-			if (stringVectorIsSubset(predicateTerms, globalPredicate->getIDs()))
-			{
-				result.push_back(ctr);
-			}
-
-			ctr++;
-		}
-
-		return result;
+		return getPredicateVariableTransitiveClosure(indexOf(predicate));
 	}
 }

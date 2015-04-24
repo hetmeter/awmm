@@ -11,11 +11,33 @@ Cascading operations may go top to bottom or bottom to top in the tree, or down 
 
 using namespace std;
 
+void Ast::updateShortStringRepresentation()
+{
+	if (children.size() > 0)
+	{
+		string result = name + "(";
+
+		for (Ast* child : children)
+		{
+			child->updateShortStringRepresentation();
+			result += child->shortStringRepresentation + ", ";
+		}
+
+		shortStringRepresentation = result.substr(0, result.size() - 2) + ")";
+	}
+	else
+	{
+		shortStringRepresentation = name;
+	}
+}
+
 Ast::Ast()
 {
 	// The index by which this node can be referred to from its parent's children vector. The root always has an index of -1
 	indexAsChild = -1;
 	name = "";
+
+	updateShortStringRepresentation();
 }
 
 Ast::Ast(string initialName)
@@ -199,6 +221,14 @@ Ast* Ast::newChoose(Ast* firstChoice, Ast* secondChoice)
 	return result;
 }
 
+Ast* Ast::newAbstractAssignmentFragment(Ast* assignment, Ast* predicate)
+{
+	return newChoose(
+			newLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, assignment->weakestLiberalPrecondition(predicate)),
+			newLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, assignment->weakestLiberalPrecondition(predicate->negate()))
+		);
+}
+
 Ast* Ast::newMultipleOperation(std::vector<Ast*> operands, string operation)
 {
 	int operandCount = operands.size();
@@ -220,14 +250,15 @@ Ast* Ast::newMultipleOperation(std::vector<Ast*> operands, string operation)
 vector<vector<Ast*>> Ast::allCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit)
 {
 	int numberOfVariables = relevantAuxiliaryTemporaryVariableIndices.size();
-	vector<Ast*> allVariables;
+	vector<Ast*> allPredicates;
 
 	for (int ctr = 0; ctr < numberOfVariables; ctr++)
 	{
-		allVariables.push_back(newID(config::auxiliaryTemporaryVariableNames[relevantAuxiliaryTemporaryVariableIndices[ctr]]));
+		allPredicates.push_back(config::globalPredicates[relevantAuxiliaryTemporaryVariableIndices[ctr]]->clone());
+		//allVariables.push_back(newID(config::auxiliaryTemporaryVariableNames[relevantAuxiliaryTemporaryVariableIndices[ctr]]));
 	}
 
-	vector<vector<Ast*>> limitedPowerSet = config::powerSetOfLimitedCardinality(allVariables, cubeSizeUpperLimit);
+	vector<vector<Ast*>> limitedPowerSet = config::powerSetOfLimitedCardinality(allPredicates, cubeSizeUpperLimit);
 	vector<vector<Ast*>> negationPatterns;
 	vector<vector<Ast*>> allCubeSets;
 
@@ -238,6 +269,11 @@ vector<vector<Ast*>> Ast::allCubes(vector<int> relevantAuxiliaryTemporaryVariabl
 	}
 
 	return allCubeSets;
+}
+
+Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate)
+{
+
 }
 
 Ast* Ast::newLargestImplicativeDisjunctionOfCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate)
@@ -438,6 +474,26 @@ vector<string> Ast::getIDs()
 	}
 
 	return results;
+}
+
+bool Ast::equals(Ast* other)
+{
+	if (name.compare(other->name) == 0)
+	{
+		int childrenCount = children.size();
+
+		for (int ctr = 0; ctr < childrenCount; ctr++)
+		{
+			if (!(children.at(ctr)->equals(other->children.at(ctr))))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 // Cascades from top to bottom. Copies all persistent buffer size maps to the successors.
@@ -1153,6 +1209,8 @@ void Ast::addChild(Ast* child)
 	child->parent = this;
 	child->indexAsChild = children.size();
 	children.push_back(child);
+
+	updateShortStringRepresentation();
 }
 
 void Ast::addChildren(vector<Ast*> newChildren)
@@ -1290,6 +1348,82 @@ string Ast::astToString()
 	result = regex_replace(result, indentationRegex, "\n|");
 
 	return result;
+}
+
+z3::expr Ast::astToZ3Expression(z3::context* c)
+{
+	if (config::currentLanguage == config::language::RMA)
+	{
+		// TODO
+		config::throwError("Z3 expression conversion not implemented for RMA");
+	}
+	else
+	{
+		if (name == config::ID_TOKEN_NAME)
+		{
+			return c->int_const(children.at(0)->name.c_str());
+		}
+		else if (name == config::INT_TOKEN_NAME)
+		{
+			return c->int_val(children.at(0)->name.c_str());
+		}
+		else if (name == config::BINARY_OPERATORS[0])	// +
+		{
+			return children.at(0)->astToZ3Expression(c) + children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[1])	// -
+		{
+			return children.at(0)->astToZ3Expression(c) - children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[2])	// *
+		{
+			return children.at(0)->astToZ3Expression(c) * children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[3])	// /
+		{
+			return children.at(0)->astToZ3Expression(c) / children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[4])	// &
+		{
+			return children.at(0)->astToZ3Expression(c) && children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[5])	// |
+		{
+			return children.at(0)->astToZ3Expression(c) || children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[6])	// <
+		{
+			return children.at(0)->astToZ3Expression(c) < children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[7])	// >
+		{
+			return children.at(0)->astToZ3Expression(c) > children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[8])	// <=
+		{
+			return children.at(0)->astToZ3Expression(c) <= children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[9])	// >=
+		{
+			return children.at(0)->astToZ3Expression(c) >= children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[10])	// =
+		{
+			// Ignore
+		}
+		else if (name == config::BINARY_OPERATORS[11])	// ==
+		{
+			return children.at(0)->astToZ3Expression(c) == children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[12])	// !=
+		{
+			return children.at(0)->astToZ3Expression(c) != children.at(1)->astToZ3Expression(c);
+		}
+	}
+
+	// If all else fails
+	config::throwCriticalError("Can't convert the following to a Z3 expression:\n" + astToString());
+	return c->int_const("INVALID");
 }
 
 vector<Ast*> Ast::search(string soughtName)
@@ -1682,29 +1816,33 @@ int Ast::effectiveMaxWriteBufferSize(string variableName)
 vector<vector<Ast*>> Ast::allNegationPatterns(std::vector<Ast*> idSet)
 {
 	int numberOfVariables = idSet.size();
-	string firstMask = string('0', numberOfVariables);
-	string mask = string(firstMask);
 	vector<vector<Ast*>> result;
-	vector<Ast*> subResult;
 
-	do {
-		subResult.clear();
+	if (numberOfVariables > 0)
+	{
+		string firstMask = string('0', numberOfVariables);
+		string mask = string(firstMask);
+		vector<Ast*> subResult;
 
-		for (int ctr = 0; ctr < numberOfVariables; ctr++)
-		{
-			if (mask[ctr] == '0')
+		do {
+			subResult.clear();
+
+			for (int ctr = 0; ctr < numberOfVariables; ctr++)
 			{
-				subResult.push_back(idSet[ctr]->clone());
+				if (mask[ctr] == '0')
+				{
+					subResult.push_back(idSet[ctr]->clone());
+				}
+				else
+				{
+					subResult.push_back(idSet[ctr]->negate());
+				}
 			}
-			else
-			{
-				subResult.push_back(idSet[ctr]->negate());
-			}
-		}
 
-		result.push_back(subResult);
-		mask = config::nextBinaryRepresentation(mask, numberOfVariables);
-	} while (mask.compare(firstMask) != 0);
+			result.push_back(subResult);
+			mask = config::nextBinaryRepresentation(mask, numberOfVariables);
+		} while (mask.compare(firstMask) != 0);
+	}
 
 	return result;
 }
@@ -1736,6 +1874,8 @@ void Ast::replaceNode(Ast* newNode, Ast* oldNode)
 	newParent->children.insert(newParent->children.begin() + newIndex, newNode);
 
 	newParent->refreshChildIndices();
+
+	newParent->updateShortStringRepresentation();
 }
 
 void Ast::initializeAuxiliaryVariables()
@@ -1832,7 +1972,7 @@ bool Ast::performPredicateAbstraction()
 				negativeWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]->negate());
 
 				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
-						newStore(
+						/*newStore(
 							config::auxiliaryBooleanVariableNames[ctr],
 							newChoose(
 								newLargestImplicativeDisjunctionOfCubes(
@@ -1844,7 +1984,8 @@ bool Ast::performPredicateAbstraction()
 									config::globalCubeSizeLimit, negativeWeakestLiberalPrecondition
 								)
 							)
-						))
+						)*/
+						newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
 					);
 			}
 
@@ -1878,7 +2019,7 @@ bool Ast::performPredicateAbstraction()
 					config::globalCubeSizeLimit, positiveConditional
 				);
 			Ast* G_negative = newReverseLargestImplicativeDisjunctionOfCubes(
-				config::getRelevantAuxiliaryTemporaryVariableIndices(negativeConditional),
+					config::getRelevantAuxiliaryTemporaryVariableIndices(negativeConditional),
 					config::globalCubeSizeLimit, negativeConditional
 				);
 
@@ -1935,8 +2076,10 @@ Ast* Ast::weakestLiberalPrecondition(Ast* predicate)
 
 			for (Ast* oldId : toBeReplaced)
 			{
-				replaceNode(rightExpression->clone(), oldId);
+				replaceNode(rightExpression->clone(), oldId->parent);
 			}
+
+			result->updateShortStringRepresentation();
 		}
 		else
 		{
