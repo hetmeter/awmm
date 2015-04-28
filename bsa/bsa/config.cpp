@@ -282,6 +282,93 @@ namespace config
 		return find(container.begin(), container.end(), element) != container.end();
 	}
 
+	bool stringVectorIsSubset(std::vector<std::string> possibleSubset, std::vector<std::string> possibleSuperset)
+	{
+		for (std::string member : possibleSubset)
+		{
+			if (!stringVectorContains(possibleSuperset, member))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	std::vector<int> intVectorUnion(std::vector<int> first, std::vector<int> second)
+	{
+		std::vector<int> result(first);
+
+		for (int elementOfSecond : second)
+		{
+			if (find(first.begin(), first.end(), elementOfSecond) == first.end())
+			{
+				result.push_back(elementOfSecond);
+			}
+		}
+
+		sort(result.begin(), result.end());
+
+		return result;
+	}
+
+	std::vector<std::vector<int>> intSetCartesianProduct(std::vector<int> first, std::vector<int> second)
+	{
+		std::vector<std::vector<int>> result;
+		std::vector<int> currentProduct;
+
+		for (int elementOfFirst : first)
+		{
+			for (int elementOfSecond : second)
+			{
+				if (elementOfFirst != elementOfSecond)
+				{
+					currentProduct = std::vector<int>();
+					currentProduct.push_back(std::min(elementOfFirst, elementOfSecond));
+					currentProduct.push_back(std::max(elementOfFirst, elementOfSecond));
+
+					if (!intVectorVectorContains(result, currentProduct))
+					{
+						result.push_back(currentProduct);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	bool intVectorVectorContains(std::vector<std::vector<int>> container, std::vector<int> element)
+	{
+		return find(container.begin(), container.end(), element) != container.end();
+	}
+	
+	std::vector<std::vector<int>> intSetCartesianProduct(std::vector<std::vector<int>> first, std::vector<int> second)
+	{
+		std::vector<std::vector<int>> result;
+		std::vector<int> currentProduct;
+
+		for (std::vector<int> elementOfFirst : first)
+		{
+			for (int elementOfSecond : second)
+			{
+				if (find(elementOfFirst.begin(), elementOfFirst.end(), elementOfSecond) == elementOfFirst.end())
+				{
+					currentProduct = std::vector<int>(elementOfFirst);
+					currentProduct.push_back(elementOfSecond);
+					std::sort(currentProduct.begin(), currentProduct.end());
+
+					if (!intVectorVectorContains(result, currentProduct))
+					{
+						result.push_back(currentProduct);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
 	Ast* stringToAst(std::string parsedProgramString)
 	{
 		// Parse through the AST representation string character by character
@@ -502,21 +589,221 @@ namespace config
 		return false;
 	}
 
-	bool stringVectorIsSubset(std::vector<std::string> possibleSubset, std::vector<std::string> possibleSuperset)
+	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate)
 	{
-		for (std::string member : possibleSubset)
+		//return getPredicateVariableTransitiveClosure(indexOf(predicate));
+
+		std::vector<std::string> relevantIDs = predicate->getIDs();
+		std::vector<int> result;
+		int numberOfPredicates = globalPredicates.size();
+
+		for (std::string id : relevantIDs)
 		{
-			if (!stringVectorContains(possibleSuperset, member))
+			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
 			{
-				return false;
+				if (stringVectorContains(globalPredicates[ctr]->getIDs(), id))
+				{
+					result = intVectorUnion(result, getPredicateVariableTransitiveClosure(ctr));
+					
+					// The closures of two predicates sharing at least one term are equal,
+					// therefore once we've found one relevant predicate, we needn't find another one
+					break;
+				}
 			}
 		}
 
-		return true;
+		return result;
 	}
 
-	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate)
+	const char CUBE_STATE_OMIT = '-';
+	const char CUBE_STATE_UNDECIDED = '?';
+	const char CUBE_STATE_MAY_BE_FALSE = 'f';
+	const char CUBE_STATE_MAY_BE_TRUE = 't';
+	const char CUBE_STATE_DECIDED_FALSE = 'F';
+	const char CUBE_STATE_DECIDED_TRUE = 'T';
+
+	std::string getCubeStatePool(std::vector<int> predicateIndices)
 	{
-		return getPredicateVariableTransitiveClosure(indexOf(predicate));
+		std::string result = std::string(globalPredicates.size(), CUBE_STATE_OMIT);
+
+		for (int predicateIndex : predicateIndices)
+		{
+			result[predicateIndex] = CUBE_STATE_UNDECIDED;
+		}
+
+		return result;
+	}
+
+	std::string getCubeStatePool(int predicateIndex)
+	{
+		std::string result = std::string(globalPredicates.size(), CUBE_STATE_OMIT);
+		result[predicateIndex] = CUBE_STATE_UNDECIDED;
+		return result;
+	}
+
+	std::vector<std::string> getNaryCubeStateCombinations(std::vector<int> predicateIndices, int n)
+	{
+		int numberOfPredicates = globalPredicates.size();
+		std::string emptyCube = std::string(numberOfPredicates, CUBE_STATE_OMIT);
+		std::string currentCube;
+		std::vector<std::string> result;
+
+		if (n == 1)
+		{
+			for (int predicateIndex : predicateIndices)
+			{
+				currentCube = getCubeStatePool(predicateIndex);
+				result.push_back(currentCube);
+			}
+		}
+		else if (n > 1)
+		{
+			std::vector<std::vector<int>> cubeIndexSet = intSetCartesianProduct(predicateIndices, predicateIndices);
+
+			for (int ctr = 2; ctr < n; ctr++)
+			{
+				cubeIndexSet = intSetCartesianProduct(cubeIndexSet, predicateIndices);
+			}
+
+			for (std::vector<int> cubeIndices : cubeIndexSet)
+			{
+				currentCube = getCubeStatePool(cubeIndices);
+				result.push_back(currentCube);
+			}
+		}
+
+		return result;
+	}
+
+	std::vector<std::string> getImplicativeCubeStates(std::string pool, Ast* predicate)
+	{
+		int numberOfPredicates = globalPredicates.size();
+		bool fullyDefined = true;
+		std::vector<std::string> result;
+		std::vector<std::string> subResult;
+		std::string poolCopy;
+
+		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+		{
+			if (pool[ctr] == CUBE_STATE_UNDECIDED || pool[ctr] == CUBE_STATE_MAY_BE_FALSE)
+			{
+				poolCopy = std::string(pool);
+				poolCopy[ctr] = CUBE_STATE_DECIDED_FALSE;
+
+				subResult = getImplicativeCubeStates(poolCopy, predicate);
+				result.insert(result.end(), subResult.begin(), subResult.end());
+				
+				fullyDefined = false;
+			}
+
+			if (pool[ctr] == CUBE_STATE_UNDECIDED || pool[ctr] == CUBE_STATE_MAY_BE_TRUE)
+			{
+				poolCopy = std::string(pool);
+				poolCopy[ctr] = CUBE_STATE_DECIDED_TRUE;
+
+				subResult = getImplicativeCubeStates(poolCopy, predicate);
+				result.insert(result.end(), subResult.begin(), subResult.end());
+
+				fullyDefined = false;
+			}
+		}
+
+		if (fullyDefined)
+		{
+			std::vector<Ast*> cubeTerms;
+			Ast* currentTerm;
+
+			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+			{
+				if (pool[ctr] == CUBE_STATE_DECIDED_FALSE)
+				{
+					currentTerm = globalPredicates[ctr]->negate();
+					cubeTerms.push_back(currentTerm);
+				}
+				else if (pool[ctr] == CUBE_STATE_DECIDED_TRUE)
+				{
+					currentTerm = globalPredicates[ctr]->clone();
+					cubeTerms.push_back(currentTerm);
+				}
+			}
+
+			if (cubeImpliesPredicate(cubeTerms, predicate))
+			{
+				result.push_back(pool);
+			}
+		}
+
+		return result;
+	}
+
+	std::string removeDecisionsFromPool(std::string pool, std::vector<std::string> decisions)
+	{
+		int numberOfPredicates = globalPredicates.size();
+		std::string result(pool);
+
+		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+		{
+			if (result[ctr] != CUBE_STATE_OMIT)
+			{
+				for (std::string decision : decisions)
+				{
+					if (decision[ctr] == CUBE_STATE_DECIDED_FALSE)
+					{
+						if (result[ctr] == CUBE_STATE_UNDECIDED)
+						{
+							result[ctr] = CUBE_STATE_MAY_BE_TRUE;
+						}
+						else if (result[ctr] == CUBE_STATE_MAY_BE_FALSE)
+						{
+							result[ctr] = CUBE_STATE_OMIT;
+						}
+					}
+					else if (decision[ctr] == CUBE_STATE_DECIDED_TRUE)
+					{
+						if (result[ctr] == CUBE_STATE_UNDECIDED)
+						{
+							result[ctr] = CUBE_STATE_MAY_BE_FALSE;
+						}
+						else if (result[ctr] == CUBE_STATE_MAY_BE_TRUE)
+						{
+							result[ctr] = CUBE_STATE_OMIT;
+						}
+					}
+					else if (decision[ctr] == CUBE_STATE_OMIT)
+					{
+						result[ctr] = CUBE_STATE_OMIT;
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	std::string applyDecisionMask(std::string pool, std::string decisionMask)
+	{
+		int numberOfPredicates = globalPredicates.size();
+		std::string result(pool);
+
+		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+		{
+			if (result[ctr] != CUBE_STATE_OMIT)
+			{
+				if (decisionMask[ctr] == CUBE_STATE_OMIT)
+				{
+					result[ctr] = CUBE_STATE_OMIT;
+				}
+				else if (decisionMask[ctr] == CUBE_STATE_MAY_BE_FALSE && result[ctr] == CUBE_STATE_UNDECIDED)
+				{
+					result[ctr] = CUBE_STATE_MAY_BE_FALSE;
+				}
+				else if (decisionMask[ctr] == CUBE_STATE_MAY_BE_TRUE && result[ctr] == CUBE_STATE_UNDECIDED)
+				{
+					result[ctr] = CUBE_STATE_MAY_BE_TRUE;
+				}
+			}
+		}
+
+		return result;
 	}
 }

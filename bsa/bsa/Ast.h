@@ -56,6 +56,7 @@ public:
 
 	Ast* weakestLiberalPrecondition(Ast* predicate);
 	Ast* negate();
+	Ast* clone();
 
 	Ast();
 	Ast(std::string initialName);
@@ -83,6 +84,7 @@ public:
 	static Ast* newAbstractAssignmentFragment(Ast* assignment, Ast* predicate);
 
 	static Ast* newMultipleOperation(std::vector<Ast*> operands, std::string operation);
+	static Ast* newBooleanVariableCube(std::string definition);
 	static std::vector<std::vector<Ast*>> allCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit);
 	static Ast* newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate);
 	static Ast* newLargestImplicativeDisjunctionOfCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate);
@@ -120,6 +122,5 @@ private:
 	bool performPredicateAbstraction();
 	void initializeAuxiliaryVariables();
 	std::vector<Ast*> reportBack();
-	Ast* clone();
 };
 

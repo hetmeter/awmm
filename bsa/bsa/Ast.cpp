@@ -247,6 +247,26 @@ Ast* Ast::newMultipleOperation(std::vector<Ast*> operands, string operation)
 	}
 }
 
+Ast* Ast::newBooleanVariableCube(std::string definition)
+{
+	int numberOfPredicates = config::globalPredicates.size();
+	vector<Ast*> cubeTerms;
+
+	for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+	{
+		if (definition[ctr] == config::CUBE_STATE_DECIDED_FALSE)
+		{
+			cubeTerms.push_back(newID(config::auxiliaryBooleanVariableNames[ctr])->negate());
+		}
+		else if (definition[ctr] == config::CUBE_STATE_DECIDED_TRUE)
+		{
+			cubeTerms.push_back(newID(config::auxiliaryBooleanVariableNames[ctr]));
+		}
+	}
+
+	return newMultipleOperation(cubeTerms, config::AND);
+}
+
 vector<vector<Ast*>> Ast::allCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit)
 {
 	int numberOfVariables = relevantAuxiliaryTemporaryVariableIndices.size();
@@ -273,7 +293,43 @@ vector<vector<Ast*>> Ast::allCubes(vector<int> relevantAuxiliaryTemporaryVariabl
 
 Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate)
 {
+	int numberOfPredicates = config::globalPredicates.size();
+	vector<int> relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
+	string pool = config::getCubeStatePool(relevantIndices);
+	vector<string> implicativeCubeStates;
+	vector<string> unmaskedImplicativeCubeStates;
+	vector<string> cubeStateCombinations;
+	vector<Ast*> implicativeCubes;
 
+	for (int ctr = 1; ctr <= config::globalCubeSizeLimit; ctr++)
+	{
+		implicativeCubeStates.clear();
+		cubeStateCombinations = config::getNaryCubeStateCombinations(relevantIndices, ctr);
+		
+		for (string cubeStateCombination : cubeStateCombinations)
+		{
+			unmaskedImplicativeCubeStates = config::getImplicativeCubeStates(config::applyDecisionMask(cubeStateCombination, pool), predicate);
+			implicativeCubeStates.insert(implicativeCubeStates.end(), unmaskedImplicativeCubeStates.begin(), unmaskedImplicativeCubeStates.end());
+		}
+
+		pool = config::removeDecisionsFromPool(pool, implicativeCubeStates);
+		relevantIndices.clear();
+
+		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+		{
+			if (pool[ctr] != config::CUBE_STATE_OMIT)
+			{
+				relevantIndices.push_back(ctr);
+			}
+		}
+
+		for (string implicativeCubeState : implicativeCubeStates)
+		{
+			implicativeCubes.push_back(Ast::newBooleanVariableCube(implicativeCubeState));
+		}
+	}
+
+	return Ast::newMultipleOperation(implicativeCubes, config::OR);
 }
 
 Ast* Ast::newLargestImplicativeDisjunctionOfCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate)
