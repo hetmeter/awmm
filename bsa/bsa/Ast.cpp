@@ -1885,7 +1885,7 @@ string Ast::emitCode()
 		{
 			result += config::CHOOSE_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(0)->emitCode() +
 				config::COMMA + config::SPACE + children.at(1)->emitCode() +
-				config::RIGHT_PARENTHESIS + config::SEMICOLON;
+				config::RIGHT_PARENTHESIS;
 		}
 		else
 		{
@@ -2101,7 +2101,10 @@ bool Ast::performPredicateAbstraction()
 								)
 							)
 						)*/
-						newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
+						newStore(
+								config::auxiliaryBooleanVariableNames[ctr],
+								newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
+							)
 					);
 				/*replacementStatements.back()->startComment = "choose(F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->emitCode() +
 					")), F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->negate()->emitCode() + ")))";*/
