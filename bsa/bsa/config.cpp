@@ -568,33 +568,45 @@ namespace config
 
 	bool cubeImpliesPredicate(std::vector<Ast*> cube, Ast* predicate)
 	{
-		z3::context c;
+		/*z3::context c;
 
-		//std::cout << "\t" << (Ast::newMultipleOperation(cube, AND))->shortStringRepresentation << "\n";
+		std::cout << "\tCube: " + Ast::newMultipleOperation(cube, AND)->emitCode() + " -> " + predicate->emitCode() + " returns " +
+			(expressionImpliesPredicate(&c, (Ast::newMultipleOperation(cube, AND))->astToZ3Expression(&c), predicate) ? "TRUE" : "FALSE") + "\n";
 
 		z3::expr cubeExpression = (Ast::newMultipleOperation(cube, AND))->astToZ3Expression(&c);
-		return expressionImpliesPredicate(&c, cubeExpression, predicate);
+		return expressionImpliesPredicate(&c, cubeExpression, predicate);*/
+
+		z3::context c;
+
+		/*std::cout << "\tCube: " + Ast::newMultipleOperation(cube, AND)->emitCode() + " -> " + predicate->emitCode() + " returns " +
+			(expressionImpliesPredicate(&c, (Ast::newMultipleOperation(cube, AND))->astToZ3Expression(&c), predicate) ? "TRUE" : "FALSE") + "\n";*/
+
+		z3::expr cubeExpression = (Ast::newMultipleOperation(cube, AND))->astToZ3Expression(&c);
+		//std::cout << "Cube " << (Ast::newMultipleOperation(cube, AND))->emitCode() << ":\n";
+		//std::cout << "\t" << cube.size() << " - " << cubeExpression << "\n";
+		return expressionImpliesPredicate(cubeExpression, predicate);
 	}
 
-	bool expressionImpliesPredicate(z3::context* c, z3::expr expression, Ast* predicate)
+	bool expressionImpliesPredicate(z3::expr expression, Ast* predicate)
 	{
-		z3::expr predicateExpression = predicate->astToZ3Expression(c);
-		z3::solver s(*c);
-		z3::expr implication = z3::implies(expression, (bool)predicateExpression);
-		s.add(implication);
+		z3::context &c = expression.ctx();
+		z3::expr const & predicateExpression = predicate->astToZ3Expression(&c);
+		z3::solver s(c);
+		z3::expr implication = impliesDuplicate(expression, predicateExpression);
+		s.add(!implication);
 
 		z3::check_result satisfiability = s.check();
 
-		if (satisfiability == z3::check_result::sat)
+		if (satisfiability == z3::check_result::unsat)
 		{
+			//std::cout << expression << "\tIMPLIES\t" << predicateExpression << "\n";
 			return true;
 		}
-		else if (satisfiability == z3::check_result::unknown)
+		else //if (satisfiability == z3::check_result::unknown)
 		{
-			throwError("Couldn't determine satisfiability of the cube's implication of the predicate.");
+			//std::cout << expression << "\DOES NOT IMPLY\t" << predicateExpression << "\n";
+			return false;
 		}
-
-		return false;
 	}
 
 	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate)
@@ -693,6 +705,8 @@ namespace config
 
 		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
 		{
+			//std::cout << "\t" << ctr << " / " << numberOfPredicates << "\n";
+
 			if (pool[ctr] == CUBE_STATE_UNDECIDED || pool[ctr] == CUBE_STATE_MAY_BE_FALSE)
 			{
 				poolCopy = std::string(pool);
@@ -785,6 +799,15 @@ namespace config
 			}
 		}
 
+		/*std::cout << "\t" << pool;
+
+		for (std::string d : decisions)
+		{
+			std::cout << "\t" << d;
+		}
+		
+		std::cout << "\t" << result << "\n";*/
+
 		return result;
 	}
 
@@ -812,6 +835,17 @@ namespace config
 			}
 		}
 
+		//std::cout << pool << "\t" << decisionMask << "\t" << result << "\n";
+
 		return result;
+	}
+
+	z3::expr impliesDuplicate(z3::expr const &a, z3::expr const &b)
+	{
+		z3::check_context(a, b);
+		assert(a.is_bool() && b.is_bool());
+		Z3_ast r = Z3_mk_implies(a.ctx(), a, b);
+		a.check_error();
+		return z3::expr(a.ctx(), r);
 	}
 }
