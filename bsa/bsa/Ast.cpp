@@ -294,38 +294,64 @@ vector<vector<Ast*>> Ast::allCubes(vector<int> relevantAuxiliaryTemporaryVariabl
 Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate)
 {
 	int numberOfPredicates = config::globalPredicates.size();
-	vector<int> relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
+	vector<int> relevantIndices;
+	string emptyPool = config::getCubeStatePool(relevantIndices);
+	relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
 	string pool = config::getCubeStatePool(relevantIndices);
 	vector<string> implicativeCubeStates;
 	vector<string> unmaskedImplicativeCubeStates;
 	vector<string> cubeStateCombinations;
 	vector<Ast*> implicativeCubes;
 
-	for (int ctr = 1; ctr <= config::globalCubeSizeLimit; ctr++)
+	if (relevantIndices.size() > 0)
 	{
-		implicativeCubeStates.clear();
-		cubeStateCombinations = config::getNaryCubeStateCombinations(relevantIndices, ctr);
-		
-		for (string cubeStateCombination : cubeStateCombinations)
+		for (int ctr = 1; ctr <= cubeSizeUpperLimit; ctr++)
 		{
-			unmaskedImplicativeCubeStates = config::getImplicativeCubeStates(config::applyDecisionMask(cubeStateCombination, pool), predicate);
-			implicativeCubeStates.insert(implicativeCubeStates.end(), unmaskedImplicativeCubeStates.begin(), unmaskedImplicativeCubeStates.end());
-		}
+			implicativeCubeStates.clear();
+			cubeStateCombinations = config::getNaryCubeStateCombinations(relevantIndices, ctr);
 
-		pool = config::removeDecisionsFromPool(pool, implicativeCubeStates);
-		relevantIndices.clear();
-
-		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
-		{
-			if (pool[ctr] != config::CUBE_STATE_OMIT)
+			for (string cubeStateCombination : cubeStateCombinations)
 			{
-				relevantIndices.push_back(ctr);
+				unmaskedImplicativeCubeStates = config::getImplicativeCubeStates(config::applyDecisionMask(cubeStateCombination, pool), predicate);
+				implicativeCubeStates.insert(implicativeCubeStates.end(), unmaskedImplicativeCubeStates.begin(), unmaskedImplicativeCubeStates.end());
+			}
+
+			pool = config::removeDecisionsFromPool(pool, implicativeCubeStates);
+
+			if (pool.compare(emptyPool) == 0)
+			{
+				break;
+			}
+			
+			relevantIndices.clear();
+
+			for (int subCtr = 0; subCtr < numberOfPredicates; subCtr++)
+			{
+				if (pool[subCtr] != config::CUBE_STATE_OMIT)
+				{
+					relevantIndices.push_back(subCtr);
+				}
+			}
+
+			for (string implicativeCubeState : implicativeCubeStates)
+			{
+				implicativeCubes.push_back(Ast::newBooleanVariableCube(implicativeCubeState));
 			}
 		}
+	}
 
-		for (string implicativeCubeState : implicativeCubeStates)
+	if (implicativeCubes.size() == 0)
+	{
+		z3::context c;
+		z3::expr trueConstant = c.bool_val(true);
+
+		if (config::expressionImpliesPredicate(&c, trueConstant, predicate))
 		{
-			implicativeCubes.push_back(Ast::newBooleanVariableCube(implicativeCubeState));
+			return newINT(1);
+		}
+		else
+		{
+			return newINT(0);
 		}
 	}
 
@@ -348,9 +374,9 @@ Ast* Ast::newLargestImplicativeDisjunctionOfCubes(vector<int> relevantAuxiliaryT
 	return newMultipleOperation(implicativeCubeNodes, config::OR);
 }
 
-Ast* Ast::newReverseLargestImplicativeDisjunctionOfCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate)
+Ast* Ast::newReverseLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate)
 {
-	return newLargestImplicativeDisjunctionOfCubes(relevantAuxiliaryTemporaryVariableIndices, cubeSizeUpperLimit, predicate->negate())->negate();
+	return newLargestImplicativeDisjunctionOfCubes(cubeSizeUpperLimit, predicate->negate())->negate();
 }
 
 // Contains all buffer size maps
@@ -1475,6 +1501,10 @@ z3::expr Ast::astToZ3Expression(z3::context* c)
 		{
 			return children.at(0)->astToZ3Expression(c) != children.at(1)->astToZ3Expression(c);
 		}
+		else if (name == config::UNARY_OPERATORS[0])	// !
+		{
+			return !children.at(0)->astToZ3Expression(c);
+		}
 	}
 
 	// If all else fails
@@ -1829,6 +1859,20 @@ string Ast::emitCode()
 			result += config::ASSUME_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(0)->emitCode() +
 				config::RIGHT_PARENTHESIS + config::SEMICOLON;
 		}
+		else if (name == config::BEGIN_ATOMIC_TOKEN_NAME)
+		{
+			result += config::BEGIN_ATOMIC_TOKEN_NAME + config::SEMICOLON;
+		}
+		else if (name == config::END_ATOMIC_TOKEN_NAME)
+		{
+			result += config::END_ATOMIC_TOKEN_NAME + config::SEMICOLON;
+		}
+		else if (name == config::CHOOSE_TOKEN_NAME)
+		{
+			result += config::CHOOSE_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(0)->emitCode() +
+				config::COMMA + config::SPACE + children.at(1)->emitCode() +
+				config::RIGHT_PARENTHESIS + config::SEMICOLON;
+		}
 		else
 		{
 			config::throwError("Can't emit node: " + name);
@@ -1994,6 +2038,8 @@ bool Ast::performPredicateAbstraction()
 {
 	bool result = false;
 
+	cout << "Performing predicate abstraction on: " << shortStringRepresentation << "\n";
+
 	if (config::currentLanguage == config::language::RMA)
 	{
 		// TODO
@@ -2071,11 +2117,9 @@ bool Ast::performPredicateAbstraction()
 			Ast* positiveConditional = children.at(0);
 			Ast* negativeConditional = children.at(0)->negate();
 			Ast* G_positive = newReverseLargestImplicativeDisjunctionOfCubes(
-					config::getRelevantAuxiliaryTemporaryVariableIndices(positiveConditional),
 					config::globalCubeSizeLimit, positiveConditional
 				);
 			Ast* G_negative = newReverseLargestImplicativeDisjunctionOfCubes(
-					config::getRelevantAuxiliaryTemporaryVariableIndices(negativeConditional),
 					config::globalCubeSizeLimit, negativeConditional
 				);
 
@@ -2151,17 +2195,32 @@ Ast* Ast::negate()
 	Ast* result;
 
 	if (name == config::EQUALS || name == config::LESS_THAN || name == config::LESS_EQUALS ||
-		name == config::GREATER_EQUALS || name == config::NOT_EQUALS ||
-		name == config::AND || name == config::OR)
+		name == string(1, config::GREATER_THAN) || name == config::GREATER_EQUALS || name == config::NOT_EQUALS ||
+		name == config::AND || name == config::OR || name == config::ID_TOKEN_NAME)
 	{
 		Ast* selfClone = clone();
 		result = new Ast();
-		result->name == config::NOT;
+		result->name = config::NOT;
 		result->addChild(selfClone);
 	}
 	else if (name == config::NOT)
 	{
 		result = children.at(0)->clone();
+	}
+	else if (name == config::INT_TOKEN_NAME)
+	{
+		if (children.at(0)->name == "0")
+		{
+			result = newINT(1);
+		}
+		else if (children.at(0)->name == "1")
+		{
+			result = newINT(0);
+		}
+		else
+		{
+			config::throwError("Can't negate INT(" + children.at(0)->name + ")");
+		}
 	}
 
 	return result;

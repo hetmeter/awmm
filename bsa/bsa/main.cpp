@@ -120,6 +120,11 @@ int main(int argc, char** argv)
 	rootAstRef->cascadingInitializeAuxiliaryVariables();
 	rootAstRef->carryOutReplacements();
 
+	cout << "\n---\n";
+	cout << rootAstRef->emitCode();
+
+	config::lazyReplacements.clear();
+
 	ifstream parsedPredicateFile(fileNameStub + "." + config::PREDICATE_EXTENSION + "." + extension + "." + config::OUT_EXTENSION);
 	string parsedPredicateLine, parsedPredicateString;
 	Ast* predicateAstRef;
@@ -150,11 +155,14 @@ int main(int argc, char** argv)
 		{
 			config::throwError("Invalid parsed predicate format or predicates in a non-accepting state");
 		}
+
+		config::carryOutLazyReplacements();
 	}
 
 	parsedPredicateFile.close();
 
-	cout << rootAstRef->astToString();
+	/*cout << "\n---\n";
+	cout << rootAstRef->astToString();*/
 	cout << "\n---\n";
 	cout << rootAstRef->emitCode();
 

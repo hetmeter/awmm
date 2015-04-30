@@ -225,7 +225,7 @@ namespace config
 		if (currentAuxiliaryLabel == -1)
 		{
 			int maxLabel = -1;
-			int currentLabel;
+			int currentLabel = 1;
 
 			for (std::map<std::string, Ast*>::iterator iterator = labelLookupMap.begin(); iterator != labelLookupMap.end(); iterator++)
 			{
@@ -569,10 +569,18 @@ namespace config
 	bool cubeImpliesPredicate(std::vector<Ast*> cube, Ast* predicate)
 	{
 		z3::context c;
+
+		//std::cout << "\t" << (Ast::newMultipleOperation(cube, AND))->shortStringRepresentation << "\n";
+
 		z3::expr cubeExpression = (Ast::newMultipleOperation(cube, AND))->astToZ3Expression(&c);
-		z3::expr predicateExpression = predicate->astToZ3Expression(&c);
-		z3::solver s(c);
-		z3::expr implication = z3::implies(cubeExpression, (bool)predicateExpression);
+		return expressionImpliesPredicate(&c, cubeExpression, predicate);
+	}
+
+	bool expressionImpliesPredicate(z3::context* c, z3::expr expression, Ast* predicate)
+	{
+		z3::expr predicateExpression = predicate->astToZ3Expression(c);
+		z3::solver s(*c);
+		z3::expr implication = z3::implies(expression, (bool)predicateExpression);
 		s.add(implication);
 
 		z3::check_result satisfiability = s.check();

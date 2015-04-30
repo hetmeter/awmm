@@ -140,6 +140,7 @@ namespace config
 	extern std::vector<std::vector<Ast*>> powerSetOfLimitedCardinality(std::vector<Ast*> superset, int cardinalityLimit);
 	extern std::string nextBinaryRepresentation(std::string currentBinaryRepresentation, int length);
 	extern bool cubeImpliesPredicate(std::vector<Ast*> cube, Ast* predicate);
+	extern bool expressionImpliesPredicate(z3::context* c, z3::expr expression, Ast* predicate);
 	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate);
 
 	const extern char CUBE_STATE_OMIT;

@@ -1,40 +1,140 @@
 beginit
 
-	store a1 = 2;
-	store a2 = 4;
+	2: nop;
+	3: begin_atomic;
+	4: load t_0 = b_0;
+	5: load t_1 = b_1;
+	6: load t_2 = b_2;
+	7: choose(1, 1);
+	8: choose(1, 1);
+	9: choose(1, 1);
+	10: load t_0 = 0;
+	11: load t_1 = 0;
+	12: load t_2 = 0;
+	13: end_atomic;
+	14: nop;
+	15: begin_atomic;
+	16: load t_0 = b_0;
+	17: load t_1 = b_1;
+	18: load t_2 = b_2;
+	19: choose(1, 1);
+	20: choose(1, 1);
+	21: choose(1, 1);
+	22: load t_0 = 0;
+	23: load t_1 = 0;
+	24: load t_2 = 0;
+	25: end_atomic;
+	26: nop;
+	27: begin_atomic;
+	28: load t_0 = b_0;
+	29: load t_1 = b_1;
+	30: load t_2 = b_2;
+	31: choose(1, 1);
+	32: choose(1, 1);
+	33: choose(1, 1);
+	34: load t_0 = 0;
+	35: load t_1 = 0;
+	36: load t_2 = 0;
+	37: end_atomic;
 
 endinit
 
 process 1:
 
-	a2_fst_1 = 0;
-	a2_cnt_1 = 0;
-	a2_1_1 = 0;
-	a2_2_1 = 0;
-	a1_fst_1 = 0;
-	a1_cnt_1 = 0;
-	t1 = 2;
-	t2 = 4;
-	// Replacing "load t3 = a1;"
-	4: if (a1_cnt_1 == 0)
-		load t3 = a1;
-	endif;
-	// Finished replacing "load t3 = a1;"
-	
-	// Replacing "store a2 = t1 + t2;"
-	a2_fst_1 = 1;
-	a2_1_1 = t1 + t2;
-	a2_cnt_1 = a2_cnt_1 + 1;
-	// Finished replacing "store a2 = t1 + t2;"
-	// Replacing "fence;"
-	assume(a1_cnt_1 == 0);
-	assume(a1_fst_1 == 0);
-	assume(a2_cnt_1 == 0);
-	assume(a2_fst_1 == 0);
-	// Finished replacing "fence;"
-	
-	if (*)
-		goto 4;
-	endif;
-	
+	38: nop;
+	39: begin_atomic;
+	40: load t_0 = b_0;
+	41: load t_1 = b_1;
+	42: load t_2 = b_2;
+	43: choose(1, 1);
+	44: choose(1, 1);
+	45: choose(1, 1);
+	46: load t_0 = 0;
+	47: load t_1 = 0;
+	48: load t_2 = 0;
+	49: end_atomic;
+	50: nop;
+	51: begin_atomic;
+	52: load t_0 = b_0;
+	53: load t_1 = b_1;
+	54: load t_2 = b_2;
+	55: choose(1, 1);
+	56: choose(1, 1);
+	57: choose(1, 1);
+	58: load t_0 = 0;
+	59: load t_1 = 0;
+	60: load t_2 = 0;
+	61: end_atomic;
+	62: nop;
+	63: begin_atomic;
+	64: load t_0 = b_0;
+	65: load t_1 = b_1;
+	66: load t_2 = b_2;
+	67: choose(1, 1);
+	68: choose(1, 1);
+	69: choose(1, 1);
+	70: load t_0 = 0;
+	71: load t_1 = 0;
+	72: load t_2 = 0;
+	73: end_atomic;
+	74: nop;
+	75: begin_atomic;
+	76: load t_0 = b_0;
+	77: load t_1 = b_1;
+	78: load t_2 = b_2;
+	79: choose(1, 1);
+	80: choose(1, 1);
+	81: choose(1, 1);
+	82: load t_0 = 0;
+	83: load t_1 = 0;
+	84: load t_2 = 0;
+	85: end_atomic;
+	86: nop;
+	87: begin_atomic;
+	88: load t_0 = b_0;
+	89: load t_1 = b_1;
+	90: load t_2 = b_2;
+	91: choose(1, 1);
+	92: choose(1, 1);
+	93: choose(1, 1);
+	94: load t_0 = 0;
+	95: load t_1 = 0;
+	96: load t_2 = 0;
+	97: end_atomic;
+	98: nop;
+	99: begin_atomic;
+	100: load t_0 = b_0;
+	101: load t_1 = b_1;
+	102: load t_2 = b_2;
+	103: choose(1, 1);
+	104: choose(1, 1);
+	105: choose(1, 1);
+	106: load t_0 = 0;
+	107: load t_1 = 0;
+	108: load t_2 = 0;
+	109: end_atomic;
+	110: nop;
+	111: begin_atomic;
+	112: load t_0 = b_0;
+	113: load t_1 = b_1;
+	114: load t_2 = b_2;
+	115: choose(1, 1);
+	116: choose(1, 1);
+	117: choose(1, 1);
+	118: load t_0 = 0;
+	119: load t_1 = 0;
+	120: load t_2 = 0;
+	121: end_atomic;
+	122: nop;
+	123: begin_atomic;
+	124: load t_0 = b_0;
+	125: load t_1 = b_1;
+	126: load t_2 = b_2;
+	127: choose(1, 1);
+	128: choose(1, 1);
+	129: choose(1, 1);
+	130: load t_0 = 0;
+	131: load t_1 = 0;
+	132: load t_2 = 0;
+	133: end_atomic;
 
