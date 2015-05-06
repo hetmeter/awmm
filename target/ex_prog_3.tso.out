@@ -1,1 +1,1 @@
-{ACCEPTING_STATE,programDeclaration(initializationBlock(store(ID(a1),INT(2)),store(ID(a2),INT(4))),processDeclaration(processHeader(1),statements(localAssign(ID(t1),INT(2)),localAssign(ID(t2),INT(4)),label(4,load(ID(t3),ID(a1))),store(ID(a2),+(ID(t1),ID(t2))),fence,ifElse(*,statements(goto(4)),none),flush)))}
+{ACCEPTING_STATE,programDeclaration(initializationBlock(store(ID(y1),INT(1)),store(ID(y2),INT(10)),store(ID(y3),INT(100))),processDeclaration(processHeader(1),statements(localAssign(ID(y1),+(ID(y2),INT(1))),localAssign(ID(y2),*(ID(y3),INT(2))))))}

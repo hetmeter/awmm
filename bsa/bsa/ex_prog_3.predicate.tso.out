@@ -1,0 +1,1 @@
+{ACCEPTING_STATE,predicateList(>=(ID(y1),INT(0)),>(ID(y1),ID(y2)),>(ID(y2),ID(y3)),>=(ID(y2),INT(0)),>(ID(y3),INT(5)))}

@@ -13,7 +13,6 @@ Buffer Size Analysis:
 #include <fstream>
 #include <regex>
 #include <map>
-#include <z3++.h>
 
 #include "config.h"
 #include "Ast.h"
@@ -37,11 +36,20 @@ int main(int argc, char** argv)
 
 	if (argc > 2)
 	{
-		config::K = stoi(argv[argc - 1]);
+		config::K = stoi(argv[2]);
 	}
 	else
 	{
 		config::throwCriticalError("No K specified");
+	}
+
+	if (argc > 3)
+	{
+		config::globalCubeSizeLimit = stoi(argv[3]);
+	}
+	else
+	{
+		config::throwCriticalError("No cube size limit specified");
 	}
 
 	// Parse input file (no line breaks are expected)
@@ -99,8 +107,10 @@ int main(int argc, char** argv)
 	{
 		config::throwCriticalError("Invalid parsed program extension");
 	}
-
 	Ast* rootAstRef = config::stringToAst(parsedProgramString);
+
+	cout << "\n---\nParsed program:\n\n";
+	cout << rootAstRef->emitCode();
 
 	rootAstRef->cascadingUnifyVariableNames();		// Send a cascading command to the root node that results in all variable identifiers registering their variable names in a global vector
 	rootAstRef->getCostsFromChildren();				// Send a cascading command to the root node that results in all program points storing the buffer size increases they cause
@@ -111,6 +121,11 @@ int main(int argc, char** argv)
 	rootAstRef->cascadingUnifyVariableNames();
 	rootAstRef->cascadingInitializeAuxiliaryVariables();
 	rootAstRef->carryOutReplacements();
+
+	cout << "\n---\nCarried out buffer size analysis:\n\n";
+	cout << rootAstRef->emitCode();
+
+	config::lazyReplacements.clear();
 
 	ifstream parsedPredicateFile(fileNameStub + "." + config::PREDICATE_EXTENSION + "." + extension + "." + config::OUT_EXTENSION);
 	string parsedPredicateLine, parsedPredicateString;
@@ -136,18 +151,27 @@ int main(int argc, char** argv)
 			}
 
 			config::initializeAuxiliaryVariables();
+
+			cout << "Performing predicate abstraction...\n";
+
 			rootAstRef->cascadingPerformPredicateAbstraction();
+
+			cout << "\n---\nCarried out predicate abstraction:\n\n";
+			cout << rootAstRef->emitCode();
 		}
 		else
 		{
 			config::throwError("Invalid parsed predicate format or predicates in a non-accepting state");
 		}
+
+		config::carryOutLazyReplacements();
 	}
 
 	parsedPredicateFile.close();
 
-	cout << rootAstRef->astToString();
-	cout << "\n---\n";
+	/*cout << "\n---\n";
+	cout << rootAstRef->astToString();*/
+	cout << "\n---\nFinal state:\n\n";
 	cout << rootAstRef->emitCode();
 
 	// Generate the output

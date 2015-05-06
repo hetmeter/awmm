@@ -4,6 +4,9 @@
 #include <iostream>
 #include <map>
 #include <regex>
+#include <bitset>
+#include <z3++.h>
+#include <algorithm>
 
 class Ast;
 class GlobalVariable;
@@ -101,11 +104,15 @@ namespace config
 	extern std::vector<std::string> variableNames;
 	extern std::map<std::string, GlobalVariable*> globalVariables;
 	extern std::vector<Ast*> globalPredicates;
+	extern int indexOf(Ast* predicate);
 	extern std::vector<std::string> auxiliaryBooleanVariableNames;
 	extern std::vector<std::string> auxiliaryTemporaryVariableNames;
+	extern std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
+	extern std::vector<int> getPredicateVariableTransitiveClosure(int index);
 	extern int currentAuxiliaryLabel;
 	extern int getCurrentAuxiliaryLabel();
 	extern int K;
+	extern int globalCubeSizeLimit;
 	extern std::map<Ast*, std::vector<Ast*>> lazyReplacements;
 
 	extern void carryOutLazyReplacements();
@@ -114,11 +121,40 @@ namespace config
 	extern std::string addTabs(std::string s, int numberOfTabs);
 	extern void throwError(std::string msg);
 	extern void throwCriticalError(std::string msg);
+
 	extern bool stringVectorContains(std::vector<std::string> container, std::string element);
+	extern bool stringVectorIsSubset(std::vector<std::string> possibleSubset, std::vector<std::string> possibleSuperset);
+
+	extern std::vector<int> intVectorUnion(std::vector<int> first, std::vector<int> second);
+	extern std::vector<std::vector<int>> intSetCartesianProduct(std::vector<int> first, std::vector<int> second);
+	extern std::vector<std::vector<int>> intSetCartesianProduct(std::vector<std::vector<int>> first, std::vector<int> second);
+	extern bool intVectorVectorContains(std::vector<std::vector<int>> container, std::vector<int> element);
 
 	extern Ast* stringToAst(std::string parsedProgramString);
 
 	enum booleanOperator { BOP_EQUALS, BOP_LESS_THAN, BOP_LESS_EQUALS, BOP_GREATER_THAN, BOP_GREATER_EQUALS, BOP_NOT_EQUALS, BOP_NOT, BOP_AND, BOP_OR, BOP_INVALID };
 	extern booleanOperator stringToBooleanOperator(std::string operatorString);
 	extern std::string booleanOperatorToString(booleanOperator boolOp);
+
+	extern std::vector<std::vector<Ast*>> allSubsetsOfLengthK(std::vector<Ast*> superset, int K);
+	extern std::vector<std::vector<Ast*>> powerSetOfLimitedCardinality(std::vector<Ast*> superset, int cardinalityLimit);
+	extern std::string nextBinaryRepresentation(std::string currentBinaryRepresentation, int length);
+	extern bool cubeImpliesPredicate(std::vector<Ast*> cube, Ast* predicate);
+	extern bool expressionImpliesPredicate(z3::expr expression, Ast* predicate);
+	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate);
+
+	const extern char CUBE_STATE_OMIT;
+	const extern char CUBE_STATE_UNDECIDED;
+	const extern char CUBE_STATE_MAY_BE_FALSE;
+	const extern char CUBE_STATE_MAY_BE_TRUE;
+	const extern char CUBE_STATE_DECIDED_FALSE;
+	const extern char CUBE_STATE_DECIDED_TRUE;
+	extern std::string getCubeStatePool(std::vector<int> predicateIndices);
+	extern std::string getCubeStatePool(int predicateIndex);
+	extern std::vector<std::string> getNaryCubeStateCombinations(std::vector<int> predicateIndices, int n);
+	extern std::vector<std::string> getImplicativeCubeStates(std::string pool, Ast* predicate);
+	extern std::string removeDecisionsFromPool(std::string pool, std::vector<std::string> decisions);
+	extern std::string applyDecisionMask(std::string pool, std::string decisionMask);
+
+	extern z3::expr impliesDuplicate(z3::expr const &a, z3::expr const &b);
 }

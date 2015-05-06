@@ -1,0 +1,1 @@
+{ACCEPTING_STATE,programDeclaration(initializationBlock(store(ID(y1),INT(1)),store(ID(y2),INT(10)),store(ID(y3),INT(100))),processDeclaration(processHeader(1),statements(localAssign(ID(y1),+(ID(y2),INT(1))),localAssign(ID(y2),*(ID(y3),INT(2))))))}

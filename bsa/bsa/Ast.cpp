@@ -11,110 +11,143 @@ Cascading operations may go top to bottom or bottom to top in the tree, or down 
 
 using namespace std;
 
+void Ast::updateShortStringRepresentation()
+{
+	if (children.size() > 0)
+	{
+		string result = name + "(";
+
+		for (Ast* child : children)
+		{
+			child->updateShortStringRepresentation();
+			result += child->shortStringRepresentation + ", ";
+		}
+
+		shortStringRepresentation = result.substr(0, result.size() - 2) + ")";
+	}
+	else
+	{
+		shortStringRepresentation = name;
+	}
+
+	/*if (name == "")
+	{
+		shortStringRepresentation = name;
+	}
+	else
+	{
+		shortStringRepresentation = emitCode();
+	}*/
+}
+
 Ast::Ast()
 {
 	// The index by which this node can be referred to from its parent's children vector. The root always has an index of -1
 	indexAsChild = -1;
 	name = "";
+
+	updateShortStringRepresentation();
 }
 
-// Initializes an ID node
-Ast::Ast(string variableName)
+Ast::Ast(string initialName)
 {
-	name = config::ID_TOKEN_NAME;
-	addChild(new Ast());
-	children.at(0)->name = variableName;
-}
-
-// Initializes an INT node
-Ast::Ast(int value)
-{
-	name = config::INT_TOKEN_NAME;
-	addChild(new Ast());
-	children.at(0)->name = to_string(value);
-}
-
-// Initializes a localAssign(ID(variableName), INT(initialValue)) node
-Ast::Ast(string variableName, int initialValue)
-{
-	name = config::LOCAL_ASSIGN_TOKEN_NAME;
-
-	addChild(new Ast(variableName));
-
-	addChild(new Ast());
-	children.at(1)->name = config::INT_TOKEN_NAME;
-	children.at(1)->addChild(new Ast());
-	children.at(1)->children.at(0)->name = to_string(initialValue);
-}
-
-// Initializes a localAssign(ID(variableName), node) node
-Ast::Ast(string variableName, Ast* assignmentNode)
-{
-	name = config::LOCAL_ASSIGN_TOKEN_NAME;
-
-	addChild(new Ast(variableName));
-
-	addChild(assignmentNode);
-}
-
-// Initializes an ifElse(ifConditional, statements) node
-Ast::Ast(Ast* ifConditionalNode, vector<Ast*> statements)
-{
-	name = config::IF_ELSE_TOKEN_NAME;
-
-	addChild(ifConditionalNode);
-
-	addChild(new Ast());
-	children.at(1)->name = config::STATEMENTS_TOKEN_NAME;
-	children.at(1)->addChildren(statements);
-
-	addChild(new Ast());
-	children.at(2)->name = config::NONE_TOKEN_NAME;
-}
-
-// Initializes an ifElse(ifConditional, ifStatements, elseStatements) node
-Ast::Ast(Ast* ifConditionalNode, vector<Ast*> ifStatements, vector<Ast*> elseStatements)
-{
-	name = config::IF_ELSE_TOKEN_NAME;
-
-	addChild(ifConditionalNode);
-
-	addChild(new Ast());
-	children.at(1)->name = config::STATEMENTS_TOKEN_NAME;
-	children.at(1)->addChildren(ifStatements);
-
-	addChild(new Ast());
-	children.at(2)->name = config::STATEMENTS_TOKEN_NAME;
-	children.at(2)->addChildren(elseStatements);
-}
-
-// Initializes an assume(conditional) node
-Ast::Ast(Ast* assumeConditionalNode)
-{
-	name = config::ASSUME_TOKEN_NAME;
-
-	addChild(assumeConditionalNode);
-}
-
-// Initializes a binary operation node
-Ast::Ast(Ast* leftOperand, Ast* rightOperand, string operation)
-{
-	name = operation;
-
-	addChild(leftOperand);
-	addChild(rightOperand);
-}
-
-// Initializes a unary operation node
-Ast::Ast(Ast* operand, string operation)
-{
-	name = operation;
-
-	addChild(operand);
+	// The index by which this node can be referred to from its parent's children vector. The root always has an index of -1
+	indexAsChild = -1;
+	name = initialName;
 }
 
 Ast::~Ast()
 {
+}
+
+// Initializes an ID node
+Ast* Ast::newID(string variableName)
+{
+	Ast* result = new Ast();
+	result->name = config::ID_TOKEN_NAME;
+	result->addChild(new Ast());
+	result->children.at(0)->name = variableName;
+	return result;
+}
+
+// Initializes an INT node
+Ast* Ast::newINT(int value)
+{
+	Ast* result = new Ast();
+	result->name = config::INT_TOKEN_NAME;
+	result->addChild(new Ast());
+	result->children.at(0)->name = to_string(value);
+	return result;
+}
+
+// Initializes a localAssign(ID(variableName), INT(initialValue)) node
+Ast* Ast::newLocalAssign(string variableName, int initialValue)
+{
+	Ast* result = new Ast();
+	result->name = config::LOCAL_ASSIGN_TOKEN_NAME;
+	result->addChild(newID(variableName));
+	result->addChild(newINT(initialValue));
+	return result;
+}
+
+// Initializes a localAssign(ID(variableName), node) node
+Ast* Ast::newLocalAssign(string variableName, Ast* assignmentNode)
+{
+	Ast* result = new Ast();
+	result->name = config::LOCAL_ASSIGN_TOKEN_NAME;
+	result->addChild(newID(variableName));
+	result->addChild(assignmentNode);
+	return result;
+}
+
+// Initializes an ifElse(ifConditional, statements) node
+Ast* Ast::newIfElse(Ast* ifConditionalNode, vector<Ast*> statements)
+{
+	Ast* result = new Ast();
+	result->name = config::IF_ELSE_TOKEN_NAME;
+	result->addChild(ifConditionalNode);
+	result->addChild(newStatements(statements));
+	result->addChild(newNone());
+	return result;
+}
+
+// Initializes an ifElse(ifConditional, ifStatements, elseStatements) node
+Ast* Ast::newIfElse(Ast* ifConditionalNode, vector<Ast*> ifStatements, vector<Ast*> elseStatements)
+{
+	Ast* result = new Ast();
+	result->name = config::IF_ELSE_TOKEN_NAME;
+	result->addChild(ifConditionalNode);
+	result->addChild(newStatements(ifStatements));
+	result->addChild(newStatements(elseStatements));
+	return result;
+}
+
+// Initializes an assume(conditional) node
+Ast* Ast::newAssume(Ast* assumeConditionalNode)
+{
+	Ast* result = new Ast();
+	result->name = config::ASSUME_TOKEN_NAME;
+	result->addChild(assumeConditionalNode);
+	return result;
+}
+
+// Initializes a binary operation node
+Ast* Ast::newBinaryOp(Ast* leftOperand, Ast* rightOperand, string operation)
+{
+	Ast* result = new Ast();
+	result->name = operation;
+	result->addChild(leftOperand);
+	result->addChild(rightOperand);
+	return result;
+}
+
+// Initializes a unary operation node
+Ast* Ast::newUnaryOp(Ast* operand, string operation)
+{
+	Ast* result = new Ast();
+	result->name = operation;
+	result->addChild(operand);
+	return result;
 }
 
 Ast* Ast::newBeginAtomic()
@@ -145,6 +178,21 @@ Ast* Ast::newAsterisk()
 	return result;
 }
 
+Ast* Ast::newNone()
+{
+	Ast* result = new Ast();
+	result->name = config::NONE_TOKEN_NAME;
+	return result;
+}
+
+Ast* Ast::newStatements(std::vector<Ast*> statements)
+{
+	Ast* result = new Ast();
+	result->name = config::STATEMENTS_TOKEN_NAME;
+	result->addChildren(statements);
+	return result;
+}
+
 Ast* Ast::newLabel(int value, Ast* statement)
 {
 	Ast* result = new Ast();
@@ -159,7 +207,7 @@ Ast* Ast::newLoad(std::string variableName, Ast* rightSide)
 {
 	Ast* result = new Ast();
 	result->name = config::PSO_TSO_LOAD_TOKEN_NAME;
-	result->addChild(new Ast(variableName));
+	result->addChild(newID(variableName));
 	result->addChild(rightSide);
 	return result;
 }
@@ -168,7 +216,7 @@ Ast* Ast::newStore(std::string variableName, Ast* rightSide)
 {
 	Ast* result = new Ast();
 	result->name = config::PSO_TSO_STORE_TOKEN_NAME;
-	result->addChild(new Ast(variableName));
+	result->addChild(newID(variableName));
 	result->addChild(rightSide);
 	return result;
 }
@@ -180,6 +228,166 @@ Ast* Ast::newChoose(Ast* firstChoice, Ast* secondChoice)
 	result->addChild(firstChoice);
 	result->addChild(secondChoice);
 	return result;
+}
+
+Ast* Ast::newAbstractAssignmentFragment(Ast* assignment, Ast* predicate)
+{
+	return newChoose(
+			newLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, assignment->weakestLiberalPrecondition(predicate)),
+			newLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, assignment->weakestLiberalPrecondition(predicate->negate()))
+		);
+}
+
+Ast* Ast::newMultipleOperation(std::vector<Ast*> operands, string operation)
+{
+	int operandCount = operands.size();
+
+	if (operandCount > 1)
+	{
+		return newBinaryOp(operands[0], newMultipleOperation(vector<Ast*>(operands.begin() + 1, operands.end()), operation), operation);
+	}
+	else if (operandCount == 1)
+	{
+		return operands[0];
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+Ast* Ast::newBooleanVariableCube(std::string definition)
+{
+	int numberOfPredicates = config::globalPredicates.size();
+	vector<Ast*> cubeTerms;
+
+	for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+	{
+		if (definition[ctr] == config::CUBE_STATE_DECIDED_FALSE)
+		{
+			cubeTerms.push_back(newID(config::auxiliaryBooleanVariableNames[ctr])->negate());
+		}
+		else if (definition[ctr] == config::CUBE_STATE_DECIDED_TRUE)
+		{
+			cubeTerms.push_back(newID(config::auxiliaryBooleanVariableNames[ctr]));
+		}
+	}
+
+	return newMultipleOperation(cubeTerms, config::AND);
+}
+
+vector<vector<Ast*>> Ast::allCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit)
+{
+	int numberOfVariables = relevantAuxiliaryTemporaryVariableIndices.size();
+	vector<Ast*> allPredicates;
+
+	for (int ctr = 0; ctr < numberOfVariables; ctr++)
+	{
+		allPredicates.push_back(config::globalPredicates[relevantAuxiliaryTemporaryVariableIndices[ctr]]->clone());
+		//allVariables.push_back(newID(config::auxiliaryTemporaryVariableNames[relevantAuxiliaryTemporaryVariableIndices[ctr]]));
+	}
+
+	vector<vector<Ast*>> limitedPowerSet = config::powerSetOfLimitedCardinality(allPredicates, cubeSizeUpperLimit);
+	vector<vector<Ast*>> negationPatterns;
+	vector<vector<Ast*>> allCubeSets;
+
+	for (vector<Ast*> subset : limitedPowerSet)
+	{
+		negationPatterns = allNegationPatterns(subset);
+		allCubeSets.insert(allCubeSets.end(), negationPatterns.begin(), negationPatterns.end());
+	}
+
+	return allCubeSets;
+}
+
+Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate)
+{
+	int numberOfPredicates = config::globalPredicates.size();
+	vector<int> relevantIndices;
+	string emptyPool = config::getCubeStatePool(relevantIndices);
+	relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
+	string pool = config::getCubeStatePool(relevantIndices);
+	vector<string> implicativeCubeStates;
+	vector<string> unmaskedImplicativeCubeStates;
+	vector<string> cubeStateCombinations;
+	vector<Ast*> implicativeCubes;
+
+	if (relevantIndices.size() > 0)
+	{
+		for (int ctr = 1; ctr <= cubeSizeUpperLimit; ctr++)
+		{
+			implicativeCubeStates.clear();
+			cubeStateCombinations = config::getNaryCubeStateCombinations(relevantIndices, ctr);
+			
+			for (string cubeStateCombination : cubeStateCombinations)
+			{
+				unmaskedImplicativeCubeStates = config::getImplicativeCubeStates(config::applyDecisionMask(cubeStateCombination, pool), predicate);
+				implicativeCubeStates.insert(implicativeCubeStates.end(), unmaskedImplicativeCubeStates.begin(), unmaskedImplicativeCubeStates.end());
+			}
+
+			//cout << pool << "\t";
+			pool = config::removeDecisionsFromPool(pool, implicativeCubeStates);
+			//cout << pool << "\n";
+
+			if (pool.compare(emptyPool) == 0)
+			{
+				break;
+			}
+			
+			relevantIndices.clear();
+
+			for (int subCtr = 0; subCtr < numberOfPredicates; subCtr++)
+			{
+				if (pool[subCtr] != config::CUBE_STATE_OMIT)
+				{
+					relevantIndices.push_back(subCtr);
+				}
+			}
+
+			for (string implicativeCubeState : implicativeCubeStates)
+			{
+				implicativeCubes.push_back(Ast::newBooleanVariableCube(implicativeCubeState));
+			}
+		}
+	}
+
+	if (implicativeCubes.size() == 0)
+	{
+		z3::context c;
+		z3::expr trueConstant = c.bool_val(true);
+
+		if (config::expressionImpliesPredicate(trueConstant, predicate))
+		{
+			return newINT(1);
+		}
+		else
+		{
+			return newINT(0);
+		}
+	}
+
+	return Ast::newMultipleOperation(implicativeCubes, config::OR);
+}
+
+Ast* Ast::newLargestImplicativeDisjunctionOfCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate)
+{
+	vector<vector<Ast*>> cubes = allCubes(relevantAuxiliaryTemporaryVariableIndices, cubeSizeUpperLimit);
+	vector<Ast*> implicativeCubeNodes;
+
+	for (vector<Ast*> cube : cubes)
+	{
+		if (config::cubeImpliesPredicate(cube, predicate))
+		{
+			implicativeCubeNodes.push_back(newMultipleOperation(cube, config::AND));
+		}
+	}
+
+	return newMultipleOperation(implicativeCubeNodes, config::OR);
+}
+
+Ast* Ast::newReverseLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate)
+{
+	return newLargestImplicativeDisjunctionOfCubes(cubeSizeUpperLimit, predicate->negate())->negate();
 }
 
 // Contains all buffer size maps
@@ -361,6 +569,26 @@ vector<string> Ast::getIDs()
 	return results;
 }
 
+bool Ast::equals(Ast* other)
+{
+	if (name.compare(other->name) == 0)
+	{
+		int childrenCount = children.size();
+
+		for (int ctr = 0; ctr < childrenCount; ctr++)
+		{
+			if (!(children.at(ctr)->equals(other->children.at(ctr))))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
 // Cascades from top to bottom. Copies all persistent buffer size maps to the successors.
 void Ast::topDownCascadingCopyPersistentBufferSizes(Ast* source)
 {
@@ -503,16 +731,16 @@ void Ast::carryOutReplacements()
 
 				for (int ctr = currentMaximum; ctr > 0; ctr--)
 				{
-					currentNode = new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)], 0);
+					currentNode = newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)], 0);
 					currentNode->parent = children.at(1);
 					children.at(1)->children.insert(children.at(1)->children.begin(), currentNode);
 				}
 
-				currentNode = new Ast(config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process], 0);
+				currentNode = newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process], 0);
 				currentNode->parent = children.at(1);
 				children.at(1)->children.insert(children.at(1)->children.begin(), currentNode);
 
-				currentNode = new Ast(config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process], 0);
+				currentNode = newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process], 0);
 				currentNode->parent = children.at(1);
 				children.at(1)->children.insert(children.at(1)->children.begin(), currentNode);
 			}
@@ -552,10 +780,10 @@ void Ast::carryOutReplacements()
 
 					statements.push_back(abortAst);
 
-					replacement.push_back(new Ast(
-							new Ast(
-									new Ast(x_cnt_t),
-									new Ast(config::K),
+					replacement.push_back(newIfElse(
+							newBinaryOp(
+									newID(x_cnt_t),
+									newINT(config::K),
 									config::EQUALS
 								),
 							statements
@@ -570,29 +798,29 @@ void Ast::carryOutReplacements()
 
 				if (persistentWriteCost[globalVariableName] == 1)
 				{
-					replacement.push_back(new Ast(x_fst_t, 1));
-					replacement.push_back(new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, 1)], children.at(1)));
+					replacement.push_back(newLocalAssign(x_fst_t, 1));
+					replacement.push_back(newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, 1)], children.at(1)));
 				}
 				else
 				{
-					statements.push_back(new Ast(x_fst_t, 1));
-					statements.push_back(new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, 1)], children.at(1)));
+					statements.push_back(newLocalAssign(x_fst_t, 1));
+					statements.push_back(newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, 1)], children.at(1)));
 
-					replacement.push_back(new Ast(
-							new Ast(
-									new Ast(x_fst_t),
-									new Ast(0),
+					replacement.push_back(newIfElse(
+							newBinaryOp(
+									newID(x_fst_t),
+									newINT(0),
 									config::EQUALS
 								),
 							statements
 						));
 				}
 
-				replacement.push_back(new Ast(
+				replacement.push_back(newLocalAssign(
 						x_cnt_t,
-						new Ast(
-							new Ast(x_cnt_t),
-							new Ast(1),
+						newBinaryOp(
+							newID(x_cnt_t),
+							newINT(1),
 							string(1, config::PLUS)
 						)
 					));
@@ -600,12 +828,12 @@ void Ast::carryOutReplacements()
 				for (int ctr = 2; ctr <= s; ctr++)
 				{
 					statements.clear();
-					statements.push_back(new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)], children.at(1)));
+					statements.push_back(newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)], children.at(1)));
 
-					replacement.push_back(new Ast(
-							new Ast(
-								new Ast(x_cnt_t),
-								new Ast(ctr),
+					replacement.push_back(newIfElse(
+							newBinaryOp(
+								newID(x_cnt_t),
+								newINT(ctr),
 								config::EQUALS
 							),
 							statements
@@ -631,12 +859,12 @@ void Ast::carryOutReplacements()
 				}
 
 				vector<Ast*> statements;
-				statements.push_back(new Ast(children.at(0), children.at(1), config::PSO_TSO_LOAD_TOKEN_NAME));
+				statements.push_back(newBinaryOp(children.at(0), children.at(1), config::PSO_TSO_LOAD_TOKEN_NAME));
 
-				replacement.push_back(new Ast(
-						new Ast(
-							new Ast(x_cnt_t),
-							new Ast(0),
+				replacement.push_back(newIfElse(
+						newBinaryOp(
+							newID(x_cnt_t),
+							newINT(0),
 							config::EQUALS
 						),
 						statements
@@ -645,16 +873,18 @@ void Ast::carryOutReplacements()
 				for (int ctr = 1; ctr <= s; ctr++)
 				{
 					statements.clear();
-					statements.push_back(new Ast(
-						children.at(0),
-						new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)]),
-						config::LOCAL_ASSIGN_TOKEN_NAME
+					statements.push_back(newBinaryOp(
+							children.at(0),
+							newID(
+								config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)]
+							),
+							config::LOCAL_ASSIGN_TOKEN_NAME
 						));
 
-					replacement.push_back(new Ast(
-							new Ast(
-								new Ast(x_cnt_t),
-								new Ast(ctr),
+					replacement.push_back(newIfElse(
+							newBinaryOp(
+								newID(x_cnt_t),
+								newINT(ctr),
 								config::EQUALS
 							),
 							statements
@@ -675,18 +905,18 @@ void Ast::carryOutReplacements()
 					x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
 					x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
 
-					replacement.push_back(new Ast(
-							new Ast(
-								new Ast(x_cnt_t),
-								new Ast(0),
+					replacement.push_back(newAssume(
+							newBinaryOp(
+								newID(x_cnt_t),
+								newINT(0),
 								config::EQUALS
 							)
 						));
 
-					replacement.push_back(new Ast(
-							new Ast(
-								new Ast(x_fst_t),
-								new Ast(0),
+					replacement.push_back(newAssume(
+							newBinaryOp(
+								newID(x_fst_t),
+								newINT(0),
 								config::EQUALS
 							)
 						));
@@ -704,7 +934,6 @@ void Ast::carryOutReplacements()
 				int uniqueLabel = rand();
 				int s;
 				Ast* currentIfElse;
-				Ast* asteriskConditional;
 
 				vector<Ast*> currentIfStatements;
 				vector<Ast*> oldIfStatements;
@@ -729,10 +958,9 @@ void Ast::carryOutReplacements()
 					{
 						if (currentIfStatements.empty())
 						{
-							currentIfStatements.push_back(new Ast(
-									new Ast(globalVariableName),
-									new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr + 1)]),
-									config::PSO_TSO_STORE_TOKEN_NAME
+							currentIfStatements.push_back(newStore(
+									globalVariableName,
+									newID(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr + 1)])
 								));
 						}
 						else
@@ -743,16 +971,15 @@ void Ast::carryOutReplacements()
 
 						currentElseStatements.clear();
 
-						currentElseStatements.push_back(new Ast(
-								new Ast(globalVariableName),
-								new Ast(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)]),
-								config::PSO_TSO_STORE_TOKEN_NAME
+						currentElseStatements.push_back(newStore(
+								globalVariableName,
+								newID(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)])
 							));
 
-						currentIfElse = new Ast(
-								new Ast(
-									new Ast(x_fst_t),
-									new Ast(ctr),
+						currentIfElse = newIfElse(
+								newBinaryOp(
+									newID(x_fst_t),
+									newINT(ctr),
 									string(1, config::GREATER_THAN)
 								),
 								currentIfStatements,
@@ -762,9 +989,6 @@ void Ast::carryOutReplacements()
 
 					if (s >= 1)
 					{
-						asteriskConditional = new Ast();
-						asteriskConditional->name = config::ASTERISK_TOKEN_NAME;
-
 						currentIfStatements.clear();
 
 						if (s > 1)
@@ -772,19 +996,19 @@ void Ast::carryOutReplacements()
 							currentIfStatements.push_back(currentIfElse);
 						}
 
-						currentIfStatements.push_back(new Ast(
+						currentIfStatements.push_back(newLocalAssign(
 								x_fst_t,
-								new Ast(
-									new Ast(x_fst_t),
-									new Ast(1),
+								newBinaryOp(
+									newID(x_fst_t),
+									newINT(1),
 									string(1, config::PLUS)
 								)
 							));
 
 						if (numberOfVariablesInPersistentWriteBuffer() > 1)
 						{
-							currentIfElse = new Ast(
-									asteriskConditional,
+							currentIfElse = newIfElse(
+									newAsterisk(),
 									currentIfStatements
 								);
 
@@ -792,10 +1016,10 @@ void Ast::carryOutReplacements()
 							currentIfStatements.push_back(currentIfElse);
 						}
 
-						currentIfElse = new Ast(
-								new Ast(
-									new Ast(x_cnt_t),
-									new Ast(0),
+						currentIfElse = newIfElse(
+								newBinaryOp(
+									newID(x_cnt_t),
+									newINT(0),
 									string(1, config::GREATER_THAN)
 								),
 								currentIfStatements
@@ -815,11 +1039,8 @@ void Ast::carryOutReplacements()
 
 					flushStatements.push_back(gotoNode);
 
-					asteriskConditional = new Ast();
-					asteriskConditional->name = config::ASTERISK_TOKEN_NAME;
-
-					Ast* envelopingIfNode = new Ast(
-							asteriskConditional,
+					Ast* envelopingIfNode = newIfElse(
+							newAsterisk(),
 							flushStatements
 						);
 
@@ -1070,7 +1291,10 @@ void Ast::cascadingPerformPredicateAbstraction()
 	{
 		for (Ast* child : children)
 		{
-			child->cascadingPerformPredicateAbstraction();
+			if (child->name != config::INITIALIZATION_BLOCK_TOKEN_NAME && child->name != config::RMA_PROCESS_INITIALIZATION_TOKEN_NAME)
+			{
+				child->cascadingPerformPredicateAbstraction();
+			}
 		}
 	}
 }
@@ -1081,6 +1305,8 @@ void Ast::addChild(Ast* child)
 	child->parent = this;
 	child->indexAsChild = children.size();
 	children.push_back(child);
+
+	updateShortStringRepresentation();
 }
 
 void Ast::addChildren(vector<Ast*> newChildren)
@@ -1218,6 +1444,86 @@ string Ast::astToString()
 	result = regex_replace(result, indentationRegex, "\n|");
 
 	return result;
+}
+
+z3::expr Ast::astToZ3Expression(z3::context* c)
+{
+	if (config::currentLanguage == config::language::RMA)
+	{
+		// TODO
+		config::throwError("Z3 expression conversion not implemented for RMA");
+	}
+	else
+	{
+		if (name == config::ID_TOKEN_NAME)
+		{
+			return c->int_const(children.at(0)->name.c_str());
+		}
+		else if (name == config::INT_TOKEN_NAME)
+		{
+			return c->int_val(children.at(0)->name.c_str());
+		}
+		else if (name == config::BINARY_OPERATORS[0])	// +
+		{
+			return children.at(0)->astToZ3Expression(c) + children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[1])	// -
+		{
+			return children.at(0)->astToZ3Expression(c) - children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[2])	// *
+		{
+			return children.at(0)->astToZ3Expression(c) * children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[3])	// /
+		{
+			return children.at(0)->astToZ3Expression(c) / children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[4])	// &
+		{
+			return children.at(0)->astToZ3Expression(c) && children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[5])	// |
+		{
+			return children.at(0)->astToZ3Expression(c) || children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[6])	// <
+		{
+			return children.at(0)->astToZ3Expression(c) < children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[7])	// >
+		{
+			return children.at(0)->astToZ3Expression(c) > children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[8])	// <=
+		{
+			return children.at(0)->astToZ3Expression(c) <= children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[9])	// >=
+		{
+			return children.at(0)->astToZ3Expression(c) >= children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[10])	// =
+		{
+			// Ignore
+		}
+		else if (name == config::BINARY_OPERATORS[11])	// ==
+		{
+			return children.at(0)->astToZ3Expression(c) == children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::BINARY_OPERATORS[12])	// !=
+		{
+			return children.at(0)->astToZ3Expression(c) != children.at(1)->astToZ3Expression(c);
+		}
+		else if (name == config::UNARY_OPERATORS[0])	// !
+		{
+			return !children.at(0)->astToZ3Expression(c);
+		}
+	}
+
+	// If all else fails
+	config::throwCriticalError("Can't convert the following to a Z3 expression:\n" + astToString());
+	return c->int_const("INVALID");
 }
 
 vector<Ast*> Ast::search(string soughtName)
@@ -1567,6 +1873,20 @@ string Ast::emitCode()
 			result += config::ASSUME_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(0)->emitCode() +
 				config::RIGHT_PARENTHESIS + config::SEMICOLON;
 		}
+		else if (name == config::BEGIN_ATOMIC_TOKEN_NAME)
+		{
+			result += config::BEGIN_ATOMIC_TOKEN_NAME + config::SEMICOLON;
+		}
+		else if (name == config::END_ATOMIC_TOKEN_NAME)
+		{
+			result += config::END_ATOMIC_TOKEN_NAME + config::SEMICOLON;
+		}
+		else if (name == config::CHOOSE_TOKEN_NAME)
+		{
+			result += config::CHOOSE_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(0)->emitCode() +
+				config::COMMA + config::SPACE + children.at(1)->emitCode() +
+				config::RIGHT_PARENTHESIS;
+		}
 		else
 		{
 			config::throwError("Can't emit node: " + name);
@@ -1607,6 +1927,40 @@ int Ast::effectiveMaxWriteBufferSize(string variableName)
 	}
 }
 
+vector<vector<Ast*>> Ast::allNegationPatterns(std::vector<Ast*> idSet)
+{
+	int numberOfVariables = idSet.size();
+	vector<vector<Ast*>> result;
+
+	if (numberOfVariables > 0)
+	{
+		string firstMask = string('0', numberOfVariables);
+		string mask = string(firstMask);
+		vector<Ast*> subResult;
+
+		do {
+			subResult.clear();
+
+			for (int ctr = 0; ctr < numberOfVariables; ctr++)
+			{
+				if (mask[ctr] == '0')
+				{
+					subResult.push_back(idSet[ctr]->clone());
+				}
+				else
+				{
+					subResult.push_back(idSet[ctr]->negate());
+				}
+			}
+
+			result.push_back(subResult);
+			mask = config::nextBinaryRepresentation(mask, numberOfVariables);
+		} while (mask.compare(firstMask) != 0);
+	}
+
+	return result;
+}
+
 void Ast::replaceNode(vector<Ast*> nodes, Ast* oldNode)
 {
 	Ast* newParent = oldNode->parent;
@@ -1634,6 +1988,8 @@ void Ast::replaceNode(Ast* newNode, Ast* oldNode)
 	newParent->children.insert(newParent->children.begin() + newIndex, newNode);
 
 	newParent->refreshChildIndices();
+
+	newParent->updateShortStringRepresentation();
 }
 
 void Ast::initializeAuxiliaryVariables()
@@ -1696,6 +2052,8 @@ bool Ast::performPredicateAbstraction()
 {
 	bool result = false;
 
+	cout << "\tPerforming predicate abstraction on: " << emitCode() << "\n\n";
+
 	if (config::currentLanguage == config::language::RMA)
 	{
 		// TODO
@@ -1717,9 +2075,9 @@ bool Ast::performPredicateAbstraction()
 			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
 			{
 				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
-						Ast::newLoad(
+						newLoad(
 							config::auxiliaryTemporaryVariableNames[ctr],
-							new Ast(config::auxiliaryBooleanVariableNames[ctr])
+							newID(config::auxiliaryBooleanVariableNames[ctr])
 						))
 					);
 			}
@@ -1730,27 +2088,44 @@ bool Ast::performPredicateAbstraction()
 				negativeWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]->negate());
 
 				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
-						Ast::newStore(
+						/*newStore(
 							config::auxiliaryBooleanVariableNames[ctr],
-							Ast::newChoose(
-								new Ast(),		// should be: F_V(positiveWeakestLiberalPrecondition)
-								new Ast()		// should be: F_V(negativeWeakestLiberalPrecondition)
+							newChoose(
+								newLargestImplicativeDisjunctionOfCubes(
+									config::getRelevantAuxiliaryTemporaryVariableIndices(positiveWeakestLiberalPrecondition),
+									config::globalCubeSizeLimit, positiveWeakestLiberalPrecondition
+								),
+								newLargestImplicativeDisjunctionOfCubes(
+									config::getRelevantAuxiliaryTemporaryVariableIndices(negativeWeakestLiberalPrecondition),
+									config::globalCubeSizeLimit, negativeWeakestLiberalPrecondition
+								)
 							)
-						))
+						)*/
+						newStore(
+								config::auxiliaryBooleanVariableNames[ctr],
+								newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
+							)
 					);
+				/*replacementStatements.back()->startComment = "choose(F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->emitCode() +
+					")), F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->negate()->emitCode() + ")))";*/
+
+				/*replacementStatements.back()->startComment = "choose(F_V(" + positiveWeakestLiberalPrecondition->emitCode() +
+					"), F_V(" + negativeWeakestLiberalPrecondition->emitCode() + "))";*/
 			}
 
 			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
 			{
 				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
-						Ast::newLoad(
+						newLoad(
 							config::auxiliaryTemporaryVariableNames[ctr],
-							new Ast(0)
+							newINT(0)
 						))
 					);
 			}
 
 			replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(), Ast::newEndAtomic()));
+			/*replacementStatements.at(0)->startComment = "Replacing " + emitCode();
+			replacementStatements.back()->endComment = "End of replacing " + emitCode();*/
 			
 			config::lazyReplacements[this] = replacementStatements;
 
@@ -1765,16 +2140,20 @@ bool Ast::performPredicateAbstraction()
 
 			Ast* positiveConditional = children.at(0);
 			Ast* negativeConditional = children.at(0)->negate();
-			Ast* G_positive = new Ast();	// should be: G_V(positiveConditional)
-			Ast* G_negative = new Ast();	// should be: G_V(negativeConditional)
+			Ast* G_positive = newReverseLargestImplicativeDisjunctionOfCubes(
+					config::globalCubeSizeLimit, positiveConditional
+				);
+			Ast* G_negative = newReverseLargestImplicativeDisjunctionOfCubes(
+					config::globalCubeSizeLimit, negativeConditional
+				);
 
-			children.at(1)->children.insert(children.at(1)->children.begin(), new Ast(positiveConditional));
+			children.at(1)->children.insert(children.at(1)->children.begin(), newAssume(positiveConditional));
 			children.at(1)->children.at(0)->parent = children.at(1);
 			children.at(1)->refreshChildIndices();
 
 			if (children.at(2)->name != config::NONE_TOKEN_NAME)
 			{
-				children.at(2)->children.insert(children.at(2)->children.begin(), new Ast(negativeConditional));
+				children.at(2)->children.insert(children.at(2)->children.begin(), newAssume(negativeConditional));
 				children.at(2)->children.at(0)->parent = children.at(1);
 				children.at(2)->refreshChildIndices();
 			}
@@ -1821,14 +2200,18 @@ Ast* Ast::weakestLiberalPrecondition(Ast* predicate)
 
 			for (Ast* oldId : toBeReplaced)
 			{
-				replaceNode(rightExpression->clone(), oldId);
+				replaceNode(rightExpression->clone(), oldId->parent);
 			}
+
+			result->updateShortStringRepresentation();
 		}
 		else
 		{
 			result = new Ast();
 		}
 	}
+
+	//cout << "\tWP(" + emitCode() + ", " + predicate->emitCode() + ") = (" + result->emitCode() + ")\n";
 
 	return result;
 }
@@ -1838,17 +2221,32 @@ Ast* Ast::negate()
 	Ast* result;
 
 	if (name == config::EQUALS || name == config::LESS_THAN || name == config::LESS_EQUALS ||
-		name == config::GREATER_EQUALS || name == config::NOT_EQUALS ||
-		name == config::AND || name == config::OR)
+		name == string(1, config::GREATER_THAN) || name == config::GREATER_EQUALS || name == config::NOT_EQUALS ||
+		name == config::AND || name == config::OR || name == config::ID_TOKEN_NAME)
 	{
 		Ast* selfClone = clone();
 		result = new Ast();
-		result->name == config::NOT;
+		result->name = config::NOT;
 		result->addChild(selfClone);
 	}
 	else if (name == config::NOT)
 	{
 		result = children.at(0)->clone();
+	}
+	else if (name == config::INT_TOKEN_NAME)
+	{
+		if (children.at(0)->name == "0")
+		{
+			result = newINT(1);
+		}
+		else if (children.at(0)->name == "1")
+		{
+			result = newINT(0);
+		}
+		else
+		{
+			config::throwError("Can't negate INT(" + children.at(0)->name + ")");
+		}
 	}
 
 	return result;
