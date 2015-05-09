@@ -1,0 +1,283 @@
+beginit
+
+	// Replacing store y1 = 1;
+2: nop;
+	3: begin_atomic;
+	4: load t_0 = b_0;
+	5: load t_1 = b_1;
+	6: load t_2 = b_2;
+	7: load t_3 = b_3;
+	8: load t_4 = b_4;
+	// choose(F_V(1 >= 0), F_V(!(1 >= 0)))
+9: choose(1, 1);
+	// choose(F_V(1 > y2), F_V(!(1 > y2)))
+10: choose(1, 1);
+	// choose(F_V(y2 > y3), F_V(!(y2 > y3)))
+11: choose(1, 1);
+	// choose(F_V(y2 >= 0), F_V(!(y2 >= 0)))
+12: choose(1, 1);
+	// choose(F_V(y3 > 5), F_V(!(y3 > 5)))
+13: choose(1, 1);
+	14: load t_0 = 0;
+	15: load t_1 = 0;
+	16: load t_2 = 0;
+	17: load t_3 = 0;
+	18: load t_4 = 0;
+	19: end_atomic;
+// End of replacing store y1 = 1;
+	// Replacing store y2 = 10;
+20: nop;
+	21: begin_atomic;
+	22: load t_0 = b_0;
+	23: load t_1 = b_1;
+	24: load t_2 = b_2;
+	25: load t_3 = b_3;
+	26: load t_4 = b_4;
+	// choose(F_V(y1 >= 0), F_V(!(y1 >= 0)))
+27: choose(1, 1);
+	// choose(F_V(y1 > 10), F_V(!(y1 > 10)))
+28: choose(1, 1);
+	// choose(F_V(10 > y3), F_V(!(10 > y3)))
+29: choose(1, 1);
+	// choose(F_V(10 >= 0), F_V(!(10 >= 0)))
+30: choose(1, 1);
+	// choose(F_V(y3 > 5), F_V(!(y3 > 5)))
+31: choose(1, 1);
+	32: load t_0 = 0;
+	33: load t_1 = 0;
+	34: load t_2 = 0;
+	35: load t_3 = 0;
+	36: load t_4 = 0;
+	37: end_atomic;
+// End of replacing store y2 = 10;
+	// Replacing store y3 = 100;
+38: nop;
+	39: begin_atomic;
+	40: load t_0 = b_0;
+	41: load t_1 = b_1;
+	42: load t_2 = b_2;
+	43: load t_3 = b_3;
+	44: load t_4 = b_4;
+	// choose(F_V(y1 >= 0), F_V(!(y1 >= 0)))
+45: choose(1, 1);
+	// choose(F_V(y1 > y2), F_V(!(y1 > y2)))
+46: choose(1, 1);
+	// choose(F_V(y2 > 100), F_V(!(y2 > 100)))
+47: choose(1, 1);
+	// choose(F_V(y2 >= 0), F_V(!(y2 >= 0)))
+48: choose(1, 1);
+	// choose(F_V(100 > 5), F_V(!(100 > 5)))
+49: choose(1, 1);
+	50: load t_0 = 0;
+	51: load t_1 = 0;
+	52: load t_2 = 0;
+	53: load t_3 = 0;
+	54: load t_4 = 0;
+	55: end_atomic;
+// End of replacing store y3 = 100;
+
+endinit
+
+process 1:
+
+	// Replacing y3_fst_1 = 0;
+	56: nop;
+	57: begin_atomic;
+	58: load t_0 = b_0;
+	59: load t_1 = b_1;
+	60: load t_2 = b_2;
+	61: load t_3 = b_3;
+	62: load t_4 = b_4;
+	// choose(F_V(y1 >= 0), F_V(!(y1 >= 0)))
+	63: choose(1, 1);
+	// choose(F_V(y1 > y2), F_V(!(y1 > y2)))
+	64: choose(1, 1);
+	// choose(F_V(y2 > y3), F_V(!(y2 > y3)))
+	65: choose(1, 1);
+	// choose(F_V(y2 >= 0), F_V(!(y2 >= 0)))
+	66: choose(1, 1);
+	// choose(F_V(y3 > 5), F_V(!(y3 > 5)))
+	67: choose(1, 1);
+	68: load t_0 = 0;
+	69: load t_1 = 0;
+	70: load t_2 = 0;
+	71: load t_3 = 0;
+	72: load t_4 = 0;
+	73: end_atomic;
+	// End of replacing y3_fst_1 = 0;
+	// Replacing y3_cnt_1 = 0;
+	74: nop;
+	75: begin_atomic;
+	76: load t_0 = b_0;
+	77: load t_1 = b_1;
+	78: load t_2 = b_2;
+	79: load t_3 = b_3;
+	80: load t_4 = b_4;
+	// choose(F_V(y1 >= 0), F_V(!(y1 >= 0)))
+	81: choose(1, 1);
+	// choose(F_V(y1 > y2), F_V(!(y1 > y2)))
+	82: choose(1, 1);
+	// choose(F_V(y2 > y3), F_V(!(y2 > y3)))
+	83: choose(1, 1);
+	// choose(F_V(y2 >= 0), F_V(!(y2 >= 0)))
+	84: choose(1, 1);
+	// choose(F_V(y3 > 5), F_V(!(y3 > 5)))
+	85: choose(1, 1);
+	86: load t_0 = 0;
+	87: load t_1 = 0;
+	88: load t_2 = 0;
+	89: load t_3 = 0;
+	90: load t_4 = 0;
+	91: end_atomic;
+	// End of replacing y3_cnt_1 = 0;
+	// Replacing y2_fst_1 = 0;
+	92: nop;
+	93: begin_atomic;
+	94: load t_0 = b_0;
+	95: load t_1 = b_1;
+	96: load t_2 = b_2;
+	97: load t_3 = b_3;
+	98: load t_4 = b_4;
+	// choose(F_V(y1 >= 0), F_V(!(y1 >= 0)))
+	99: choose(1, 1);
+	// choose(F_V(y1 > y2), F_V(!(y1 > y2)))
+	100: choose(1, 1);
+	// choose(F_V(y2 > y3), F_V(!(y2 > y3)))
+	101: choose(1, 1);
+	// choose(F_V(y2 >= 0), F_V(!(y2 >= 0)))
+	102: choose(1, 1);
+	// choose(F_V(y3 > 5), F_V(!(y3 > 5)))
+	103: choose(1, 1);
+	104: load t_0 = 0;
+	105: load t_1 = 0;
+	106: load t_2 = 0;
+	107: load t_3 = 0;
+	108: load t_4 = 0;
+	109: end_atomic;
+	// End of replacing y2_fst_1 = 0;
+	// Replacing y2_cnt_1 = 0;
+	110: nop;
+	111: begin_atomic;
+	112: load t_0 = b_0;
+	113: load t_1 = b_1;
+	114: load t_2 = b_2;
+	115: load t_3 = b_3;
+	116: load t_4 = b_4;
+	// choose(F_V(y1 >= 0), F_V(!(y1 >= 0)))
+	117: choose(1, 1);
+	// choose(F_V(y1 > y2), F_V(!(y1 > y2)))
+	118: choose(1, 1);
+	// choose(F_V(y2 > y3), F_V(!(y2 > y3)))
+	119: choose(1, 1);
+	// choose(F_V(y2 >= 0), F_V(!(y2 >= 0)))
+	120: choose(1, 1);
+	// choose(F_V(y3 > 5), F_V(!(y3 > 5)))
+	121: choose(1, 1);
+	122: load t_0 = 0;
+	123: load t_1 = 0;
+	124: load t_2 = 0;
+	125: load t_3 = 0;
+	126: load t_4 = 0;
+	127: end_atomic;
+	// End of replacing y2_cnt_1 = 0;
+	// Replacing y1_fst_1 = 0;
+	128: nop;
+	129: begin_atomic;
+	130: load t_0 = b_0;
+	131: load t_1 = b_1;
+	132: load t_2 = b_2;
+	133: load t_3 = b_3;
+	134: load t_4 = b_4;
+	// choose(F_V(y1 >= 0), F_V(!(y1 >= 0)))
+	135: choose(1, 1);
+	// choose(F_V(y1 > y2), F_V(!(y1 > y2)))
+	136: choose(1, 1);
+	// choose(F_V(y2 > y3), F_V(!(y2 > y3)))
+	137: choose(1, 1);
+	// choose(F_V(y2 >= 0), F_V(!(y2 >= 0)))
+	138: choose(1, 1);
+	// choose(F_V(y3 > 5), F_V(!(y3 > 5)))
+	139: choose(1, 1);
+	140: load t_0 = 0;
+	141: load t_1 = 0;
+	142: load t_2 = 0;
+	143: load t_3 = 0;
+	144: load t_4 = 0;
+	145: end_atomic;
+	// End of replacing y1_fst_1 = 0;
+	// Replacing y1_cnt_1 = 0;
+	146: nop;
+	147: begin_atomic;
+	148: load t_0 = b_0;
+	149: load t_1 = b_1;
+	150: load t_2 = b_2;
+	151: load t_3 = b_3;
+	152: load t_4 = b_4;
+	// choose(F_V(y1 >= 0), F_V(!(y1 >= 0)))
+	153: choose(1, 1);
+	// choose(F_V(y1 > y2), F_V(!(y1 > y2)))
+	154: choose(1, 1);
+	// choose(F_V(y2 > y3), F_V(!(y2 > y3)))
+	155: choose(1, 1);
+	// choose(F_V(y2 >= 0), F_V(!(y2 >= 0)))
+	156: choose(1, 1);
+	// choose(F_V(y3 > 5), F_V(!(y3 > 5)))
+	157: choose(1, 1);
+	158: load t_0 = 0;
+	159: load t_1 = 0;
+	160: load t_2 = 0;
+	161: load t_3 = 0;
+	162: load t_4 = 0;
+	163: end_atomic;
+	// End of replacing y1_cnt_1 = 0;
+	// Replacing y1 = y2 + 1;
+	164: nop;
+	165: begin_atomic;
+	166: load t_0 = b_0;
+	167: load t_1 = b_1;
+	168: load t_2 = b_2;
+	169: load t_3 = b_3;
+	170: load t_4 = b_4;
+	// choose(F_V((y2 + 1) >= 0), F_V(!((y2 + 1) >= 0)))
+	171: choose(1, 1);
+	// choose(F_V((y2 + 1) > y2), F_V(!((y2 + 1) > y2)))
+	172: choose(1, 1);
+	// choose(F_V(y2 > y3), F_V(!(y2 > y3)))
+	173: choose(1, 1);
+	// choose(F_V(y2 >= 0), F_V(!(y2 >= 0)))
+	174: choose(1, 1);
+	// choose(F_V(y3 > 5), F_V(!(y3 > 5)))
+	175: choose(1, 1);
+	176: load t_0 = 0;
+	177: load t_1 = 0;
+	178: load t_2 = 0;
+	179: load t_3 = 0;
+	180: load t_4 = 0;
+	181: end_atomic;
+	// End of replacing y1 = y2 + 1;
+	// Replacing y2 = y3 * 2;
+	182: nop;
+	183: begin_atomic;
+	184: load t_0 = b_0;
+	185: load t_1 = b_1;
+	186: load t_2 = b_2;
+	187: load t_3 = b_3;
+	188: load t_4 = b_4;
+	// choose(F_V(y1 >= 0), F_V(!(y1 >= 0)))
+	189: choose(1, 1);
+	// choose(F_V(y1 > (y3 * 2)), F_V(!(y1 > (y3 * 2))))
+	190: choose(1, 1);
+	// choose(F_V((y3 * 2) > y3), F_V(!((y3 * 2) > y3)))
+	191: choose(1, 1);
+	// choose(F_V((y3 * 2) >= 0), F_V(!((y3 * 2) >= 0)))
+	192: choose(1, 1);
+	// choose(F_V(y3 > 5), F_V(!(y3 > 5)))
+	193: choose(1, 1);
+	194: load t_0 = 0;
+	195: load t_1 = 0;
+	196: load t_2 = 0;
+	197: load t_3 = 0;
+	198: load t_4 = 0;
+	199: end_atomic;
+	// End of replacing y2 = y3 * 2;
+
