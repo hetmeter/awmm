@@ -125,6 +125,12 @@ int main(int argc, char** argv)
 	cout << "\n---\nCarried out buffer size analysis:\n\n";
 	cout << rootAstRef->emitCode();
 
+	// Generate the output
+	outputPath = fileNameStub + "." + config::BSA_EXTENSION + "." + extension;
+	ofstream programOut(outputPath);
+	programOut << rootAstRef->emitCode();
+	programOut.close();
+
 	config::lazyReplacements.clear();
 
 	ifstream parsedPredicateFile(fileNameStub + "." + config::PREDICATE_EXTENSION + "." + extension + "." + config::OUT_EXTENSION);
@@ -155,6 +161,7 @@ int main(int argc, char** argv)
 			cout << "Performing predicate abstraction...\n";
 
 			rootAstRef->cascadingPerformPredicateAbstraction();
+			rootAstRef->children.at(2)->setVariableInitializations();
 
 			cout << "\n---\nCarried out predicate abstraction:\n\n";
 			cout << rootAstRef->emitCode();
@@ -175,10 +182,10 @@ int main(int argc, char** argv)
 	cout << rootAstRef->emitCode();
 
 	// Generate the output
-	outputPath = fileNameStub + "." + config::BSA_EXTENSION + "." + extension;
-	ofstream programOut(outputPath);
-	programOut << rootAstRef->emitCode();
-	programOut.close();
+	string booleanOutputPath = fileNameStub + "." + config::BOOLEAN_EXTENSION;
+	ofstream booleanProgramOut(booleanOutputPath);
+	booleanProgramOut << rootAstRef->emitCode();
+	booleanProgramOut.close();
 
 	return 0;
 }

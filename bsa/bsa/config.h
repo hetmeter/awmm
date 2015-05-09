@@ -44,8 +44,11 @@ namespace config
 
 	const extern std::string ID_TOKEN_NAME;
 	const extern std::string INT_TOKEN_NAME;
+	const extern std::string BOOL_TOKEN_NAME;
 	const extern std::string PROGRAM_DECLARATION_TOKEN_NAME;
+	const extern std::string BL_PROGRAM_DECLARATION_TOKEN_NAME;
 	const extern std::string PROCESS_DECLARATION_TOKEN_NAME;
+	const extern std::string BL_PROCESS_DECLARATION_TOKEN_NAME;
 	const extern std::string STATEMENTS_TOKEN_NAME;
 	const extern std::string FENCE_TOKEN_NAME;
 	const extern std::string LABEL_TOKEN_NAME;
@@ -59,6 +62,9 @@ namespace config
 	const extern std::string PROCESS_HEADER_TOKEN_NAME;
 	const extern std::string ASTERISK_TOKEN_NAME;
 	const extern std::string INITIALIZATION_BLOCK_TOKEN_NAME;
+	const extern std::string BL_INITIALIZATION_BLOCK_TOKEN_NAME;
+	const extern std::string BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME;
+	const extern std::string BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME;
 	const extern std::string LOCAL_ASSIGN_TOKEN_NAME;
 	const extern std::string ASSUME_TOKEN_NAME;
 	const extern std::string BEGIN_ATOMIC_TOKEN_NAME;
@@ -68,9 +74,12 @@ namespace config
 	const extern std::string BEGINIT_TAG_NAME;
 	const extern std::string ENDINIT_TAG_NAME;
 	const extern std::string PROCESS_TAG_NAME;
+	const extern std::string INIT_TAG_NAME;
 	const extern std::string IF_TAG_NAME;
 	const extern std::string ELSE_TAG_NAME;
 	const extern std::string ENDIF_TAG_NAME;
+	const extern std::string TRUE_TAG_NAME;
+	const extern std::string FALSE_TAG_NAME;
 
 	const extern std::string AUXILIARY_COUNTER_TAG;
 	const extern std::string AUXILIARY_FIRST_POINTER_TAG;
@@ -94,9 +103,13 @@ namespace config
 	const extern std::string PSO_EXTENSION;
 	const extern std::string TSO_EXTENSION;
 	const extern std::string RMA_EXTENSION;
+	const extern std::string BOOLEAN_EXTENSION;
 	const extern std::string PREDICATE_EXTENSION;
 	const extern std::string BSA_EXTENSION;
 	const extern std::string OUT_EXTENSION;
+
+	const extern std::string PREDICATE_ABSTRACTION_COMMENT_PREFIX;
+
 	enum language { PSO, TSO, RMA };
 
 	extern language currentLanguage;
@@ -142,6 +155,7 @@ namespace config
 	extern bool cubeImpliesPredicate(std::vector<Ast*> cube, Ast* predicate);
 	extern bool expressionImpliesPredicate(z3::expr expression, Ast* predicate);
 	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate);
+	extern std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(std::string variableName);
 
 	const extern char CUBE_STATE_OMIT;
 	const extern char CUBE_STATE_UNDECIDED;

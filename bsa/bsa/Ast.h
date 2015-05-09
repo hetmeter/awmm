@@ -32,8 +32,10 @@ public:
 	int indexAsChild;
 
 	void addChild(Ast* child);
+	void addChild(Ast* child, int index);
 	void addChildren(std::vector<Ast*> newChildren);
 	void refreshChildIndices();
+	void setVariableInitializations();
 	std::string astToString();
 	z3::expr astToZ3Expression(z3::context* c);
 	std::vector<Ast*> search(std::string soughtName);
@@ -76,7 +78,11 @@ public:
 	static Ast* newNop();
 	static Ast* newAsterisk();
 	static Ast* newNone();
+	static Ast* newTrue();
+	static Ast* newFalse();
 	static Ast* newStatements(std::vector<Ast*> statements);
+	static Ast* newSharedVariables(std::vector<std::string> variableNames);
+	static Ast* newLocalVariables(std::vector<std::string> variableNames);
 	static Ast* newLabel(int value, Ast* statement);
 	static Ast* newLoad(std::string variableName, Ast* rightSide);
 	static Ast* newStore(std::string variableName, Ast* rightSide);

@@ -185,11 +185,55 @@ Ast* Ast::newNone()
 	return result;
 }
 
+Ast* Ast::newTrue()
+{
+	Ast* result = new Ast();
+	result->name = config::BOOL_TOKEN_NAME;
+	result->addChild(new Ast());
+	result->children.at(0)->name = config::TRUE_TAG_NAME;
+	return result;
+}
+
+Ast* Ast::newFalse()
+{
+	Ast* result = new Ast();
+	result->name = config::BOOL_TOKEN_NAME;
+	result->addChild(new Ast());
+	result->children.at(0)->name = config::FALSE_TAG_NAME;
+	return result;
+}
+
 Ast* Ast::newStatements(std::vector<Ast*> statements)
 {
 	Ast* result = new Ast();
 	result->name = config::STATEMENTS_TOKEN_NAME;
 	result->addChildren(statements);
+	return result;
+}
+
+Ast* Ast::newSharedVariables(std::vector<std::string> variableNames)
+{
+	Ast* result = new Ast();
+	result->name = config::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME;
+
+	for (string variableName : variableNames)
+	{
+		result->addChild(newID(variableName));
+	}
+
+	return result;
+}
+
+Ast* Ast::newLocalVariables(std::vector<std::string> variableNames)
+{
+	Ast* result = new Ast();
+	result->name = config::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME;
+
+	for (string variableName : variableNames)
+	{
+		result->addChild(newID(variableName));
+	}
+
 	return result;
 }
 
@@ -265,11 +309,11 @@ Ast* Ast::newBooleanVariableCube(std::string definition)
 	{
 		if (definition[ctr] == config::CUBE_STATE_DECIDED_FALSE)
 		{
-			cubeTerms.push_back(newID(config::auxiliaryBooleanVariableNames[ctr])->negate());
+			cubeTerms.push_back(newID(config::auxiliaryTemporaryVariableNames[ctr])->negate());
 		}
 		else if (definition[ctr] == config::CUBE_STATE_DECIDED_TRUE)
 		{
-			cubeTerms.push_back(newID(config::auxiliaryBooleanVariableNames[ctr]));
+			cubeTerms.push_back(newID(config::auxiliaryTemporaryVariableNames[ctr]));
 		}
 	}
 
@@ -328,11 +372,6 @@ Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* p
 			//cout << pool << "\t";
 			pool = config::removeDecisionsFromPool(pool, implicativeCubeStates);
 			//cout << pool << "\n";
-
-			if (pool.compare(emptyPool) == 0)
-			{
-				break;
-			}
 			
 			relevantIndices.clear();
 
@@ -346,7 +385,12 @@ Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* p
 
 			for (string implicativeCubeState : implicativeCubeStates)
 			{
-				implicativeCubes.push_back(Ast::newBooleanVariableCube(implicativeCubeState));
+				implicativeCubes.push_back(newBooleanVariableCube(implicativeCubeState));
+			}
+
+			if (pool.compare(emptyPool) == 0)
+			{
+				break;
 			}
 		}
 	}
@@ -358,15 +402,15 @@ Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* p
 
 		if (config::expressionImpliesPredicate(trueConstant, predicate))
 		{
-			return newINT(1);
+			return newTrue();
 		}
 		else
 		{
-			return newINT(0);
+			return newFalse();
 		}
 	}
 
-	return Ast::newMultipleOperation(implicativeCubes, config::OR);
+	return newMultipleOperation(implicativeCubes, config::OR);
 }
 
 Ast* Ast::newLargestImplicativeDisjunctionOfCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate)
@@ -1291,7 +1335,7 @@ void Ast::cascadingPerformPredicateAbstraction()
 	{
 		for (Ast* child : children)
 		{
-			if (child->name != config::INITIALIZATION_BLOCK_TOKEN_NAME && child->name != config::RMA_PROCESS_INITIALIZATION_TOKEN_NAME)
+			if (child->name != config::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME && child->name != config::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME)
 			{
 				child->cascadingPerformPredicateAbstraction();
 			}
@@ -1306,6 +1350,17 @@ void Ast::addChild(Ast* child)
 	child->indexAsChild = children.size();
 	children.push_back(child);
 
+	updateShortStringRepresentation();
+}
+
+// Adds a child node at a specific index and sets its variables connecting it to this node
+void Ast::addChild(Ast* child, int index)
+{
+	child->parent = this;
+	child->indexAsChild = index;
+	children.insert(children.begin() + index, child);
+
+	refreshChildIndices();
 	updateShortStringRepresentation();
 }
 
@@ -1326,6 +1381,92 @@ void Ast::refreshChildIndices()
 	for (int ctr = 0; ctr < childCount; ctr++)
 	{
 		children.at(ctr)->indexAsChild = ctr;
+	}
+}
+
+void Ast::setVariableInitializations()
+{
+	if (name == config::BL_INITIALIZATION_BLOCK_TOKEN_NAME)
+	{
+		int numberOfGlobalPredicates = config::globalPredicates.size();
+
+		for (int ctr = numberOfGlobalPredicates - 1; ctr >= 0; ctr--)
+		{
+			addChild(newLabel(config::getCurrentAuxiliaryLabel(), newLoad(config::auxiliaryTemporaryVariableNames[ctr], newID(config::auxiliaryBooleanVariableNames[ctr]))), 0);
+		}
+
+		for (int ctr = numberOfGlobalPredicates - 1; ctr >= 0; ctr--)
+		{
+			addChild(newLabel(config::getCurrentAuxiliaryLabel(), newStore(config::auxiliaryBooleanVariableNames[ctr], newAsterisk())), 0);
+		}
+
+		children.at(0)->startComment = "Initializing local variables";
+
+		vector<Ast*> postFix;
+
+		for (int ctr = 0; ctr < numberOfGlobalPredicates; ctr++)
+		{
+			postFix.push_back(newLabel(config::getCurrentAuxiliaryLabel(), newLocalAssign(config::auxiliaryTemporaryVariableNames[ctr], newINT(0))));
+		}
+
+		postFix.at(0)->startComment = "Resetting local variables";
+		addChildren(postFix);
+
+		vector<string> implicativeCubeStates;
+		vector<string> cubeStateCombinations;
+		vector<string> unmaskedImplicativeCubeStates;
+		vector<int> relevantIndices;
+		vector<Ast*> implicativeCubes;
+
+		string emptyPool = config::getCubeStatePool(relevantIndices);
+
+		for (int ctr = 0; ctr < config::globalCubeSizeLimit; ctr++)
+		{
+			relevantIndices.push_back(ctr);
+		}
+
+		string pool = config::getCubeStatePool(relevantIndices);
+
+		for (int ctr = 1; ctr <= config::globalCubeSizeLimit; ctr++)
+		{
+			implicativeCubeStates.clear();
+			cubeStateCombinations = config::getNaryCubeStateCombinations(relevantIndices, ctr);
+
+			for (string cubeStateCombination : cubeStateCombinations)
+			{
+				unmaskedImplicativeCubeStates = config::getImplicativeCubeStates(config::applyDecisionMask(cubeStateCombination, pool), newFalse());
+				implicativeCubeStates.insert(implicativeCubeStates.end(), unmaskedImplicativeCubeStates.begin(), unmaskedImplicativeCubeStates.end());
+			}
+
+			//cout << pool << "\t";
+			pool = config::removeDecisionsFromPool(pool, implicativeCubeStates);
+			//cout << pool << "\n";
+
+			relevantIndices.clear();
+
+			for (int subCtr = 0; subCtr < config::globalCubeSizeLimit; subCtr++)
+			{
+				if (pool[subCtr] != config::CUBE_STATE_OMIT)
+				{
+					relevantIndices.push_back(subCtr);
+				}
+			}
+
+			for (string implicativeCubeState : implicativeCubeStates)
+			{
+				implicativeCubes.push_back(Ast::newBooleanVariableCube(implicativeCubeState));
+			}
+
+			if (pool.compare(emptyPool) == 0)
+			{
+				break;
+			}
+		}
+
+		if (implicativeCubes.size() > 0)
+		{
+			addChild(newLabel(config::getCurrentAuxiliaryLabel(), newAssume(newMultipleOperation(implicativeCubes, config::OR)->negate())));
+		}
 	}
 }
 
@@ -1463,6 +1604,10 @@ z3::expr Ast::astToZ3Expression(z3::context* c)
 		{
 			return c->int_val(children.at(0)->name.c_str());
 		}
+		else if (name == config::BOOL_TOKEN_NAME)
+		{
+			return c->bool_const(children.at(0)->name.c_str());
+		}
 		else if (name == config::BINARY_OPERATORS[0])	// +
 		{
 			return children.at(0)->astToZ3Expression(c) + children.at(1)->astToZ3Expression(c);
@@ -1551,6 +1696,81 @@ vector<Ast*> Ast::search(string soughtName)
 string Ast::emitCode()
 {
 	string result = "";
+	bool isBooleanProgramNode = false;
+
+	if (name == config::BL_PROGRAM_DECLARATION_TOKEN_NAME)
+	{
+		for (Ast* child : children)
+		{
+			result += child->emitCode() + "\n\n";
+		}
+
+		isBooleanProgramNode = true;
+	}
+	else if (name == config::BL_INITIALIZATION_BLOCK_TOKEN_NAME)
+	{
+		string subResult = "";
+
+		for (Ast* child : children)
+		{
+			subResult += child->emitCode() + "\n";
+		}
+
+		if (!subResult.empty())
+		{
+			subResult = subResult.substr(0, subResult.length() - 1);
+		}
+
+		result += config::INIT_TAG_NAME + "\n\n" + config::addTabs(subResult, 1) + "\n\n";
+
+		isBooleanProgramNode = true;
+	}
+	else if (name == config::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME)
+	{
+		result += config::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME;
+
+		for (Ast* child : children)
+		{
+			result += " " + child->emitCode() + ",";
+		}
+
+		if (result.size() > config::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME.size())
+		{
+			result[result.size() - 1] = config::SEMICOLON;
+		}
+		else
+		{
+			result += config::SEMICOLON;
+		}
+
+		isBooleanProgramNode = true;
+	}
+	else if (name == config::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME)
+	{
+		result += config::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME;
+
+		for (Ast* child : children)
+		{
+			result += " " + child->emitCode() + ",";
+		}
+
+		if (result.size() > config::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME.size())
+		{
+			result[result.size() - 1] = config::SEMICOLON;
+		}
+		else
+		{
+			result += config::SEMICOLON;
+		}
+
+		isBooleanProgramNode = true;
+	}
+	else if (name == config::BL_PROCESS_DECLARATION_TOKEN_NAME)
+	{
+		result += config::PROCESS_TAG_NAME + " " + children.at(0)->children.at(0)->name + "\n\n" + config::addTabs(children.at(1)->emitCode(), 1);
+
+		isBooleanProgramNode = true;
+	}
 
 	if (!startComment.empty())
 	{
@@ -1621,6 +1841,10 @@ string Ast::emitCode()
 			result += children.at(0)->name;
 		}
 		else if (name == config::INT_TOKEN_NAME)
+		{
+			result += children.at(0)->name;
+		}
+		else if (name == config::BOOL_TOKEN_NAME)
 		{
 			result += children.at(0)->name;
 		}
@@ -1717,7 +1941,7 @@ string Ast::emitCode()
 			result += config::ASSUME_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(0)->emitCode() +
 				config::RIGHT_PARENTHESIS + config::SEMICOLON;
 		}
-		else
+		else if (!isBooleanProgramNode)
 		{
 			config::throwError("Can't emit node: " + name);
 		}
@@ -1764,6 +1988,10 @@ string Ast::emitCode()
 			result += children.at(0)->name;
 		}
 		else if (name == config::INT_TOKEN_NAME)
+		{
+			result += children.at(0)->name;
+		}
+		else if (name == config::BOOL_TOKEN_NAME)
 		{
 			result += children.at(0)->name;
 		}
@@ -1887,7 +2115,7 @@ string Ast::emitCode()
 				config::COMMA + config::SPACE + children.at(1)->emitCode() +
 				config::RIGHT_PARENTHESIS;
 		}
-		else
+		else if (!isBooleanProgramNode)
 		{
 			config::throwError("Can't emit node: " + name);
 		}
@@ -2061,72 +2289,96 @@ bool Ast::performPredicateAbstraction()
 	}
 	else
 	{
-		if (name == config::PSO_TSO_STORE_TOKEN_NAME || name == config::PSO_TSO_LOAD_TOKEN_NAME
+		if (name == config::PROGRAM_DECLARATION_TOKEN_NAME)
+		{
+			name = config::BL_PROGRAM_DECLARATION_TOKEN_NAME;
+
+			Ast* sharedVars = newSharedVariables(config::auxiliaryBooleanVariableNames);
+			Ast* localVars = newLocalVariables(config::auxiliaryTemporaryVariableNames);
+
+			addChild(localVars, 0);
+			addChild(sharedVars, 0);
+		}
+		else if (name == config::INITIALIZATION_BLOCK_TOKEN_NAME)
+		{
+			name = config::BL_INITIALIZATION_BLOCK_TOKEN_NAME;
+		}
+		else if (name == config::PROCESS_DECLARATION_TOKEN_NAME)
+		{
+			name = config::BL_PROCESS_DECLARATION_TOKEN_NAME;
+		}
+		else if (name == config::PSO_TSO_STORE_TOKEN_NAME || name == config::PSO_TSO_LOAD_TOKEN_NAME
 			|| name == config::LOCAL_ASSIGN_TOKEN_NAME)
 		{
-			Ast* positiveWeakestLiberalPrecondition;
-			Ast* negativeWeakestLiberalPrecondition;
+			vector<int> relevantPredicateIndices = config::getRelevantAuxiliaryBooleanVariableIndices(children.at(0)->children.at(0)->name);
 			vector<Ast*> replacementStatements;
-			int numberOfPredicates = config::globalPredicates.size();
 
-			replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(), Ast::newNop()));
-			replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(), Ast::newBeginAtomic()));
+			replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(), Ast::newNop()));
 
-			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+			if (relevantPredicateIndices.size() > 0)
 			{
-				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
-						newLoad(
-							config::auxiliaryTemporaryVariableNames[ctr],
-							newID(config::auxiliaryBooleanVariableNames[ctr])
-						))
-					);
-			}
+				Ast* positiveWeakestLiberalPrecondition;
+				Ast* negativeWeakestLiberalPrecondition;
+				int numberOfPredicates = config::globalPredicates.size();
+				replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(), Ast::newBeginAtomic()));
 
-			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
-			{
-				positiveWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]);
-				negativeWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]->negate());
+				for (int ctr : relevantPredicateIndices)
+				{
+					replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
+							newLoad(
+								config::auxiliaryTemporaryVariableNames[ctr],
+								newID(config::auxiliaryBooleanVariableNames[ctr])
+							))
+						);
+				}
 
-				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
-						/*newStore(
-							config::auxiliaryBooleanVariableNames[ctr],
-							newChoose(
-								newLargestImplicativeDisjunctionOfCubes(
-									config::getRelevantAuxiliaryTemporaryVariableIndices(positiveWeakestLiberalPrecondition),
-									config::globalCubeSizeLimit, positiveWeakestLiberalPrecondition
-								),
-								newLargestImplicativeDisjunctionOfCubes(
-									config::getRelevantAuxiliaryTemporaryVariableIndices(negativeWeakestLiberalPrecondition),
-									config::globalCubeSizeLimit, negativeWeakestLiberalPrecondition
-								)
-							)
-						)*/
-						newStore(
+				for (int ctr : relevantPredicateIndices)
+				{
+					positiveWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]);
+					negativeWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]->negate());
+
+					replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
+							/*newStore(
 								config::auxiliaryBooleanVariableNames[ctr],
-								newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
-							)
-					);
-				/*replacementStatements.back()->startComment = "choose(F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->emitCode() +
-					")), F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->negate()->emitCode() + ")))";*/
+								newChoose(
+									newLargestImplicativeDisjunctionOfCubes(
+										config::getRelevantAuxiliaryTemporaryVariableIndices(positiveWeakestLiberalPrecondition),
+										config::globalCubeSizeLimit, positiveWeakestLiberalPrecondition
+									),
+									newLargestImplicativeDisjunctionOfCubes(
+										config::getRelevantAuxiliaryTemporaryVariableIndices(negativeWeakestLiberalPrecondition),
+										config::globalCubeSizeLimit, negativeWeakestLiberalPrecondition
+									)
+								)
+							)*/
+							newStore(
+									config::auxiliaryBooleanVariableNames[ctr],
+									newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
+								)
+						);
+					/*replacementStatements.back()->startComment = "choose(F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->emitCode() +
+						")), F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->negate()->emitCode() + ")))";*/
 
-				/*replacementStatements.back()->startComment = "choose(F_V(" + positiveWeakestLiberalPrecondition->emitCode() +
-					"), F_V(" + negativeWeakestLiberalPrecondition->emitCode() + "))";*/
+					/*replacementStatements.back()->startComment = "choose(F_V(" + positiveWeakestLiberalPrecondition->emitCode() +
+						"), F_V(" + negativeWeakestLiberalPrecondition->emitCode() + "))";*/
+				}
+
+				for (int ctr : relevantPredicateIndices)
+				{
+					replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
+							newLoad(
+								config::auxiliaryTemporaryVariableNames[ctr],
+								newINT(0)
+							))
+						);
+				}
+
+				replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(), Ast::newEndAtomic()));
+				/*replacementStatements.at(0)->startComment = "Replacing " + emitCode();
+				replacementStatements.back()->endComment = "End of replacing " + emitCode();*/
 			}
-
-			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
-			{
-				replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(),
-						newLoad(
-							config::auxiliaryTemporaryVariableNames[ctr],
-							newINT(0)
-						))
-					);
-			}
-
-			replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(), Ast::newEndAtomic()));
-			/*replacementStatements.at(0)->startComment = "Replacing " + emitCode();
-			replacementStatements.back()->endComment = "End of replacing " + emitCode();*/
 			
+			replacementStatements[0]->startComment = config::PREDICATE_ABSTRACTION_COMMENT_PREFIX + emitCode();
 			config::lazyReplacements[this] = replacementStatements;
 
 			result = true;
@@ -2158,7 +2410,7 @@ bool Ast::performPredicateAbstraction()
 				children.at(2)->refreshChildIndices();
 			}
 
-			replaceNode(Ast::newAsterisk(), children.at(0));
+			replaceNode(newAsterisk(), children.at(0));
 		}
 	}
 

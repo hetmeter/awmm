@@ -39,8 +39,11 @@ namespace config
 
 	const std::string ID_TOKEN_NAME = "ID";
 	const std::string INT_TOKEN_NAME = "INT";
+	const std::string BOOL_TOKEN_NAME = "BOOL";
 	const std::string PROGRAM_DECLARATION_TOKEN_NAME = "programDeclaration";
+	const std::string BL_PROGRAM_DECLARATION_TOKEN_NAME = "booleanProgramDeclaration";
 	const std::string PROCESS_DECLARATION_TOKEN_NAME = "processDeclaration";
+	const std::string BL_PROCESS_DECLARATION_TOKEN_NAME = "booleanProcess";
 	const std::string STATEMENTS_TOKEN_NAME = "statements";
 	const std::string FENCE_TOKEN_NAME = "fence";
 	const std::string LABEL_TOKEN_NAME = "label";
@@ -54,6 +57,9 @@ namespace config
 	const std::string PROCESS_HEADER_TOKEN_NAME = "processHeader";
 	const std::string ASTERISK_TOKEN_NAME = "*";
 	const std::string INITIALIZATION_BLOCK_TOKEN_NAME = "initializationBlock";
+	const std::string BL_INITIALIZATION_BLOCK_TOKEN_NAME = "booleanInitialization";
+	const std::string BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME = "local";
+	const std::string BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME = "shared";
 	const std::string LOCAL_ASSIGN_TOKEN_NAME = "localAssign";
 	const std::string ASSUME_TOKEN_NAME = "assume";
 	const std::string BEGIN_ATOMIC_TOKEN_NAME = "begin_atomic";
@@ -63,9 +69,12 @@ namespace config
 	const std::string BEGINIT_TAG_NAME = "beginit";
 	const std::string ENDINIT_TAG_NAME = "endinit";
 	const std::string PROCESS_TAG_NAME = "process";
+	const std::string INIT_TAG_NAME = "init";
 	const std::string IF_TAG_NAME = "if";
 	const std::string ELSE_TAG_NAME = "else";
 	const std::string ENDIF_TAG_NAME = "endif";
+	const std::string TRUE_TAG_NAME = "true";
+	const std::string FALSE_TAG_NAME = "false";
 
 	const std::string AUXILIARY_COUNTER_TAG = "cnt";
 	const std::string AUXILIARY_FIRST_POINTER_TAG = "fst";
@@ -89,9 +98,12 @@ namespace config
 	const std::string PSO_EXTENSION = "pso";
 	const std::string TSO_EXTENSION = "tso";
 	const std::string RMA_EXTENSION = "rma";
+	const std::string BOOLEAN_EXTENSION = "bl";
 	const std::string PREDICATE_EXTENSION = "predicate";
 	const std::string BSA_EXTENSION = "bsa";
 	const std::string OUT_EXTENSION = "out";
+
+	const std::string PREDICATE_ABSTRACTION_COMMENT_PREFIX = "Predicate abstraction: ";
 
 	language currentLanguage;
 	std::map<std::string, Ast*> labelLookupMap;
@@ -635,6 +647,22 @@ namespace config
 		return result;
 	}
 
+	std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(std::string variableName)
+	{
+		std::vector<int> result;
+		int numberOfPredicates = globalPredicates.size();
+
+		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+		{
+			if (stringVectorContains(globalPredicates[ctr]->getIDs(), variableName))
+			{
+				result.push_back(ctr);
+			}
+		}
+
+		return result;
+	}
+
 	const char CUBE_STATE_OMIT = '-';
 	const char CUBE_STATE_UNDECIDED = '?';
 	const char CUBE_STATE_MAY_BE_FALSE = 'f';
@@ -702,6 +730,8 @@ namespace config
 		std::vector<std::string> result;
 		std::vector<std::string> subResult;
 		std::string poolCopy;
+
+		int a;
 
 		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
 		{
