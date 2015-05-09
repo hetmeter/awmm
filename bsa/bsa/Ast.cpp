@@ -29,6 +29,15 @@ void Ast::updateShortStringRepresentation()
 	{
 		shortStringRepresentation = name;
 	}
+
+	/*if (name == "")
+	{
+		shortStringRepresentation = name;
+	}
+	else
+	{
+		shortStringRepresentation = emitCode();
+	}*/
 }
 
 Ast::Ast()
@@ -309,14 +318,16 @@ Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* p
 		{
 			implicativeCubeStates.clear();
 			cubeStateCombinations = config::getNaryCubeStateCombinations(relevantIndices, ctr);
-
+			
 			for (string cubeStateCombination : cubeStateCombinations)
 			{
 				unmaskedImplicativeCubeStates = config::getImplicativeCubeStates(config::applyDecisionMask(cubeStateCombination, pool), predicate);
 				implicativeCubeStates.insert(implicativeCubeStates.end(), unmaskedImplicativeCubeStates.begin(), unmaskedImplicativeCubeStates.end());
 			}
 
+			//cout << pool << "\t";
 			pool = config::removeDecisionsFromPool(pool, implicativeCubeStates);
+			//cout << pool << "\n";
 
 			if (pool.compare(emptyPool) == 0)
 			{
@@ -345,7 +356,7 @@ Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* p
 		z3::context c;
 		z3::expr trueConstant = c.bool_val(true);
 
-		if (config::expressionImpliesPredicate(&c, trueConstant, predicate))
+		if (config::expressionImpliesPredicate(trueConstant, predicate))
 		{
 			return newINT(1);
 		}
@@ -1280,7 +1291,10 @@ void Ast::cascadingPerformPredicateAbstraction()
 	{
 		for (Ast* child : children)
 		{
-			child->cascadingPerformPredicateAbstraction();
+			if (child->name != config::INITIALIZATION_BLOCK_TOKEN_NAME && child->name != config::RMA_PROCESS_INITIALIZATION_TOKEN_NAME)
+			{
+				child->cascadingPerformPredicateAbstraction();
+			}
 		}
 	}
 }
@@ -1871,7 +1885,7 @@ string Ast::emitCode()
 		{
 			result += config::CHOOSE_TOKEN_NAME + config::LEFT_PARENTHESIS + children.at(0)->emitCode() +
 				config::COMMA + config::SPACE + children.at(1)->emitCode() +
-				config::RIGHT_PARENTHESIS + config::SEMICOLON;
+				config::RIGHT_PARENTHESIS;
 		}
 		else
 		{
@@ -2038,7 +2052,7 @@ bool Ast::performPredicateAbstraction()
 {
 	bool result = false;
 
-	cout << "Performing predicate abstraction on: " << shortStringRepresentation << "\n";
+	cout << "\tPerforming predicate abstraction on: " << emitCode() << "\n\n";
 
 	if (config::currentLanguage == config::language::RMA)
 	{
@@ -2087,8 +2101,16 @@ bool Ast::performPredicateAbstraction()
 								)
 							)
 						)*/
-						newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
+						newStore(
+								config::auxiliaryBooleanVariableNames[ctr],
+								newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
+							)
 					);
+				/*replacementStatements.back()->startComment = "choose(F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->emitCode() +
+					")), F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->negate()->emitCode() + ")))";*/
+
+				/*replacementStatements.back()->startComment = "choose(F_V(" + positiveWeakestLiberalPrecondition->emitCode() +
+					"), F_V(" + negativeWeakestLiberalPrecondition->emitCode() + "))";*/
 			}
 
 			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
@@ -2102,6 +2124,8 @@ bool Ast::performPredicateAbstraction()
 			}
 
 			replacementStatements.push_back(Ast::newLabel(config::getCurrentAuxiliaryLabel(), Ast::newEndAtomic()));
+			/*replacementStatements.at(0)->startComment = "Replacing " + emitCode();
+			replacementStatements.back()->endComment = "End of replacing " + emitCode();*/
 			
 			config::lazyReplacements[this] = replacementStatements;
 
@@ -2186,6 +2210,8 @@ Ast* Ast::weakestLiberalPrecondition(Ast* predicate)
 			result = new Ast();
 		}
 	}
+
+	//cout << "\tWP(" + emitCode() + ", " + predicate->emitCode() + ") = (" + result->emitCode() + ")\n";
 
 	return result;
 }
