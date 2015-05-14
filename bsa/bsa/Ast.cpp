@@ -8,6 +8,7 @@ Cascading operations may go top to bottom or bottom to top in the tree, or down 
 #include "Ast.h"
 #include "GlobalVariable.h"
 #include "ControlFlowEdge.h"
+#include "CubeTreeNode.h"
 
 using namespace std;
 
@@ -300,24 +301,39 @@ Ast* Ast::newMultipleOperation(std::vector<Ast*> operands, string operation)
 	}
 }
 
-Ast* Ast::newBooleanVariableCube(std::string definition)
+Ast* Ast::newBooleanVariableCube(std::string definition, bool useTemporaryVariables)
 {
 	int numberOfPredicates = config::globalPredicates.size();
 	vector<Ast*> cubeTerms;
+	string currentVariableName;
 
 	for (int ctr = 0; ctr < numberOfPredicates; ctr++)
 	{
+		currentVariableName = useTemporaryVariables ? config::auxiliaryTemporaryVariableNames[ctr] : config::auxiliaryBooleanVariableNames[ctr];
+
 		if (definition[ctr] == config::CUBE_STATE_DECIDED_FALSE)
 		{
-			cubeTerms.push_back(newID(config::auxiliaryTemporaryVariableNames[ctr])->negate());
+			cubeTerms.push_back(
+					newBinaryOp(
+						newID(currentVariableName),
+						newINT(0),
+						config::EQUALS
+					)
+				);
 		}
 		else if (definition[ctr] == config::CUBE_STATE_DECIDED_TRUE)
 		{
-			cubeTerms.push_back(newID(config::auxiliaryTemporaryVariableNames[ctr]));
+			cubeTerms.push_back(
+					newBinaryOp(
+						newID(currentVariableName),
+						newINT(0),
+						config::NOT_EQUALS
+					)
+				);
 		}
 	}
 
-	return newMultipleOperation(cubeTerms, config::AND);
+	return newMultipleOperation(cubeTerms, config::DOUBLE_AND);
 }
 
 vector<vector<Ast*>> Ast::allCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit)
@@ -344,55 +360,95 @@ vector<vector<Ast*>> Ast::allCubes(vector<int> relevantAuxiliaryTemporaryVariabl
 	return allCubeSets;
 }
 
-Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate)
+//Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables)
+//{
+//	int numberOfPredicates = config::globalPredicates.size();
+//	vector<int> relevantIndices;
+//	string emptyPool = config::getCubeStatePool(relevantIndices);
+//	relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
+//	string pool = config::getCubeStatePool(relevantIndices);
+//	vector<string> implicativeCubeStates;
+//	vector<string> unmaskedImplicativeCubeStates;
+//	vector<string> cubeStateCombinations;
+//	vector<Ast*> implicativeCubes;
+//
+//	if (relevantIndices.size() > 0)
+//	{
+//		for (int ctr = 1; ctr <= cubeSizeUpperLimit; ctr++)
+//		{
+//			implicativeCubeStates.clear();
+//			cubeStateCombinations = config::getNaryCubeStateCombinations(relevantIndices, ctr);
+//			
+//			for (string cubeStateCombination : cubeStateCombinations)
+//			{
+//				unmaskedImplicativeCubeStates = config::getImplicativeCubeStates(config::applyDecisionMask(cubeStateCombination, pool), predicate);
+//				implicativeCubeStates.insert(implicativeCubeStates.end(), unmaskedImplicativeCubeStates.begin(), unmaskedImplicativeCubeStates.end());
+//			}
+//
+//			//cout << pool << "\t";
+//			pool = config::removeDecisionsFromPool(pool, implicativeCubeStates);
+//			//cout << pool << "\n";
+//			
+//			relevantIndices.clear();
+//
+//			for (int subCtr = 0; subCtr < numberOfPredicates; subCtr++)
+//			{
+//				if (pool[subCtr] != config::CUBE_STATE_OMIT)
+//				{
+//					relevantIndices.push_back(subCtr);
+//				}
+//			}
+//
+//			for (string implicativeCubeState : implicativeCubeStates)
+//			{
+//				implicativeCubes.push_back(newBooleanVariableCube(implicativeCubeState, useTemporaryVariables));
+//			}
+//
+//			if (pool.compare(emptyPool) == 0)
+//			{
+//				break;
+//			}
+//		}
+//	}
+//
+//	if (implicativeCubes.size() == 0)
+//	{
+//		z3::context c;
+//		z3::expr trueConstant = c.bool_val(true);
+//
+//		if (config::expressionImpliesPredicate(trueConstant, predicate))
+//		{
+//			return newTrue();
+//		}
+//		else
+//		{
+//			return newFalse();
+//		}
+//	}
+//
+//	return newMultipleOperation(implicativeCubes, config::DOUBLE_OR);
+//}
+
+Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables)
 {
 	int numberOfPredicates = config::globalPredicates.size();
-	vector<int> relevantIndices;
-	string emptyPool = config::getCubeStatePool(relevantIndices);
-	relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
-	string pool = config::getCubeStatePool(relevantIndices);
-	vector<string> implicativeCubeStates;
-	vector<string> unmaskedImplicativeCubeStates;
-	vector<string> cubeStateCombinations;
+	vector<int> relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
+	string pool = string(numberOfPredicates, config::CUBE_STATE_IGNORE);
+
+	for (int relevantIndex : relevantIndices)
+	{
+		pool[relevantIndex] = config::CUBE_STATE_OMIT;
+	}
+
+	CubeTreeNode* cubeTreeRoot = new CubeTreeNode(pool);
+	cubeTreeRoot->cascadingPopulate(cubeSizeUpperLimit);
+	cubeTreeRoot->cascadingCheckImplication(predicate);
+	vector<CubeTreeNode*> implicativeCubeNodes = cubeTreeRoot->getImplyingCubes();
 	vector<Ast*> implicativeCubes;
 
-	if (relevantIndices.size() > 0)
+	for (CubeTreeNode* implicativeCubeNode : implicativeCubeNodes)
 	{
-		for (int ctr = 1; ctr <= cubeSizeUpperLimit; ctr++)
-		{
-			implicativeCubeStates.clear();
-			cubeStateCombinations = config::getNaryCubeStateCombinations(relevantIndices, ctr);
-			
-			for (string cubeStateCombination : cubeStateCombinations)
-			{
-				unmaskedImplicativeCubeStates = config::getImplicativeCubeStates(config::applyDecisionMask(cubeStateCombination, pool), predicate);
-				implicativeCubeStates.insert(implicativeCubeStates.end(), unmaskedImplicativeCubeStates.begin(), unmaskedImplicativeCubeStates.end());
-			}
-
-			//cout << pool << "\t";
-			pool = config::removeDecisionsFromPool(pool, implicativeCubeStates);
-			//cout << pool << "\n";
-			
-			relevantIndices.clear();
-
-			for (int subCtr = 0; subCtr < numberOfPredicates; subCtr++)
-			{
-				if (pool[subCtr] != config::CUBE_STATE_OMIT)
-				{
-					relevantIndices.push_back(subCtr);
-				}
-			}
-
-			for (string implicativeCubeState : implicativeCubeStates)
-			{
-				implicativeCubes.push_back(newBooleanVariableCube(implicativeCubeState));
-			}
-
-			if (pool.compare(emptyPool) == 0)
-			{
-				break;
-			}
-		}
+		implicativeCubes.push_back(newBooleanVariableCube(implicativeCubeNode->stringRepresentation, useTemporaryVariables));
 	}
 
 	if (implicativeCubes.size() == 0)
@@ -410,7 +466,7 @@ Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* p
 		}
 	}
 
-	return newMultipleOperation(implicativeCubes, config::OR);
+	return newMultipleOperation(implicativeCubes, config::DOUBLE_OR);
 }
 
 Ast* Ast::newLargestImplicativeDisjunctionOfCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate)
@@ -431,7 +487,7 @@ Ast* Ast::newLargestImplicativeDisjunctionOfCubes(vector<int> relevantAuxiliaryT
 
 Ast* Ast::newReverseLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate)
 {
-	return newLargestImplicativeDisjunctionOfCubes(cubeSizeUpperLimit, predicate->negate())->negate();
+	return newLargestImplicativeDisjunctionOfCubes(cubeSizeUpperLimit, predicate->negate(), false)->negate();
 }
 
 // Contains all buffer size maps
@@ -1386,21 +1442,21 @@ void Ast::refreshChildIndices()
 
 void Ast::setVariableInitializations()
 {
-	if (name == config::BL_INITIALIZATION_BLOCK_TOKEN_NAME)
+	if (name == config::BL_PROGRAM_DECLARATION_TOKEN_NAME)
 	{
 		int numberOfGlobalPredicates = config::globalPredicates.size();
 
 		for (int ctr = numberOfGlobalPredicates - 1; ctr >= 0; ctr--)
 		{
-			addChild(newLabel(config::getCurrentAuxiliaryLabel(), newLoad(config::auxiliaryTemporaryVariableNames[ctr], newID(config::auxiliaryBooleanVariableNames[ctr]))), 0);
+			children.at(2)->addChild(newLabel(config::getCurrentAuxiliaryLabel(), newLoad(config::auxiliaryTemporaryVariableNames[ctr], newID(config::auxiliaryBooleanVariableNames[ctr]))), 0);
 		}
 
 		for (int ctr = numberOfGlobalPredicates - 1; ctr >= 0; ctr--)
 		{
-			addChild(newLabel(config::getCurrentAuxiliaryLabel(), newStore(config::auxiliaryBooleanVariableNames[ctr], newAsterisk())), 0);
+			children.at(2)->addChild(newLabel(config::getCurrentAuxiliaryLabel(), newStore(config::auxiliaryBooleanVariableNames[ctr], newAsterisk())), 0);
 		}
 
-		children.at(0)->startComment = "Initializing local variables";
+		children.at(2)->children.at(0)->startComment = "Initializing local variables";
 
 		vector<Ast*> postFix;
 
@@ -1410,7 +1466,7 @@ void Ast::setVariableInitializations()
 		}
 
 		postFix.at(0)->startComment = "Resetting local variables";
-		addChildren(postFix);
+		children.at(2)->addChildren(postFix);
 
 		vector<string> implicativeCubeStates;
 		vector<string> cubeStateCombinations;
@@ -1465,7 +1521,12 @@ void Ast::setVariableInitializations()
 
 		if (implicativeCubes.size() > 0)
 		{
-			addChild(newLabel(config::getCurrentAuxiliaryLabel(), newAssume(newMultipleOperation(implicativeCubes, config::OR)->negate())));
+			children.at(2)->addChild(newLabel(config::getCurrentAuxiliaryLabel(), newAssume(newMultipleOperation(implicativeCubes, config::DOUBLE_OR)->negate())));
+
+			for (int ctr = 3; ctr < children.size(); ctr++)
+			{
+				children.at(ctr)->children.at(1)->addChild(newLabel(config::getCurrentAuxiliaryLabel(), newAssume(newMultipleOperation(implicativeCubes, config::DOUBLE_OR)->negate())), 0);
+			}
 		}
 	}
 }
@@ -1774,8 +1835,13 @@ string Ast::emitCode()
 
 	if (!startComment.empty())
 	{
-		result += config::COMMENT_PREFIX + config::SPACE + startComment + "\n";
+		result += "\n" + config::MULTILINE_COMMENT_PREFIX + config::SPACE + startComment + config::SPACE + config::MULTILINE_COMMENT_SUFFIX + "\n";
 	}
+
+	/*if (!startComment.empty())
+	{
+		result += config::COMMENT_PREFIX + config::SPACE + startComment + "\n";
+	}*/
 
 	if (config::currentLanguage == config::language::RMA)
 	{
@@ -2121,9 +2187,14 @@ string Ast::emitCode()
 		}
 	}
 
-	if (!endComment.empty())
+	/*if (!endComment.empty())
 	{
 		result += "\n" + config::COMMENT_PREFIX + config::SPACE + endComment;
+	}*/
+
+	if (!endComment.empty())
+	{
+		result += "\n" + config::MULTILINE_COMMENT_PREFIX + config::SPACE + endComment + config::SPACE + config::MULTILINE_COMMENT_SUFFIX + "\n";
 	}
 
 	if (name == config::IF_ELSE_TOKEN_NAME)
@@ -2317,9 +2388,28 @@ bool Ast::performPredicateAbstraction()
 
 			if (relevantPredicateIndices.size() > 0)
 			{
+				int numberOfPredicates = config::globalPredicates.size();
 				Ast* positiveWeakestLiberalPrecondition;
 				Ast* negativeWeakestLiberalPrecondition;
-				int numberOfPredicates = config::globalPredicates.size();
+				vector<Ast*> parallelAssignments;
+				vector<string> usedVariables;
+				vector<string> currentIDs;
+
+				for (int ctr : relevantPredicateIndices)
+				{
+					positiveWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]);
+					negativeWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]->negate());
+
+					parallelAssignments.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
+							newStore(
+								config::auxiliaryBooleanVariableNames[ctr],
+								newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
+							)
+						);
+				}
+
+				relevantPredicateIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(parallelAssignments);
+
 				replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(), Ast::newBeginAtomic()));
 
 				for (int ctr : relevantPredicateIndices)
@@ -2332,36 +2422,7 @@ bool Ast::performPredicateAbstraction()
 						);
 				}
 
-				for (int ctr : relevantPredicateIndices)
-				{
-					positiveWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]);
-					negativeWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]->negate());
-
-					replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
-							/*newStore(
-								config::auxiliaryBooleanVariableNames[ctr],
-								newChoose(
-									newLargestImplicativeDisjunctionOfCubes(
-										config::getRelevantAuxiliaryTemporaryVariableIndices(positiveWeakestLiberalPrecondition),
-										config::globalCubeSizeLimit, positiveWeakestLiberalPrecondition
-									),
-									newLargestImplicativeDisjunctionOfCubes(
-										config::getRelevantAuxiliaryTemporaryVariableIndices(negativeWeakestLiberalPrecondition),
-										config::globalCubeSizeLimit, negativeWeakestLiberalPrecondition
-									)
-								)
-							)*/
-							newStore(
-									config::auxiliaryBooleanVariableNames[ctr],
-									newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
-								)
-						);
-					/*replacementStatements.back()->startComment = "choose(F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->emitCode() +
-						")), F_V(WP(" + emitCode() + ", " + config::globalPredicates[ctr]->negate()->emitCode() + ")))";*/
-
-					/*replacementStatements.back()->startComment = "choose(F_V(" + positiveWeakestLiberalPrecondition->emitCode() +
-						"), F_V(" + negativeWeakestLiberalPrecondition->emitCode() + "))";*/
-				}
+				replacementStatements.insert(replacementStatements.end(), parallelAssignments.begin(), parallelAssignments.end());
 
 				for (int ctr : relevantPredicateIndices)
 				{
@@ -2374,8 +2435,6 @@ bool Ast::performPredicateAbstraction()
 				}
 
 				replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(), Ast::newEndAtomic()));
-				/*replacementStatements.at(0)->startComment = "Replacing " + emitCode();
-				replacementStatements.back()->endComment = "End of replacing " + emitCode();*/
 			}
 			
 			replacementStatements[0]->startComment = config::PREDICATE_ABSTRACTION_COMMENT_PREFIX + emitCode();
@@ -2385,32 +2444,15 @@ bool Ast::performPredicateAbstraction()
 		}
 		else if (name == config::IF_ELSE_TOKEN_NAME)
 		{
-			// Since an ifElse node would be replaced by another ifElse node with a slight modification, just replace
-			// the conditional with * and add an assume to each statement block, then return false, causing the
-			// cascading function to spread to the node's children. Since assume statements and boolean literals are
-			// ignored anyway, this achieves the intended effect.
+			Ast* conditional = children.at(0)->clone();
+			replaceNode(newAsterisk(), children.at(0));
 
-			Ast* positiveConditional = children.at(0);
-			Ast* negativeConditional = children.at(0)->negate();
-			Ast* G_positive = newReverseLargestImplicativeDisjunctionOfCubes(
-					config::globalCubeSizeLimit, positiveConditional
-				);
-			Ast* G_negative = newReverseLargestImplicativeDisjunctionOfCubes(
-					config::globalCubeSizeLimit, negativeConditional
-				);
-
-			children.at(1)->children.insert(children.at(1)->children.begin(), newAssume(positiveConditional));
-			children.at(1)->children.at(0)->parent = children.at(1);
-			children.at(1)->refreshChildIndices();
+			children.at(1)->addChild(newAssume(newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional)), 0);
 
 			if (children.at(2)->name != config::NONE_TOKEN_NAME)
 			{
-				children.at(2)->children.insert(children.at(2)->children.begin(), newAssume(negativeConditional));
-				children.at(2)->children.at(0)->parent = children.at(1);
-				children.at(2)->refreshChildIndices();
+				children.at(2)->addChild(newAssume(newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional->negate())), 0);
 			}
-
-			replaceNode(newAsterisk(), children.at(0));
 		}
 	}
 
@@ -2474,7 +2516,8 @@ Ast* Ast::negate()
 
 	if (name == config::EQUALS || name == config::LESS_THAN || name == config::LESS_EQUALS ||
 		name == string(1, config::GREATER_THAN) || name == config::GREATER_EQUALS || name == config::NOT_EQUALS ||
-		name == config::AND || name == config::OR || name == config::ID_TOKEN_NAME)
+		name == config::AND || name == config::OR || name == config::DOUBLE_AND || name == config::DOUBLE_OR ||
+		name == config::ID_TOKEN_NAME)
 	{
 		Ast* selfClone = clone();
 		result = new Ast();
@@ -2484,6 +2527,21 @@ Ast* Ast::negate()
 	else if (name == config::NOT)
 	{
 		result = children.at(0)->clone();
+	}
+	else if (name == config::BOOL_TOKEN_NAME)
+	{
+		if (children.at(0)->name == config::TRUE_TAG_NAME)
+		{
+			result = newFalse();
+		}
+		else if (children.at(0)->name == config::FALSE_TAG_NAME)
+		{
+			result = newTrue();
+		}
+		else
+		{
+			config::throwError("Can't negate BOOL(" + children.at(0)->name + ")");
+		}
 	}
 	else if (name == config::INT_TOKEN_NAME)
 	{

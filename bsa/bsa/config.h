@@ -37,7 +37,11 @@ namespace config
 	const extern std::string NOT;
 	const extern std::string AND;
 	const extern std::string OR;
+	const extern std::string DOUBLE_AND;
+	const extern std::string DOUBLE_OR;
 	const extern std::string COMMENT_PREFIX;
+	const extern std::string MULTILINE_COMMENT_PREFIX;
+	const extern std::string MULTILINE_COMMENT_SUFFIX;
 	const extern std::string REPLACING_CAPTION;
 	const extern std::string FINISHED_REPLACING_CAPTION;
 	const extern std::string OVERFLOW_MESSAGE;
@@ -118,6 +122,7 @@ namespace config
 	extern std::map<std::string, GlobalVariable*> globalVariables;
 	extern std::vector<Ast*> globalPredicates;
 	extern int indexOf(Ast* predicate);
+	extern int indexOf(std::string varName);
 	extern std::vector<std::string> auxiliaryBooleanVariableNames;
 	extern std::vector<std::string> auxiliaryTemporaryVariableNames;
 	extern std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
@@ -155,9 +160,11 @@ namespace config
 	extern bool cubeImpliesPredicate(std::vector<Ast*> cube, Ast* predicate);
 	extern bool expressionImpliesPredicate(z3::expr expression, Ast* predicate);
 	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate);
+	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(std::vector<Ast*> parallelAssignments);
 	extern std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(std::string variableName);
 
 	const extern char CUBE_STATE_OMIT;
+	const extern char CUBE_STATE_IGNORE;
 	const extern char CUBE_STATE_UNDECIDED;
 	const extern char CUBE_STATE_MAY_BE_FALSE;
 	const extern char CUBE_STATE_MAY_BE_TRUE;
@@ -166,9 +173,11 @@ namespace config
 	extern std::string getCubeStatePool(std::vector<int> predicateIndices);
 	extern std::string getCubeStatePool(int predicateIndex);
 	extern std::vector<std::string> getNaryCubeStateCombinations(std::vector<int> predicateIndices, int n);
+	extern std::vector<Ast*> cubeStringRepresentationToAstRef(std::string pool);
 	extern std::vector<std::string> getImplicativeCubeStates(std::string pool, Ast* predicate);
 	extern std::string removeDecisionsFromPool(std::string pool, std::vector<std::string> decisions);
 	extern std::string applyDecisionMask(std::string pool, std::string decisionMask);
+	extern bool isSubset(std::string possibleSubset, std::string possibleSuperset);
 
 	extern z3::expr impliesDuplicate(z3::expr const &a, z3::expr const &b);
 }

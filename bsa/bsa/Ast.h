@@ -90,9 +90,9 @@ public:
 	static Ast* newAbstractAssignmentFragment(Ast* assignment, Ast* predicate);
 
 	static Ast* newMultipleOperation(std::vector<Ast*> operands, std::string operation);
-	static Ast* newBooleanVariableCube(std::string definition);
+	static Ast* newBooleanVariableCube(std::string definition, bool useTemporaryVariables = true);
 	static std::vector<std::vector<Ast*>> allCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit);
-	static Ast* newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate);
+	static Ast* newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables = true);
 	static Ast* newLargestImplicativeDisjunctionOfCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate);
 	static Ast* newReverseLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate);
 

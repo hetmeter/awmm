@@ -23,7 +23,7 @@ namespace config
 
 	const std::vector<std::string> UNARY_OPERATORS = { "!" };
 	const std::vector<std::string> BINARY_OPERATORS = { "+", "-", "*", "/", "&", "|", "<", ">", "<=", ">=", "=",
-		"==", "!=" };
+		"==", "!=", "&&", "||" };
 	const std::string EQUALS = "==";
 	const std::string LESS_THAN = "<";
 	const std::string LESS_EQUALS = "<=";
@@ -32,7 +32,11 @@ namespace config
 	const std::string NOT = "!";
 	const std::string AND = "&";
 	const std::string OR = "|";
+	const std::string DOUBLE_AND = "&&";
+	const std::string DOUBLE_OR = "||";
 	const std::string COMMENT_PREFIX = "//";
+	const std::string MULTILINE_COMMENT_PREFIX = "/*";
+	const std::string MULTILINE_COMMENT_SUFFIX = "*/";
 	const std::string REPLACING_CAPTION = "Replacing";
 	const std::string FINISHED_REPLACING_CAPTION = "Finished replacing";
 	const std::string OVERFLOW_MESSAGE = "overflow";
@@ -126,6 +130,35 @@ namespace config
 		}
 
 		return result;
+	}
+
+	int indexOf(std::string varName)
+	{
+		int result = -1;
+
+		for (std::string auxiliaryBooleanVariableName : auxiliaryBooleanVariableNames)
+		{
+			result++;
+
+			if (auxiliaryBooleanVariableName.compare(varName) == 0)
+			{
+				return result;
+			}
+		}
+
+		result = -1;
+
+		for (std::string auxiliaryTemporaryVariableName : auxiliaryTemporaryVariableNames)
+		{
+			result++;
+
+			if (auxiliaryTemporaryVariableName.compare(varName) == 0)
+			{
+				return result;
+			}
+		}
+
+		return -1;
 	}
 
 	std::vector<std::string> auxiliaryBooleanVariableNames;
@@ -313,7 +346,7 @@ namespace config
 
 		for (int elementOfSecond : second)
 		{
-			if (find(first.begin(), first.end(), elementOfSecond) == first.end())
+			if (find(result.begin(), result.end(), elementOfSecond) == result.end())
 			{
 				result.push_back(elementOfSecond);
 			}
@@ -647,6 +680,36 @@ namespace config
 		return result;
 	}
 
+	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(std::vector<Ast*> parallelAssignments)
+	{
+		std::vector<std::string> relevantIDs;
+		std::vector<int> relevantIDIndices;
+		std::vector<int> result;
+		int numberOfPredicates = globalPredicates.size();
+
+		for (Ast* assignment : parallelAssignments)
+		{
+			relevantIDs = assignment->children.at(1)->children.at(1)->getIDs();
+			relevantIDIndices.clear();
+
+			for (std::string relevantID : relevantIDs)
+			{
+				relevantIDIndices.push_back(indexOf(relevantID));
+			}
+
+			result = intVectorUnion(result, relevantIDIndices);
+			
+			if (result.size() == numberOfPredicates)
+			{
+				break;
+			}
+		}
+
+		std::sort(result.begin(), result.end());
+
+		return result;
+	}
+
 	std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(std::string variableName)
 	{
 		std::vector<int> result;
@@ -664,6 +727,7 @@ namespace config
 	}
 
 	const char CUBE_STATE_OMIT = '-';
+	const char CUBE_STATE_IGNORE = 'X';
 	const char CUBE_STATE_UNDECIDED = '?';
 	const char CUBE_STATE_MAY_BE_FALSE = 'f';
 	const char CUBE_STATE_MAY_BE_TRUE = 't';
@@ -731,8 +795,6 @@ namespace config
 		std::vector<std::string> subResult;
 		std::string poolCopy;
 
-		int a;
-
 		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
 		{
 			//std::cout << "\t" << ctr << " / " << numberOfPredicates << "\n";
@@ -744,6 +806,16 @@ namespace config
 
 				subResult = getImplicativeCubeStates(poolCopy, predicate);
 				result.insert(result.end(), subResult.begin(), subResult.end());
+
+				/*if (subResult.size() > 0)
+				{
+					std::cout << "\tPool " << pool << " threw\n";
+
+					for (std::string temp : subResult)
+					{
+						std::cout << "\t\t" << temp << "\n";
+					}
+				}*/
 				
 				fullyDefined = false;
 			}
@@ -754,38 +826,60 @@ namespace config
 				poolCopy[ctr] = CUBE_STATE_DECIDED_TRUE;
 
 				subResult = getImplicativeCubeStates(poolCopy, predicate);
+
 				result.insert(result.end(), subResult.begin(), subResult.end());
 
+				/*if (subResult.size() > 0)
+				{
+					std::cout << "\tPool " << pool << " threw\n";
+
+					for (std::string temp : subResult)
+					{
+						std::cout << "\t\t" << temp << "\n";
+					}
+				}*/
+
 				fullyDefined = false;
+			}
+
+			if (!fullyDefined)
+			{
+				break;
 			}
 		}
 
 		if (fullyDefined)
 		{
-			std::vector<Ast*> cubeTerms;
-			Ast* currentTerm;
-
-			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
-			{
-				if (pool[ctr] == CUBE_STATE_DECIDED_FALSE)
-				{
-					currentTerm = globalPredicates[ctr]->negate();
-					cubeTerms.push_back(currentTerm);
-				}
-				else if (pool[ctr] == CUBE_STATE_DECIDED_TRUE)
-				{
-					currentTerm = globalPredicates[ctr]->clone();
-					cubeTerms.push_back(currentTerm);
-				}
-			}
-
-			if (cubeImpliesPredicate(cubeTerms, predicate))
+			if (cubeImpliesPredicate(cubeStringRepresentationToAstRef(pool), predicate))
 			{
 				result.push_back(pool);
 			}
 		}
 
 		return result;
+	}
+
+	std::vector<Ast*> cubeStringRepresentationToAstRef(std::string pool)
+	{
+		int numberOfPredicates = globalPredicates.size();
+		std::vector<Ast*> cubeTerms;
+		Ast* currentTerm;
+
+		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+		{
+			if (pool[ctr] == CUBE_STATE_DECIDED_FALSE)
+			{
+				currentTerm = globalPredicates[ctr]->negate();
+				cubeTerms.push_back(currentTerm);
+			}
+			else if (pool[ctr] == CUBE_STATE_DECIDED_TRUE)
+			{
+				currentTerm = globalPredicates[ctr]->clone();
+				cubeTerms.push_back(currentTerm);
+			}
+		}
+
+		return cubeTerms;
 	}
 
 	std::string removeDecisionsFromPool(std::string pool, std::vector<std::string> decisions)
@@ -868,6 +962,30 @@ namespace config
 		//std::cout << pool << "\t" << decisionMask << "\t" << result << "\n";
 
 		return result;
+	}
+
+	bool isSubset(std::string possibleSubset, std::string possibleSuperset)
+	{
+		int numberOfPredicates = globalPredicates.size();
+
+		if (std::count(possibleSubset.begin(), possibleSubset.end(), CUBE_STATE_OMIT) +
+			std::count(possibleSubset.begin(), possibleSubset.end(), CUBE_STATE_IGNORE) == possibleSubset.size() ||
+			std::count(possibleSuperset.begin(), possibleSuperset.end(), CUBE_STATE_OMIT)
+			+ std::count(possibleSuperset.begin(), possibleSuperset.end(), CUBE_STATE_IGNORE) == possibleSuperset.size())
+		{
+			return false;
+		}
+
+		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+		{
+			if (possibleSubset[ctr] != CUBE_STATE_OMIT && possibleSubset[ctr] != CUBE_STATE_IGNORE &&
+				possibleSubset[ctr] != possibleSuperset[ctr])
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	z3::expr impliesDuplicate(z3::expr const &a, z3::expr const &b)

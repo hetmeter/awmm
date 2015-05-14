@@ -85,7 +85,7 @@ process 1:
 	// Finished replacing "store a1 = 1;"
 	
 	// Replacing "flush;"
-	21477: if (*)
+	2613: if (*)
 		
 		if (a1_cnt_1 > 0)
 			
@@ -104,7 +104,7 @@ process 1:
 			a1_fst_1 = a1_fst_1 + 1;
 		endif;
 		
-		goto 21477;
+		goto 2613;
 	endif;
 	
 	// Finished replacing "flush;"

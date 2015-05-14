@@ -161,7 +161,7 @@ int main(int argc, char** argv)
 			cout << "Performing predicate abstraction...\n";
 
 			rootAstRef->cascadingPerformPredicateAbstraction();
-			rootAstRef->children.at(2)->setVariableInitializations();
+			rootAstRef->setVariableInitializations();
 
 			cout << "\n---\nCarried out predicate abstraction:\n\n";
 			cout << rootAstRef->emitCode();
