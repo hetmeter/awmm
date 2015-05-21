@@ -1,9 +1,11 @@
 #pragma once
 
+#include <string>
 #include <vector>
-#include <iostream>
+//#include <iostream>
 
 #include "bufferSizeMap.h"
+
 class Ast;
 
 class ControlFlowVisitor
@@ -17,10 +19,9 @@ public:
 
 private:
 
-	std::vector<std::string> visitedLabels;
+	bool isVisitingAlreadyVisitedLabel(Ast* currentNode);
 	bufferSizeMap writeBufferSizeMap;
 	bufferSizeMap readBufferSizeMap;
+	std::vector<std::string> visitedLabels;
 	ControlFlowVisitor* clone();
-	bool isVisitingAlreadyVisitedLabel(Ast* currentNode);
 };
-

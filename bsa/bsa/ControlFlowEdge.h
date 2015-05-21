@@ -10,4 +10,3 @@ public:
 	Ast* start;
 	Ast* end;
 };
-

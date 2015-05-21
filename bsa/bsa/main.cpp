@@ -19,6 +19,17 @@ Buffer Size Analysis:
 
 using namespace std;
 
+/* Local constants */
+const string ACCEPTING_STATE_REGEX = "\\{ACCEPTING_STATE,(\\S+)\\}";
+const string EXTENSION_REGEX = "(.*)\\.(\\S\\S\\S)\\.out";
+const string PSO_EXTENSION = "pso";
+const string TSO_EXTENSION = "tso";
+const string RMA_EXTENSION = "rma";
+const string BSA_EXTENSION = "bsa";
+const string OUT_EXTENSION = "out";
+const string PREDICATE_EXTENSION = "predicate";
+const string BOOLEAN_EXTENSION = "bl";
+
 int main(int argc, char** argv)
 {
 	string parsedProgramPath;
@@ -64,7 +75,7 @@ int main(int argc, char** argv)
 	parsedProgramFile.close();
 
 	// Extract AST representation from the input file
-	regex programInputRegex(config::ACCEPTING_STATE_REGEX);
+	regex programInputRegex(ACCEPTING_STATE_REGEX);
 	smatch stringMatch;
 	string parsedProgramString;
 
@@ -82,7 +93,7 @@ int main(int argc, char** argv)
 
 	// Get the input extension and set the global language variable accordingly. Prompt an error otherwise.
 	string extension, fileNameStub;
-	programInputRegex = regex(config::EXTENSION_REGEX);
+	programInputRegex = regex(EXTENSION_REGEX);
 	regex_search(parsedProgramPath, stringMatch, programInputRegex);
 
 	if (stringMatch.size() == 3)
@@ -90,15 +101,15 @@ int main(int argc, char** argv)
 		fileNameStub = stringMatch[1].str();
 		extension = stringMatch[2].str();
 
-		if (extension == config::PSO_EXTENSION)
+		if (extension == PSO_EXTENSION)
 		{
 			config::currentLanguage = config::language::PSO;
 		}
-		else if (extension == config::TSO_EXTENSION)
+		else if (extension == TSO_EXTENSION)
 		{
 			config::currentLanguage = config::language::TSO;
 		}
-		else if (extension == config::RMA_EXTENSION)
+		else if (extension == RMA_EXTENSION)
 		{
 			config::currentLanguage = config::language::RMA;
 		}
@@ -107,7 +118,7 @@ int main(int argc, char** argv)
 	{
 		config::throwCriticalError("Invalid parsed program extension");
 	}
-	Ast* rootAstRef = config::stringToAst(parsedProgramString);
+	Ast* rootAstRef = Ast::newAstFromParsedProgram(parsedProgramString);
 
 	cout << "\n---\nParsed program:\n\n";
 	cout << rootAstRef->emitCode();
@@ -126,14 +137,14 @@ int main(int argc, char** argv)
 	cout << rootAstRef->emitCode();
 
 	// Generate the output
-	outputPath = fileNameStub + "." + config::BSA_EXTENSION + "." + extension;
+	outputPath = fileNameStub + "." + BSA_EXTENSION + "." + extension;
 	ofstream programOut(outputPath);
 	programOut << rootAstRef->emitCode();
 	programOut.close();
 
 	config::lazyReplacements.clear();
 
-	ifstream parsedPredicateFile(fileNameStub + "." + config::PREDICATE_EXTENSION + "." + extension + "." + config::OUT_EXTENSION);
+	ifstream parsedPredicateFile(fileNameStub + "." + PREDICATE_EXTENSION + "." + extension + "." + OUT_EXTENSION);
 	string parsedPredicateLine, parsedPredicateString;
 	Ast* predicateAstRef;
 
@@ -144,12 +155,12 @@ int main(int argc, char** argv)
 	else
 	{
 		// Check if the predicates are in an accepting state, prompt an error otherwise
-		programInputRegex = regex(config::ACCEPTING_STATE_REGEX);
+		programInputRegex = regex(ACCEPTING_STATE_REGEX);
 		regex_search(parsedPredicateLine, stringMatch, programInputRegex);
 
 		if (stringMatch.size() == 2)
 		{
-			predicateAstRef = config::stringToAst(stringMatch[1].str());
+			predicateAstRef = Ast::newAstFromParsedProgram(stringMatch[1].str());
 
 			for (Ast* child : predicateAstRef->children)
 			{
@@ -182,7 +193,7 @@ int main(int argc, char** argv)
 	cout << rootAstRef->emitCode();
 
 	// Generate the output
-	string booleanOutputPath = fileNameStub + "." + config::BOOLEAN_EXTENSION;
+	string booleanOutputPath = fileNameStub + "." + BOOLEAN_EXTENSION;
 	ofstream booleanProgramOut(booleanOutputPath);
 	booleanProgramOut << rootAstRef->emitCode();
 	booleanProgramOut.close();

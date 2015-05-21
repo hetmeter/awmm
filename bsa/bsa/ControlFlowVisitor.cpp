@@ -2,6 +2,7 @@
 
 #include "ControlFlowEdge.h"
 #include "Ast.h"
+#include "literalCode.h"
 #include "config.h"
 
 using namespace std;
@@ -15,38 +16,6 @@ ControlFlowVisitor::~ControlFlowVisitor()
 {
 }
 
-// Generates a copy of the current node, with its visited label vector and buffer size maps having the same content
-ControlFlowVisitor* ControlFlowVisitor::clone()
-{
-	ControlFlowVisitor * result = new ControlFlowVisitor;
-
-	// Copy the visited label vector content
-	for (string visitedLabel : visitedLabels)
-	{
-		result->visitedLabels.push_back(visitedLabel);
-	}
-
-	// Copy the contents of both buffer size maps
-	copyBufferSizes(&writeBufferSizeMap, &(result->writeBufferSizeMap));
-	copyBufferSizes(&readBufferSizeMap, &(result->readBufferSizeMap));
-
-	return result;
-}
-
-// Returns whether the currently visited node has already been visited by this visitor or one of its ancestors
-bool ControlFlowVisitor::isVisitingAlreadyVisitedLabel(Ast* currentNode)
-{
-	if (currentNode->name == config::LABEL_TOKEN_NAME)	// Since the only possible closing points of cycles are labels, disregard any other node type
-	{
-		if (config::stringVectorContains(visitedLabels, currentNode->getLabelCode()))
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
 // Performs one visit to the target node. Updates the node's persistent buffer size map, continues along the control flow path,
 // or spawns copies of itself, according to the state of the visit
 void ControlFlowVisitor::traverseControlFlowGraph(Ast* startNode)
@@ -55,29 +24,29 @@ void ControlFlowVisitor::traverseControlFlowGraph(Ast* startNode)
 	{												// on the traversed path. Cascade these changes along all successive control flow paths.
 
 		// Add the visitor's accumulated buffer sizes to the persistent buffer sizes of the node
-		additiveMergeBufferSizes(&(startNode->causedWriteCost), &writeBufferSizeMap);
-		additiveMergeBufferSizes(&(startNode->causedReadCost), &readBufferSizeMap);
+		bsm::additiveMergeBufferSizes(&(startNode->causedWriteCost), &writeBufferSizeMap);
+		bsm::additiveMergeBufferSizes(&(startNode->causedReadCost), &readBufferSizeMap);
 
-		setTopIfIncremented(&writeBufferSizeMap, &(startNode->persistentWriteCost));
-		setTopIfIncremented(&readBufferSizeMap, &(startNode->persistentReadCost));
+		bsm::setTopIfIncremented(&writeBufferSizeMap, &(startNode->persistentWriteCost));
+		bsm::setTopIfIncremented(&readBufferSizeMap, &(startNode->persistentReadCost));
 		startNode->controlFlowDirectionCascadingPropagateTops();
 	}
 	else
 	{
-		if (startNode->name == config::LABEL_TOKEN_NAME)	// If visiting a label for the first time, add it to the list of visited labels
+		if (startNode->name == literalCode::LABEL_TOKEN_NAME)	// If visiting a label for the first time, add it to the list of visited labels
 		{
 			visitedLabels.push_back(startNode->getLabelCode());
 		}
 
 		// Add the visitor's accumulated buffer sizes to the persistent buffer sizes of the node
-		additiveMergeBufferSizes(&writeBufferSizeMap, &(startNode->persistentWriteCost));
-		additiveMergeBufferSizes(&readBufferSizeMap, &(startNode->persistentReadCost));
+		bsm::additiveMergeBufferSizes(&writeBufferSizeMap, &(startNode->persistentWriteCost));
+		bsm::additiveMergeBufferSizes(&readBufferSizeMap, &(startNode->persistentReadCost));
 
 		// Copy the node's updated buffer sizes to the visitor's maps
-		copyBufferSizes(&(startNode->persistentWriteCost), &writeBufferSizeMap);
-		copyBufferSizes(&(startNode->persistentReadCost), &readBufferSizeMap);
+		bsm::copyBufferSizes(&(startNode->persistentWriteCost), &writeBufferSizeMap);
+		bsm::copyBufferSizes(&(startNode->persistentReadCost), &readBufferSizeMap);
 
-		if (startNode->name == config::FENCE_TOKEN_NAME)	// If visiting a fence, reset all buffer sizes to 0
+		if (startNode->name == literalCode::FENCE_TOKEN_NAME)	// If visiting a fence, reset all buffer sizes to 0
 		{
 			for (bufferSizeMapIterator iterator = writeBufferSizeMap.begin(); iterator != writeBufferSizeMap.end(); iterator++)
 			{
@@ -106,4 +75,36 @@ void ControlFlowVisitor::traverseControlFlowGraph(Ast* startNode)
 			}
 		}
 	}
+}
+
+// Returns whether the currently visited node has already been visited by this visitor or one of its ancestors
+bool ControlFlowVisitor::isVisitingAlreadyVisitedLabel(Ast* currentNode)
+{
+	if (currentNode->name == literalCode::LABEL_TOKEN_NAME)	// Since the only possible closing points of cycles are labels, disregard any other node type
+	{
+		if (config::stringVectorContains(visitedLabels, currentNode->getLabelCode()))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+// Generates a copy of the current node, with its visited label vector and buffer size maps having the same content
+ControlFlowVisitor* ControlFlowVisitor::clone()
+{
+	ControlFlowVisitor * result = new ControlFlowVisitor;
+
+	// Copy the visited label vector content
+	for (string visitedLabel : visitedLabels)
+	{
+		result->visitedLabels.push_back(visitedLabel);
+	}
+
+	// Copy the contents of both buffer size maps
+	bsm::copyBufferSizes(&writeBufferSizeMap, &(result->writeBufferSizeMap));
+	bsm::copyBufferSizes(&readBufferSizeMap, &(result->readBufferSizeMap));
+
+	return result;
 }

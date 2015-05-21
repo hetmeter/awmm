@@ -88,6 +88,7 @@
     <ClCompile Include="ControlFlowVisitor.cpp" />
     <ClCompile Include="CubeTreeNode.cpp" />
     <ClCompile Include="GlobalVariable.cpp" />
+    <ClCompile Include="literalCode.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +99,7 @@
     <ClInclude Include="ControlFlowVisitor.h" />
     <ClInclude Include="CubeTreeNode.h" />
     <ClInclude Include="GlobalVariable.h" />
+    <ClInclude Include="literalCode.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,6 @@
 #include "GlobalVariable.h"
 #include "config.h"
+#include "literalCode.h"
 
 using namespace std;
 
@@ -9,15 +10,15 @@ GlobalVariable::GlobalVariable(string variableName, vector<int> processes)
 
 	for (int processNumber : processes)
 	{
-		auxiliaryCounterVariableNames[processNumber] = registerAuxiliaryVariable(variableName + config::AUXILIARY_VARIABLE_SEPARATOR +
-			config::AUXILIARY_COUNTER_TAG + config::AUXILIARY_VARIABLE_SEPARATOR + to_string(processNumber));
-		auxiliaryFirstPointerVariableNames[processNumber] = registerAuxiliaryVariable(variableName + config::AUXILIARY_VARIABLE_SEPARATOR +
-			config::AUXILIARY_FIRST_POINTER_TAG + config::AUXILIARY_VARIABLE_SEPARATOR + to_string(processNumber));
+		auxiliaryCounterVariableNames[processNumber] = registerAuxiliaryVariable(variableName + literalCode::AUXILIARY_VARIABLE_SEPARATOR +
+			literalCode::AUXILIARY_COUNTER_TAG + literalCode::AUXILIARY_VARIABLE_SEPARATOR + to_string(processNumber));
+		auxiliaryFirstPointerVariableNames[processNumber] = registerAuxiliaryVariable(variableName + literalCode::AUXILIARY_VARIABLE_SEPARATOR +
+			literalCode::AUXILIARY_FIRST_POINTER_TAG + literalCode::AUXILIARY_VARIABLE_SEPARATOR + to_string(processNumber));
 
 		for (int ctr = 1; ctr <= config::K; ctr++)
 		{
 			auxiliaryWriteBufferVariableNames[pair<int, int>(processNumber, ctr)] = registerAuxiliaryVariable(variableName +
-				config::AUXILIARY_VARIABLE_SEPARATOR + to_string(ctr) + config::AUXILIARY_VARIABLE_SEPARATOR +
+				literalCode::AUXILIARY_VARIABLE_SEPARATOR + to_string(ctr) + literalCode::AUXILIARY_VARIABLE_SEPARATOR +
 				to_string(processNumber));
 		}
 	}
@@ -40,12 +41,12 @@ string GlobalVariable::registerAuxiliaryVariable(string minimalName)
 		srand(time(NULL));
 		string randomSuffix = to_string(rand());
 
-		while (config::stringVectorContains(config::variableNames, minimalName + config::AUXILIARY_VARIABLE_SEPARATOR + randomSuffix))
+		while (config::stringVectorContains(config::variableNames, minimalName + literalCode::AUXILIARY_VARIABLE_SEPARATOR + randomSuffix))
 		{
 			randomSuffix = to_string(rand());
 		}
 
-		config::variableNames.push_back(minimalName + config::AUXILIARY_VARIABLE_SEPARATOR + randomSuffix);
-		return minimalName + config::AUXILIARY_VARIABLE_SEPARATOR + randomSuffix;
+		config::variableNames.push_back(minimalName + literalCode::AUXILIARY_VARIABLE_SEPARATOR + randomSuffix);
+		return minimalName + literalCode::AUXILIARY_VARIABLE_SEPARATOR + randomSuffix;
 	}
 }

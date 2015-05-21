@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+//#include <string>
 #include <map>
 #include <vector>
 
@@ -21,4 +21,3 @@ public:
 	std::map<int, std::string> auxiliaryFirstPointerVariableNames;
 	std::map<std::pair<int, int>, std::string> auxiliaryWriteBufferVariableNames;
 };
-
