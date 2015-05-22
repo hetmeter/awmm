@@ -457,7 +457,8 @@ using namespace std;
 		{
 			for (int ctr = 0; ctr < children.size(); ctr++)
 			{
-				if (isSubset(implyingCubeRepresentation, children.at(ctr)->stringRepresentation))
+				if (!children.at(ctr)->impliesPredicate && !children.at(ctr)->toBeDeleted &&
+					isSubset(implyingCubeRepresentation, children.at(ctr)->stringRepresentation))
 				{
 					/*children.at(ctr)->parent = nullptr;
 					children.erase(children.begin() + ctr);

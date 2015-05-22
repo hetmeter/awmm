@@ -1893,7 +1893,7 @@ using namespace std;
 		cubeTreeRoot->cascadingPopulate(cubeSizeUpperLimit);
 		//cout << "\nPopulated:\n" << cubeTreeRoot->toString() << "\n";
 		cubeTreeRoot->cascadingCheckImplication(predicate);
-		cout << "\nImplications checked:\n" << cubeTreeRoot->toString() << "\n";
+		//cout << "\nImplications checked:\n" << cubeTreeRoot->toString() << "\n";
 		cubeTreeRoot->scour();
 		//cout << "\nScoured:\n" << cubeTreeRoot->toString() << "\n";
 		vector<CubeTreeNode*> implicativeCubeNodes = cubeTreeRoot->getImplyingCubes();
