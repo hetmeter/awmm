@@ -20,7 +20,7 @@ namespace bsm
 /* Methods */
 
 	// Adds a set amount to the value of the given key, creating the entry with the increment as its value if it doesn't already exist
-	void incrementCost(std::string varName, int increment, bufferSizeMap* target)
+	void incrementCost(const std::string &varName, int increment, bufferSizeMap* target)
 	{
 		if (!bufferSizeMapContains(target, varName) || (*target)[varName] == BOTTOM_VALUE)
 		{
@@ -40,7 +40,7 @@ namespace bsm
 	}
 	
 	// Adds a set amount to the value of the given key, but only if it already exists
-	void incrementCostIfExists(std::string varName, int increment, bufferSizeMap* target)
+	void incrementCostIfExists(const std::string &varName, int increment, bufferSizeMap* target)
 	{
 		if (bufferSizeMapContains(target, varName))
 		{
@@ -157,7 +157,7 @@ namespace bsm
 /* Map methods */
 
 	// Return whether the map contains a key
-	bool bufferSizeMapContains(bufferSizeMap* container, std::string key)
+	bool bufferSizeMapContains(bufferSizeMap* container, const std::string &key)
 	{
 		return !(container->find(key) == container->end());
 	}

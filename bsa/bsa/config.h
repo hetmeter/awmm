@@ -36,21 +36,21 @@ namespace config
 /* Global variable handling */
 	extern void carryOutLazyReplacements();
 	extern int getCurrentAuxiliaryLabel();
-	extern int indexOf(std::string varName);
+	extern int indexOf(const std::string &varName);
 	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate);
-	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(std::vector<Ast*> parallelAssignments);
-	extern std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(std::string variableName);
+	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(const std::vector<Ast*> &parallelAssignments);
+	extern std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(const std::string &variableName);
 	extern std::vector<int> getPredicateVariableTransitiveClosure(int index);
 
 /* String operations */
-	extern std::string addTabs(std::string s, int numberOfTabs);
+	extern std::string addTabs(const std::string &s, int numberOfTabs);
 
 /* Vector operations */
-	extern bool stringVectorContains(std::vector<std::string> container, std::string element);
-	extern std::vector<int> intVectorUnion(std::vector<int> first, std::vector<int> second);
-	extern bool intVectorVectorContains(std::vector<std::vector<int>> container, std::vector<int> element);
-	extern std::vector<std::vector<int>> intSetCartesianProduct(std::vector<int> first, std::vector<int> second);
-	extern std::vector<std::vector<int>> intSetCartesianProduct(std::vector<std::vector<int>> first, std::vector<int> second);
+	extern bool stringVectorContains(const std::vector<std::string> &container, const std::string &element);
+	extern std::vector<int> intVectorUnion(const std::vector<int> &first, const std::vector<int> &second);
+	extern bool intVectorVectorContains(const std::vector<std::vector<int>> &container, const std::vector<int> &element);
+	extern std::vector<std::vector<int>> intSetCartesianProduct(const std::vector<int> &first, const std::vector<int> &second);
+	extern std::vector<std::vector<int>> intSetCartesianProduct(const std::vector<std::vector<int>> &first, const std::vector<int> &second);
 
 /* Initializations */
 	extern void initializeAuxiliaryVariables();
@@ -59,11 +59,11 @@ namespace config
 	const extern std::string OVERFLOW_MESSAGE;
 
 /* Error handling */
-	extern void throwError(std::string msg);
-	extern void throwCriticalError(std::string msg);
+	extern void throwError(const std::string &msg);
+	extern void throwCriticalError(const std::string &msg);
 
 /* Z3 */
-	extern bool cubeImpliesPredicate(std::vector<Ast*> cube, Ast* predicate);
+	extern bool cubeImpliesPredicate(const std::vector<Ast*> &cube, Ast* predicate);
 	extern bool expressionImpliesPredicate(z3::expr expression, Ast* predicate);
 	extern z3::expr impliesDuplicate(z3::expr const &a, z3::expr const &b);
 }

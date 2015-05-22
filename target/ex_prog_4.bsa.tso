@@ -16,19 +16,24 @@ process 1:
 	a1_3_1 = 0;
 	t1 = 2;
 	t2 = 4;
-	// Replacing "load t3 = a1;"
+	
+	/* Replacing "load t3 = a1;" */
 	4: if (a1_cnt_1 == 0)
 		load t3 = a1;
 	endif;
-	// Finished replacing "load t3 = a1;"
+	/* Finished replacing "load t3 = a1;" */
 	
-	// Replacing "store a1 = 1;"
+	
+	
+	/* Replacing "store a1 = 1;" */
 	a1_fst_1 = 1;
 	a1_1_1 = 1;
 	a1_cnt_1 = a1_cnt_1 + 1;
-	// Finished replacing "store a1 = 1;"
+	/* Finished replacing "store a1 = 1;" */
 	
-	// Replacing "store a1 = 1;"
+	
+	
+	/* Replacing "store a1 = 1;" */
 	if (a1_fst_1 == 0)
 		a1_fst_1 = 1;
 		a1_1_1 = 1;
@@ -39,10 +44,12 @@ process 1:
 	if (a1_cnt_1 == 2)
 		a1_2_1 = 1;
 	endif;
-	// Finished replacing "store a1 = 1;"
+	/* Finished replacing "store a1 = 1;" */
 	
 	
-	// Replacing "store a1 = 1;"
+	
+	
+	/* Replacing "store a1 = 1;" */
 	if (a1_fst_1 == 0)
 		a1_fst_1 = 1;
 		a1_1_1 = 1;
@@ -58,10 +65,12 @@ process 1:
 	if (a1_cnt_1 == 3)
 		a1_3_1 = 1;
 	endif;
-	// Finished replacing "store a1 = 1;"
+	/* Finished replacing "store a1 = 1;" */
 	
 	
-	// Replacing "store a1 = 1;"
+	
+	
+	/* Replacing "store a1 = 1;" */
 	if (a1_cnt_1 == 3)
 		abort("overflow");
 	endif;
@@ -82,10 +91,12 @@ process 1:
 	if (a1_cnt_1 == 3)
 		a1_3_1 = 1;
 	endif;
-	// Finished replacing "store a1 = 1;"
+	/* Finished replacing "store a1 = 1;" */
 	
-	// Replacing "flush;"
-	2613: if (*)
+	
+	
+	/* Replacing "flush;" */
+	3450: if (*)
 		
 		if (a1_cnt_1 > 0)
 			
@@ -104,8 +115,9 @@ process 1:
 			a1_fst_1 = a1_fst_1 + 1;
 		endif;
 		
-		goto 2613;
+		goto 3450;
 	endif;
 	
-	// Finished replacing "flush;"
+	/* Finished replacing "flush;" */
+	
 

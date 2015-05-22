@@ -17,8 +17,8 @@ namespace bsm
 	const extern int UNDEFINED_VALUE;
 
 /* General methods */
-	extern void incrementCost(std::string varName, int increment, bufferSizeMap* target);
-	void incrementCostIfExists(std::string varName, int increment, bufferSizeMap* target);
+	extern void incrementCost(const std::string &varName, int increment, bufferSizeMap* target);
+	void incrementCostIfExists(const std::string &varName, int increment, bufferSizeMap* target);
 	extern void additiveMergeBufferSizes(bufferSizeMap* source, bufferSizeMap* destination);
 	extern void setTopIfIncremented(bufferSizeMap* source, bufferSizeMap* destination);
 	extern void copyBufferSizes(bufferSizeMap* source, bufferSizeMap* destination);
@@ -28,7 +28,7 @@ namespace bsm
 	std::string toString(bufferSizeMap* source);
 
 /* Map methods */
-	bool bufferSizeMapContains(bufferSizeMap* container, std::string key);
+	bool bufferSizeMapContains(bufferSizeMap* container, const std::string &key);
 	int bufferSizeValueCompare(int first, int second);
 	bool bufferSizeMapCompare(bufferSizeMap* first, bufferSizeMap* second);
 }

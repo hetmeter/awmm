@@ -56,7 +56,7 @@ namespace config
 		return ++currentAuxiliaryLabel;
 	}
 	
-	int indexOf(std::string varName)
+	int indexOf(const std::string &varName)
 	{
 		int result = -1;
 	
@@ -88,10 +88,20 @@ namespace config
 	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate)
 	{
 		//return getPredicateVariableTransitiveClosure(indexOf(predicate));
-	
-		std::vector<std::string> relevantIDs = predicate->getIDs();
 		std::vector<int> result;
 		int numberOfPredicates = globalPredicates.size();
+
+		if (predicate->name == literalCode::BOOL_TOKEN_NAME && predicate->children.at(0)->name == literalCode::FALSE_TAG_NAME)
+		{
+			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+			{
+				result.push_back(ctr);
+			}
+
+			return result;
+		}
+	
+		std::vector<std::string> relevantIDs = predicate->getIDs();
 	
 		for (std::string id : relevantIDs)
 		{
@@ -111,7 +121,7 @@ namespace config
 		return result;
 	}
 	
-	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(std::vector<Ast*> parallelAssignments)
+	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(const std::vector<Ast*> &parallelAssignments)
 	{
 		std::vector<std::string> relevantIDs;
 		std::vector<int> relevantIDIndices;
@@ -141,7 +151,7 @@ namespace config
 		return result;
 	}
 	
-	std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(std::string variableName)
+	std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(const std::string &variableName)
 	{
 		std::vector<int> result;
 		int numberOfPredicates = globalPredicates.size();
@@ -215,7 +225,7 @@ namespace config
 	}
 
 /* String operations */
-	std::string addTabs(std::string s, int numberOfTabs)
+	std::string addTabs(const std::string &s, int numberOfTabs)
 	{
 		std::regex newLineRegex("\\n");
 		std::smatch stringMatch;
@@ -228,12 +238,12 @@ namespace config
 	}
 
 /* Vector operations */
-	bool stringVectorContains(std::vector<std::string> container, std::string element)
+	bool stringVectorContains(const std::vector<std::string> &container, const std::string &element)
 	{
 		return find(container.begin(), container.end(), element) != container.end();
 	}
 	
-	std::vector<int> intVectorUnion(std::vector<int> first, std::vector<int> second)
+	std::vector<int> intVectorUnion(const std::vector<int> &first, const std::vector<int> &second)
 	{
 		std::vector<int> result(first);
 	
@@ -250,12 +260,12 @@ namespace config
 		return result;
 	}
 	
-	bool intVectorVectorContains(std::vector<std::vector<int>> container, std::vector<int> element)
+	bool intVectorVectorContains(const std::vector<std::vector<int>> &container, const std::vector<int> &element)
 	{
 		return find(container.begin(), container.end(), element) != container.end();
 	}
 	
-	std::vector<std::vector<int>> intSetCartesianProduct(std::vector<int> first, std::vector<int> second)
+	std::vector<std::vector<int>> intSetCartesianProduct(const std::vector<int> &first, const std::vector<int> &second)
 	{
 		std::vector<std::vector<int>> result;
 		std::vector<int> currentProduct;
@@ -281,7 +291,7 @@ namespace config
 		return result;
 	}
 		
-	std::vector<std::vector<int>> intSetCartesianProduct(std::vector<std::vector<int>> first, std::vector<int> second)
+	std::vector<std::vector<int>> intSetCartesianProduct(const std::vector<std::vector<int>> &first, const std::vector<int> &second)
 	{
 		std::vector<std::vector<int>> result;
 		std::vector<int> currentProduct;
@@ -342,19 +352,19 @@ namespace config
 	const std::string OVERFLOW_MESSAGE = "overflow";
 
 /* Error handling */
-	void throwError(std::string msg)
+	void throwError(const std::string &msg)
 	{
 		std::cout << "Error: " << msg << "\n";
 	}
 	
-	void throwCriticalError(std::string msg)
+	void throwCriticalError(const std::string &msg)
 	{
 		std::cout << "Error: " << msg << "\n";
 		std::exit(EXIT_FAILURE);
 	}
 
 /* Z3 */
-	bool cubeImpliesPredicate(std::vector<Ast*> cube, Ast* predicate)
+	bool cubeImpliesPredicate(const std::vector<Ast*> &cube, Ast* predicate)
 	{
 		/*z3::context c;
 	

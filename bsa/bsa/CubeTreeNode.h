@@ -13,7 +13,7 @@ public:
 //	CubeTreeNode(CubeTreeNode* source);
 
 /* Constructors and destructor */
-	CubeTreeNode(std::string representation);
+	CubeTreeNode(const std::string &representation);
 	~CubeTreeNode();
 
 /* Constants */
@@ -30,28 +30,31 @@ public:
 	CubeTreeNode* parent;
 	std::vector<CubeTreeNode*> children;
 	bool impliesPredicate = false;
+	bool toBeDeleted = false;
 
 /* Access */
 	std::string toString();
+	void cull();
 
 /* Cascading methods */
 	void cascadingPopulate(int sizeLimit);
 	void cascadingCheckImplication(Ast* predicate);
-	void cascadingPrune(std::string implyingCubeRepresentation);
+	void cascadingPrune(const std::string &implyingCubeRepresentation);
 	std::vector<CubeTreeNode*> getImplyingCubes();
+	void scour();
 
 /* Static methods */
 	static std::string getCubeStatePool(int predicateIndex);
-	static std::string getCubeStatePool(std::vector<int> predicateIndices);
-	static std::vector<std::string> getNaryCubeStateCombinations(std::vector<int> predicateIndices, int n);
-	static std::vector<std::string> getImplicativeCubeStates(std::string pool, Ast* predicate);
-	static std::string applyDecisionMask(std::string pool, std::string decisionMask);
-	static std::string removeDecisionsFromPool(std::string pool, std::vector<std::string> decisions);
-	static std::vector<Ast*> toAstRef(std::string pool);
-	static bool isSubset(std::string possibleSubset, std::string possibleSuperset);
+	static std::string getCubeStatePool(const std::vector<int> &predicateIndices);
+	static std::vector<std::string> getNaryCubeStateCombinations(const std::vector<int> &predicateIndices, int n);
+	static std::vector<std::string> getImplicativeCubeStates(const std::string &pool, Ast* predicate);
+	static std::string applyDecisionMask(const std::string &pool, const std::string &decisionMask);
+	static std::string removeDecisionsFromPool(const std::string &pool, const std::vector<std::string> &decisions);
+	static std::vector<Ast*> toAstRef(const std::string &pool);
+	static bool isSubset(const std::string &possibleSubset, const std::string &possibleSuperset);
 
 private:
 	void populate(int sizeLimit);
-	void prune(std::string implyingCubeRepresentation);
+	void prune(const std::string &implyingCubeRepresentation);
 	void checkImplication(Ast* predicate);
 };

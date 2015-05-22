@@ -38,9 +38,9 @@ public:
 /* Access */
 	void addChild(Ast* child);
 	void addChild(Ast* child, int index);
-	void addChildren(std::vector<Ast*> newChildren);
+	void addChildren(const std::vector<Ast*> &newChildren);
 	void refreshChildIndices();
-	std::vector<Ast*> search(std::string soughtName);
+	std::vector<Ast*> search(const std::string &soughtName);
 	std::string getLabelCode();
 	Ast* weakestLiberalPrecondition(Ast* predicate);
 	std::string toString();
@@ -64,21 +64,21 @@ public:
 	void controlFlowDirectionCascadingPropagateTops();
 
 /* Static operations */
-	static void replaceNode(std::vector<Ast*> nodes, Ast* oldNode);
+	static void replaceNode(const std::vector<Ast*> &nodes, Ast* oldNode);
 	static void replaceNode(Ast* newNode, Ast* oldNode);
 
 /* Static pseudo-constructors */
-	static Ast* newID(std::string variableName);
+	static Ast* newID(const std::string &variableName);
 	static Ast* newINT(int value);
-	static Ast* newBinaryOp(Ast* leftOperand, Ast* rightOperand, std::string operation);
-	static Ast* newMultipleOperation(std::vector<Ast*> operands, std::string operation);
-	static Ast* newLocalAssign(std::string variableName, int initialValue);
-	static Ast* newLocalAssign(std::string variableName, Ast* assignmentNode);
-	static Ast* newStore(std::string variableName, Ast* rightSide);
-	static Ast* newLoad(std::string variableName, Ast* rightSide);
-	static Ast* newIfElse(Ast* ifConditionalNode, std::vector<Ast*> statements);
-	static Ast* newIfElse(Ast* ifConditionalNode, std::vector<Ast*> ifStatements, std::vector<Ast*> elseStatements);
-	static Ast* newStatements(std::vector<Ast*> statements);
+	static Ast* newBinaryOp(Ast* leftOperand, Ast* rightOperand, const std::string &operation);
+	static Ast* newMultipleOperation(const std::vector<Ast*> &operands, const std::string &operation);
+	static Ast* newLocalAssign(const std::string &variableName, int initialValue);
+	static Ast* newLocalAssign(const std::string &variableName, Ast* assignmentNode);
+	static Ast* newStore(const std::string &variableName, Ast* rightSide);
+	static Ast* newLoad(const std::string &variableName, Ast* rightSide);
+	static Ast* newIfElse(Ast* ifConditionalNode, const std::vector<Ast*> &statements);
+	static Ast* newIfElse(Ast* ifConditionalNode, const std::vector<Ast*> &ifStatements, const std::vector<Ast*> &elseStatements);
+	static Ast* newStatements(const std::vector<Ast*> &statements);
 	static Ast* newNone();
 	static Ast* newNop();
 	static Ast* newLabel(int value, Ast* statement);
@@ -90,10 +90,10 @@ public:
 	static Ast* newBeginAtomic();
 	static Ast* newEndAtomic();
 
-	static Ast* newAstFromParsedProgram(std::string parsedProgramString);
-	static Ast* newSharedVariables(std::vector<std::string> variableNames);
-	static Ast* newLocalVariables(std::vector<std::string> variableNames);
-	static Ast* newBooleanVariableCube(std::string definition, bool useTemporaryVariables = true);
+	static Ast* newAstFromParsedProgram(const std::string &parsedProgramString);
+	static Ast* newSharedVariables(const std::vector<std::string> &variableNames);
+	static Ast* newLocalVariables(const std::vector<std::string> &variableNames);
+	static Ast* newBooleanVariableCube(const std::string &definition, bool useTemporaryVariables = true);
 	static Ast* newAbstractAssignmentFragment(Ast* assignment, Ast* predicate);
 	static Ast* newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables = true);
 	static Ast* newReverseLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate);

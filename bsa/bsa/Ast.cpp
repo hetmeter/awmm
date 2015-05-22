@@ -119,7 +119,7 @@ using namespace std;
 		//updateShortStringRepresentation();
 	}
 	
-	void Ast::addChildren(vector<Ast*> newChildren)
+	void Ast::addChildren(const vector<Ast*> &newChildren)
 	{
 		for (Ast* child : newChildren)
 		{
@@ -139,7 +139,7 @@ using namespace std;
 		}
 	}
 	
-	vector<Ast*> Ast::search(string soughtName)
+	vector<Ast*> Ast::search(const string &soughtName)
 	{
 		vector<Ast*> results;
 	
@@ -1418,8 +1418,17 @@ using namespace std;
 	
 			postFix.at(0)->startComment = "Resetting local variables";
 			children.at(2)->addChildren(postFix);
+
+			Ast* maxCube = newAssume(newLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, newFalse(), false)->negate());
+
+			children.at(2)->addChild(newLabel(config::getCurrentAuxiliaryLabel(), maxCube));
+
+			for (int ctr = 3; ctr < children.size(); ctr++)
+			{
+				children.at(ctr)->children.at(1)->addChild(newLabel(config::getCurrentAuxiliaryLabel(), maxCube), 0);
+			}
 	
-			vector<string> implicativeCubeStates;
+			/*vector<string> implicativeCubeStates;
 			vector<string> cubeStateCombinations;
 			vector<string> unmaskedImplicativeCubeStates;
 			vector<int> relevantIndices;
@@ -1478,7 +1487,7 @@ using namespace std;
 				{
 					children.at(ctr)->children.at(1)->addChild(newLabel(config::getCurrentAuxiliaryLabel(), newAssume(newMultipleOperation(implicativeCubes, literalCode::DOUBLE_OR)->negate())), 0);
 				}
-			}
+			}*/
 		}
 	}
 	
@@ -1518,7 +1527,7 @@ using namespace std;
 	}
 
 /* Static operations */
-	void Ast::replaceNode(vector<Ast*> nodes, Ast* oldNode)
+	void Ast::replaceNode(const vector<Ast*> &nodes, Ast* oldNode)
 	{
 		Ast* newParent = oldNode->parent;
 		int newIndex = oldNode->indexAsChild;
@@ -1551,7 +1560,7 @@ using namespace std;
 
 /* Static pseudo-constructors */
 	// Initializes an ID node
-	Ast* Ast::newID(string variableName)
+	Ast* Ast::newID(const string &variableName)
 	{
 		Ast* result = new Ast();
 		result->name = literalCode::ID_TOKEN_NAME;
@@ -1571,7 +1580,7 @@ using namespace std;
 	}
 	
 	// Initializes a binary operation node
-	Ast* Ast::newBinaryOp(Ast* leftOperand, Ast* rightOperand, string operation)
+	Ast* Ast::newBinaryOp(Ast* leftOperand, Ast* rightOperand, const string &operation)
 	{
 		Ast* result = new Ast();
 		result->name = operation;
@@ -1580,7 +1589,7 @@ using namespace std;
 		return result;
 	}
 
-	Ast* Ast::newMultipleOperation(std::vector<Ast*> operands, string operation)
+	Ast* Ast::newMultipleOperation(const vector<Ast*> &operands, const string &operation)
 	{
 		int operandCount = operands.size();
 
@@ -1599,7 +1608,7 @@ using namespace std;
 	}
 	
 	// Initializes a localAssign(ID(variableName), INT(initialValue)) node
-	Ast* Ast::newLocalAssign(string variableName, int initialValue)
+	Ast* Ast::newLocalAssign(const string &variableName, int initialValue)
 	{
 		Ast* result = new Ast();
 		result->name = literalCode::LOCAL_ASSIGN_TOKEN_NAME;
@@ -1609,7 +1618,7 @@ using namespace std;
 	}
 	
 	// Initializes a localAssign(ID(variableName), node) node
-	Ast* Ast::newLocalAssign(string variableName, Ast* assignmentNode)
+	Ast* Ast::newLocalAssign(const string &variableName, Ast* assignmentNode)
 	{
 		Ast* result = new Ast();
 		result->name = literalCode::LOCAL_ASSIGN_TOKEN_NAME;
@@ -1618,7 +1627,7 @@ using namespace std;
 		return result;
 	}
 	
-	Ast* Ast::newStore(std::string variableName, Ast* rightSide)
+	Ast* Ast::newStore(const string &variableName, Ast* rightSide)
 	{
 		Ast* result = new Ast();
 		result->name = literalCode::PSO_TSO_STORE_TOKEN_NAME;
@@ -1627,7 +1636,7 @@ using namespace std;
 		return result;
 	}
 	
-	Ast* Ast::newLoad(std::string variableName, Ast* rightSide)
+	Ast* Ast::newLoad(const string &variableName, Ast* rightSide)
 	{
 		Ast* result = new Ast();
 		result->name = literalCode::PSO_TSO_LOAD_TOKEN_NAME;
@@ -1637,7 +1646,7 @@ using namespace std;
 	}
 	
 	// Initializes an ifElse(ifConditional, statements) node
-	Ast* Ast::newIfElse(Ast* ifConditionalNode, vector<Ast*> statements)
+	Ast* Ast::newIfElse(Ast* ifConditionalNode, const vector<Ast*> &statements)
 	{
 		Ast* result = new Ast();
 		result->name = literalCode::IF_ELSE_TOKEN_NAME;
@@ -1648,7 +1657,7 @@ using namespace std;
 	}
 	
 	// Initializes an ifElse(ifConditional, ifStatements, elseStatements) node
-	Ast* Ast::newIfElse(Ast* ifConditionalNode, vector<Ast*> ifStatements, vector<Ast*> elseStatements)
+	Ast* Ast::newIfElse(Ast* ifConditionalNode, const vector<Ast*> &ifStatements, const vector<Ast*> &elseStatements)
 	{
 		Ast* result = new Ast();
 		result->name = literalCode::IF_ELSE_TOKEN_NAME;
@@ -1658,7 +1667,7 @@ using namespace std;
 		return result;
 	}
 	
-	Ast* Ast::newStatements(std::vector<Ast*> statements)
+	Ast* Ast::newStatements(const vector<Ast*> &statements)
 	{
 		Ast* result = new Ast();
 		result->name = literalCode::STATEMENTS_TOKEN_NAME;
@@ -1747,7 +1756,7 @@ using namespace std;
 		return result;
 	}
 
-	Ast* Ast::newAstFromParsedProgram(string parsedProgramString)
+	Ast* Ast::newAstFromParsedProgram(const string &parsedProgramString)
 	{
 		// Parse through the AST representation string character by character
 		Ast* currentAst = new Ast();
@@ -1798,7 +1807,7 @@ using namespace std;
 		return result;
 	}
 	
-	Ast* Ast::newSharedVariables(std::vector<std::string> variableNames)
+	Ast* Ast::newSharedVariables(const vector<string> &variableNames)
 	{
 		Ast* result = new Ast();
 		result->name = literalCode::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME;
@@ -1811,7 +1820,7 @@ using namespace std;
 		return result;
 	}
 	
-	Ast* Ast::newLocalVariables(std::vector<std::string> variableNames)
+	Ast* Ast::newLocalVariables(const vector<string> &variableNames)
 	{
 		Ast* result = new Ast();
 		result->name = literalCode::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME;
@@ -1824,7 +1833,7 @@ using namespace std;
 		return result;
 	}
 	
-	Ast* Ast::newBooleanVariableCube(std::string definition, bool useTemporaryVariables)
+	Ast* Ast::newBooleanVariableCube(const string &definition, bool useTemporaryVariables)
 	{
 		int numberOfPredicates = config::globalPredicates.size();
 		vector<Ast*> cubeTerms;
@@ -1871,6 +1880,7 @@ using namespace std;
 	{
 		int numberOfPredicates = config::globalPredicates.size();
 		vector<int> relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
+
 		string pool = string(numberOfPredicates, CubeTreeNode::CUBE_STATE_IGNORE);
 	
 		for (int relevantIndex : relevantIndices)
@@ -1879,11 +1889,13 @@ using namespace std;
 		}
 	
 		CubeTreeNode* cubeTreeRoot = new CubeTreeNode(pool);
-		cout << "\nCreated:\n" << cubeTreeRoot->toString() << "\n";
+		//cout << "\nCreated:\n" << cubeTreeRoot->toString() << "\n";
 		cubeTreeRoot->cascadingPopulate(cubeSizeUpperLimit);
-		cout << "\nPopulated:\n" << cubeTreeRoot->toString() << "\n";
+		//cout << "\nPopulated:\n" << cubeTreeRoot->toString() << "\n";
 		cubeTreeRoot->cascadingCheckImplication(predicate);
 		cout << "\nImplications checked:\n" << cubeTreeRoot->toString() << "\n";
+		cubeTreeRoot->scour();
+		//cout << "\nScoured:\n" << cubeTreeRoot->toString() << "\n";
 		vector<CubeTreeNode*> implicativeCubeNodes = cubeTreeRoot->getImplyingCubes();
 		vector<Ast*> implicativeCubes;
 	

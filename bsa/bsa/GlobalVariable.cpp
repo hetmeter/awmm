@@ -4,7 +4,7 @@
 
 using namespace std;
 
-GlobalVariable::GlobalVariable(string variableName, vector<int> processes)
+GlobalVariable::GlobalVariable(const string &variableName, const vector<int> &processes)
 {
 	_variableName = variableName;
 
@@ -29,7 +29,7 @@ GlobalVariable::~GlobalVariable()
 {
 }
 
-string GlobalVariable::registerAuxiliaryVariable(string minimalName)
+string GlobalVariable::registerAuxiliaryVariable(const string &minimalName)
 {
 	if (!config::stringVectorContains(config::variableNames, minimalName))
 	{

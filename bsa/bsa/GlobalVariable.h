@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <string>
 #include <map>
 #include <vector>
 
@@ -10,11 +9,11 @@ private:
 
 	std::string _variableName;
 	
-	std::string registerAuxiliaryVariable(std::string minimalName);
+	std::string registerAuxiliaryVariable(const std::string &minimalName);
 
 public:
 
-	GlobalVariable(std::string variableName, std::vector<int> processes);
+	GlobalVariable(const std::string &variableName, const std::vector<int> &processes);
 	~GlobalVariable();
 
 	std::map<int, std::string> auxiliaryCounterVariableNames;
