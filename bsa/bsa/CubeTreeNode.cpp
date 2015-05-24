@@ -11,19 +11,26 @@ using namespace std;
 		assert(representation.size() == config::globalPredicates.size());
 
 		stringRepresentation = representation;
+		varCount = representation.size() - count(stringRepresentation.begin(), stringRepresentation.end(), CUBE_STATE_OMIT) -
+			count(stringRepresentation.begin(), stringRepresentation.end(), CUBE_STATE_IGNORE);
 		parent = this;
 	}
 
 	CubeTreeNode::~CubeTreeNode()
 	{
-
+		parent = nullptr;
+		cullChildren();
 	}
 
 /* Access */
+	bool CubeTreeNode::isConsiderable()
+	{
+		return !ignore && !impliesPredicate;
+	}
 
 	string CubeTreeNode::toString()
 	{
-		string result = stringRepresentation + (impliesPredicate ? "\t- implying" : "") + (toBeDeleted ? "\t- to be deleted" : "");
+		string result = stringRepresentation + (impliesPredicate ? "\t- implying" : "") + (ignore ? "\t- to be deleted" : "");
 		string subResult = "";
 
 		for (CubeTreeNode* child : children)
@@ -39,20 +46,14 @@ using namespace std;
 		return result + subResult;
 	}
 
-	void CubeTreeNode::cull()
+	void CubeTreeNode::cullChildren()
 	{
-		for (CubeTreeNode* child : children)
-		{
-			child->cull();
-		}
-
 		for (CubeTreeNode* child : children)
 		{
 			delete child;
 		}
 
 		children.clear();
-		parent = nullptr;
 	}
 
 /* Cascading methods */
@@ -63,7 +64,7 @@ using namespace std;
 	
 		for (CubeTreeNode* child : children)
 		{
-			if (!child->toBeDeleted)
+			if (!child->ignore)
 			{
 				child->cascadingPopulate(sizeLimit);
 			}
@@ -74,7 +75,7 @@ using namespace std;
 	{
 		for (CubeTreeNode* child : children)
 		{
-			if (!child->toBeDeleted)
+			if (child->isConsiderable())
 			{
 				child->checkImplication(predicate);
 			}
@@ -82,7 +83,7 @@ using namespace std;
 	
 		for (CubeTreeNode* child : children)
 		{
-			if (!child->toBeDeleted)
+			if (child->isConsiderable())
 			{
 				child->cascadingCheckImplication(predicate);
 			}
@@ -91,17 +92,11 @@ using namespace std;
 	
 	void CubeTreeNode::cascadingPrune(const string &implyingCubeRepresentation)
 	{
-		if (!impliesPredicate)
-		{
-			prune(implyingCubeRepresentation);
+		prune(implyingCubeRepresentation);
 	
-			for (CubeTreeNode* child : children)
-			{
-				if (!child->toBeDeleted && !child->impliesPredicate)
-				{
-					child->cascadingPrune(implyingCubeRepresentation);
-				}
-			}
+		for (CubeTreeNode* child : children)
+		{
+			child->cascadingPrune(implyingCubeRepresentation);
 		}
 	}
 
@@ -126,19 +121,23 @@ using namespace std;
 
 	void CubeTreeNode::scour()
 	{
-		for (int ctr = 0; ctr < children.size(); ctr++)
+		for (int ctr = children.size() - 1; ctr >= 0; ctr--)
 		{
-			if (children.at(ctr)->toBeDeleted)
+			if (children.at(ctr)->ignore)
 			{
-				children.at(ctr)->cull();
+				if (children.at(ctr)->impliesPredicate)
+				{
+					cout << "\t\t\t\tDeleting implicative cube [" << children.at(ctr)->stringRepresentation << "] (" << varCount << ")\n";
+				}
+
 				delete children.at(ctr);
 				children.erase(children.begin() + ctr);
-				ctr--;
 			}
-			else
-			{
-				children.at(ctr)->scour();
-			}
+		}
+
+		for (CubeTreeNode* child : children)
+		{
+			child->scour();
 		}
 	}
 
@@ -374,7 +373,7 @@ using namespace std;
 		return cubeTerms;
 	}
 	
-	bool CubeTreeNode::isSubset(const string &possibleSubset, const string &possibleSuperset)
+	bool CubeTreeNode::isProperSubset(const string &possibleSubset, const string &possibleSuperset)
 	{
 		int numberOfPredicates = config::globalPredicates.size();
 	
@@ -398,23 +397,20 @@ using namespace std;
 			}
 		}
 	
-		return true;
+		return possibleSubset != possibleSuperset;
 	}
 
 /* Private methods */
 	
 	void CubeTreeNode::populate(int sizeLimit)
 	{
-		if (!toBeDeleted)
+		if (!ignore)
 		{
-			int numberOfPredicates = config::globalPredicates.size();
-			int numberOfOmits = count(stringRepresentation.begin(), stringRepresentation.end(), CUBE_STATE_OMIT);
-			int numberOfIgnores = count(stringRepresentation.begin(), stringRepresentation.end(), CUBE_STATE_IGNORE);
-
-			if (numberOfPredicates - numberOfOmits - numberOfIgnores < sizeLimit)
+			if (varCount < sizeLimit)
 			{
 				assert(children.size() == 0);
 
+				int numberOfPredicates = stringRepresentation.size();
 				int startIndex = numberOfPredicates - 1;
 				string newRepresentation;
 
@@ -452,38 +448,26 @@ using namespace std;
 	
 	void CubeTreeNode::prune(const string &implyingCubeRepresentation)
 	{
-		//cout << "\tPruned : " << stringRepresentation << "\n";
-		if (!impliesPredicate && !toBeDeleted)
+		if (isProperSubset(implyingCubeRepresentation, stringRepresentation))
 		{
-			for (int ctr = 0; ctr < children.size(); ctr++)
-			{
-				if (!children.at(ctr)->impliesPredicate && !children.at(ctr)->toBeDeleted &&
-					isSubset(implyingCubeRepresentation, children.at(ctr)->stringRepresentation))
-				{
-					/*children.at(ctr)->parent = nullptr;
-					children.erase(children.begin() + ctr);
-					ctr--;*/
+			cout << "\t\t\t\tCube [" << stringRepresentation << "] (" << varCount << ") will be pruned by [" << implyingCubeRepresentation << "]\n";
 
-					children.at(ctr)->toBeDeleted = true;
-				}
-			}
+			ignore = true;
+			cullChildren();
 		}
 	}
 
 	void CubeTreeNode::checkImplication(Ast* predicate)
 	{
-		if (!toBeDeleted && !impliesPredicate)
+		if (isConsiderable())
 		{
 			impliesPredicate = config::cubeImpliesPredicate(toAstRef(stringRepresentation), predicate);
 
 			if (impliesPredicate)
 			{
-				for (CubeTreeNode* child : children)
-				{
-					child->parent = nullptr;
-				}
+				cout << "\t\t\t\tCube [" << stringRepresentation << "] (" << varCount << ") implies " << predicate->emitCode() << "\n";
 
-				children.clear();
+				cullChildren();
 
 				CubeTreeNode* possibleRoot = parent;
 
@@ -493,6 +477,7 @@ using namespace std;
 				}
 
 				possibleRoot->cascadingPrune(stringRepresentation);
+				possibleRoot->scour();
 			}
 		}
 	}

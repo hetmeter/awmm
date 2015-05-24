@@ -27,14 +27,16 @@ public:
 
 /* Attributes */
 	std::string stringRepresentation;
+	int varCount;
 	CubeTreeNode* parent;
 	std::vector<CubeTreeNode*> children;
 	bool impliesPredicate = false;
-	bool toBeDeleted = false;
+	bool ignore = false;
 
 /* Access */
+	bool isConsiderable();
 	std::string toString();
-	void cull();
+	void cullChildren();
 
 /* Cascading methods */
 	void cascadingPopulate(int sizeLimit);
@@ -51,7 +53,7 @@ public:
 	static std::string applyDecisionMask(const std::string &pool, const std::string &decisionMask);
 	static std::string removeDecisionsFromPool(const std::string &pool, const std::vector<std::string> &decisions);
 	static std::vector<Ast*> toAstRef(const std::string &pool);
-	static bool isSubset(const std::string &possibleSubset, const std::string &possibleSuperset);
+	static bool isProperSubset(const std::string &possibleSubset, const std::string &possibleSuperset);
 
 private:
 	void populate(int sizeLimit);

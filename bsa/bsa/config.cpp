@@ -326,21 +326,21 @@ namespace config
 		for (int ctr = 0; ctr < globalPredicateCount; ctr++)
 		{
 			srand(time(NULL));
-			currentVariableName = "b_" + std::to_string(ctr);
+			currentVariableName = "B" + std::to_string(ctr);
 	
 			while (stringVectorContains(variableNames, currentVariableName))
 			{
-				currentVariableName = "b_" + std::to_string(ctr) + "_" + std::to_string(rand());
+				currentVariableName = "B" + std::to_string(ctr) + "_" + std::to_string(rand());
 			}
 	
 			auxiliaryBooleanVariableNames.push_back(currentVariableName);
 			variableNames.push_back(currentVariableName);
 	
-			currentVariableName = "t_" + std::to_string(ctr);
+			currentVariableName = "T" + std::to_string(ctr);
 	
 			while (stringVectorContains(variableNames, currentVariableName))
 			{
-				currentVariableName = "t_" + std::to_string(ctr) + "_" + std::to_string(rand());
+				currentVariableName = "T" + std::to_string(ctr) + "_" + std::to_string(rand());
 			}
 	
 			auxiliaryTemporaryVariableNames.push_back(currentVariableName);

@@ -189,6 +189,8 @@ using namespace std;
 		}
 		else
 		{
+			cout << "\t\tComputing WP(" << emitCode() << ", " << predicate->emitCode() << ")\n";
+
 			if (name == literalCode::PSO_TSO_STORE_TOKEN_NAME || name == literalCode::PSO_TSO_LOAD_TOKEN_NAME
 				|| name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
 			{
@@ -1878,6 +1880,7 @@ using namespace std;
 	
 	Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables)
 	{
+		cout << "\t\tComputing F(" << predicate->emitCode() << ")\n";
 		int numberOfPredicates = config::globalPredicates.size();
 		vector<int> relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
 
@@ -1890,10 +1893,13 @@ using namespace std;
 	
 		CubeTreeNode* cubeTreeRoot = new CubeTreeNode(pool);
 		//cout << "\nCreated:\n" << cubeTreeRoot->toString() << "\n";
+		cout << "\t\t\tPopulating cube tree...\n";
 		cubeTreeRoot->cascadingPopulate(cubeSizeUpperLimit);
 		//cout << "\nPopulated:\n" << cubeTreeRoot->toString() << "\n";
+		cout << "\t\t\tChecking implications...\n";
 		cubeTreeRoot->cascadingCheckImplication(predicate);
 		//cout << "\nImplications checked:\n" << cubeTreeRoot->toString() << "\n";
+		cout << "\t\t\tScouring cube tree...\n";
 		cubeTreeRoot->scour();
 		//cout << "\nScoured:\n" << cubeTreeRoot->toString() << "\n";
 		vector<CubeTreeNode*> implicativeCubeNodes = cubeTreeRoot->getImplyingCubes();
@@ -2198,7 +2204,7 @@ using namespace std;
 	{
 		bool result = false;
 	
-		cout << "\tPerforming predicate abstraction on: " << emitCode() << "\n\n";
+		//cout << "\tPerforming predicate abstraction on: " << emitCode() << "\n\n";
 	
 		if (config::currentLanguage == config::language::RMA)
 		{
@@ -2228,6 +2234,8 @@ using namespace std;
 			else if (name == literalCode::PSO_TSO_STORE_TOKEN_NAME || name == literalCode::PSO_TSO_LOAD_TOKEN_NAME
 				|| name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
 			{
+				cout << "\tPerforming predicate abstraction on: " << emitCode() << "\n\n";
+
 				vector<int> relevantPredicateIndices = config::getRelevantAuxiliaryBooleanVariableIndices(children.at(0)->children.at(0)->name);
 				vector<Ast*> replacementStatements;
 	
@@ -2274,7 +2282,7 @@ using namespace std;
 					for (int ctr : relevantPredicateIndices)
 					{
 						replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
-								newLoad(
+								newLocalAssign(
 									config::auxiliaryTemporaryVariableNames[ctr],
 									newINT(0)
 								))
@@ -2291,6 +2299,8 @@ using namespace std;
 			}
 			else if (name == literalCode::IF_ELSE_TOKEN_NAME)
 			{
+				cout << "\tPerforming predicate abstraction on: if(" << children.at(0)->emitCode() << ")...\n\n";
+
 				Ast* conditional = children.at(0)->clone();
 				replaceNode(newAsterisk(), children.at(0));
 	
