@@ -13,7 +13,7 @@ public:
 //	CubeTreeNode(CubeTreeNode* source);
 
 /* Constructors and destructor */
-	CubeTreeNode(const std::string &representation);
+	CubeTreeNode(const std::string &representation, int upperLimit);
 	~CubeTreeNode();
 
 /* Constants */
@@ -28,6 +28,7 @@ public:
 /* Attributes */
 	std::string stringRepresentation;
 	int varCount;
+	int varCountUpperLimit;
 	CubeTreeNode* parent;
 	std::vector<CubeTreeNode*> children;
 	bool impliesPredicate = false;
@@ -40,7 +41,7 @@ public:
 
 /* Cascading methods */
 	void cascadingPopulate(int sizeLimit);
-	void cascadingCheckImplication(Ast* predicate);
+	void breadthFirstCheckImplication(Ast* predicate);
 	void cascadingPrune(const std::string &implyingCubeRepresentation);
 	std::vector<CubeTreeNode*> getImplyingCubes();
 	void scour();

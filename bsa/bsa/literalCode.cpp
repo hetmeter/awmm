@@ -37,6 +37,7 @@ namespace literalCode
 	const std::string BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME = "local";
 	const std::string BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME = "shared";
 	const std::string BL_PROCESS_DECLARATION_TOKEN_NAME = "booleanProcess";
+	const std::string BL_IF_TOKEN_NAME = "booleanIf";
 	
 	const std::string PSO_TSO_STORE_TOKEN_NAME = "store";
 	const std::string PSO_TSO_LOAD_TOKEN_NAME = "load";

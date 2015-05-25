@@ -81,6 +81,7 @@ public:
 	static Ast* newStatements(const std::vector<Ast*> &statements);
 	static Ast* newNone();
 	static Ast* newNop();
+	static Ast* newGoto(int value);
 	static Ast* newLabel(int value, Ast* statement);
 	static Ast* newAsterisk();
 	static Ast* newTrue();
@@ -89,6 +90,7 @@ public:
 	static Ast* newChoose(Ast* firstChoice, Ast* secondChoice);
 	static Ast* newBeginAtomic();
 	static Ast* newEndAtomic();
+	static Ast* newBooleanIf(Ast* ifConditionalNode, Ast* statement);
 
 	static Ast* newAstFromParsedProgram(const std::string &parsedProgramString);
 	static Ast* newSharedVariables(const std::vector<std::string> &variableNames);

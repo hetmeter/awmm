@@ -6,13 +6,14 @@ using namespace std;
 
 /* Constructors and destructor */
 
-	CubeTreeNode::CubeTreeNode(const string &representation)
+	CubeTreeNode::CubeTreeNode(const string &representation, int upperLimit)
 	{
 		assert(representation.size() == config::globalPredicates.size());
 
 		stringRepresentation = representation;
 		varCount = representation.size() - count(stringRepresentation.begin(), stringRepresentation.end(), CUBE_STATE_OMIT) -
 			count(stringRepresentation.begin(), stringRepresentation.end(), CUBE_STATE_IGNORE);
+		varCountUpperLimit = upperLimit;
 		parent = this;
 	}
 
@@ -71,9 +72,30 @@ using namespace std;
 		}
 	}
 	
-	void CubeTreeNode::cascadingCheckImplication(Ast* predicate)
+	void CubeTreeNode::breadthFirstCheckImplication(Ast* predicate)
 	{
-		for (CubeTreeNode* child : children)
+		vector<CubeTreeNode*> searchQueue;
+		CubeTreeNode* currentNode;
+		searchQueue.push_back(this);
+
+		while (!searchQueue.empty())
+		{
+			currentNode = searchQueue.at(0);
+
+			if (currentNode->isConsiderable())
+			{
+				currentNode->checkImplication(predicate);
+
+				for (CubeTreeNode* child : currentNode->children)
+				{
+					searchQueue.push_back(child);
+				}
+			}
+
+			searchQueue.erase(searchQueue.begin());
+		}
+
+		/*for (CubeTreeNode* child : children)
 		{
 			if (child->isConsiderable())
 			{
@@ -87,7 +109,7 @@ using namespace std;
 			{
 				child->cascadingCheckImplication(predicate);
 			}
-		}
+		}*/
 	}
 	
 	void CubeTreeNode::cascadingPrune(const string &implyingCubeRepresentation)
@@ -103,6 +125,35 @@ using namespace std;
 	vector<CubeTreeNode*> CubeTreeNode::getImplyingCubes()
 	{
 		vector<CubeTreeNode*> result;
+		vector<CubeTreeNode*> searchQueue;
+		CubeTreeNode* currentNode;
+		searchQueue.push_back(this);
+
+		while (!searchQueue.empty())
+		{
+			currentNode = searchQueue.at(0);
+
+			if (currentNode->impliesPredicate)
+			{
+				result.push_back(currentNode);
+			}
+			else
+			{
+				if (!currentNode->ignore)
+				{
+					for (CubeTreeNode* child : currentNode->children)
+					{
+						searchQueue.push_back(child);
+					}
+				}
+			}
+
+			searchQueue.erase(searchQueue.begin());
+		}
+
+		return result;
+
+		/*vector<CubeTreeNode*> result;
 		vector<CubeTreeNode*> subResult;
 
 		if (impliesPredicate)
@@ -116,7 +167,7 @@ using namespace std;
 			result.insert(result.end(), subResult.begin(), subResult.end());
 		}
 
-		return result;
+		return result;*/
 	}
 
 	void CubeTreeNode::scour()
@@ -429,10 +480,10 @@ using namespace std;
 						newRepresentation = string(stringRepresentation);
 
 						newRepresentation[startIndex] = CUBE_STATE_DECIDED_TRUE;
-						children.push_back(new CubeTreeNode(newRepresentation));
+						children.push_back(new CubeTreeNode(newRepresentation, sizeLimit));
 
 						newRepresentation[startIndex] = CUBE_STATE_DECIDED_FALSE;
-						children.push_back(new CubeTreeNode(newRepresentation));
+						children.push_back(new CubeTreeNode(newRepresentation, sizeLimit));
 
 						newRepresentation[startIndex] = CUBE_STATE_OMIT;
 					}
@@ -459,6 +510,8 @@ using namespace std;
 
 	void CubeTreeNode::checkImplication(Ast* predicate)
 	{
+		//cout << "\t\t\t\tChecking implication of [" << stringRepresentation << "] (" << varCount << ")\n";
+
 		if (isConsiderable())
 		{
 			impliesPredicate = config::cubeImpliesPredicate(toAstRef(stringRepresentation), predicate);
@@ -469,15 +522,18 @@ using namespace std;
 
 				cullChildren();
 
-				CubeTreeNode* possibleRoot = parent;
-
-				while (possibleRoot->parent != possibleRoot)
+				if (varCount < varCountUpperLimit)	// Don't look for supersets of cubes the maximum size
 				{
-					possibleRoot = possibleRoot->parent;
-				}
+					CubeTreeNode* possibleRoot = parent;
 
-				possibleRoot->cascadingPrune(stringRepresentation);
-				possibleRoot->scour();
+					while (possibleRoot->parent != possibleRoot)
+					{
+						possibleRoot = possibleRoot->parent;
+					}
+
+					possibleRoot->cascadingPrune(stringRepresentation);
+					//possibleRoot->scour();
+				}
 			}
 		}
 	}

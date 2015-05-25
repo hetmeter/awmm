@@ -366,6 +366,11 @@ namespace config
 /* Z3 */
 	bool cubeImpliesPredicate(const std::vector<Ast*> &cube, Ast* predicate)
 	{
+		if (cube.empty())
+		{
+			return false;
+		}
+
 		/*z3::context c;
 	
 		std::cout << "\tCube: " + Ast::newMultipleOperation(cube, AND)->emitCode() + " -> " + predicate->emitCode() + " returns " +

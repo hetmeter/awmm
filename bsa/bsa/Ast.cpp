@@ -413,6 +413,13 @@ using namespace std;
 
 			isBooleanProgramNode = true;
 		}
+		else if (name == literalCode::BL_IF_TOKEN_NAME)
+		{
+			result += literalCode::IF_TAG_NAME + literalCode::SPACE + literalCode::LEFT_PARENTHESIS +
+				children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS + literalCode::SPACE + children.at(1)->emitCode();
+
+			isBooleanProgramNode = true;
+		}
 
 		if (!startComment.empty())
 		{
@@ -1385,7 +1392,8 @@ using namespace std;
 		{
 			for (Ast* child : children)
 			{
-				if (child->name != literalCode::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME && child->name != literalCode::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME)
+				if (name != literalCode::IF_ELSE_TOKEN_NAME && child->name != literalCode::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME &&
+					child->name != literalCode::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME && child->name != literalCode::BL_IF_TOKEN_NAME)
 				{
 					child->cascadingPerformPredicateAbstraction();
 				}
@@ -1690,6 +1698,15 @@ using namespace std;
 		result->name = literalCode::NOP_TOKEN_NAME;
 		return result;
 	}
+
+	Ast* Ast::newGoto(int value)
+	{
+		Ast* result = new Ast();
+		result->name = literalCode::GOTO_TOKEN_NAME;
+		result->children.push_back(new Ast());
+		result->children.at(0)->name = to_string(value);
+		return result;
+	}
 	
 	Ast* Ast::newLabel(int value, Ast* statement)
 	{
@@ -1755,6 +1772,15 @@ using namespace std;
 	{
 		Ast* result = new Ast();
 		result->name = literalCode::END_ATOMIC_TOKEN_NAME;
+		return result;
+	}
+
+	Ast* Ast::newBooleanIf(Ast* ifConditionalNode, Ast* statement)
+	{
+		Ast* result = new Ast();
+		result->name = literalCode::BL_IF_TOKEN_NAME;
+		result->addChild(ifConditionalNode);
+		result->addChild(statement);
 		return result;
 	}
 
@@ -1891,13 +1917,14 @@ using namespace std;
 			pool[relevantIndex] = CubeTreeNode::CUBE_STATE_OMIT;
 		}
 	
-		CubeTreeNode* cubeTreeRoot = new CubeTreeNode(pool);
+		CubeTreeNode* cubeTreeRoot = new CubeTreeNode(pool, cubeSizeUpperLimit);
 		//cout << "\nCreated:\n" << cubeTreeRoot->toString() << "\n";
 		cout << "\t\t\tPopulating cube tree...\n";
 		cubeTreeRoot->cascadingPopulate(cubeSizeUpperLimit);
 		//cout << "\nPopulated:\n" << cubeTreeRoot->toString() << "\n";
 		cout << "\t\t\tChecking implications...\n";
-		cubeTreeRoot->cascadingCheckImplication(predicate);
+		cubeTreeRoot->breadthFirstCheckImplication(predicate);
+		//cubeTreeRoot->cascadingCheckImplication(predicate);
 		//cout << "\nImplications checked:\n" << cubeTreeRoot->toString() << "\n";
 		cout << "\t\t\tScouring cube tree...\n";
 		cubeTreeRoot->scour();
@@ -2299,13 +2326,43 @@ using namespace std;
 			}
 			else if (name == literalCode::IF_ELSE_TOKEN_NAME)
 			{
-				cout << "\tPerforming predicate abstraction on: if(" << children.at(0)->emitCode() << ")...\n\n";
+				/*cout << "\tPerforming predicate abstraction on: if(" << children.at(0)->emitCode() << ")...\n\n";
 
 				Ast* conditional = children.at(0)->clone();
 				replaceNode(newAsterisk(), children.at(0));
-	
+
 				children.at(1)->addChild(newAssume(newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional)), 0);
-	
+
+				if (children.at(2)->name != literalCode::NONE_TOKEN_NAME)
+				{
+					children.at(2)->addChild(newAssume(newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional->negate())), 0);
+				}*/
+
+				cout << "\tPerforming predicate abstraction on: if(" << children.at(0)->emitCode() << ")...\n\n";
+
+				vector<Ast*> replacementStatements;
+				Ast* conditional = children.at(0)->clone();
+				int endLabel = config::getCurrentAuxiliaryLabel();
+				int elseLabel = config::getCurrentAuxiliaryLabel();
+
+				replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
+								newBooleanIf(
+									newAsterisk(),
+									newGoto(endLabel)
+								))
+							);
+
+				replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
+								newBooleanIf(
+									newAsterisk(),
+									newGoto(endLabel)
+								))
+							);
+
+				replaceNode(newAsterisk(), children.at(0));
+
+				children.at(1)->addChild(newAssume(newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional)), 0);
+
 				if (children.at(2)->name != literalCode::NONE_TOKEN_NAME)
 				{
 					children.at(2)->addChild(newAssume(newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional->negate())), 0);

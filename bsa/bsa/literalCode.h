@@ -40,6 +40,7 @@ namespace literalCode
 	const extern std::string BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME;
 	const extern std::string BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME;
 	const extern std::string BL_PROCESS_DECLARATION_TOKEN_NAME;
+	const extern std::string BL_IF_TOKEN_NAME;
 
 	const extern std::string PSO_TSO_STORE_TOKEN_NAME;
 	const extern std::string PSO_TSO_LOAD_TOKEN_NAME;

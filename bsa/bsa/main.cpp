@@ -34,6 +34,7 @@ int main(int argc, char** argv)
 {
 	string parsedProgramPath;
 	string outputPath;
+	string endAssertion;
 
 	// Read arguments
 	if (argc > 1)
@@ -61,6 +62,15 @@ int main(int argc, char** argv)
 	else
 	{
 		config::throwCriticalError("No cube size limit specified");
+	}
+
+	if (argc > 4)
+	{
+		endAssertion = stoi(argv[4]);
+	}
+	else
+	{
+		config::throwCriticalError("No end assertion specified");
 	}
 
 	// Parse input file (no line breaks are expected)
@@ -198,7 +208,7 @@ int main(int argc, char** argv)
 	// Generate the output
 	string booleanOutputPath = fileNameStub + "." + BOOLEAN_EXTENSION;
 	ofstream booleanProgramOut(booleanOutputPath);
-	booleanProgramOut << rootAstRef->emitCode();
+	booleanProgramOut << rootAstRef->emitCode() << "\n\n" << endAssertion;
 	booleanProgramOut.close();
 
 	return 0;
