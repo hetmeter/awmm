@@ -1,0 +1,1 @@
+java -jar fender.jar "..\\..\\target\\%1" sc
