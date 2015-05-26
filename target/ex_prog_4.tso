@@ -8,14 +8,14 @@ endinit
 process 1:
 	
 	t1 = 2;
-	t2 = 4;
-	4: load t3 = a1;
-	store a1 = 1;
-	store a1 = 1;
-	store a1 = 1;
-	store a1 = 1;
+	
+	100: if (t1 < 2)
+		goto 1;
+	endif;
+	
+	1: load t1 = a2;
 		
 	
 	/*fence;*/
 	
-	flush;
+	/*flush;*/

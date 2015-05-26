@@ -58,6 +58,7 @@ public:
 	void cascadingInitializeAuxiliaryVariables();
 	void carryOutReplacements();
 	void cascadingPerformPredicateAbstraction();
+	void cascadingUnfoldIfElses();
 	void setVariableInitializations();
 	void topDownCascadingCopyPersistentBufferSizes(Ast* source);
 	void topDownCascadingAddInitializedCausedCostsToPersistentCosts();
@@ -123,6 +124,7 @@ private:
 	void initializeAuxiliaryVariables();
 	std::vector<Ast*> reportBack();
 	bool performPredicateAbstraction();
+	bool unfoldIfElses();
 	void copyPersistentBufferSizes(Ast* source);
 	bool propagateTops();
 	Ast* tryGetNextStatement();

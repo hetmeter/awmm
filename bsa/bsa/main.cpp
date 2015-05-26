@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 
 	if (argc > 4)
 	{
-		endAssertion = stoi(argv[4]);
+		endAssertion = argv[4];
 	}
 	else
 	{
@@ -184,6 +184,7 @@ int main(int argc, char** argv)
 
 			cout << "Performing predicate abstraction...\n";
 
+			rootAstRef->cascadingUnfoldIfElses();
 			rootAstRef->cascadingPerformPredicateAbstraction();
 			rootAstRef->setVariableInitializations();
 

@@ -38,6 +38,7 @@ public:
 	bool isConsiderable();
 	std::string toString();
 	void cullChildren();
+	bool contains(const std::string &cubeRepresentation);
 
 /* Cascading methods */
 	void cascadingPopulate(int sizeLimit);
@@ -55,6 +56,7 @@ public:
 	static std::string removeDecisionsFromPool(const std::string &pool, const std::vector<std::string> &decisions);
 	static std::vector<Ast*> toAstRef(const std::string &pool);
 	static bool isProperSubset(const std::string &possibleSubset, const std::string &possibleSuperset);
+	static bool isEquivalent(const std::string &first, const std::string &second);
 
 private:
 	void populate(int sizeLimit);

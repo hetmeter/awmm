@@ -57,6 +57,24 @@ using namespace std;
 		children.clear();
 	}
 
+	bool CubeTreeNode::contains(const string &cubeRepresentation)
+	{
+		if (isEquivalent(stringRepresentation, cubeRepresentation))
+		{
+			return true;
+		}
+
+		for (CubeTreeNode* child : children)
+		{
+			if (child->contains(cubeRepresentation))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 /* Cascading methods */
 	
 	void CubeTreeNode::cascadingPopulate(int sizeLimit)
@@ -451,6 +469,30 @@ using namespace std;
 		return possibleSubset != possibleSuperset;
 	}
 
+	bool CubeTreeNode::isEquivalent(const string &first, const string &second)
+	{
+		int numberOfPredicates = first.size();
+
+		if (numberOfPredicates != second.size())
+		{
+			return false;
+		}
+
+		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+		{
+			if (first[ctr] == CubeTreeNode::CUBE_STATE_DECIDED_FALSE || first[ctr] == CubeTreeNode::CUBE_STATE_DECIDED_TRUE ||
+				second[ctr] == CubeTreeNode::CUBE_STATE_DECIDED_FALSE || second[ctr] == CubeTreeNode::CUBE_STATE_DECIDED_TRUE)
+			{
+				if (first[ctr] != second[ctr])
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
 /* Private methods */
 	
 	void CubeTreeNode::populate(int sizeLimit)
@@ -480,10 +522,24 @@ using namespace std;
 						newRepresentation = string(stringRepresentation);
 
 						newRepresentation[startIndex] = CUBE_STATE_DECIDED_TRUE;
-						children.push_back(new CubeTreeNode(newRepresentation, sizeLimit));
+						if (config::falseImplicativeCubes == nullptr)
+						{
+							children.push_back(new CubeTreeNode(newRepresentation, sizeLimit));
+						}
+						else if (!config::impliesFalse(newRepresentation))
+						{
+							children.push_back(new CubeTreeNode(newRepresentation, sizeLimit));
+						}
 
 						newRepresentation[startIndex] = CUBE_STATE_DECIDED_FALSE;
-						children.push_back(new CubeTreeNode(newRepresentation, sizeLimit));
+						if (config::falseImplicativeCubes == nullptr)
+						{
+							children.push_back(new CubeTreeNode(newRepresentation, sizeLimit));
+						}
+						else if (!config::impliesFalse(newRepresentation))
+						{
+							children.push_back(new CubeTreeNode(newRepresentation, sizeLimit));
+						}
 
 						newRepresentation[startIndex] = CUBE_STATE_OMIT;
 					}
@@ -518,7 +574,8 @@ using namespace std;
 
 			if (impliesPredicate)
 			{
-				cout << "\t\t\t\tCube [" << stringRepresentation << "] (" << varCount << ") implies " << predicate->emitCode() << "\n";
+				cout << "\t\t\t\tCube [" << stringRepresentation << "] (" << varCount << ") implies " << predicate->emitCode() <<
+					(config::impliesFalse(stringRepresentation) && config::falseImplicativeCubes != nullptr ? " and false\n" : "\n");
 
 				cullChildren();
 

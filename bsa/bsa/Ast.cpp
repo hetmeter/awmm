@@ -22,6 +22,7 @@ using namespace std;
 		// The index by which this node can be referred to from its parent's children vector. The root always has an index of -1
 		indexAsChild = -1;
 		name = "";
+		parent = nullptr;
 
 		//updateShortStringRepresentation();
 	}
@@ -113,7 +114,21 @@ using namespace std;
 	{
 		child->parent = this;
 		child->indexAsChild = index;
-		children.insert(children.begin() + index, child);
+
+		if (index == children.size())
+		{
+			children.insert(children.end(), child);
+		}
+		else if (index < children.size())
+		{
+			children.insert(children.begin() + index, child);
+		}
+		else
+		{
+			/*config::throwCriticalError("Error trying to insert: " + child->emitCode() + " on the index " + to_string(index) +
+				". The current vector size is " + to_string(children.size()) + ".");*/
+			children.insert(children.begin() + index, child);
+		}
 	
 		refreshChildIndices();
 		//updateShortStringRepresentation();
@@ -1390,13 +1405,33 @@ using namespace std;
 	{
 		if (!performPredicateAbstraction())
 		{
-			for (Ast* child : children)
+			Ast* child;
+
+			//for (Ast* child : children)
+			for (int ctr = 0; ctr < children.size(); ctr++)
 			{
+				child = children.at(ctr);
+
 				if (name != literalCode::IF_ELSE_TOKEN_NAME && child->name != literalCode::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME &&
 					child->name != literalCode::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME && child->name != literalCode::BL_IF_TOKEN_NAME)
 				{
 					child->cascadingPerformPredicateAbstraction();
 				}
+			}
+		}
+	}
+
+	void Ast::cascadingUnfoldIfElses()
+	{
+		bool hasChanged = true;
+
+		while (hasChanged)
+		{
+			hasChanged = false;
+
+			for (Ast* child : children)
+			{
+				hasChanged = hasChanged || child->unfoldIfElses();
 			}
 		}
 	}
@@ -1429,7 +1464,7 @@ using namespace std;
 			postFix.at(0)->startComment = "Resetting local variables";
 			children.at(2)->addChildren(postFix);
 
-			Ast* maxCube = newAssume(newLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, newFalse(), false)->negate());
+			Ast* maxCube = config::getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes();
 
 			children.at(2)->addChild(newLabel(config::getCurrentAuxiliaryLabel(), maxCube));
 
@@ -2230,6 +2265,15 @@ using namespace std;
 	bool Ast::performPredicateAbstraction()
 	{
 		bool result = false;
+		int firstLabel = config::getCurrentAuxiliaryLabel();
+
+		if (!isRoot())
+		{
+			if (parent->name == literalCode::LABEL_TOKEN_NAME)
+			{
+				firstLabel = stoi(parent->children.at(0)->name);
+			}
+		}
 	
 		//cout << "\tPerforming predicate abstraction on: " << emitCode() << "\n\n";
 	
@@ -2266,7 +2310,7 @@ using namespace std;
 				vector<int> relevantPredicateIndices = config::getRelevantAuxiliaryBooleanVariableIndices(children.at(0)->children.at(0)->name);
 				vector<Ast*> replacementStatements;
 	
-				replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(), newNop()));
+				replacementStatements.push_back(newLabel(firstLabel, newNop()));
 	
 				if (relevantPredicateIndices.size() > 0)
 				{
@@ -2315,7 +2359,9 @@ using namespace std;
 								))
 							);
 					}
-	
+
+					replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
+						config::getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes()));
 					replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(), Ast::newEndAtomic()));
 				}
 				
@@ -2324,53 +2370,89 @@ using namespace std;
 	
 				result = true;
 			}
-			else if (name == literalCode::IF_ELSE_TOKEN_NAME)
-			{
-				/*cout << "\tPerforming predicate abstraction on: if(" << children.at(0)->emitCode() << ")...\n\n";
-
-				Ast* conditional = children.at(0)->clone();
-				replaceNode(newAsterisk(), children.at(0));
-
-				children.at(1)->addChild(newAssume(newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional)), 0);
-
-				if (children.at(2)->name != literalCode::NONE_TOKEN_NAME)
-				{
-					children.at(2)->addChild(newAssume(newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional->negate())), 0);
-				}*/
-
-				cout << "\tPerforming predicate abstraction on: if(" << children.at(0)->emitCode() << ")...\n\n";
-
-				vector<Ast*> replacementStatements;
-				Ast* conditional = children.at(0)->clone();
-				int endLabel = config::getCurrentAuxiliaryLabel();
-				int elseLabel = config::getCurrentAuxiliaryLabel();
-
-				replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
-								newBooleanIf(
-									newAsterisk(),
-									newGoto(endLabel)
-								))
-							);
-
-				replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
-								newBooleanIf(
-									newAsterisk(),
-									newGoto(endLabel)
-								))
-							);
-
-				replaceNode(newAsterisk(), children.at(0));
-
-				children.at(1)->addChild(newAssume(newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional)), 0);
-
-				if (children.at(2)->name != literalCode::NONE_TOKEN_NAME)
-				{
-					children.at(2)->addChild(newAssume(newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional->negate())), 0);
-				}
-			}
 		}
 	
 		return result;
+	}
+
+	bool Ast::unfoldIfElses()
+	{
+		if (name == literalCode::IF_ELSE_TOKEN_NAME)
+		{
+			cout << "\tPerforming predicate abstraction on: if(" << children.at(0)->emitCode() << ")...\n\n";
+
+			bool isLabeled = parent->name == literalCode::LABEL_TOKEN_NAME;
+			bool hasElse = children.at(2)->name != literalCode::NONE_TOKEN_NAME;
+			vector<Ast*> replacementStatements;
+			Ast* conditional = children.at(0)->clone();
+			int elseLabel = hasElse ? config::getCurrentAuxiliaryLabel() : -1;
+			int endLabel = config::getCurrentAuxiliaryLabel();
+
+			replacementStatements.push_back(newAssume(
+					newReverseLargestImplicativeDisjunctionOfCubes(
+						config::globalCubeSizeLimit,
+						conditional
+					))
+				);
+
+			replacementStatements.insert(replacementStatements.end(),
+				children.at(1)->children.begin(), children.at(1)->children.end());
+
+			if (hasElse)
+			{
+				replacementStatements.push_back(newGoto(endLabel));
+
+				replacementStatements.push_back(newLabel(elseLabel,
+						newAssume(
+							newReverseLargestImplicativeDisjunctionOfCubes(
+								config::globalCubeSizeLimit,
+								conditional->negate()
+							)
+					)));
+
+				replacementStatements.insert(replacementStatements.end(),
+					children.at(2)->children.begin(), children.at(2)->children.end());
+			}
+
+			replacementStatements.push_back(newLabel(endLabel, newNop()));
+
+			Ast* firstStatement = newBooleanIf(newAsterisk(), newGoto(hasElse ? elseLabel : endLabel));
+
+			if (isLabeled)
+			{
+				parent->parent->refreshChildIndices();
+
+				for (int ctr = replacementStatements.size() - 1; ctr >= 0; ctr--)
+				{
+					parent->parent->addChild(replacementStatements.at(ctr), parent->indexAsChild + 1);
+				}
+
+				parent->parent->refreshChildIndices();
+
+				replaceNode(firstStatement, this);
+			}
+			else
+			{
+				parent->refreshChildIndices();
+
+				for (int ctr = replacementStatements.size() - 1; ctr >= 0; ctr--)
+				{
+					parent->addChild(replacementStatements.at(ctr), indexAsChild + 1);
+				}
+
+				parent->refreshChildIndices();
+
+				replaceNode(newLabel(config::getCurrentAuxiliaryLabel(), firstStatement), this);
+			}
+
+			return true;
+		}
+		else if (name == literalCode::LABEL_TOKEN_NAME)
+		{
+			return children.at(1)->unfoldIfElses();
+		}
+
+		return false;
 	}
 	
 	// Copies the contents of the persistent buffer size maps from another node

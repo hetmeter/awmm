@@ -5,6 +5,7 @@ Global variables, constants, and methods
 #include "config.h"
 #include "literalCode.h"
 #include "Ast.h"
+#include "CubeTreeNode.h"
 
 namespace config
 {
@@ -24,6 +25,8 @@ namespace config
 	int currentAuxiliaryLabel = -1;
 	std::map<std::string, Ast*> labelLookupMap;
 	std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
+	CubeTreeNode* falseImplicativeCubes = nullptr;
+	Ast* assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = nullptr;
 
 /* Global variable handling */
 	void carryOutLazyReplacements()
@@ -222,6 +225,57 @@ namespace config
 		}
 	
 		return predicateVariableTransitiveClosures[index];
+	}
+
+	bool impliesFalse(const std::string &cubeRepresentation)
+	{
+		return getFalseImplicativeCubes()->contains(cubeRepresentation);
+	}
+
+	CubeTreeNode* getFalseImplicativeCubes()
+	{
+		if (falseImplicativeCubes == nullptr)
+		{
+			int numberOfPredicates = globalPredicates.size();
+			std::string pool = std::string(numberOfPredicates, CubeTreeNode::CUBE_STATE_OMIT);
+
+			falseImplicativeCubes = new CubeTreeNode(pool, globalCubeSizeLimit);
+			falseImplicativeCubes->cascadingPopulate(globalCubeSizeLimit);
+			falseImplicativeCubes->breadthFirstCheckImplication(Ast::newFalse());
+			falseImplicativeCubes->scour();
+
+			std::cout << "\nFalse implicative cubes created.\n\n";
+		}
+
+		return falseImplicativeCubes;
+	}
+
+	Ast* getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes()
+	{
+		if (assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes == nullptr)
+		{
+			std::vector<CubeTreeNode*> falseImplicativeCubeNodes = getFalseImplicativeCubes()->getImplyingCubes();
+			std::vector<Ast*> implicativeCubes;
+
+			for (CubeTreeNode* implicativeCubeNode : falseImplicativeCubeNodes)
+			{
+				implicativeCubes.push_back(Ast::newBooleanVariableCube(implicativeCubeNode->stringRepresentation, false));
+			}
+
+			if (implicativeCubes.size() == 0)
+			{
+				assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = Ast::newAssume(Ast::newTrue());
+			}
+			else
+			{
+				assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes =
+					Ast::newAssume(Ast::newMultipleOperation(implicativeCubes, literalCode::DOUBLE_OR)->negate());
+			}
+
+			std::cout << "\nAssumption of negated largest false implicative disjunction of cubes created.\n\n";
+		}
+
+		return assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes;
 	}
 
 /* String operations */

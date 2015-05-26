@@ -6,12 +6,11 @@
 #include <iostream>
 #include <map>
 #include <regex>
-//#include <bitset>
 #include <z3++.h>
-//#include <algorithm>
-//
+
 class Ast;
 class GlobalVariable;
+class CubeTreeNode;
 
 namespace config
 {
@@ -32,6 +31,8 @@ namespace config
 	extern int currentAuxiliaryLabel;
 	extern std::map<std::string, Ast*> labelLookupMap;
 	extern std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
+	extern CubeTreeNode* falseImplicativeCubes;
+	extern Ast* assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes;
 
 /* Global variable handling */
 	extern void carryOutLazyReplacements();
@@ -41,6 +42,9 @@ namespace config
 	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(const std::vector<Ast*> &parallelAssignments);
 	extern std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(const std::string &variableName);
 	extern std::vector<int> getPredicateVariableTransitiveClosure(int index);
+	extern bool impliesFalse(const std::string &cubeRepresentation);
+	extern CubeTreeNode* getFalseImplicativeCubes();
+	extern Ast* getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes();
 
 /* String operations */
 	extern std::string addTabs(const std::string &s, int numberOfTabs);
