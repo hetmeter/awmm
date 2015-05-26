@@ -38,7 +38,7 @@ public:
 	bool isConsiderable();
 	std::string toString();
 	void cullChildren();
-	bool contains(const std::string &cubeRepresentation);
+	bool containsImplying(const std::string &cubeRepresentation);
 
 /* Cascading methods */
 	void cascadingPopulate(int sizeLimit);

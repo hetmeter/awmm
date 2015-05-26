@@ -25,7 +25,8 @@ namespace config
 	int currentAuxiliaryLabel = -1;
 	std::map<std::string, Ast*> labelLookupMap;
 	std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
-	CubeTreeNode* falseImplicativeCubes = nullptr;
+	bool falseImplicativeCubesIsInitialized = false;
+	CubeTreeNode* falseImplicativeCubes;
 	Ast* assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = nullptr;
 
 /* Global variable handling */
@@ -229,32 +230,34 @@ namespace config
 
 	bool impliesFalse(const std::string &cubeRepresentation)
 	{
-		return getFalseImplicativeCubes()->contains(cubeRepresentation);
-	}
-
-	CubeTreeNode* getFalseImplicativeCubes()
-	{
-		if (falseImplicativeCubes == nullptr)
+		if (std::count(cubeRepresentation.begin(), cubeRepresentation.end(), CubeTreeNode::CUBE_STATE_DECIDED_TRUE) == 0 &&
+			std::count(cubeRepresentation.begin(), cubeRepresentation.end(), CubeTreeNode::CUBE_STATE_DECIDED_FALSE) == 0)
 		{
-			int numberOfPredicates = globalPredicates.size();
-			std::string pool = std::string(numberOfPredicates, CubeTreeNode::CUBE_STATE_OMIT);
-
-			falseImplicativeCubes = new CubeTreeNode(pool, globalCubeSizeLimit);
-			falseImplicativeCubes->cascadingPopulate(globalCubeSizeLimit);
-			falseImplicativeCubes->breadthFirstCheckImplication(Ast::newFalse());
-			falseImplicativeCubes->scour();
-
-			std::cout << "\nFalse implicative cubes created.\n\n";
+			return false;
 		}
 
-		return falseImplicativeCubes;
+		return falseImplicativeCubes->containsImplying(cubeRepresentation);
+	}
+
+	void initializeFalseImplicativeCubes()
+	{
+		int numberOfPredicates = globalPredicates.size();
+		std::string pool = std::string(numberOfPredicates, CubeTreeNode::CUBE_STATE_OMIT);
+
+		falseImplicativeCubes = new CubeTreeNode(pool, globalCubeSizeLimit);
+		falseImplicativeCubes->cascadingPopulate(globalCubeSizeLimit);
+		falseImplicativeCubes->breadthFirstCheckImplication(Ast::newFalse());
+		falseImplicativeCubes->scour();
+		falseImplicativeCubesIsInitialized = true;
+
+		std::cout << "\nFalse implicative cubes created.\n\n";
 	}
 
 	Ast* getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes()
 	{
 		if (assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes == nullptr)
 		{
-			std::vector<CubeTreeNode*> falseImplicativeCubeNodes = getFalseImplicativeCubes()->getImplyingCubes();
+			std::vector<CubeTreeNode*> falseImplicativeCubeNodes = falseImplicativeCubes->getImplyingCubes();
 			std::vector<Ast*> implicativeCubes;
 
 			for (CubeTreeNode* implicativeCubeNode : falseImplicativeCubeNodes)

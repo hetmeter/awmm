@@ -31,6 +31,7 @@ namespace config
 	extern int currentAuxiliaryLabel;
 	extern std::map<std::string, Ast*> labelLookupMap;
 	extern std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
+	extern bool falseImplicativeCubesIsInitialized;
 	extern CubeTreeNode* falseImplicativeCubes;
 	extern Ast* assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes;
 
@@ -43,7 +44,7 @@ namespace config
 	extern std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(const std::string &variableName);
 	extern std::vector<int> getPredicateVariableTransitiveClosure(int index);
 	extern bool impliesFalse(const std::string &cubeRepresentation);
-	extern CubeTreeNode* getFalseImplicativeCubes();
+	extern void initializeFalseImplicativeCubes();
 	extern Ast* getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes();
 
 /* String operations */

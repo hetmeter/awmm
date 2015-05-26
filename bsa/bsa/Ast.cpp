@@ -1423,15 +1423,25 @@ using namespace std;
 
 	void Ast::cascadingUnfoldIfElses()
 	{
-		bool hasChanged = true;
-
-		while (hasChanged)
+		if (name == literalCode::STATEMENTS_TOKEN_NAME)
 		{
-			hasChanged = false;
+			bool hasChanged = true;
 
-			for (Ast* child : children)
+			while (hasChanged)
 			{
-				hasChanged = hasChanged || child->unfoldIfElses();
+				hasChanged = false;
+
+				for (int ctr = 0; ctr < children.size(); ctr++)
+				{
+					hasChanged = hasChanged || children.at(ctr)->unfoldIfElses();
+				}
+			}
+		}
+		else
+		{
+			for (int ctr = 0; ctr < children.size(); ctr++)
+			{
+				children.at(ctr)->cascadingUnfoldIfElses();
 			}
 		}
 	}
