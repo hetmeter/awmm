@@ -63,6 +63,7 @@ public:
 	void topDownCascadingCopyPersistentBufferSizes(Ast* source);
 	void topDownCascadingAddInitializedCausedCostsToPersistentCosts();
 	void controlFlowDirectionCascadingPropagateTops();
+	void labelAllStatements();
 
 /* Static operations */
 	static void replaceNode(const std::vector<Ast*> &nodes, Ast* oldNode);
@@ -131,6 +132,7 @@ private:
 	Ast* tryGetLastStatement();
 	Ast* tryGetNextSibling();
 	Ast* tryGetLastChild();
+	void labelStatement();
 };
 
 

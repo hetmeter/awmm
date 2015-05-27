@@ -1581,6 +1581,24 @@ using namespace std;
 		}
 	}
 
+	void Ast::labelAllStatements()
+	{
+		if (name == literalCode::STATEMENTS_TOKEN_NAME)
+		{
+			vector<Ast*> replacementVector;
+
+			for (Ast* child : children)
+			{
+				if (child->name != literalCode::LABEL_TOKEN_NAME)
+				{
+					replacementVector.clear();
+					replacementVector.push_back(newLabel(config::getCurrentAuxiliaryLabel(), child));
+					config::lazyReplacements[child] = replacementVector;
+				}
+			}
+		}
+	}
+
 /* Static operations */
 	void Ast::replaceNode(const vector<Ast*> &nodes, Ast* oldNode)
 	{
@@ -1964,14 +1982,14 @@ using namespace std;
 	
 		CubeTreeNode* cubeTreeRoot = new CubeTreeNode(pool, cubeSizeUpperLimit);
 		//cout << "\nCreated:\n" << cubeTreeRoot->toString() << "\n";
-		cout << "\t\t\tPopulating cube tree...\n";
+		//cout << "\t\t\tPopulating cube tree...\n";
 		cubeTreeRoot->cascadingPopulate(cubeSizeUpperLimit);
 		//cout << "\nPopulated:\n" << cubeTreeRoot->toString() << "\n";
-		cout << "\t\t\tChecking implications...\n";
+		//cout << "\t\t\tChecking implications...\n";
 		cubeTreeRoot->breadthFirstCheckImplication(predicate);
 		//cubeTreeRoot->cascadingCheckImplication(predicate);
 		//cout << "\nImplications checked:\n" << cubeTreeRoot->toString() << "\n";
-		cout << "\t\t\tScouring cube tree...\n";
+		//cout << "\t\t\tScouring cube tree...\n";
 		cubeTreeRoot->scour();
 		//cout << "\nScoured:\n" << cubeTreeRoot->toString() << "\n";
 		vector<CubeTreeNode*> implicativeCubeNodes = cubeTreeRoot->getImplyingCubes();
@@ -2336,47 +2354,48 @@ using namespace std;
 						positiveWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]);
 						negativeWeakestLiberalPrecondition = weakestLiberalPrecondition(config::globalPredicates[ctr]->negate());
 	
-						parallelAssignments.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
-								newStore(
-									config::auxiliaryBooleanVariableNames[ctr],
-									newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
-								)
+						parallelAssignments.push_back(newStore(
+								config::auxiliaryBooleanVariableNames[ctr],
+								newAbstractAssignmentFragment(this, config::globalPredicates[ctr]))
 							);
 					}
 	
 					relevantPredicateIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(parallelAssignments);
 	
-					replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(), newBeginAtomic()));
+					replacementStatements.push_back(newBeginAtomic());
 	
 					for (int ctr : relevantPredicateIndices)
 					{
-						replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
-								newLoad(
-									config::auxiliaryTemporaryVariableNames[ctr],
-									newID(config::auxiliaryBooleanVariableNames[ctr])
-								))
-							);
+						replacementStatements.push_back(newLoad(
+								config::auxiliaryTemporaryVariableNames[ctr],
+								newID(config::auxiliaryBooleanVariableNames[ctr])
+							));
 					}
 	
 					replacementStatements.insert(replacementStatements.end(), parallelAssignments.begin(), parallelAssignments.end());
 	
 					for (int ctr : relevantPredicateIndices)
 					{
-						replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
-								newLocalAssign(
-									config::auxiliaryTemporaryVariableNames[ctr],
-									newINT(0)
-								))
-							);
+						replacementStatements.push_back(newLocalAssign(
+								config::auxiliaryTemporaryVariableNames[ctr],
+								newINT(0)
+							));
 					}
 
-					replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
-						config::getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes()));
-					replacementStatements.push_back(newLabel(config::getCurrentAuxiliaryLabel(), Ast::newEndAtomic()));
+					replacementStatements.push_back(config::getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes());
+					replacementStatements.push_back(Ast::newEndAtomic());
 				}
 				
 				replacementStatements[0]->startComment = literalCode::PREDICATE_ABSTRACTION_COMMENT_PREFIX + emitCode();
-				config::lazyReplacements[this] = replacementStatements;
+
+				if (parent->name == literalCode::LABEL_TOKEN_NAME)
+				{
+					config::lazyReplacements[parent] = replacementStatements;
+				}
+				else
+				{
+					config::lazyReplacements[this] = replacementStatements;
+				}
 	
 				result = true;
 			}
@@ -2452,7 +2471,7 @@ using namespace std;
 
 				parent->refreshChildIndices();
 
-				replaceNode(newLabel(config::getCurrentAuxiliaryLabel(), firstStatement), this);
+				replaceNode(firstStatement, this);
 			}
 
 			return true;

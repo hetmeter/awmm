@@ -544,10 +544,10 @@ using namespace std;
 							{
 								children.push_back(new CubeTreeNode(newRepresentation, sizeLimit));
 							}
-							else
+							/*else
 							{
 								cout << "\t\t\t\t\t[" << stringRepresentation << "] has been found to imply false\n";
-							}
+							}*/
 						}
 						else
 						{
@@ -561,10 +561,10 @@ using namespace std;
 							{
 								children.push_back(new CubeTreeNode(newRepresentation, sizeLimit));
 							}
-							else
+							/*else
 							{
 								cout << "\t\t\t\t\t[" << stringRepresentation << "] has been found to imply false\n";
-							}
+							}*/
 						}
 						else
 						{
@@ -587,7 +587,7 @@ using namespace std;
 	{
 		if (isProperSubset(implyingCubeRepresentation, stringRepresentation))
 		{
-			cout << "\t\t\t\tCube [" << stringRepresentation << "] (" << varCount << ") will be pruned by [" << implyingCubeRepresentation << "]\n";
+			//cout << "\t\t\t\tCube [" << stringRepresentation << "] (" << varCount << ") will be pruned by [" << implyingCubeRepresentation << "]\n";
 
 			ignore = true;
 			cullChildren();
@@ -604,7 +604,7 @@ using namespace std;
 
 			if (impliesPredicate)
 			{
-				cout << "\t\t\t\tCube [" << stringRepresentation << "] (" << varCount << ") implies " << predicate->emitCode() << "\n";
+				//cout << "\t\t\t\tCube [" << stringRepresentation << "] (" << varCount << ") implies " << predicate->emitCode() << "\n";
 
 				cullChildren();
 

@@ -188,6 +188,8 @@ int main(int argc, char** argv)
 			rootAstRef->cascadingUnfoldIfElses();
 			rootAstRef->cascadingPerformPredicateAbstraction();
 			rootAstRef->setVariableInitializations();
+			config::carryOutLazyReplacements();
+			config::lazyReplacements.clear();
 
 			/*cout << "\n---\nCarried out predicate abstraction:\n\n";
 			cout << rootAstRef->emitCode();*/
