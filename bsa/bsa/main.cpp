@@ -178,13 +178,14 @@ int main(int argc, char** argv)
 			for (Ast* child : predicateAstRef->children)
 			{
 				config::globalPredicates.push_back(child);
+				config::globalPredicatesCount++;
 			}
 
 			config::initializeAuxiliaryVariables();
 
 			cout << "Performing predicate abstraction...\n";
 
-			config::initializeFalseImplicativeCubes();
+			config::getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes();
 			rootAstRef->cascadingUnfoldIfElses();
 			rootAstRef->cascadingPerformPredicateAbstraction();
 			rootAstRef->setVariableInitializations();

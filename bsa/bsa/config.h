@@ -17,6 +17,7 @@ namespace config
 /* Global parameters */
 	extern int K;
 	extern int globalCubeSizeLimit;
+	extern int globalPredicatesCount;
 	extern std::vector<Ast*> globalPredicates;
 	
 	enum language { PSO, TSO, RMA };
@@ -32,8 +33,10 @@ namespace config
 	extern std::map<std::string, Ast*> labelLookupMap;
 	extern std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
 	extern bool falseImplicativeCubesIsInitialized;
-	extern CubeTreeNode* falseImplicativeCubes;
 	extern Ast* assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes;
+	extern Ast* falsePredicate;
+	//extern CubeTreeNode* implicativeCubes;
+	extern CubeTreeNode* implicativeCubes;
 
 /* Global variable handling */
 	extern void carryOutLazyReplacements();
@@ -43,9 +46,9 @@ namespace config
 	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(const std::vector<Ast*> &parallelAssignments);
 	extern std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(const std::string &variableName);
 	extern std::vector<int> getPredicateVariableTransitiveClosure(int index);
-	extern bool impliesFalse(const std::string &cubeRepresentation);
-	extern void initializeFalseImplicativeCubes();
 	extern Ast* getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes();
+	extern Ast* getFalsePredicate();
+	extern CubeTreeNode* getImplicativeCubes();
 
 /* String operations */
 	extern std::string addTabs(const std::string &s, int numberOfTabs);
@@ -68,6 +71,7 @@ namespace config
 	extern void throwCriticalError(const std::string &msg);
 
 /* Z3 */
+	extern bool isTautology(Ast* predicate);
 	extern bool cubeImpliesPredicate(const std::vector<Ast*> &cube, Ast* predicate);
 	extern bool expressionImpliesPredicate(z3::expr expression, Ast* predicate);
 	extern z3::expr impliesDuplicate(z3::expr const &a, z3::expr const &b);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 #include <vector>
 
 class Ast;
@@ -9,57 +10,55 @@ class CubeTreeNode
 {
 public:
 
-//	CubeTreeNode();
-//	CubeTreeNode(CubeTreeNode* source);
-
 /* Constructors and destructor */
-	CubeTreeNode(const std::string &representation, int upperLimit);
+	CubeTreeNode(int upperLimit);
+	CubeTreeNode(const std::string &stringRepresentation, int upperLimit, CubeTreeNode* parent);
 	~CubeTreeNode();
 
 /* Constants */
 	static const char CUBE_STATE_OMIT = '-';
-	static const char CUBE_STATE_IGNORE = 'X';
 	static const char CUBE_STATE_DECIDED_FALSE = 'F';
 	static const char CUBE_STATE_DECIDED_TRUE = 'T';
-	static const char CUBE_STATE_UNDECIDED = '?';
-	static const char CUBE_STATE_MAY_BE_FALSE = 'f';
-	static const char CUBE_STATE_MAY_BE_TRUE = 't';
 
-/* Attributes */
-	std::string stringRepresentation;
-	int varCount;
-	int varCountUpperLimit;
-	CubeTreeNode* parent;
-	std::vector<CubeTreeNode*> children;
-	bool impliesPredicate = false;
-	bool ignore = false;
+/* Enumerations */
+	enum Implication { IMPLIES, NOT_IMPLIES, SUPERSET_IMPLIES };
 
-/* Access */
-	bool isConsiderable();
-	std::string toString();
-	void cullChildren();
-	bool containsImplying(const std::string &cubeRepresentation);
+/* Public fields */
+	CubeTreeNode* getRoot();
+	void setImplication(const std::string &key, const Implication &value);
+	Implication getImplication(Ast* predicate);
+	std::string getStringRepresentation();
+	int getFirstUsableIndex();
+	int getVarCount();
+	int getUpperLimit();
+	CubeTreeNode* getChild(const int &index);
 
-/* Cascading methods */
-	void cascadingPopulate(int sizeLimit);
-	void breadthFirstCheckImplication(Ast* predicate);
-	void cascadingPrune(const std::string &implyingCubeRepresentation);
-	std::vector<CubeTreeNode*> getImplyingCubes();
-	void scour();
-
-/* Static methods */
-	static std::string getCubeStatePool(int predicateIndex);
-	static std::string getCubeStatePool(const std::vector<int> &predicateIndices);
-	static std::vector<std::string> getNaryCubeStateCombinations(const std::vector<int> &predicateIndices, int n);
-	static std::vector<std::string> getImplicativeCubeStates(const std::string &pool, Ast* predicate);
-	static std::string applyDecisionMask(const std::string &pool, const std::string &decisionMask);
-	static std::string removeDecisionsFromPool(const std::string &pool, const std::vector<std::string> &decisions);
-	static std::vector<Ast*> toAstRef(const std::string &pool);
-	static bool isProperSubset(const std::string &possibleSubset, const std::string &possibleSuperset);
-	static bool isEquivalent(const std::string &first, const std::string &second);
+/* Public methods */
+	std::vector<std::string> getMinimalImplyingCubes(Ast* predicate, const std::vector<int> &relevantIndices);
+	std::vector<std::string> getAllFalseImplyingCubes();
+	void reportImplication(const std::string &representation, Ast* predicate);
+	void setSubtreeImplication(Ast* predicate, const Implication &implicationValue);
+	bool isProperSubset(const std::string &possibleSubset);
+	bool hasImplicationData(const std::string &predicateCode);
 
 private:
-	void populate(int sizeLimit);
-	void prune(const std::string &implyingCubeRepresentation);
-	void checkImplication(Ast* predicate);
+
+/* Locals */
+	std::string _stringRepresentation;
+	CubeTreeNode* _parent = nullptr;
+	int _upperLimit;
+	int _varCount;
+	int _firstUsableIndex;
+	int _childrenCount = 0;
+	std::map<std::string, Implication> _predicateImplications;
+	std::vector<CubeTreeNode*> _children;
+	std::vector<Ast*> _astRepresentation;
+
+/* Private fields */
+	std::vector<Ast*> getAstRepresentation();
+	std::vector<std::string> getCurrentSubtreeRepresentations();
+
+/* Private methods */
+	void initializeChildren();
+	void calculateImplication(Ast* predicate);
 };

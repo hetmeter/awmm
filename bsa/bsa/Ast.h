@@ -64,6 +64,7 @@ public:
 	void topDownCascadingAddInitializedCausedCostsToPersistentCosts();
 	void controlFlowDirectionCascadingPropagateTops();
 	void labelAllStatements();
+	bool isEquivalent(Ast* otherAst);
 
 /* Static operations */
 	static void replaceNode(const std::vector<Ast*> &nodes, Ast* oldNode);

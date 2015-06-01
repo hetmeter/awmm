@@ -12,6 +12,7 @@ Cascading operations may go top to bottom or bottom to top in the tree, or down 
 #include "ControlFlowVisitor.h"
 #include "GlobalVariable.h"
 #include "ControlFlowEdge.h"
+//#include "Cube.h"
 #include "CubeTreeNode.h"
 
 using namespace std;
@@ -1599,6 +1600,11 @@ using namespace std;
 		}
 	}
 
+	bool Ast::isEquivalent(Ast* otherAst)
+	{
+		return emitCode().compare(otherAst->emitCode()) == 0;
+	}
+
 /* Static operations */
 	void Ast::replaceNode(const vector<Ast*> &nodes, Ast* oldNode)
 	{
@@ -1972,40 +1978,19 @@ using namespace std;
 		cout << "\t\tComputing F(" << predicate->emitCode() << ")\n";
 		int numberOfPredicates = config::globalPredicates.size();
 		vector<int> relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
-
-		string pool = string(numberOfPredicates, CubeTreeNode::CUBE_STATE_IGNORE);
 	
-		for (int relevantIndex : relevantIndices)
-		{
-			pool[relevantIndex] = CubeTreeNode::CUBE_STATE_OMIT;
-		}
-	
-		CubeTreeNode* cubeTreeRoot = new CubeTreeNode(pool, cubeSizeUpperLimit);
-		//cout << "\nCreated:\n" << cubeTreeRoot->toString() << "\n";
-		//cout << "\t\t\tPopulating cube tree...\n";
-		cubeTreeRoot->cascadingPopulate(cubeSizeUpperLimit);
-		//cout << "\nPopulated:\n" << cubeTreeRoot->toString() << "\n";
-		//cout << "\t\t\tChecking implications...\n";
-		cubeTreeRoot->breadthFirstCheckImplication(predicate);
-		//cubeTreeRoot->cascadingCheckImplication(predicate);
-		//cout << "\nImplications checked:\n" << cubeTreeRoot->toString() << "\n";
-		//cout << "\t\t\tScouring cube tree...\n";
-		cubeTreeRoot->scour();
-		//cout << "\nScoured:\n" << cubeTreeRoot->toString() << "\n";
-		vector<CubeTreeNode*> implicativeCubeNodes = cubeTreeRoot->getImplyingCubes();
 		vector<Ast*> implicativeCubes;
+		//vector<string> implicativeCubeStringRepresentations = config::getMinimalImplyingCubes(predicate, relevantIndices);
+		vector<string> implicativeCubeStringRepresentations = config::getImplicativeCubes()->getMinimalImplyingCubes(predicate, relevantIndices);
 	
-		for (CubeTreeNode* implicativeCubeNode : implicativeCubeNodes)
+		for (string implicativeCubeStringRepresentation : implicativeCubeStringRepresentations)
 		{
-			implicativeCubes.push_back(newBooleanVariableCube(implicativeCubeNode->stringRepresentation, useTemporaryVariables));
+			implicativeCubes.push_back(newBooleanVariableCube(implicativeCubeStringRepresentation, useTemporaryVariables));
 		}
 	
 		if (implicativeCubes.size() == 0)
 		{
-			z3::context c;
-			z3::expr trueConstant = c.bool_val(true);
-	
-			if (config::expressionImpliesPredicate(trueConstant, predicate))
+			if (config::isTautology(predicate))
 			{
 				return newTrue();
 			}

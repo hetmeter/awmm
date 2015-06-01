@@ -6,12 +6,14 @@ Global variables, constants, and methods
 #include "literalCode.h"
 #include "Ast.h"
 #include "CubeTreeNode.h"
+//#include "Cube.h"
 
 namespace config
 {
 /* Global parameters */
 	int K;
 	int globalCubeSizeLimit;
+	int globalPredicatesCount = 0;
 	std::vector<Ast*> globalPredicates;
 
 	language currentLanguage;
@@ -26,8 +28,9 @@ namespace config
 	std::map<std::string, Ast*> labelLookupMap;
 	std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
 	bool falseImplicativeCubesIsInitialized = false;
-	CubeTreeNode* falseImplicativeCubes;
 	Ast* assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = nullptr;
+	Ast* falsePredicate = nullptr;
+	CubeTreeNode* implicativeCubes = nullptr;
 
 /* Global variable handling */
 	void carryOutLazyReplacements()
@@ -228,57 +231,61 @@ namespace config
 		return predicateVariableTransitiveClosures[index];
 	}
 
-	bool impliesFalse(const std::string &cubeRepresentation)
-	{
-		if (std::count(cubeRepresentation.begin(), cubeRepresentation.end(), CubeTreeNode::CUBE_STATE_DECIDED_TRUE) == 0 &&
-			std::count(cubeRepresentation.begin(), cubeRepresentation.end(), CubeTreeNode::CUBE_STATE_DECIDED_FALSE) == 0)
-		{
-			return false;
-		}
-
-		return falseImplicativeCubes->containsImplying(cubeRepresentation);
-	}
-
-	void initializeFalseImplicativeCubes()
-	{
-		int numberOfPredicates = globalPredicates.size();
-		std::string pool = std::string(numberOfPredicates, CubeTreeNode::CUBE_STATE_OMIT);
-
-		falseImplicativeCubes = new CubeTreeNode(pool, globalCubeSizeLimit);
-		falseImplicativeCubes->cascadingPopulate(globalCubeSizeLimit);
-		falseImplicativeCubes->breadthFirstCheckImplication(Ast::newFalse());
-		falseImplicativeCubes->scour();
-		falseImplicativeCubesIsInitialized = true;
-
-		std::cout << "\nFalse implicative cubes created.\n\n";
-	}
-
 	Ast* getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes()
 	{
 		if (assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes == nullptr)
 		{
-			std::vector<CubeTreeNode*> falseImplicativeCubeNodes = falseImplicativeCubes->getImplyingCubes();
-			std::vector<Ast*> implicativeCubes;
-
-			for (CubeTreeNode* implicativeCubeNode : falseImplicativeCubeNodes)
+			std::vector<int> allIndices;
+			for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
 			{
-				implicativeCubes.push_back(Ast::newBooleanVariableCube(implicativeCubeNode->stringRepresentation, false));
+				allIndices.push_back(ctr);
 			}
 
-			if (implicativeCubes.size() == 0)
+			std::vector<std::string> falseImplicativeCubeStrings = getImplicativeCubes()->getMinimalImplyingCubes(getFalsePredicate(), allIndices);
+			//std::vector<std::string> falseImplicativeCubeStrings = getImplicativeCubes()->getAllFalseImplyingCubes();
+
+			std::string falseString = getFalsePredicate()->emitCode();
+			std::vector<Ast*> falseImplicativeCubes;
+
+			for (std::string falseImplicativeCubeString : falseImplicativeCubeStrings)
+			{
+				falseImplicativeCubes.push_back(Ast::newBooleanVariableCube(falseImplicativeCubeString, false));
+			}
+
+			if (falseImplicativeCubes.size() == 0)
 			{
 				assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = Ast::newAssume(Ast::newTrue());
 			}
 			else
 			{
 				assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes =
-					Ast::newAssume(Ast::newMultipleOperation(implicativeCubes, literalCode::DOUBLE_OR)->negate());
+					Ast::newAssume(Ast::newMultipleOperation(falseImplicativeCubes, literalCode::DOUBLE_OR)->negate());
 			}
 
 			std::cout << "\nAssumption of negated largest false implicative disjunction of cubes created.\n\n";
 		}
 
 		return assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes;
+	}
+
+	Ast* getFalsePredicate()
+	{
+		if (falsePredicate == nullptr)
+		{
+			falsePredicate = Ast::newFalse();
+		}
+
+		return falsePredicate;
+	}
+
+	CubeTreeNode* getImplicativeCubes()
+	{
+		if (implicativeCubes == nullptr)
+		{
+			implicativeCubes = new CubeTreeNode(globalCubeSizeLimit);
+		}
+
+		return implicativeCubes;
 	}
 
 /* String operations */
@@ -416,11 +423,20 @@ namespace config
 	
 	void throwCriticalError(const std::string &msg)
 	{
+		throw 20;
 		std::cout << "Error: " << msg << "\n";
 		std::exit(EXIT_FAILURE);
 	}
 
 /* Z3 */
+	bool isTautology(Ast* predicate)
+	{
+		z3::context c;
+		z3::expr trueConstant = c.bool_val(true);
+
+		return expressionImpliesPredicate(trueConstant, predicate);
+	}
+
 	bool cubeImpliesPredicate(const std::vector<Ast*> &cube, Ast* predicate)
 	{
 		if (cube.empty())
@@ -454,6 +470,8 @@ namespace config
 		z3::solver s(c);
 		z3::expr implication = impliesDuplicate(expression, predicateExpression);
 		s.add(!implication);
+
+		//std::cout << "\ts = {" << s << "}\n";
 	
 		z3::check_result satisfiability = s.check();
 	

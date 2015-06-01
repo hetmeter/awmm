@@ -36,10 +36,10 @@
     <ClCompile Include="GlobalVariable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CubeTreeNode.cpp">
+    <ClCompile Include="literalCode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="literalCode.cpp">
+    <ClCompile Include="CubeTreeNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,10 +62,10 @@
     <ClInclude Include="GlobalVariable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CubeTreeNode.h">
+    <ClInclude Include="literalCode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="literalCode.h">
+    <ClInclude Include="CubeTreeNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
