@@ -205,7 +205,7 @@ using namespace std;
 		}
 		else
 		{
-			cout << "\t\tComputing WP(" << emitCode() << ", " << predicate->emitCode() << ")\n";
+			cout << "\t\tComputing WP(" << emitCode() << ", " << predicate->emitCode() << ")\t\t\t \n";
 
 			if (name == literalCode::PSO_TSO_STORE_TOKEN_NAME || name == literalCode::PSO_TSO_LOAD_TOKEN_NAME
 				|| name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
@@ -518,7 +518,7 @@ using namespace std;
 			{
 				if (children.at(0)->name == literalCode::PC_TOKEN_NAME)
 				{
-					result += literalCode::PC_TOKEN_NAME + literalCode::LEFT_CURLY_BRACKET + children.at(0)->name +
+					result += literalCode::PC_TOKEN_NAME + literalCode::LEFT_CURLY_BRACKET + children.at(0)->children.at(0)->name +
 						literalCode::RIGHT_CURLY_BRACKET;
 				}
 				else
@@ -582,7 +582,7 @@ using namespace std;
 				{
 					if (children.at(0)->name == literalCode::ID_TOKEN_NAME || children.at(0)->name == literalCode::INT_TOKEN_NAME)
 					{
-						result += children.at(0)->children.at(0)->name;
+						result += children.at(0)->emitCode();
 					}
 					else
 					{
@@ -593,7 +593,7 @@ using namespace std;
 
 					if (children.at(1)->name == literalCode::ID_TOKEN_NAME || children.at(1)->name == literalCode::INT_TOKEN_NAME)
 					{
-						result += children.at(1)->children.at(0)->name;
+						result += children.at(1)->emitCode();
 					}
 					else
 					{
@@ -671,7 +671,15 @@ using namespace std;
 			}
 			else if (name == literalCode::ID_TOKEN_NAME)
 			{
-				result += children.at(0)->name;
+				if (children.at(0)->name == literalCode::PC_TOKEN_NAME)
+				{
+					result += literalCode::PC_TOKEN_NAME + literalCode::LEFT_CURLY_BRACKET + children.at(0)->children.at(0)->name +
+						literalCode::RIGHT_CURLY_BRACKET;
+				}
+				else
+				{
+					result += children.at(0)->name;
+				}
 			}
 			else if (name == literalCode::INT_TOKEN_NAME)
 			{
@@ -742,7 +750,8 @@ using namespace std;
 				{
 					if (children.at(0)->name == literalCode::ID_TOKEN_NAME || children.at(0)->name == literalCode::INT_TOKEN_NAME)
 					{
-						result += children.at(0)->children.at(0)->name;
+						//result += children.at(0)->children.at(0)->name;
+						result += children.at(0)->emitCode();
 					}
 					else
 					{
@@ -753,7 +762,8 @@ using namespace std;
 
 					if (children.at(1)->name == literalCode::ID_TOKEN_NAME || children.at(1)->name == literalCode::INT_TOKEN_NAME)
 					{
-						result += children.at(1)->children.at(0)->name;
+						//result += children.at(1)->children.at(0)->name;
+						result += children.at(1)->emitCode();
 					}
 					else
 					{
@@ -1998,7 +2008,7 @@ using namespace std;
 	
 	Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables)
 	{
-		cout << "\t\tComputing F(" << predicate->emitCode() << ")\n";
+		cout << "\t\tComputing F(" << predicate->emitCode() << ")\t\t\t \n";
 		int numberOfPredicates = config::globalPredicates.size();
 		vector<int> relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
 	
@@ -2341,7 +2351,7 @@ using namespace std;
 			else if (name == literalCode::PSO_TSO_STORE_TOKEN_NAME || name == literalCode::PSO_TSO_LOAD_TOKEN_NAME
 				|| name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
 			{
-				cout << "\tPerforming predicate abstraction on: " << emitCode() << "\n\n";
+				cout << "\tPerforming predicate abstraction on: " << emitCode() << "\t\t\t \n\n";
 
 				vector<int> relevantPredicateIndices = config::getRelevantAuxiliaryBooleanVariableIndices(children.at(0)->children.at(0)->name);
 				vector<Ast*> replacementStatements;

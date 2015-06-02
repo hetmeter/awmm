@@ -19,3 +19,4 @@ process 1:
 	/*fence;*/
 	
 	/*flush;*/
+assert(always((pc(1) != 15) | (pc(2) != 15)))

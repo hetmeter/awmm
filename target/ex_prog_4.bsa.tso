@@ -25,3 +25,5 @@ process 1:
 	
 	
 
+assert always((pc{1} != 15) | (pc{2} != 15));
+
