@@ -40,7 +40,7 @@
  {booleanTerm,$2($1,$3)} 	\{booleanTerm,(\S+)\}\s*\{binaryBooleanOperation,(\S+)\}\s*\{booleanTerm,(\S+)\}
  {booleanTerm,$2($1,$3)} 	\{integerTerm,(\S+)\}\s*\{binaryIntegerComparison,(\S+)\}\s*\{integerTerm,(\S+)\}
  {booleanTerm,$1} 	\{LEFTPARENTHESIS\}\s*\{booleanTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
- {assertion,$1} 	\{ASSERT_KEYWORD\}\s*\{LEFTPARENTHESIS\}\s*\{ALWAYS_KEYWORD\}\s*\{booleanTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
+ {assert,$1} 	\{ASSERT_KEYWORD\}\s*\{LEFTPARENTHESIS\}\s*\{ALWAYS_KEYWORD\}\s*\{booleanTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
  {ifHeader,$1} 	\{ifHeaderStart\}\s*\{booleanTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
  {whileHeader,$1} 	\{whileHeaderStart\}\s*\{booleanTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
  {statement,nop} 	\{nopStatement\}
@@ -67,10 +67,10 @@
  {statement,atomic(statements($1))} 	\{atomicBlock,statements\((\S+)\)\}\s*\{END_ATOMIC_KEYWORD\}
  {processDeclarationStart,processDeclaration(processHeader($1),statements($2))} 	\{processHeader,processHeader\((\d+)\)\}\s*\{statement,(\S+)\}
  {processDeclarationStart,processDeclaration(processHeader($1),statements($2,$3))} 	\{processDeclarationStart,processDeclaration\(processHeader\((\d+)\),statements\((\S+)\)\)\}\s*\{statement,(\S+)\}
- {processDeclaration,$1} {assertion,$2} {EOF}	\{processDeclarationStart,(\S+)\}\s*\{assertion,(\S+)\}\s*\{EOF\}
+ {processDeclaration,$1} {assert,$2} {EOF}	\{processDeclarationStart,(\S+)\}\s*\{assert,(\S+)\}\s*\{EOF\}
  {processDeclaration,$1} {EOF}	\{processDeclarationStart,(\S+)\}\s*\{EOF\}
  {processDeclaration,$1} {processDeclaration,$2} 	\{processDeclarationStart,(\S+)\}\s*\{processDeclaration,(\S+)\}
  {programDeclaration,$1,$2} 	\{initializationBlock,(\S+)\}\s*\{processDeclaration,(\S+)\}
  {programDeclaration,$1,$2} 	\{programDeclaration,(\S+)\}\s*\{processDeclaration,(\S+)\}
- {programDeclaration,$1,assertion($2)} 	\{programDeclaration,(\S+)\}\s*\{assertion,(\S+)\}
+ {programDeclaration,$1,assert($2)} 	\{programDeclaration,(\S+)\}\s*\{assert,(\S+)\}
 {ACCEPTING_STATE,programDeclaration($1)}	\{programDeclaration,(\S+)\}\s*\{EOF\}

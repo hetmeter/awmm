@@ -173,5 +173,5 @@ process 2:
 	endif;
 	
 
-
+assert always((pc != 15) | (pc != 15));
 

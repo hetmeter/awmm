@@ -138,8 +138,9 @@ using namespace std;
 	vector<string> CubeTreeNode::getMinimalImplyingCubes(Ast* predicate, const vector<int> &relevantIndices)
 	{
 		vector<string> result;
+		bool predicateIsFalse = config::getFalsePredicate()->isEquivalent(predicate);
 
-		if (config::isTautology(predicate))
+		if (!predicateIsFalse && (config::isTautology(predicate) || config::isTautology(predicate->negate())))
 		{
 			return result;
 		}
@@ -147,7 +148,6 @@ using namespace std;
 		vector<CubeTreeNode*> searchQueue;
 		CubeTreeNode* currentNode;
 		searchQueue.push_back(this);
-		bool predicateIsFalse = config::getFalsePredicate()->isEquivalent(predicate);
 		string predicateCode = predicate->emitCode();
 		Implication currentImplication;
 		int currentFirstUsableIndex;
@@ -262,7 +262,7 @@ using namespace std;
 			{
 				setSubtreeImplication(predicate, SUPERSET_IMPLIES);
 
-				cout << "Set " << _stringRepresentation << "[" << predicate->emitCode() << "] = SUPERSET_IMPLIES\r";
+				cout << "Set " << _stringRepresentation << "[" << predicate->emitCode() << "] = SUPERSET_IMPLIES\t\t\t \r";
 			}
 			else if (_varCount < _upperLimit)
 			{
@@ -383,7 +383,7 @@ using namespace std;
 		{
 			_predicateImplications[predicateCode] = IMPLIES;
 
-			cout << "\t\t\t\t\tSet " << _stringRepresentation << "[" << predicateCode << "] = IMPLIES\n";
+			cout << "\t\t\t\t\tSet " << _stringRepresentation << "[" << predicateCode << "] = IMPLIES\t\t\t \n";
 
 			getRoot()->reportImplication(_stringRepresentation, predicate);
 		}
@@ -391,6 +391,6 @@ using namespace std;
 		{
 			_predicateImplications[predicateCode] = NOT_IMPLIES;
 
-			cout << "Set " << _stringRepresentation << "[" << predicateCode << "] = NOT_IMPLIES\r";
+			cout << "Set " << _stringRepresentation << "[" << predicateCode << "] = NOT_IMPLIES\t\t\t \r";
 		}
 	}
