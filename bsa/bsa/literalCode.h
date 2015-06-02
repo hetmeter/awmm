@@ -12,6 +12,8 @@ namespace literalCode
 /* Symbols */
 	const extern char LEFT_PARENTHESIS;
 	const extern char RIGHT_PARENTHESIS;
+	const extern char LEFT_CURLY_BRACKET;
+	const extern char RIGHT_CURLY_BRACKET;
 	const extern char COMMA;
 	const extern char SEMICOLON;
 	const extern char COLON;
@@ -41,6 +43,7 @@ namespace literalCode
 	const extern std::string BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME;
 	const extern std::string BL_PROCESS_DECLARATION_TOKEN_NAME;
 	const extern std::string BL_IF_TOKEN_NAME;
+	const extern std::string BL_ALWAYS_TOKEN_NAME;
 
 	const extern std::string PSO_TSO_STORE_TOKEN_NAME;
 	const extern std::string PSO_TSO_LOAD_TOKEN_NAME;
@@ -71,6 +74,8 @@ namespace literalCode
 	const extern std::string BEGIN_ATOMIC_TOKEN_NAME;
 	const extern std::string END_ATOMIC_TOKEN_NAME;
 	const extern std::string CHOOSE_TOKEN_NAME;
+	const extern std::string ASSERT_TOKEN_NAME;
+	const extern std::string PC_TOKEN_NAME;
 
 /* Tag names*/
 	const extern std::string BEGINIT_TAG_NAME;

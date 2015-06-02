@@ -436,6 +436,14 @@ using namespace std;
 
 			isBooleanProgramNode = true;
 		}
+		else if (name == literalCode::ASSERT_TOKEN_NAME)
+		{
+			result += literalCode::ASSERT_TOKEN_NAME + literalCode::SPACE + literalCode::BL_ALWAYS_TOKEN_NAME +
+				literalCode::LEFT_PARENTHESIS +	children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS +
+				literalCode::SEMICOLON;
+
+			isBooleanProgramNode = true;
+		}
 
 		if (!startComment.empty())
 		{
@@ -508,7 +516,15 @@ using namespace std;
 			}
 			else if (name == literalCode::ID_TOKEN_NAME)
 			{
-				result += children.at(0)->name;
+				if (children.at(0)->name == literalCode::PC_TOKEN_NAME)
+				{
+					result += literalCode::PC_TOKEN_NAME + literalCode::LEFT_CURLY_BRACKET + children.at(0)->name +
+						literalCode::RIGHT_CURLY_BRACKET;
+				}
+				else
+				{
+					result += children.at(0)->name;
+				}
 			}
 			else if (name == literalCode::INT_TOKEN_NAME)
 			{
@@ -994,12 +1010,15 @@ using namespace std;
 	
 			for (int ctr = 1; ctr < childrenCount; ctr++)
 			{
-				currentProcessDeclarationStatements = children.at(ctr)->children.at(1);
-	
-				if (((int)currentProcessDeclarationStatements->children.size()) > 0)
+				if (children.at(ctr)->name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
 				{
-					newControlFlowVisitor = new ControlFlowVisitor;
-					newControlFlowVisitor->traverseControlFlowGraph(currentProcessDeclarationStatements->children.at(0));
+					currentProcessDeclarationStatements = children.at(ctr)->children.at(1);
+
+					if (((int)currentProcessDeclarationStatements->children.size()) > 0)
+					{
+						newControlFlowVisitor = new ControlFlowVisitor;
+						newControlFlowVisitor->traverseControlFlowGraph(currentProcessDeclarationStatements->children.at(0));
+					}
 				}
 			}
 		}
@@ -1481,7 +1500,11 @@ using namespace std;
 
 			for (int ctr = 3; ctr < children.size(); ctr++)
 			{
-				children.at(ctr)->children.at(1)->addChild(newLabel(config::getCurrentAuxiliaryLabel(), maxCube), 0);
+				if (children.at(ctr)->name == literalCode::BL_PROCESS_DECLARATION_TOKEN_NAME ||
+					children.at(ctr)->name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
+				{
+					children.at(ctr)->children.at(1)->addChild(newLabel(config::getCurrentAuxiliaryLabel(), maxCube), 0);
+				}
 			}
 	
 			/*vector<string> implicativeCubeStates;
@@ -2382,6 +2405,54 @@ using namespace std;
 					config::lazyReplacements[this] = replacementStatements;
 				}
 	
+				result = true;
+			}
+			else if (name == literalCode::ASSERT_TOKEN_NAME)
+			{
+				vector<Ast*> nonPcAssertions;
+				vector<Ast*> currentReplacement;
+				Ast* leftSide;
+				Ast* rightSide;
+				Ast* currentAssertion;
+				nonPcAssertions.push_back(children.at(0));
+
+				for (int ctr = 0; ctr < nonPcAssertions.size(); ctr++)
+				{
+					currentAssertion = nonPcAssertions.at(0);
+					leftSide = currentAssertion->children.at(0);
+					rightSide = currentAssertion->children.at(1);
+
+					if (currentAssertion->name == literalCode::AND || currentAssertion->name == literalCode::OR ||
+						currentAssertion->name == literalCode::DOUBLE_AND || currentAssertion->name == literalCode::DOUBLE_OR)
+					{
+						if (currentAssertion->name == literalCode::AND)
+						{
+							currentAssertion->name = literalCode::DOUBLE_AND;
+						}
+						else if (currentAssertion->name == literalCode::OR)
+						{
+							currentAssertion->name = literalCode::DOUBLE_OR;
+						}
+
+						nonPcAssertions.push_back(leftSide);
+						nonPcAssertions.push_back(rightSide);
+						nonPcAssertions.erase(nonPcAssertions.begin() + ctr);
+						ctr--;
+					}
+					else if (config::stringVectorContains(currentAssertion->getIDs(), literalCode::PC_TOKEN_NAME))
+					{
+						nonPcAssertions.erase(nonPcAssertions.begin() + ctr);
+						ctr--;
+					}
+				}
+
+				for (Ast* nonPcAssertion : nonPcAssertions)
+				{
+					currentReplacement.clear();
+					currentReplacement.push_back(newLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, nonPcAssertion, false));
+					config::lazyReplacements[nonPcAssertion] = currentReplacement;
+				}
+
 				result = true;
 			}
 		}

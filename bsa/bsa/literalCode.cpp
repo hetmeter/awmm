@@ -9,6 +9,8 @@ namespace literalCode
 /* Symbols */
 	const char LEFT_PARENTHESIS = '(';
 	const char RIGHT_PARENTHESIS = ')';
+	const char LEFT_CURLY_BRACKET = '{';
+	const char RIGHT_CURLY_BRACKET = '}';
 	const char COMMA = ',';
 	const char SEMICOLON = ';';
 	const char COLON = ':';
@@ -38,6 +40,7 @@ namespace literalCode
 	const std::string BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME = "shared";
 	const std::string BL_PROCESS_DECLARATION_TOKEN_NAME = "booleanProcess";
 	const std::string BL_IF_TOKEN_NAME = "booleanIf";
+	const std::string BL_ALWAYS_TOKEN_NAME = "always";
 	
 	const std::string PSO_TSO_STORE_TOKEN_NAME = "store";
 	const std::string PSO_TSO_LOAD_TOKEN_NAME = "load";
@@ -68,6 +71,8 @@ namespace literalCode
 	const std::string BEGIN_ATOMIC_TOKEN_NAME = "begin_atomic";
 	const std::string END_ATOMIC_TOKEN_NAME = "end_atomic";
 	const std::string CHOOSE_TOKEN_NAME = "choose";
+	const std::string ASSERT_TOKEN_NAME = "assert";
+	const std::string PC_TOKEN_NAME = "pc";
 
 /* Tag names */
 	const std::string BEGINIT_TAG_NAME = "beginit";
