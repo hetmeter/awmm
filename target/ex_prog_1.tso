@@ -56,4 +56,4 @@ process 2:
 15: nop;
 16: store y2 = 0;
 
-/*program counters:  ((pc{1} != 15) || (pc{2} != 15)) */
+assert(always((pc(1) != 15) | (pc(2) != 15)))

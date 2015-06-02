@@ -20,6 +20,9 @@
  {IF_KEYWORD} 	if
  {BEGIN_ATOMIC_KEYWORD} 	begin_atomic
  {END_ATOMIC_KEYWORD} 	end_atomic
+ {PC_KEYWORD} 	pc
+ {ASSERT_KEYWORD} 	assert
+ {ALWAYS_KEYWORD} 	always
  {PLUS} 	\+
  {MINUS} 	-
  {ASTERISK} 	\*

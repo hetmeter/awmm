@@ -1,2 +1,2 @@
 parser.exe %1
-bsa.exe %1.out %2 %3 %4
+bsa.exe %1.out %2 %3

@@ -76,28 +76,3 @@ namespace config
 	extern bool expressionImpliesPredicate(z3::expr expression, Ast* predicate);
 	extern z3::expr impliesDuplicate(z3::expr const &a, z3::expr const &b);
 }
-
-
-//	const extern std::string TOP_STRING;
-//	const extern std::string BOTTOM_STRING;
-//
-//	extern int indexOf(Ast* predicate);
-//
-//	extern std::string replicateString(std::string s, int n);
-//
-//	extern bool stringVectorIsSubset(std::vector<std::string> possibleSubset, std::vector<std::string> possibleSuperset);
-//
-//
-//	extern Ast* stringToAst(std::string parsedProgramString);
-//
-//	enum booleanOperator { BOP_EQUALS, BOP_LESS_THAN, BOP_LESS_EQUALS, BOP_GREATER_THAN, BOP_GREATER_EQUALS, BOP_NOT_EQUALS, BOP_NOT, BOP_AND, BOP_OR, BOP_INVALID };
-//	extern booleanOperator stringToBooleanOperator(std::string operatorString);
-//	extern std::string booleanOperatorToString(booleanOperator boolOp);
-//
-//	extern std::vector<std::vector<Ast*>> allSubsetsOfLengthK(std::vector<Ast*> superset, int K);
-//	extern std::vector<std::vector<Ast*>> powerSetOfLimitedCardinality(std::vector<Ast*> superset, int cardinalityLimit);
-//	extern std::string nextBinaryRepresentation(std::string currentBinaryRepresentation, int length);
-//
-//	const extern char CUBE_STATE_UNDECIDED;
-//	const extern char CUBE_STATE_MAY_BE_FALSE;
-//	const extern char CUBE_STATE_MAY_BE_TRUE;
