@@ -2013,8 +2013,8 @@ using namespace std;
 		vector<int> relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
 	
 		vector<Ast*> implicativeCubes;
-		//vector<string> implicativeCubeStringRepresentations = config::getMinimalImplyingCubes(predicate, relevantIndices);
-		vector<string> implicativeCubeStringRepresentations = config::getImplicativeCubes()->getMinimalImplyingCubes(predicate, relevantIndices);
+		vector<string> implicativeCubeStringRepresentations = config::getMinimalImplyingCubes(predicate, relevantIndices);
+		//vector<string> implicativeCubeStringRepresentations = config::getImplicativeCubes()->getMinimalImplyingCubes(predicate, relevantIndices);
 	
 		for (string implicativeCubeStringRepresentation : implicativeCubeStringRepresentations)
 		{

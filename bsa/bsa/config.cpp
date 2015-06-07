@@ -30,7 +30,10 @@ namespace config
 	bool falseImplicativeCubesIsInitialized = false;
 	Ast* assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = nullptr;
 	Ast* falsePredicate = nullptr;
-	CubeTreeNode* implicativeCubes = nullptr;
+	std::map<std::string, CubeTreeNode*> implicativeCubes;
+	std::map<int, std::vector<CubeTreeNode*>> implicativeCubesPerLevel;
+	std::map<std::vector<int>, std::vector<int>> relevantCubeIndices;
+	//CubeTreeNode* implicativeCubes = nullptr;
 
 /* Global variable handling */
 	void carryOutLazyReplacements()
@@ -241,8 +244,9 @@ namespace config
 				allIndices.push_back(ctr);
 			}
 
-			std::vector<std::string> falseImplicativeCubeStrings = getImplicativeCubes()->getMinimalImplyingCubes(getFalsePredicate(), allIndices);
+			//std::vector<std::string> falseImplicativeCubeStrings = getImplicativeCubes()->getMinimalImplyingCubes(getFalsePredicate(), allIndices);
 			//std::vector<std::string> falseImplicativeCubeStrings = getImplicativeCubes()->getAllFalseImplyingCubes();
+			std::vector<std::string> falseImplicativeCubeStrings = getAllFalseImplyingCubes();
 
 			std::string falseString = getFalsePredicate()->emitCode();
 			std::vector<Ast*> falseImplicativeCubes;
@@ -278,14 +282,36 @@ namespace config
 		return falsePredicate;
 	}
 
-	CubeTreeNode* getImplicativeCubes()
+	void initializeImplicativeCubes()
 	{
-		if (implicativeCubes == nullptr)
+		new CubeTreeNode(globalCubeSizeLimit);
+	}
+
+	void registerImplicativeCube(CubeTreeNode* cube)
+	{
+		std::string cubeStringRepresentation = cube->getStringRepresentation();
+
+		if (implicativeCubes.find(cubeStringRepresentation) == implicativeCubes.end())
 		{
-			implicativeCubes = new CubeTreeNode(globalCubeSizeLimit);
+			implicativeCubes.insert(std::pair<std::string, CubeTreeNode*>(cubeStringRepresentation, cube));
 		}
 
-		return implicativeCubes;
+		int cubeVarCount = cube->getVarCount();
+
+		if (implicativeCubesPerLevel.find(cubeVarCount) == implicativeCubesPerLevel.end())
+		{
+			implicativeCubesPerLevel[cubeVarCount].push_back(cube);
+		}
+	}
+
+	std::vector<std::string> getMinimalImplyingCubes(Ast* predicate, const std::vector<int> &relevantIndices)
+	{
+		return implicativeCubesPerLevel[0][0]->getMinimalImplyingCubes(predicate, relevantIndices);
+	}
+
+	std::vector<std::string> getAllFalseImplyingCubes()
+	{
+		return implicativeCubesPerLevel[0][0]->getAllFalseImplyingCubes();
 	}
 
 /* String operations */

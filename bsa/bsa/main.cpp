@@ -185,7 +185,8 @@ int main(int argc, char** argv)
 
 			cout << "Performing predicate abstraction...\n";
 
-			config::getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes();
+			config::initializeImplicativeCubes();
+			config::getAllFalseImplyingCubes();
 			rootAstRef->cascadingUnfoldIfElses();
 			rootAstRef->cascadingPerformPredicateAbstraction();
 			rootAstRef->setVariableInitializations();

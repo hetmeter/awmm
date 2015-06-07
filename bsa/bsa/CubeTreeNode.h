@@ -40,6 +40,8 @@ public:
 	void setSubtreeImplication(Ast* predicate, const Implication &implicationValue);
 	bool isProperSubset(const std::string &possibleSubset);
 	bool hasImplicationData(const std::string &predicateCode);
+	void registerSuperset(CubeTreeNode* superset);
+	void registerAllSubsets();
 
 private:
 
@@ -52,6 +54,8 @@ private:
 	int _childrenCount = 0;
 	std::map<std::string, Implication> _predicateImplications;
 	std::vector<CubeTreeNode*> _children;
+	std::vector<CubeTreeNode*> _subsets;
+	std::vector<CubeTreeNode*> _supersets;
 	std::vector<Ast*> _astRepresentation;
 
 /* Private fields */

@@ -13,6 +13,7 @@ using namespace std;
 		_firstUsableIndex = 0;
 		_childrenCount = 2 * config::globalPredicatesCount;
 		initializeChildren();
+		config::registerImplicativeCube(this);
 	}
 
 	CubeTreeNode::CubeTreeNode(const string &stringRepresentation, int upperLimit, CubeTreeNode* parent)
@@ -34,6 +35,7 @@ using namespace std;
 
 		_childrenCount = 2 * (config::globalPredicatesCount - _firstUsableIndex);
 		initializeChildren();
+		config::registerImplicativeCube(this);
 	}
 	
 	CubeTreeNode::~CubeTreeNode()
@@ -125,6 +127,7 @@ using namespace std;
 
 				_children[index] = new CubeTreeNode(representation, _upperLimit, this);
 
+				//cout << "Created " << _stringRepresentation << "[" << index << "] = " << representation << "\n";
 				cout << "Created " << _stringRepresentation << "[" << index << "] = " << representation << "\r";
 			}
 
@@ -313,6 +316,25 @@ using namespace std;
 	bool CubeTreeNode::hasImplicationData(const string &predicateCode)
 	{
 		return _predicateImplications.find(predicateCode) != _predicateImplications.end();
+	}
+
+	void CubeTreeNode::registerSuperset(CubeTreeNode* superset)
+	{
+		_supersets.push_back(superset);
+	}
+
+	void CubeTreeNode::registerAllSubsets()
+	{
+		string representationCopy = string(_stringRepresentation);
+
+		for (int ctr = 0; ctr < config::globalPredicatesCount; ctr++)
+		{
+			if (representationCopy[ctr] != CUBE_STATE_OMIT)
+			{
+				representationCopy[ctr] = CUBE_STATE_OMIT;
+				_subsets.push_back(config::implicativeCubes[representationCopy]);
+			}
+		}
 	}
 
 /* Private fields */
