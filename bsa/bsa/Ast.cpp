@@ -350,6 +350,16 @@ using namespace std;
 		return c->int_const("INVALID");
 	}
 
+	const string Ast::getCode()
+	{
+		if (_code.empty())
+		{
+			_code = emitCode();
+		}
+
+		return _code;
+	}
+
 /* Cascading operations */
 	string Ast::emitCode()
 	{

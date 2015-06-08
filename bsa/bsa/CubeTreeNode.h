@@ -10,11 +10,6 @@ class CubeTreeNode
 {
 public:
 
-/* Constructors and destructor */
-	CubeTreeNode(int upperLimit);
-	CubeTreeNode(const std::string &stringRepresentation, int upperLimit, CubeTreeNode* parent);
-	~CubeTreeNode();
-
 /* Constants */
 	static const char CUBE_STATE_OMIT = '-';
 	static const char CUBE_STATE_DECIDED_FALSE = 'F';
@@ -23,46 +18,31 @@ public:
 /* Enumerations */
 	enum Implication { IMPLIES, NOT_IMPLIES, SUPERSET_IMPLIES };
 
-/* Public fields */
-	CubeTreeNode* getRoot();
-	void setImplication(const std::string &key, const Implication &value);
-	Implication getImplication(Ast* predicate);
-	std::string getStringRepresentation();
-	int getFirstUsableIndex();
-	int getVarCount();
-	int getUpperLimit();
-	CubeTreeNode* getChild(const int &index);
+/* Constructors and destructor */
+	CubeTreeNode(int upperLimit);
+	CubeTreeNode(const std::string &stringRepresentation, int upperLimit);
+	~CubeTreeNode();
 
-/* Public methods */
-	std::vector<std::string> getMinimalImplyingCubes(Ast* predicate, const std::vector<int> &relevantIndices);
-	std::vector<std::string> getAllFalseImplyingCubes();
-	void reportImplication(const std::string &representation, Ast* predicate);
-	void setSubtreeImplication(Ast* predicate, const Implication &implicationValue);
-	bool isProperSubset(const std::string &possibleSubset);
-	bool hasImplicationData(const std::string &predicateCode);
-	void registerSuperset(CubeTreeNode* superset);
-	void registerAllSubsets();
+/* Public fields */
+	Implication getPredicateImplication(Ast* predicate, const std::vector<int> &relevantIndices);
+	void setPredicateImplication(const std::string &predicateCode, Implication predicateImplication);
+	void setPredicateImplication(const std::string &predicateCode, const std::vector<int> &relevantIndices);
+	std::vector<std::string> getSupersetStringRepresentations(const std::vector<int> &relevantIndices);
+	std::vector<std::string> getCanonicalSupersetStringRepresentations(const std::vector<int> &relevantIndices);
 
 private:
 
 /* Locals */
 	std::string _stringRepresentation;
-	CubeTreeNode* _parent = nullptr;
 	int _upperLimit;
 	int _varCount;
-	int _firstUsableIndex;
-	int _childrenCount = 0;
+	int _suffixIndex;
 	std::map<std::string, Implication> _predicateImplications;
-	std::vector<CubeTreeNode*> _children;
-	std::vector<CubeTreeNode*> _subsets;
-	std::vector<CubeTreeNode*> _supersets;
-	std::vector<Ast*> _astRepresentation;
+	std::vector<Ast*> _astVectorRepresentation;
+	std::map<std::vector<int>, std::vector<std::string>> _supersetStringRepresentations;
+	std::map<std::vector<int>, std::vector<std::string>> _canonicalSupersetStringRepresentations;
+
 
 /* Private fields */
-	std::vector<Ast*> getAstRepresentation();
-	std::vector<std::string> getCurrentSubtreeRepresentations();
-
-/* Private methods */
-	void initializeChildren();
-	void calculateImplication(Ast* predicate);
+	std::vector<Ast*> getAstVectorRepresentation();
 };

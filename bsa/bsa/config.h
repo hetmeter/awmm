@@ -35,10 +35,9 @@ namespace config
 	extern bool falseImplicativeCubesIsInitialized;
 	extern Ast* assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes;
 	extern Ast* falsePredicate;
+	extern std::string emptyCubeRepresentation;
 	extern std::map<std::string, CubeTreeNode*> implicativeCubes;
-	extern std::map<int, std::vector<CubeTreeNode*>> implicativeCubesPerLevel;
-	extern std::map<std::vector<int>, std::vector<int>> relevantCubeIndices;
-	//extern CubeTreeNode* implicativeCubes;
+	extern std::vector<std::string> allFalseImplyingCubes;
 
 /* Global variable handling */
 	extern void carryOutLazyReplacements();
@@ -50,12 +49,14 @@ namespace config
 	extern std::vector<int> getPredicateVariableTransitiveClosure(int index);
 	extern Ast* getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes();
 	extern Ast* getFalsePredicate();
-	extern void initializeImplicativeCubes();
-	extern void registerImplicativeCube(CubeTreeNode* cube);
+	extern std::string getEmptyCubeRepresentation();
 	extern std::vector<std::string> getMinimalImplyingCubes(Ast* predicate, const std::vector<int> &relevantIndices);
-	extern std::vector<int> getRelevantCubeIndices(const std::vector<int> &relevantIndices);
 	extern std::vector<std::string> getAllFalseImplyingCubes();
-	extern void reportImplication(const std::string &representation, Ast* predicate);
+	extern CubeTreeNode* getImplicativeCube(const std::string &stringRepresentation);
+	/*extern void initializeImplicativeCubes();
+	extern void registerImplicativeCube(CubeTreeNode* cube);
+	extern std::vector<int> getRelevantCubeIndices(const std::vector<int> &relevantIndices);
+	extern void reportImplication(const std::string &representation, Ast* predicate);*/
 
 /* String operations */
 	extern std::string addTabs(const std::string &s, int numberOfTabs);

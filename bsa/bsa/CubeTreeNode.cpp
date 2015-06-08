@@ -7,341 +7,168 @@ using namespace std;
 /* Constructors and destructor */
 	CubeTreeNode::CubeTreeNode(int upperLimit)
 	{
-		_upperLimit = upperLimit;
 		_stringRepresentation = string(config::globalPredicatesCount, CUBE_STATE_OMIT);
+		_upperLimit = upperLimit;
 		_varCount = 0;
-		_firstUsableIndex = 0;
-		_childrenCount = 2 * config::globalPredicatesCount;
-		initializeChildren();
-		config::registerImplicativeCube(this);
+		_suffixIndex = 0;
+
+		config::implicativeCubes.insert(pair<string, CubeTreeNode*>(_stringRepresentation, this));
 	}
 
-	CubeTreeNode::CubeTreeNode(const string &stringRepresentation, int upperLimit, CubeTreeNode* parent)
+	CubeTreeNode::CubeTreeNode(const string &stringRepresentation, int upperLimit)
 	{
+		_stringRepresentation = stringRepresentation;
 		_upperLimit = upperLimit;
-		_stringRepresentation = string(stringRepresentation);
 		_varCount = _stringRepresentation.size() - count(_stringRepresentation.begin(), _stringRepresentation.end(), CUBE_STATE_OMIT);
-		_firstUsableIndex = 0;
-		_parent = parent;
-
+		_suffixIndex = 0;
+		
 		for (int ctr = config::globalPredicatesCount - 1; ctr >= 0; ctr--)
 		{
 			if (_stringRepresentation[ctr] != CUBE_STATE_OMIT)
 			{
-				_firstUsableIndex = ctr + 1;
+				_suffixIndex = ctr + 1;
 				break;
 			}
 		}
 
-		_childrenCount = 2 * (config::globalPredicatesCount - _firstUsableIndex);
-		initializeChildren();
-		config::registerImplicativeCube(this);
+		config::implicativeCubes.insert(pair<string, CubeTreeNode*>(_stringRepresentation, this));
 	}
-	
+
 	CubeTreeNode::~CubeTreeNode()
-	{
-		for (CubeTreeNode* child : _children)
-		{
-			if (child != nullptr)
-			{
-				delete child;
-			}
-		}
-	}
+	{}
 
 /* Public fields */
-	CubeTreeNode* CubeTreeNode::getRoot()
+	CubeTreeNode::Implication CubeTreeNode::getPredicateImplication(Ast* predicate, const vector<int> &relevantIndices)
 	{
-		if (_parent == nullptr)
+		cout << "getPredicateImplication(" << predicate->getCode() << ", relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
+
+		if (_varCount == 0)
 		{
-			return this;
+			return NOT_IMPLIES;
 		}
 
-		return _parent->getRoot();
-	}
+		const string predicateCode = predicate->getCode();
 
-	void CubeTreeNode::setImplication(const string &key, const Implication &value)
-	{
-		_predicateImplications[key] = value;
-	}
-
-	CubeTreeNode::Implication CubeTreeNode::getImplication(Ast* predicate)
-	{
-		string predicateCode = predicate->emitCode();
-
-		if (!hasImplicationData(predicateCode))
+		if (_predicateImplications.find(predicateCode) == _predicateImplications.end())
 		{
-			if (config::getFalsePredicate()->isEquivalent(predicate))
+			if (config::cubeImpliesPredicate(getAstVectorRepresentation(), predicate))
 			{
-				calculateImplication(predicate);
-			}
-			else if (getImplication(config::getFalsePredicate()) == NOT_IMPLIES)
-			{
-				calculateImplication(predicate);
+				setPredicateImplication(predicateCode, IMPLIES);
+
+				const vector<string> supersetStringRepresentations = getSupersetStringRepresentations(relevantIndices);
+
+				for (string supersetStringRepresentation : supersetStringRepresentations)
+				{
+					config::getImplicativeCube(supersetStringRepresentation)->setPredicateImplication(predicateCode, relevantIndices);
+				}
 			}
 			else
 			{
-				_predicateImplications[predicateCode] = NOT_IMPLIES;
+				setPredicateImplication(predicateCode, NOT_IMPLIES);
 			}
 		}
 
-		return _predicateImplications[predicateCode];
+		return _predicateImplications.at(predicateCode);
 	}
 
-	string CubeTreeNode::getStringRepresentation()
+	void CubeTreeNode::setPredicateImplication(const string &predicateCode, CubeTreeNode::Implication predicateImplication)
 	{
-		return _stringRepresentation;
+		cout << "setPredicateImplication(" << predicateCode << ", relevantIndices |" << predicateImplication << "|)\t\t\t \r";
+
+		assert(predicateImplication != SUPERSET_IMPLIES);
+		_predicateImplications.insert(pair<string, Implication>(predicateCode, predicateImplication));
 	}
 
-	int CubeTreeNode::getFirstUsableIndex()
+	void CubeTreeNode::setPredicateImplication(const string &predicateCode, const vector<int> &relevantIndices)
 	{
-		return _firstUsableIndex;
-	}
+		cout << "setPredicateImplication(" << predicateCode << ", relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
 
-	int CubeTreeNode::getVarCount()
-	{
-		return _varCount;
-	}
+		_predicateImplications.insert(pair<string, Implication>(predicateCode, SUPERSET_IMPLIES));
 
-	int CubeTreeNode::getUpperLimit()
-	{
-		return _upperLimit;
-	}
+		const vector<string> supersetStringRepresentations = getSupersetStringRepresentations(relevantIndices);
 
-	CubeTreeNode* CubeTreeNode::getChild(const int &index)
-	{
-		if (index >= 0 && index < _childrenCount && _varCount < _upperLimit)
+		for (string supersetStringRepresentation : supersetStringRepresentations)
 		{
-			if (_children[index] == nullptr)
-			{
-				string representation = string(_stringRepresentation);
+			config::getImplicativeCube(supersetStringRepresentation)->setPredicateImplication(predicateCode, relevantIndices);
+		}
+	}
 
-				if ((index / 2) * 2 == index)
-				{
-					representation[_firstUsableIndex + (index / 2)] = CUBE_STATE_DECIDED_FALSE;
-				}
-				else
-				{
-					representation[_firstUsableIndex + (index / 2)] = CUBE_STATE_DECIDED_TRUE;
-				}
+	vector<string> CubeTreeNode::getSupersetStringRepresentations(const vector<int> &relevantIndices)
+	{
+		cout << "getSupersetStringRepresentations(relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
 
-				_children[index] = new CubeTreeNode(representation, _upperLimit, this);
-
-				//cout << "Created " << _stringRepresentation << "[" << index << "] = " << representation << "\n";
-				cout << "Created " << _stringRepresentation << "[" << index << "] = " << representation << "\r";
-			}
-
-			return _children[index];
+		if (relevantIndices.empty())
+		{
+			return vector<string>();
 		}
 
-		return nullptr;
-	}
-
-/* Public methods */
-	vector<string> CubeTreeNode::getMinimalImplyingCubes(Ast* predicate, const vector<int> &relevantIndices)
-	{
-		vector<string> result;
-		bool predicateIsFalse = config::getFalsePredicate()->isEquivalent(predicate);
-
-		if (!predicateIsFalse && (config::isTautology(predicate) || config::isTautology(predicate->negate())))
+		if (_supersetStringRepresentations.find(relevantIndices) == _supersetStringRepresentations.end())
 		{
-			return result;
+			_supersetStringRepresentations.insert(pair<vector<int>, vector<string>>(relevantIndices, vector<string>()));
 		}
 
-		vector<CubeTreeNode*> searchQueue;
-		CubeTreeNode* currentNode;
-		searchQueue.push_back(this);
-		string predicateCode = predicate->emitCode();
-		Implication currentImplication;
-		int currentFirstUsableIndex;
-
-		while (!searchQueue.empty())
+		if (_supersetStringRepresentations.at(relevantIndices).empty() && _varCount < _upperLimit)
 		{
-			currentNode = searchQueue.at(0);
-
-			if (!currentNode->hasImplicationData(predicateCode))
-			{
-				if (predicateIsFalse)
-				{
-					currentNode->calculateImplication(predicate);
-				}
-				else if (currentNode->getImplication(config::getFalsePredicate()) == NOT_IMPLIES)
-				{
-					currentNode->calculateImplication(predicate);
-				}
-				else
-				{
-					currentNode->setImplication(predicateCode, NOT_IMPLIES);
-				}
-			}
-
-			currentImplication = currentNode->getImplication(predicate);
-			currentFirstUsableIndex = currentNode->getFirstUsableIndex();
-
-			if (currentImplication == IMPLIES)
-			{
-				result.push_back(currentNode->getStringRepresentation());
-			}
-			else if (currentImplication == NOT_IMPLIES &&
-				currentNode->getVarCount() < currentNode->getUpperLimit())
-			{
-				for (int relevantIndex : relevantIndices)
-				{
-					if (relevantIndex >= currentFirstUsableIndex)
-					{
-						searchQueue.push_back(currentNode->
-							getChild(2 * (relevantIndex - currentFirstUsableIndex)));
-						searchQueue.push_back(currentNode->
-							getChild(2 * (relevantIndex - currentFirstUsableIndex) + 1));
-					}
-				}
-			}
-
-			searchQueue.erase(searchQueue.begin());
-		}
-
-		return result;
-	}
-	/*vector<string> CubeTreeNode::getMinimalImplyingCubes(Ast* predicate, const vector<int> &relevantIndices)
-	{
-		vector<string> result;
-		Implication currentImplication = getImplication(predicate);
-
-		if (currentImplication == IMPLIES)
-		{
-			result.push_back(_stringRepresentation);
-		}
-		else if (currentImplication == NOT_IMPLIES && _varCount < _upperLimit)
-		{
-			vector<string> subResult;
+			string stringRepresentationCopy = string(_stringRepresentation);
 
 			for (int relevantIndex : relevantIndices)
 			{
-				if (relevantIndex >= _firstUsableIndex)
+				if (stringRepresentationCopy[relevantIndex] == CUBE_STATE_OMIT)
 				{
-					subResult = getChild(2 * (relevantIndex - _firstUsableIndex))->
-						getMinimalImplyingCubes(predicate, relevantIndices);
-					result.insert(result.end(), subResult.begin(), subResult.end());
-
-					subResult = getChild(2 * (relevantIndex - _firstUsableIndex) + 1)->
-						getMinimalImplyingCubes(predicate, relevantIndices);
-					result.insert(result.end(), subResult.begin(), subResult.end());
+					stringRepresentationCopy[relevantIndex] = CUBE_STATE_DECIDED_FALSE;
+					_supersetStringRepresentations.at(relevantIndices).push_back(stringRepresentationCopy);
+					stringRepresentationCopy[relevantIndex] = CUBE_STATE_DECIDED_TRUE;
+					_supersetStringRepresentations.at(relevantIndices).push_back(stringRepresentationCopy);
+					stringRepresentationCopy[relevantIndex] = CUBE_STATE_OMIT;
 				}
 			}
 		}
 
-		return result;
-	}*/
-
-	vector<string> CubeTreeNode::getAllFalseImplyingCubes()
-	{
-		vector<string> result;
-		Implication currentImplication = getImplication(config::getFalsePredicate());
-
-		if (currentImplication == IMPLIES || currentImplication == SUPERSET_IMPLIES)
-		{
-			vector<string> subResult = getCurrentSubtreeRepresentations();
-			result.insert(result.end(), subResult.begin(), subResult.end());
-		}
-		else if (currentImplication == NOT_IMPLIES && _varCount < _upperLimit)
-		{
-			vector<string> subResult;
-
-			for (int ctr = 0; ctr < _childrenCount; ctr++)
-			{
-				subResult = getChild(ctr)->getAllFalseImplyingCubes();
-				result.insert(result.end(), subResult.begin(), subResult.end());
-			}
-		}
-
-		return result;
+		return _supersetStringRepresentations.at(relevantIndices);
 	}
 
-	void CubeTreeNode::reportImplication(const string &representation, Ast* predicate)
+	vector<string> CubeTreeNode::getCanonicalSupersetStringRepresentations(const vector<int> &relevantIndices)
 	{
-		if (!hasImplicationData(predicate->emitCode()) || getImplication(predicate) != SUPERSET_IMPLIES)
-		{
-			if (isProperSubset(representation))
-			{
-				setSubtreeImplication(predicate, SUPERSET_IMPLIES);
+		//cout << "getCanonicalSupersetStringRepresentations(relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
+		cout << _stringRepresentation << ".getCanonicalSupersetStringRepresentations(relevantIndices |" << relevantIndices.size() << "|)\n";
 
-				cout << "Set " << _stringRepresentation << "[" << predicate->emitCode() << "] = SUPERSET_IMPLIES\t\t\t \r";
-			}
-			else if (_varCount < _upperLimit)
+		if (relevantIndices.empty())
+		{
+			return vector<string>();
+		}
+
+		if (_canonicalSupersetStringRepresentations.find(relevantIndices) == _canonicalSupersetStringRepresentations.end())
+		{
+			_canonicalSupersetStringRepresentations.insert(pair<vector<int>, vector<string>>(relevantIndices, vector<string>()));
+		}
+
+		if (_canonicalSupersetStringRepresentations.at(relevantIndices).empty() &&
+			_varCount < _upperLimit && _suffixIndex < config::globalPredicatesCount)
+		{
+			string stringRepresentationCopy = string(_stringRepresentation);
+
+			for (int relevantIndex : relevantIndices)
 			{
-				for (int ctr = 0; ctr < _childrenCount; ctr++)
+				if (relevantIndex >= _suffixIndex)
 				{
-					getChild(ctr)->reportImplication(representation, predicate);
+					stringRepresentationCopy[relevantIndex] = CUBE_STATE_DECIDED_FALSE;
+					_canonicalSupersetStringRepresentations.at(relevantIndices).push_back(stringRepresentationCopy);
+					stringRepresentationCopy[relevantIndex] = CUBE_STATE_DECIDED_TRUE;
+					_canonicalSupersetStringRepresentations.at(relevantIndices).push_back(stringRepresentationCopy);
+					stringRepresentationCopy[relevantIndex] = CUBE_STATE_OMIT;
 				}
 			}
 		}
-	}
 
-	void CubeTreeNode::setSubtreeImplication(Ast* predicate, const Implication &implicationValue)
-	{
-		_predicateImplications[predicate->emitCode()] = implicationValue;
-
-		if (_varCount < _upperLimit)
-		{
-			for (int ctr = 0; ctr < _childrenCount; ctr++)
-			{
-				getChild(ctr)->setSubtreeImplication(predicate, implicationValue);
-			}
-		}
-	}
-
-	bool CubeTreeNode::isProperSubset(const string &possibleSubset)
-	{
-		int numberOfPredicates = config::globalPredicates.size();
-
-		int possibleSubsetOmitCount = std::count(possibleSubset.begin(), possibleSubset.end(), CUBE_STATE_OMIT);
-		int possibleSupersetOmitCount = std::count(_stringRepresentation.begin(), _stringRepresentation.end(), CUBE_STATE_OMIT);
-
-		if (possibleSubsetOmitCount == possibleSubset.size() || possibleSupersetOmitCount == config::globalPredicatesCount)
-		{
-			return false;
-		}
-
-		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
-		{
-			if (possibleSubset[ctr] != CUBE_STATE_OMIT && possibleSubset[ctr] != _stringRepresentation[ctr])
-			{
-				return false;
-			}
-		}
-
-		return possibleSubset != _stringRepresentation;
-	}
-
-	bool CubeTreeNode::hasImplicationData(const string &predicateCode)
-	{
-		return _predicateImplications.find(predicateCode) != _predicateImplications.end();
-	}
-
-	void CubeTreeNode::registerSuperset(CubeTreeNode* superset)
-	{
-		_supersets.push_back(superset);
-	}
-
-	void CubeTreeNode::registerAllSubsets()
-	{
-		string representationCopy = string(_stringRepresentation);
-
-		for (int ctr = 0; ctr < config::globalPredicatesCount; ctr++)
-		{
-			if (representationCopy[ctr] != CUBE_STATE_OMIT)
-			{
-				representationCopy[ctr] = CUBE_STATE_OMIT;
-				_subsets.push_back(config::implicativeCubes[representationCopy]);
-			}
-		}
+		return _canonicalSupersetStringRepresentations.at(relevantIndices);
 	}
 
 /* Private fields */
-
-	vector<Ast*> CubeTreeNode::getAstRepresentation()
+	vector<Ast*> CubeTreeNode::getAstVectorRepresentation()
 	{
-		if (_astRepresentation.empty())
+		cout << "getAstVectorRepresentation()\t\t\t \r";
+
+		if (_astVectorRepresentation.empty() && _varCount < _upperLimit)
 		{
 			Ast* currentTerm;
 
@@ -350,69 +177,15 @@ using namespace std;
 				if (_stringRepresentation[ctr] == CUBE_STATE_DECIDED_FALSE)
 				{
 					currentTerm = config::globalPredicates[ctr]->negate();
-					_astRepresentation.push_back(currentTerm);
+					_astVectorRepresentation.push_back(currentTerm);
 				}
 				else if (_stringRepresentation[ctr] == CUBE_STATE_DECIDED_TRUE)
 				{
 					currentTerm = config::globalPredicates[ctr]->clone();
-					_astRepresentation.push_back(currentTerm);
+					_astVectorRepresentation.push_back(currentTerm);
 				}
 			}
 		}
 
-		return _astRepresentation;
-	}
-
-	vector<string> CubeTreeNode::getCurrentSubtreeRepresentations()
-	{
-		vector<string> result;
-
-		result.push_back(_stringRepresentation);
-
-		if (_varCount < _upperLimit)
-		{
-			vector<string> subResult;
-
-			for (int ctr = 0; ctr < _childrenCount; ctr++)
-			{
-				subResult = getChild(ctr)->getCurrentSubtreeRepresentations();
-				result.insert(result.end(), subResult.begin(), subResult.end());
-			}
-		}
-
-		return result;
-	}
-
-/* Private methods */
-	void CubeTreeNode::initializeChildren()
-	{
-		assert(_children.empty());
-
-		if (_varCount < _upperLimit)
-		{
-			for (int ctr = 0; ctr < _childrenCount; ctr++)
-			{
-				_children.push_back(nullptr);
-			}
-		}
-	}
-
-	void CubeTreeNode::calculateImplication(Ast* predicate)
-	{
-		string predicateCode = predicate->emitCode();
-
-		if (config::cubeImpliesPredicate(getAstRepresentation(), predicate))
-		{
-			_predicateImplications[predicateCode] = IMPLIES;
-
-			cout << "\t\t\t\t\tSet " << _stringRepresentation << "[" << predicateCode << "] = IMPLIES\t\t\t \n";
-
-			getRoot()->reportImplication(_stringRepresentation, predicate);
-		}
-		else
-		{
-			_predicateImplications[predicateCode] = NOT_IMPLIES;
-
-			cout << "Set " << _stringRepresentation << "[" << predicateCode << "] = NOT_IMPLIES\t\t\t \r";
-		}
+		return _astVectorRepresentation;
 	}

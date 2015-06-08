@@ -45,6 +45,7 @@ public:
 	Ast* weakestLiberalPrecondition(Ast* predicate);
 	std::string toString();
 	z3::expr toZ3Expression(z3::context* c);
+	const std::string getCode();
 
 /* Cascading operations */
 	std::string emitCode();
@@ -106,6 +107,8 @@ public:
 	//	static Ast* newUnaryOp(Ast* operand, std::string operation);
 
 private:
+/* Locals */
+	std::string _code = "";
 
 /* Local access */
 	void resetBufferSizes();

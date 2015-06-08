@@ -30,9 +30,11 @@ namespace config
 	bool falseImplicativeCubesIsInitialized = false;
 	Ast* assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = nullptr;
 	Ast* falsePredicate = nullptr;
+	std::string emptyCubeRepresentation;
 	std::map<std::string, CubeTreeNode*> implicativeCubes;
-	std::map<int, std::vector<CubeTreeNode*>> implicativeCubesPerLevel;
-	std::map<std::vector<int>, std::vector<int>> relevantCubeIndices;
+	std::vector<std::string> allFalseImplyingCubes;
+	/*std::map<int, std::vector<CubeTreeNode*>> implicativeCubesPerLevel;
+	std::map<std::vector<int>, std::vector<int>> relevantCubeIndices;*/
 	//CubeTreeNode* implicativeCubes = nullptr;
 
 /* Global variable handling */
@@ -282,7 +284,111 @@ namespace config
 		return falsePredicate;
 	}
 
-	void initializeImplicativeCubes()
+	std::string getEmptyCubeRepresentation()
+	{
+		if (emptyCubeRepresentation.empty())
+		{
+			emptyCubeRepresentation = std::string(globalPredicatesCount, CubeTreeNode::CUBE_STATE_OMIT);
+		}
+
+		return emptyCubeRepresentation;
+	}
+
+	std::vector<std::string> getMinimalImplyingCubes(Ast* predicate, const std::vector<int> &relevantIndices)
+	{
+		std::vector<std::string> result;
+		std::vector<std::string> pending;
+		pending.push_back(getEmptyCubeRepresentation());
+
+		CubeTreeNode* currentCube;
+		CubeTreeNode::Implication currentImplication;
+		std::vector<std::string> currentCanonicalSupersetRepresentations;
+
+		while (!pending.empty())
+		{
+			std::cout << "|pending| = " << pending.size() << "\t\t\t\t\t \r";
+
+			currentCube = getImplicativeCube(pending[0]);
+			currentImplication = currentCube->getPredicateImplication(predicate, relevantIndices);
+
+			if (currentImplication == CubeTreeNode::IMPLIES)
+			{
+				result.push_back(pending[0]);
+			}
+			else if (currentImplication == CubeTreeNode::NOT_IMPLIES)
+			{
+				currentCanonicalSupersetRepresentations = currentCube->getCanonicalSupersetStringRepresentations(relevantIndices);
+
+				/*for (std::string currentCanonicalSupersetRepresentation : currentCanonicalSupersetRepresentations)
+				{
+					std::cout << "\t" << currentCanonicalSupersetRepresentation << "\n";
+				}*/
+
+				pending.insert(pending.end(), currentCanonicalSupersetRepresentations.begin(),
+					currentCanonicalSupersetRepresentations.end());
+			}
+
+			pending.erase(pending.begin());
+		}
+
+		return result;
+
+		//return implicativeCubesPerLevel[0][0]->getMinimalImplyingCubes(predicate, relevantIndices);
+	}
+
+	std::vector<std::string> getAllFalseImplyingCubes()
+	{
+		if (allFalseImplyingCubes.empty() && globalPredicatesCount > 0)
+		{
+			std::vector<std::string> pending;
+			pending.push_back(getEmptyCubeRepresentation());
+
+			CubeTreeNode* currentCube;
+			CubeTreeNode::Implication currentImplication;
+			std::vector<std::string> currentCanonicalSupersetRepresentations;
+
+			std::vector<int> relevantIndices;
+			for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
+			{
+				relevantIndices.push_back(ctr);
+			}
+
+			while (!pending.empty())
+			{
+				currentCube = getImplicativeCube(pending[0]);
+				currentImplication = currentCube->getPredicateImplication(getFalsePredicate(), relevantIndices);
+
+				if (currentImplication == CubeTreeNode::IMPLIES || currentImplication == CubeTreeNode::SUPERSET_IMPLIES)
+				{
+					allFalseImplyingCubes.push_back(pending[0]);
+				}
+
+
+				currentCanonicalSupersetRepresentations = currentCube->getCanonicalSupersetStringRepresentations(relevantIndices);
+				pending.insert(pending.end(), currentCanonicalSupersetRepresentations.begin(),
+					currentCanonicalSupersetRepresentations.end());
+
+				pending.erase(pending.begin());
+			}
+		}
+
+		return allFalseImplyingCubes;
+
+		//return implicativeCubesPerLevel[0][0]->getAllFalseImplyingCubes();
+	}
+
+	CubeTreeNode* getImplicativeCube(const std::string &stringRepresentation)
+	{
+		if (implicativeCubes.find(stringRepresentation) == implicativeCubes.end())
+		{
+			implicativeCubes.insert(std::pair<std::string, CubeTreeNode*>(stringRepresentation,
+				new CubeTreeNode(stringRepresentation, globalCubeSizeLimit)));
+		}
+
+		return implicativeCubes.at(stringRepresentation);
+	}
+
+	/*void initializeImplicativeCubes()
 	{
 		new CubeTreeNode(globalCubeSizeLimit);
 	}
@@ -302,17 +408,7 @@ namespace config
 		{
 			implicativeCubesPerLevel[cubeVarCount].push_back(cube);
 		}
-	}
-
-	std::vector<std::string> getMinimalImplyingCubes(Ast* predicate, const std::vector<int> &relevantIndices)
-	{
-		return implicativeCubesPerLevel[0][0]->getMinimalImplyingCubes(predicate, relevantIndices);
-	}
-
-	std::vector<std::string> getAllFalseImplyingCubes()
-	{
-		return implicativeCubesPerLevel[0][0]->getAllFalseImplyingCubes();
-	}
+	}*/
 
 /* String operations */
 	std::string addTabs(const std::string &s, int numberOfTabs)
