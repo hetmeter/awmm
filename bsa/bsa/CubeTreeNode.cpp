@@ -40,7 +40,8 @@ using namespace std;
 /* Public fields */
 	CubeTreeNode::Implication CubeTreeNode::getPredicateImplication(Ast* predicate, const vector<int> &relevantIndices)
 	{
-		cout << "getPredicateImplication(" << predicate->getCode() << ", relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
+		//cout << "getPredicateImplication(" << predicate->getCode() << ", relevantIndices |" << relevantIndices.size() << "|)\t\t\t \n";
+		//cout << "getPredicateImplication(" << predicate->getCode() << ", relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
 
 		if (_varCount == 0)
 		{
@@ -73,7 +74,8 @@ using namespace std;
 
 	void CubeTreeNode::setPredicateImplication(const string &predicateCode, CubeTreeNode::Implication predicateImplication)
 	{
-		cout << "setPredicateImplication(" << predicateCode << ", relevantIndices |" << predicateImplication << "|)\t\t\t \r";
+		//cout << "setPredicateImplication(" << predicateCode << ", relevantIndices |" << predicateImplication << "|)\t\t\t \n";
+		//cout << "setPredicateImplication(" << predicateCode << ", relevantIndices |" << predicateImplication << "|)\t\t\t \r";
 
 		assert(predicateImplication != SUPERSET_IMPLIES);
 		_predicateImplications.insert(pair<string, Implication>(predicateCode, predicateImplication));
@@ -81,7 +83,8 @@ using namespace std;
 
 	void CubeTreeNode::setPredicateImplication(const string &predicateCode, const vector<int> &relevantIndices)
 	{
-		cout << "setPredicateImplication(" << predicateCode << ", relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
+		//cout << "setPredicateImplication(" << predicateCode << ", relevantIndices |" << relevantIndices.size() << "|)\t\t\t \n";
+		//cout << "setPredicateImplication(" << predicateCode << ", relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
 
 		_predicateImplications.insert(pair<string, Implication>(predicateCode, SUPERSET_IMPLIES));
 
@@ -95,7 +98,8 @@ using namespace std;
 
 	vector<string> CubeTreeNode::getSupersetStringRepresentations(const vector<int> &relevantIndices)
 	{
-		cout << "getSupersetStringRepresentations(relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
+		//cout << "getSupersetStringRepresentations(relevantIndices |" << relevantIndices.size() << "|)\t\t\t \n";
+		//cout << "getSupersetStringRepresentations(relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
 
 		if (relevantIndices.empty())
 		{
@@ -129,8 +133,8 @@ using namespace std;
 
 	vector<string> CubeTreeNode::getCanonicalSupersetStringRepresentations(const vector<int> &relevantIndices)
 	{
-		//cout << "getCanonicalSupersetStringRepresentations(relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
-		cout << _stringRepresentation << ".getCanonicalSupersetStringRepresentations(relevantIndices |" << relevantIndices.size() << "|)\n";
+		//cout << _stringRepresentation << ".getCanonicalSupersetStringRepresentations(relevantIndices |" << relevantIndices.size() << "|)\n";
+		//cout << _stringRepresentation << ".getCanonicalSupersetStringRepresentations(relevantIndices |" << relevantIndices.size() << "|)\t\t\t \r";
 
 		if (relevantIndices.empty())
 		{
@@ -166,7 +170,8 @@ using namespace std;
 /* Private fields */
 	vector<Ast*> CubeTreeNode::getAstVectorRepresentation()
 	{
-		cout << "getAstVectorRepresentation()\t\t\t \r";
+		//cout << "getAstVectorRepresentation()\t\t\t \r";
+		//cout << "getAstVectorRepresentation()\t\t\t \n";
 
 		if (_astVectorRepresentation.empty() && _varCount < _upperLimit)
 		{
