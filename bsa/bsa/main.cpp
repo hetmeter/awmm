@@ -10,11 +10,13 @@ Buffer Size Analysis:
 
 #include <string>
 #include <iostream>
+#include <ctime>
 #include <fstream>
 #include <regex>
 #include <map>
 
 #include "config.h"
+#include "literalCode.h"
 #include "Ast.h"
 
 using namespace std;
@@ -32,6 +34,8 @@ const string BOOLEAN_EXTENSION = "bl";
 
 int main(int argc, char** argv)
 {
+	time_t startedAt = time(0);
+
 	string parsedProgramPath;
 	string outputPath;
 	//string endAssertion;
@@ -64,14 +68,7 @@ int main(int argc, char** argv)
 		config::throwCriticalError("No cube size limit specified");
 	}
 
-	/*if (argc > 4)
-	{
-		endAssertion = argv[4];
-	}
-	else
-	{
-		config::throwCriticalError("No end assertion specified");
-	}*/
+	config::generateAuxiliaryPredicates = !(argc > 4 && literalCode::OMIT_AUXILIARY_PREDICATES_PARAMETER.compare(argv[4]) == 0);
 
 	// Parse input file (no line breaks are expected)
 	ifstream parsedProgramFile(parsedProgramPath);
@@ -136,12 +133,31 @@ int main(int argc, char** argv)
 	/*cout << "\n---\nParsed program:\n\n";
 	cout << rootAstRef->emitCode();*/
 
-	rootAstRef->cascadingUnifyVariableNames();		// Send a cascading command to the root node that results in all variable identifiers registering their variable names in a global vector
-	rootAstRef->getCostsFromChildren();				// Send a cascading command to the root node that results in all program points storing the buffer size increases they cause
-	rootAstRef->initializePersistentCosts();		// Prompt the AST to gather all globally initialized variables and have all program point nodes keep track of their buffer sizes
-	rootAstRef->topDownCascadingRegisterLabels();	// Send a cascading command to the root node that results in all label AST nodes registering themselves in a global map
-	rootAstRef->cascadingGenerateOutgoingEdges();	// Send a cascading command to the root node that results in all program points estabilishing outgoing program flow edges to their possible successor nodes in the control flow graph
-	rootAstRef->visitAllProgramPoints();			// Generate one control flow visitor in the first program point nodes of each process declaration and prompt them to start traversing the AST
+	// Register all global variables
+	rootAstRef->getChild(0)->registerIDsAsGlobal();
+
+	// Register all local variables and processes
+	for (int ctr = 1; ctr < rootAstRef->getChildrenCount(); ctr++)
+	{
+		if (rootAstRef->getChild(ctr)->getName().compare(literalCode::PROCESS_DECLARATION_TOKEN_NAME) == 0)
+		{
+			config::tryRegisterProcess(stoi(rootAstRef->getChild(ctr)->getChild(0)->getChild(0)->getName()));
+			rootAstRef->getChild(ctr)->registerIDsAsLocal();
+		}
+	}
+
+	// Register all auxiliary variables
+	config::generateAllAuxiliarySymbols();
+
+
+	//rootAstRef->cascadingUnifyVariableNames();		// Send a cascading command to the root node that results in all variable identifiers registering their variable names in a global vector
+
+	rootAstRef->getCostsFromChildren();						// Send a cascading command to the root node that results in all program points storing the buffer size increases they cause
+	rootAstRef->initializePersistentCosts();				// Prompt the AST to gather all globally initialized variables and have all program point nodes keep track of their buffer sizes
+	rootAstRef->topDownCascadingRegisterLabels();			// Send a cascading command to the root node that results in all label AST nodes registering themselves in a global map
+	rootAstRef->topDownCascadingGenerateOutgoingEdges();	// Send a cascading command to the root node that results in all program points estabilishing outgoing program flow edges to their possible successor nodes in the control flow graph
+	rootAstRef->visitAllProgramPoints();					// Generate one control flow visitor in the first program point nodes of each process declaration and prompt them to start traversing the AST
+	
 	rootAstRef->cascadingUnifyVariableNames();
 	rootAstRef->cascadingInitializeAuxiliaryVariables();
 	rootAstRef->carryOutReplacements();
@@ -181,12 +197,27 @@ int main(int argc, char** argv)
 				config::globalPredicatesCount++;
 			}
 
+			if (config::generateAuxiliaryPredicates)
+			{
+				config::processes = rootAstRef->getAllProcessDeclarations();
+				config::initializeAuxiliaryPredicates();
+				config::globalPredicatesCount = config::globalPredicates.size();
+			}
+
 			config::initializeAuxiliaryVariables();
 
-			cout << "Performing predicate abstraction...\n";
+			cout << "\nUsing global predicates:\n";
+
+			for (Ast* globalPredicate : config::globalPredicates)
+			{
+				cout << globalPredicate->getCode() << "\n";
+			}
+
+			cout << "\nPerforming predicate abstraction...\n";
 
 			/*config::initializeImplicativeCubes();
 			config::getAllFalseImplyingCubes();*/
+
 			rootAstRef->cascadingUnfoldIfElses();
 			rootAstRef->cascadingPerformPredicateAbstraction();
 			rootAstRef->setVariableInitializations();
@@ -217,6 +248,17 @@ int main(int argc, char** argv)
 	booleanProgramOut << rootAstRef->emitCode() << "\n";
 	//booleanProgramOut << rootAstRef->emitCode() << "\n\n" << endAssertion;
 	booleanProgramOut.close();
+
+	// Output elapsed time
+	time_t finishedAt = time(0);
+	double elapsedSeconds = difftime(finishedAt, startedAt);
+
+	int elapsedHours = elapsedSeconds / (60 * 60);
+	elapsedSeconds -= elapsedHours * 60 * 60;
+	int elapsedMinutes = elapsedSeconds / 60;
+	elapsedSeconds -= elapsedMinutes * 60;
+
+	cout << "\nElapsed time: " << elapsedHours << "h " << elapsedMinutes << "min " << elapsedSeconds << "s\n";
 
 	return 0;
 }

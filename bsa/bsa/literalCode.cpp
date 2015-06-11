@@ -5,6 +5,14 @@ namespace literalCode
 /* Collections */
 	const std::vector<std::string> UNARY_OPERATORS = { "!" };
 	const std::vector<std::string> BINARY_OPERATORS = { "+", "-", "*", "/", "&", "|", "<", ">", "<=", ">=", "=", "==", "!=", "&&", "||" };
+	const std::vector<std::string> RMA_PROGRAM_POINT_TOKENS = {
+		LABEL_TOKEN_NAME, GOTO_TOKEN_NAME, RMA_GET_TOKEN_NAME, PSO_TSO_LOAD_TOKEN_NAME, IF_ELSE_TOKEN_NAME, FENCE_TOKEN_NAME,
+		RMA_PUT_TOKEN_NAME, LOCAL_ASSIGN_TOKEN_NAME, NOP_TOKEN_NAME, FLUSH_TOKEN_NAME
+	};
+	const std::vector<std::string> PSO_TSO_PROGRAM_POINT_TOKENS = {
+		LABEL_TOKEN_NAME, GOTO_TOKEN_NAME, PSO_TSO_STORE_TOKEN_NAME, PSO_TSO_LOAD_TOKEN_NAME, IF_ELSE_TOKEN_NAME, FENCE_TOKEN_NAME,
+		NOP_TOKEN_NAME, FLUSH_TOKEN_NAME, LOCAL_ASSIGN_TOKEN_NAME
+	};
 
 /* Symbols */
 	const char LEFT_PARENTHESIS = '(';
@@ -95,6 +103,9 @@ namespace literalCode
 	const std::string REPLACING_CAPTION = "Replacing";
 	const std::string FINISHED_REPLACING_CAPTION = "Finished replacing";
 	const std::string PREDICATE_ABSTRACTION_COMMENT_PREFIX = "Predicate abstraction: ";
+
+/* Parameters */
+	const std::string OMIT_AUXILIARY_PREDICATES_PARAMETER = "-oa";
 }
 
 //	const char TAB = '\t';

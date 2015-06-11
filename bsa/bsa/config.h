@@ -10,6 +10,7 @@
 
 class Ast;
 class GlobalVariable;
+class VariableEntry;
 class CubeTreeNode;
 
 namespace config
@@ -19,11 +20,16 @@ namespace config
 	extern int globalCubeSizeLimit;
 	extern int globalPredicatesCount;
 	extern std::vector<Ast*> globalPredicates;
+	extern bool generateAuxiliaryPredicates;
 	
 	enum language { PSO, TSO, RMA };
 	extern language currentLanguage;
 
 /* Global variables */
+	extern std::map<std::string, VariableEntry*> symbolMap;
+	extern std::map<int, Ast*> labelMap;
+	extern std::vector<int> processes;
+
 	extern std::map<Ast*, std::vector<Ast*>> lazyReplacements;
 	extern std::vector<std::string> variableNames;
 	extern std::vector<std::string> auxiliaryBooleanVariableNames;
@@ -38,8 +44,18 @@ namespace config
 	extern std::string emptyCubeRepresentation;
 	extern std::map<std::string, CubeTreeNode*> implicativeCubes;
 	extern std::vector<std::string> allFalseImplyingCubes;
+	extern std::map<std::string, std::pair<Ast*, Ast*>> predicateAstRepresentations;
 
 /* Global variable handling */
+	extern bool tryRegisterGlobalSymbol(const std::string &name);
+	extern bool tryRegisterLocalSymbol(const std::string &name);
+	extern bool tryRegisterAuxiliarySymbol(const std::string &name, const std::string &globalName);
+	extern void generateAllAuxiliarySymbols();
+
+	extern bool tryRegisterLabel(int label, Ast* node);
+
+	extern bool tryRegisterProcess(int process);
+
 	extern void carryOutLazyReplacements();
 	extern int getCurrentAuxiliaryLabel();
 	extern int indexOf(const std::string &varName);
@@ -53,6 +69,9 @@ namespace config
 	extern std::vector<std::string> getMinimalImplyingCubes(Ast* predicate, const std::vector<int> &relevantIndices);
 	extern std::vector<std::string> getAllFalseImplyingCubes();
 	extern CubeTreeNode* getImplicativeCube(const std::string &stringRepresentation);
+	extern std::pair<Ast*, Ast*> getPredicateAstRepresentationPair(Ast* predicate);
+	extern Ast* getPredicateTemporaryAstRepresentation(Ast* predicate);
+	extern Ast* getPredicateBooleanAstRepresentation(Ast* predicate);
 	/*extern void initializeImplicativeCubes();
 	extern void registerImplicativeCube(CubeTreeNode* cube);
 	extern std::vector<int> getRelevantCubeIndices(const std::vector<int> &relevantIndices);
@@ -70,6 +89,7 @@ namespace config
 
 /* Initializations */
 	extern void initializeAuxiliaryVariables();
+	extern void initializeAuxiliaryPredicates();
 
 /* Messages */
 	const extern std::string OVERFLOW_MESSAGE;

@@ -8,6 +8,8 @@ namespace literalCode
 /* Collections */
 	const extern std::vector<std::string> UNARY_OPERATORS;
 	const extern std::vector<std::string> BINARY_OPERATORS;
+	const extern std::vector<std::string> RMA_PROGRAM_POINT_TOKENS;
+	const extern std::vector<std::string> PSO_TSO_PROGRAM_POINT_TOKENS;
 
 /* Symbols */
 	const extern char LEFT_PARENTHESIS;
@@ -98,6 +100,9 @@ namespace literalCode
 	const extern std::string REPLACING_CAPTION;
 	const extern std::string FINISHED_REPLACING_CAPTION;
 	const extern std::string PREDICATE_ABSTRACTION_COMMENT_PREFIX;
+
+/* Parameters */
+	const extern std::string OMIT_AUXILIARY_PREDICATES_PARAMETER;
 }
 
 //	const extern char TAB;

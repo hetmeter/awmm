@@ -10,24 +10,43 @@ class ControlFlowEdge;
 
 class Ast
 {
+private:
+
+/* Locals */
+	std::string _name;
+
+	std::string _code;
+	bool _codeIsValid;
+
+	Ast* _parent;
+	std::vector<Ast*> _children;
+	int _childrenCount;
+
+	std::string _startComment;
+	std::string _endComment;
+
+/* Private fields */
+	const Ast* getParent();
+	int getIndexAsChild();
+	int tryGetParentProcessNumber();
+
+/* Local methods */
+	void resetBufferSizes();
+	void copyPersistentBufferSizes(Ast* source);
+	bool generateOutgoingEdges();
+	bool isProgramPoint();
+	Ast* tryGetNextStatement();
+	Ast* tryGetLastStatement();
+	Ast* tryGetNextSibling();
+	Ast* tryGetLastChild();
+
 public:
 
 /* Constructors and destructor */
-	Ast();
+	Ast(const std::string &name);
 	~Ast();
 
-/* Replicators */
-	Ast* clone();
-	Ast* negate();
-
-/* Attributes */
-	std::string name;
-	std::vector<Ast*> children;
-	Ast* parent;
-	int indexAsChild;
-	std::string startComment;
-	std::string endComment;
-
+/* Public members */
 	bufferSizeMap causedWriteCost;
 	bufferSizeMap causedReadCost;
 	bufferSizeMap persistentWriteCost;
@@ -35,108 +54,55 @@ public:
 
 	std::vector<ControlFlowEdge*> outgoingEdges;
 
-/* Access */
-	void addChild(Ast* child);
-	void addChild(Ast* child, int index);
-	void addChildren(const std::vector<Ast*> &newChildren);
-	void refreshChildIndices();
-	std::vector<Ast*> search(const std::string &soughtName);
-	std::string getLabelCode();
-	Ast* weakestLiberalPrecondition(Ast* predicate);
-	std::string toString();
-	z3::expr toZ3Expression(z3::context* c);
+/* Public fields */
+	const std::string getName();
+	void setName(const std::string value);
+
 	const std::string getCode();
 
-/* Cascading operations */
-	std::string emitCode();
-	std::vector<std::string> getIDs();
-	void cascadingUnifyVariableNames();
-	void getCostsFromChildren();
-	void initializePersistentCosts();
-	void topDownCascadingRegisterLabels();
-	void cascadingGenerateOutgoingEdges();
+	void setParent(Ast* newParent);
+
+	Ast* getChild(int index);
+	void insertChild(Ast* newChild);
+	void insertChild(Ast* newChild, int index);
+	void insertChildren(const std::vector<Ast*> &newChildren);
+	void insertChildren(const std::vector<Ast*> &newChildren, int index);
+	void deleteChild(int index);
+	void replaceChild(Ast* newChild, int index);
+	void replaceChild(const std::vector<Ast*> &newChildren, int index);
+
+	int getChildrenCount();
+
+/* Public methods */
+	void invalidateCode();
 	void visitAllProgramPoints();
-	void cascadingInitializeAuxiliaryVariables();
-	void carryOutReplacements();
-	void cascadingPerformPredicateAbstraction();
-	void cascadingUnfoldIfElses();
-	void setVariableInitializations();
-	void topDownCascadingCopyPersistentBufferSizes(Ast* source);
-	void topDownCascadingAddInitializedCausedCostsToPersistentCosts();
-	void controlFlowDirectionCascadingPropagateTops();
-	void labelAllStatements();
-	bool isEquivalent(Ast* otherAst);
 
-/* Static operations */
-	static void replaceNode(const std::vector<Ast*> &nodes, Ast* oldNode);
-	static void replaceNode(Ast* newNode, Ast* oldNode);
+/* Pseudo-constructors */
+	static Ast* newAstFromParsedProgram(const std::string &parsedProgramString);
 
-/* Static pseudo-constructors */
-	static Ast* newID(const std::string &variableName);
-	static Ast* newINT(int value);
-	static Ast* newBinaryOp(Ast* leftOperand, Ast* rightOperand, const std::string &operation);
-	static Ast* newMultipleOperation(const std::vector<Ast*> &operands, const std::string &operation);
 	static Ast* newLocalAssign(const std::string &variableName, int initialValue);
 	static Ast* newLocalAssign(const std::string &variableName, Ast* assignmentNode);
-	static Ast* newStore(const std::string &variableName, Ast* rightSide);
-	static Ast* newLoad(const std::string &variableName, Ast* rightSide);
+
 	static Ast* newIfElse(Ast* ifConditionalNode, const std::vector<Ast*> &statements);
 	static Ast* newIfElse(Ast* ifConditionalNode, const std::vector<Ast*> &ifStatements, const std::vector<Ast*> &elseStatements);
+
+	static Ast* newID(const std::string &variableName);
+	static Ast* newINT(int value);
 	static Ast* newStatements(const std::vector<Ast*> &statements);
 	static Ast* newNone();
-	static Ast* newNop();
-	static Ast* newGoto(int value);
-	static Ast* newLabel(int value, Ast* statement);
-	static Ast* newAsterisk();
-	static Ast* newTrue();
-	static Ast* newFalse();
-	static Ast* newAssume(Ast* assumeConditionalNode);
-	static Ast* newChoose(Ast* firstChoice, Ast* secondChoice);
-	static Ast* newBeginAtomic();
-	static Ast* newEndAtomic();
-	static Ast* newBooleanIf(Ast* ifConditionalNode, Ast* statement);
+	static Ast* newAbort(const std::string &abortMessage);
 
-	static Ast* newAstFromParsedProgram(const std::string &parsedProgramString);
-	static Ast* newSharedVariables(const std::vector<std::string> &variableNames);
-	static Ast* newLocalVariables(const std::vector<std::string> &variableNames);
-	static Ast* newBooleanVariableCube(const std::string &definition, bool useTemporaryVariables = true);
-	static Ast* newAbstractAssignmentFragment(Ast* assignment, Ast* predicate);
-	static Ast* newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables = true);
-	static Ast* newReverseLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate);
-	//
-	//	static Ast* newUnaryOp(Ast* operand, std::string operation);
-
-private:
-/* Locals */
-	std::string _code = "";
-
-/* Local access */
-	void resetBufferSizes();
-	bool tryGetParentProcessNumber(std::string* out);
-	int numberOfVariablesInPersistentWriteBuffer();
-	bool isRoot();
-	bool isProgramPoint();
-	bool hasElse();
-	std::string getGotoCode();
-
-	std::vector<bufferSizeMap*> _allBufferSizeContainers;
-	std::vector<bufferSizeMap*> allBufferSizeContainers();
-
-/* Cascade elements */
-	bool unifyVariableNames();
-	void registerLabel();
-	bool generateOutgoingEdges();
-	void initializeAuxiliaryVariables();
-	std::vector<Ast*> reportBack();
-	bool performPredicateAbstraction();
-	bool unfoldIfElses();
-	void copyPersistentBufferSizes(Ast* source);
-	bool propagateTops();
-	Ast* tryGetNextStatement();
-	Ast* tryGetLastStatement();
-	Ast* tryGetNextSibling();
-	Ast* tryGetLastChild();
-	void labelStatement();
+/* Cascading methods */
+	void registerIDsAsGlobal();
+	void registerIDsAsLocal();
+	void getCostsFromChildren();
+	std::vector<std::string> getIDs();
+	void initializePersistentCosts();
+	void topDownCascadingCopyPersistentBufferSizes(Ast* source);
+	void topDownCascadingAddInitializedCausedCostsToPersistentCosts();
+	void topDownCascadingRegisterLabels();
+	void topDownCascadingGenerateOutgoingEdges();
+	void performBufferSizeAnalysisReplacements();
 };
 
 

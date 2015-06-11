@@ -11,13 +11,1580 @@ Cascading operations may go top to bottom or bottom to top in the tree, or down 
 #include "config.h"
 #include "ControlFlowVisitor.h"
 #include "GlobalVariable.h"
+#include "VariableEntry.h"
 #include "ControlFlowEdge.h"
 //#include "Cube.h"
 #include "CubeTreeNode.h"
 
 using namespace std;
 
+/* Private fields */
+	const Ast* Ast::getParent()
+{
+	return _parent;
+}
+
+/* Local methods */
+	// Sets all buffer size map entry values to 0
+	void Ast::resetBufferSizes()
+	{
+		bufferSizeMap* containers[] = { &causedWriteCost, &causedReadCost, &persistentWriteCost, &persistentReadCost };
+
+		for (bufferSizeMap* container : containers)
+		{
+			for (bufferSizeMapIterator iterator = container->begin(); iterator != container->end(); iterator++)
+			{
+				(*container)[iterator->first] = 0;
+			}
+		}
+	}
+
+	// Copies the contents of the persistent buffer size maps from another node
+	void Ast::copyPersistentBufferSizes(Ast* source)
+	{
+		bsm::copyBufferSizes(&(source->persistentWriteCost), &persistentWriteCost);
+		bsm::copyBufferSizes(&(source->persistentReadCost), &persistentReadCost);
+	}
+
+	// Checks whether the node is a program point and has any control flow successors, and if so, creates control flow edges between this node and its successors.
+	bool Ast::generateOutgoingEdges()
+	{
+		if (isProgramPoint())	// Checks whether the node is a program point
+		{
+			ControlFlowEdge* newEdge;
+			Ast* nextStatement = nullptr;
+
+			if (_name == literalCode::GOTO_TOKEN_NAME)	// Goto nodes only lead to their corresponding label
+			{
+				newEdge = new ControlFlowEdge(this, config::labelLookupMap[_children[0]->getName()]);
+				outgoingEdges.push_back(newEdge);
+			}
+			else if (_name == literalCode::LABEL_TOKEN_NAME)	// Label nodes only lead to their corresponding statement
+			{
+				newEdge = new ControlFlowEdge(this, _children[1]);
+				outgoingEdges.push_back(newEdge);
+			}
+			else if (_name == literalCode::IF_ELSE_TOKEN_NAME)	// IfElse nodes lead to their conditionals, which lead to both statement blocks' first statements,
+			{												// of which the last statements lead to the statement following the IfElse block, unless they're goto statements
+				Ast* lastChild = nullptr;
+				nextStatement = tryGetNextStatement();
+				bool nextStatementExists = nextStatement != nullptr;
+
+				newEdge = new ControlFlowEdge(this, _children[0]);	// Create an edge to the conditional
+				outgoingEdges.push_back(newEdge);
+
+				newEdge = new ControlFlowEdge(_children[0], _children[1]->getChild(0));	// Create an edge from the conditional to the first statement of the If block
+				_children[0]->outgoingEdges.push_back(newEdge);
+
+				lastChild = _children[1]->tryGetLastStatement();		// If there is a statement after the IfElse block, connect to it from the last statement of the If block, if it's not a goto statement
+				if (nextStatementExists && lastChild != nullptr && lastChild->getName() != literalCode::GOTO_TOKEN_NAME)
+				{
+					newEdge = new ControlFlowEdge(lastChild, nextStatement);
+					lastChild->outgoingEdges.push_back(newEdge);
+				}
+
+				if (_children[2]->getName().compare(literalCode::NONE_TOKEN_NAME) != 0)		// If there is a non-empty Else block, connect to its first statement from the conditional
+				{
+					newEdge = new ControlFlowEdge(_children[0], _children[2]->getChild(0));
+					_children[0]->outgoingEdges.push_back(newEdge);
+
+					lastChild = _children[2]->tryGetLastStatement();		// If there is a statement after the IfElse block, connect to it from the last statement of the Else block, if it's not a goto statement
+					if (nextStatementExists && lastChild != nullptr && lastChild->getName() != literalCode::GOTO_TOKEN_NAME)
+					{
+						newEdge = new ControlFlowEdge(lastChild, nextStatement);
+						lastChild->outgoingEdges.push_back(newEdge);
+					}
+				}
+				else if (nextStatementExists)	// If there is no Else block, but there is a statement following the IfElse block, connect to it from the conditional
+				{
+					newEdge = new ControlFlowEdge(_children[0], nextStatement);
+					_children[0]->outgoingEdges.push_back(newEdge);
+				}
+			}
+			else if ((nextStatement = tryGetNextStatement()) != nullptr)	// For other program points, follow the statement block if it continues
+			{
+				newEdge = new ControlFlowEdge(this, nextStatement);
+				outgoingEdges.push_back(newEdge);
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	// Returns whether the node represents one of the program point types
+	bool Ast::isProgramPoint()
+	{
+		if (config::currentLanguage == config::language::RMA)
+		{
+			return config::stringVectorContains(literalCode::RMA_PROGRAM_POINT_TOKENS, _name);
+		}
+		else
+		{
+			return config::stringVectorContains(literalCode::PSO_TSO_PROGRAM_POINT_TOKENS, _name);
+		}
+	}
+
+	// Returns the next statement node of the current statements block if applicable, otherwise returns nullptr
+	Ast* Ast::tryGetNextStatement()
+	{
+		if (_parent->getName() == literalCode::LABEL_TOKEN_NAME)
+		{
+			return _parent->tryGetNextSibling();
+		}
+		else if (_parent->getName() == literalCode::STATEMENTS_TOKEN_NAME)
+		{
+			return tryGetNextSibling();
+		}
+
+		return nullptr;
+	}
+
+	// Returns the last statement node of the current statements block if applicable, otherwise returns nullptr
+	Ast* Ast::tryGetLastStatement()
+	{
+		if (_name == literalCode::STATEMENTS_TOKEN_NAME)
+		{
+			Ast* lastChild = tryGetLastChild();
+
+			if (lastChild->getName() == literalCode::LABEL_TOKEN_NAME)
+			{
+				lastChild = lastChild->getChild(1);
+			}
+
+			return lastChild;
+		}
+
+		return nullptr;
+	}
+
+	// Returns the next child of the node's parent if it exists, otherwise returns nullptr
+	Ast* Ast::tryGetNextSibling()
+	{
+		if (_parent != nullptr && (_parent->getChildrenCount()) > getIndexAsChild() + 1)
+		{
+			return _parent->getChild(getIndexAsChild() + 1);
+		}
+
+		return nullptr;
+	}
+
+	// Returns the last child node if it exists, otherwise returns nullptr
+	Ast* Ast::tryGetLastChild()
+	{
+		if (_childrenCount > 0)
+		{
+			return _children[_childrenCount - 1];
+		}
+
+		return nullptr;
+	}
+
 /* Constructors and destructor */
+	Ast::Ast(const string &name)
+	{
+		_name = name;
+		_code = "";
+		_codeIsValid = false;
+		_parent = nullptr;
+		_childrenCount = 0;
+	}
+
+	Ast::~Ast()
+	{
+		for (Ast* child : _children)
+		{
+			delete child;
+		}
+
+		for (ControlFlowEdge* outgoingEdge : outgoingEdges)
+		{
+			delete outgoingEdge;
+		}
+	}
+
+/* Public fields */
+	const string Ast::getName()
+	{
+		return _name;
+	}
+
+	void Ast::setName(const string value)
+	{
+		_name = value;
+		invalidateCode();
+	}
+
+	const string Ast::getCode()
+	{
+		if (!_codeIsValid)
+		{
+			string result = "";
+			bool isBooleanProgramNode = false;
+			int childrenCount;
+
+			if (_name == literalCode::BL_PROGRAM_DECLARATION_TOKEN_NAME)
+			{
+				for (Ast* child : _children)
+				{
+					result += child->getCode() + "\n\n";
+				}
+
+				isBooleanProgramNode = true;
+			}
+			else if (_name == literalCode::BL_INITIALIZATION_BLOCK_TOKEN_NAME)
+			{
+				string subResult = "";
+
+				for (Ast* child : _children)
+				{
+					subResult += child->getCode() + "\n";
+				}
+
+				if (!subResult.empty())
+				{
+					subResult = subResult.substr(0, subResult.length() - 1);
+				}
+
+				result += literalCode::INIT_TAG_NAME + "\n\n" + config::addTabs(subResult, 1) + "\n\n";
+
+				isBooleanProgramNode = true;
+			}
+			else if (_name == literalCode::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME)
+			{
+				result += literalCode::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME;
+
+				for (Ast* child : _children)
+				{
+					result += " " + child->getCode() + ",";
+				}
+
+				if (result.size() > literalCode::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME.size())
+				{
+					result[result.size() - 1] = literalCode::SEMICOLON;
+				}
+				else
+				{
+					result += literalCode::SEMICOLON;
+				}
+
+				isBooleanProgramNode = true;
+			}
+			else if (_name == literalCode::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME)
+			{
+				result += literalCode::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME;
+
+				for (Ast* child : _children)
+				{
+					result += " " + child->getCode() + ",";
+				}
+
+				if (result.size() > literalCode::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME.size())
+				{
+					result[result.size() - 1] = literalCode::SEMICOLON;
+				}
+				else
+				{
+					result += literalCode::SEMICOLON;
+				}
+
+				isBooleanProgramNode = true;
+			}
+			else if (_name == literalCode::BL_PROCESS_DECLARATION_TOKEN_NAME)
+			{
+				result += literalCode::PROCESS_TAG_NAME + " " + _children.at(0)->getChild(0)->getName() + "\n\n" +
+					config::addTabs(_children.at(1)->getCode(), 1);
+
+				isBooleanProgramNode = true;
+			}
+			else if (_name == literalCode::BL_IF_TOKEN_NAME)
+			{
+				result += literalCode::IF_TAG_NAME + literalCode::SPACE + literalCode::LEFT_PARENTHESIS +
+					_children.at(0)->getCode() + literalCode::RIGHT_PARENTHESIS + literalCode::SPACE + _children.at(1)->getCode();
+
+				isBooleanProgramNode = true;
+			}
+			else if (_name == literalCode::ASSERT_TOKEN_NAME)
+			{
+				result += literalCode::ASSERT_TOKEN_NAME + literalCode::SPACE + literalCode::BL_ALWAYS_TOKEN_NAME +
+					literalCode::LEFT_PARENTHESIS + _children.at(0)->getCode() + literalCode::RIGHT_PARENTHESIS +
+					literalCode::SEMICOLON;
+
+				isBooleanProgramNode = true;
+			}
+
+			if (!_startComment.empty())
+			{
+				result += "\n" + literalCode::MULTILINE_COMMENT_PREFIX + literalCode::SPACE + _startComment + literalCode::SPACE +
+					literalCode::MULTILINE_COMMENT_SUFFIX + "\n";
+			}
+
+			if (config::currentLanguage == config::language::RMA)
+			{
+				if (_name == literalCode::PROGRAM_DECLARATION_TOKEN_NAME)
+				{
+					for (Ast* child : _children)
+					{
+						result += child->getCode() + "\n\n";
+					}
+				}
+				else if (_name == literalCode::INITIALIZATION_BLOCK_TOKEN_NAME)
+				{
+					result += literalCode::BEGINIT_TAG_NAME + "\n\n";
+
+					for (Ast* child : _children)
+					{
+						result += config::addTabs(child->getCode(), 1) + "\n";
+					}
+
+					result += "\n" + literalCode::ENDINIT_TAG_NAME;
+				}
+				else if (_name == literalCode::RMA_PROCESS_INITIALIZATION_TOKEN_NAME)
+				{
+					result += _children.at(0)->getCode() + "\n" + config::addTabs(_children.at(1)->getCode(), 1);
+				}
+				else if (_name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
+				{
+					result += _children.at(0)->getCode() + "\n\n" + config::addTabs(_children.at(1)->getCode(), 1);
+				}
+				else if (_name == literalCode::PROCESS_HEADER_TOKEN_NAME)
+				{
+					result += literalCode::PROCESS_TAG_NAME + literalCode::SPACE + _children.at(0)->getName() + literalCode::COLON;
+				}
+				else if (_name == literalCode::STATEMENTS_TOKEN_NAME)
+				{
+					for (Ast* child : _children)
+					{
+						result += child->getCode() + "\n";
+					}
+
+					if (!result.empty())
+					{
+						result = result.substr(0, result.length() - 1);
+					}
+				}
+				else if (_name == literalCode::LABEL_TOKEN_NAME)
+				{
+					if (_children.at(0)->getName() == literalCode::IF_ELSE_TOKEN_NAME)
+					{
+						result.insert(result.begin(), '\n');
+					}
+
+					result += _children.at(0)->getName() + literalCode::COLON + literalCode::SPACE + _children.at(1)->getCode();
+				}
+				else if (_name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
+				{
+					result += _children.at(0)->getCode() + literalCode::SPACE + literalCode::ASSIGN_OPERATOR + literalCode::LEFT_PARENTHESIS +
+						_children.at(1)->getName() + literalCode::RIGHT_PARENTHESIS + literalCode::SPACE +
+						_children.at(2)->getCode() + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::ID_TOKEN_NAME)
+				{
+					if (_children.at(0)->getName() == literalCode::PC_TOKEN_NAME)
+					{
+						result += literalCode::PC_TOKEN_NAME + literalCode::LEFT_CURLY_BRACKET + _children.at(0)->getChild(0)->getName() +
+							literalCode::RIGHT_CURLY_BRACKET;
+					}
+					else
+					{
+						result += _children.at(0)->getName();
+					}
+				}
+				else if (_name == literalCode::INT_TOKEN_NAME)
+				{
+					result += _children.at(0)->getName();
+				}
+				else if (_name == literalCode::BOOL_TOKEN_NAME)
+				{
+					result += _children.at(0)->getName();
+				}
+				else if (_name == literalCode::RMA_PUT_TOKEN_NAME)
+				{
+					result += literalCode::RMA_PUT_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + _children.at(0)->getName() +
+						literalCode::COMMA + literalCode::SPACE + _children.at(1)->getName() + literalCode::RIGHT_PARENTHESIS +
+						literalCode::SPACE + literalCode::LEFT_PARENTHESIS + _children.at(2)->getName() + literalCode::COMMA +
+						literalCode::SPACE + _children.at(3)->getName() + literalCode::COMMA + literalCode::SPACE + _children.at(4)->getName() +
+						literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::RMA_GET_TOKEN_NAME)
+				{
+					result += _children.at(0)->getName() + literalCode::SPACE + literalCode::EQUALS + literalCode::SPACE +
+						literalCode::RMA_GET_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + _children.at(1)->getName() +
+						literalCode::COMMA + literalCode::SPACE + _children.at(2)->getName() + literalCode::RIGHT_PARENTHESIS +
+						literalCode::SPACE + literalCode::LEFT_PARENTHESIS + _children.at(3)->getName() + literalCode::COMMA +
+						literalCode::SPACE + _children.at(4)->getName() + literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::IF_ELSE_TOKEN_NAME)
+				{
+					if (_parent->getName() != literalCode::LABEL_TOKEN_NAME)
+					{
+						result.insert(result.begin(), '\n');
+					}
+
+					result += literalCode::IF_TAG_NAME + literalCode::SPACE + literalCode::LEFT_PARENTHESIS +
+						_children.at(0)->getCode() + literalCode::RIGHT_PARENTHESIS + "\n" +
+						config::addTabs(_children.at(1)->getCode(), 1) + "\n";
+
+					if (_children.at(2)->getName() != literalCode::NONE_TOKEN_NAME)
+					{
+						result += literalCode::ELSE_TAG_NAME + "\n" + config::addTabs(_children.at(2)->getCode(), 1) + "\n";
+					}
+
+					result += literalCode::ENDIF_TAG_NAME + literalCode::SEMICOLON;
+				}
+				else if (find(literalCode::UNARY_OPERATORS.begin(), literalCode::UNARY_OPERATORS.end(), _name) != literalCode::UNARY_OPERATORS.end())
+				{
+					result += _name + literalCode::LEFT_PARENTHESIS + _children.at(0)->getCode() + literalCode::RIGHT_PARENTHESIS;
+				}
+				else if (find(literalCode::BINARY_OPERATORS.begin(), literalCode::BINARY_OPERATORS.end(), _name) != literalCode::BINARY_OPERATORS.end())
+				{
+					if (_name == literalCode::ASTERISK_TOKEN_NAME && _children.size() == 0)
+					{
+						result += _name;
+					}
+					else
+					{
+						childrenCount = _children.size();
+
+						for (int ctr = 0; ctr < childrenCount; ctr++)
+						{
+							if (_children.at(ctr)->getName() == literalCode::ID_TOKEN_NAME ||
+								_children.at(ctr)->getName() == literalCode::INT_TOKEN_NAME)
+							{
+								result += _children.at(ctr)->getCode();
+							}
+							else
+							{
+								result += literalCode::LEFT_PARENTHESIS + _children.at(ctr)->getCode() + literalCode::RIGHT_PARENTHESIS;
+							}
+
+							if (ctr < childrenCount - 1)
+							{
+								result += literalCode::SPACE + _name + literalCode::SPACE;
+							}
+						}
+					}
+				}
+				else if (_name == literalCode::ABORT_TOKEN_NAME)
+				{
+					result += literalCode::ABORT_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + literalCode::QUOTATION +
+						_children.at(0)->getName() + literalCode::QUOTATION + literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::FLUSH_TOKEN_NAME)
+				{
+					result += literalCode::FLUSH_TOKEN_NAME + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::FENCE_TOKEN_NAME)
+				{
+					result += literalCode::FENCE_TOKEN_NAME + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::GOTO_TOKEN_NAME)
+				{
+					result += literalCode::GOTO_TOKEN_NAME + literalCode::SPACE + _children.at(0)->getName() + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::NOP_TOKEN_NAME)
+				{
+					result += literalCode::NOP_TOKEN_NAME + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::ASSUME_TOKEN_NAME)
+				{
+					result += literalCode::ASSUME_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + _children.at(0)->getCode() +
+						literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
+				}
+				else if (!isBooleanProgramNode)
+				{
+					config::throwError("Can't emit node: " + _name);
+				}
+			}
+			else
+			{
+				if (_name == literalCode::PROGRAM_DECLARATION_TOKEN_NAME)
+				{
+					for (Ast* child : _children)
+					{
+						result += child->getCode() + "\n\n";
+					}
+				}
+				else if (_name == literalCode::INITIALIZATION_BLOCK_TOKEN_NAME)
+				{
+					result += literalCode::BEGINIT_TAG_NAME + "\n\n";
+
+					for (Ast* child : _children)
+					{
+						result += "\t" + child->getCode() + "\n";
+					}
+
+					result += "\n" + literalCode::ENDINIT_TAG_NAME;
+				}
+				else if (_name == literalCode::PSO_TSO_STORE_TOKEN_NAME)
+				{
+					result += literalCode::PSO_TSO_STORE_TOKEN_NAME + literalCode::SPACE +
+						_children.at(0)->getCode() + literalCode::SPACE + literalCode::ASSIGN_OPERATOR +
+						literalCode::SPACE + _children.at(1)->getCode() + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::PSO_TSO_LOAD_TOKEN_NAME)
+				{
+					result += literalCode::PSO_TSO_LOAD_TOKEN_NAME + literalCode::SPACE +
+						_children.at(0)->getCode() + literalCode::SPACE + literalCode::ASSIGN_OPERATOR +
+						literalCode::SPACE + _children.at(1)->getCode() + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
+				{
+					result += _children.at(0)->getCode() + literalCode::SPACE + literalCode::ASSIGN_OPERATOR +
+						literalCode::SPACE + _children.at(1)->getCode() + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::ID_TOKEN_NAME)
+				{
+					if (_children.at(0)->getName() == literalCode::PC_TOKEN_NAME)
+					{
+						result += literalCode::PC_TOKEN_NAME + literalCode::LEFT_CURLY_BRACKET + _children.at(0)->getChild(0)->getName() +
+							literalCode::RIGHT_CURLY_BRACKET;
+					}
+					else
+					{
+						result += _children.at(0)->getName();
+					}
+				}
+				else if (_name == literalCode::INT_TOKEN_NAME)
+				{
+					result += _children.at(0)->getName();
+				}
+				else if (_name == literalCode::BOOL_TOKEN_NAME)
+				{
+					result += _children.at(0)->getName();
+				}
+				else if (_name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
+				{
+					result += _children.at(0)->getCode() + "\n\n" + config::addTabs(_children.at(1)->getCode(), 1);
+				}
+				else if (_name == literalCode::PROCESS_HEADER_TOKEN_NAME)
+				{
+					result += literalCode::PROCESS_TAG_NAME + literalCode::SPACE + _children.at(0)->getName() + literalCode::COLON;
+				}
+				else if (_name == literalCode::STATEMENTS_TOKEN_NAME)
+				{
+					for (Ast* child : _children)
+					{
+						result += child->getCode() + "\n";
+					}
+
+					if (!result.empty())
+					{
+						result = result.substr(0, result.length() - 1);
+					}
+				}
+				else if (_name == literalCode::LABEL_TOKEN_NAME)
+				{
+					if (_children.at(0)->getName() == literalCode::IF_ELSE_TOKEN_NAME)
+					{
+						result.insert(result.begin(), '\n');
+					}
+
+					result += _children.at(0)->getName() + literalCode::COLON + literalCode::SPACE + _children.at(1)->getCode();
+				}
+				else if (_name == literalCode::IF_ELSE_TOKEN_NAME)
+				{
+					if (_parent->getName() != literalCode::LABEL_TOKEN_NAME)
+					{
+						result.insert(result.begin(), '\n');
+					}
+
+					result += literalCode::IF_TAG_NAME + literalCode::SPACE + literalCode::LEFT_PARENTHESIS +
+						_children.at(0)->getCode() + literalCode::RIGHT_PARENTHESIS + "\n" +
+						config::addTabs(_children.at(1)->getCode(), 1) + "\n";
+
+					if (_children.at(2)->getName() != literalCode::NONE_TOKEN_NAME)
+					{
+						result += literalCode::ELSE_TAG_NAME + "\n" + config::addTabs(_children.at(2)->getCode(), 1) + "\n";
+					}
+
+					result += literalCode::ENDIF_TAG_NAME + literalCode::SEMICOLON;
+				}
+				else if (find(literalCode::UNARY_OPERATORS.begin(), literalCode::UNARY_OPERATORS.end(), _name) !=
+					literalCode::UNARY_OPERATORS.end())
+				{
+					result += _name + literalCode::LEFT_PARENTHESIS + _children.at(0)->getCode() + literalCode::RIGHT_PARENTHESIS;
+				}
+				else if (find(literalCode::BINARY_OPERATORS.begin(), literalCode::BINARY_OPERATORS.end(), _name) !=
+					literalCode::BINARY_OPERATORS.end())
+				{
+					if (_name == literalCode::ASTERISK_TOKEN_NAME && _children.size() == 0)
+					{
+						result += _name;
+					}
+					else
+					{
+
+						childrenCount = _children.size();
+
+						for (int ctr = 0; ctr < childrenCount; ctr++)
+						{
+							if (_children.at(ctr)->getName() == literalCode::ID_TOKEN_NAME || _children.at(ctr)->getName() ==
+								literalCode::INT_TOKEN_NAME)
+							{
+								result += _children.at(ctr)->getCode();
+							}
+							else
+							{
+								result += literalCode::LEFT_PARENTHESIS + _children.at(ctr)->getCode() + literalCode::RIGHT_PARENTHESIS;
+							}
+
+							if (ctr < childrenCount - 1)
+							{
+								result += literalCode::SPACE + _name + literalCode::SPACE;
+							}
+						}
+					}
+				}
+				else if (_name == literalCode::ABORT_TOKEN_NAME)
+				{
+					result += literalCode::ABORT_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + literalCode::QUOTATION +
+						_children.at(0)->getName() + literalCode::QUOTATION + literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::FLUSH_TOKEN_NAME)
+				{
+					result += literalCode::FLUSH_TOKEN_NAME + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::FENCE_TOKEN_NAME)
+				{
+					result += literalCode::FENCE_TOKEN_NAME + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::GOTO_TOKEN_NAME)
+				{
+					result += literalCode::GOTO_TOKEN_NAME + literalCode::SPACE + _children.at(0)->getName() + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::NOP_TOKEN_NAME)
+				{
+					result += literalCode::NOP_TOKEN_NAME + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::ASSUME_TOKEN_NAME)
+				{
+					result += literalCode::ASSUME_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + _children.at(0)->getCode() +
+						literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::BEGIN_ATOMIC_TOKEN_NAME)
+				{
+					result += literalCode::BEGIN_ATOMIC_TOKEN_NAME + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::END_ATOMIC_TOKEN_NAME)
+				{
+					result += literalCode::END_ATOMIC_TOKEN_NAME + literalCode::SEMICOLON;
+				}
+				else if (_name == literalCode::CHOOSE_TOKEN_NAME)
+				{
+					result += literalCode::CHOOSE_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + _children.at(0)->getCode() +
+						literalCode::COMMA + literalCode::SPACE + _children.at(1)->getCode() +
+						literalCode::RIGHT_PARENTHESIS;
+				}
+				else if (!isBooleanProgramNode)
+				{
+					config::throwError("Can't emit node: " + _name);
+				}
+			}
+
+			if (!_endComment.empty())
+			{
+				result += "\n" + literalCode::MULTILINE_COMMENT_PREFIX + literalCode::SPACE + _endComment + literalCode::SPACE +
+					literalCode::MULTILINE_COMMENT_SUFFIX + "\n";
+			}
+
+			if (_name == literalCode::IF_ELSE_TOKEN_NAME)
+			{
+				result += "\n";
+			}
+
+			_code = result;
+			_codeIsValid = true;
+		}
+
+		return _code;
+	}
+
+	void Ast::setParent(Ast* newParent)
+	{
+		_parent = newParent;
+	}
+
+	Ast* Ast::getChild(int index)
+	{
+		if (index < 0 || index >= _children.size())
+		{
+			config::throwCriticalError("Invalid child index: " + to_string(index) + " for Ast node {" + getCode() + "}");
+		}
+
+		_childrenCount = _children.size();
+		return _children[index];
+	}
+
+	void Ast::insertChild(Ast* newChild)
+	{
+		newChild->setParent(this);
+		_children.push_back(newChild);
+		invalidateCode();
+
+		_childrenCount = _children.size();
+	}
+
+	void Ast::insertChild(Ast* newChild, int index)
+	{
+		newChild->setParent(this);
+		_children.insert(_children.begin() + index, newChild);
+		invalidateCode();
+
+		_childrenCount = _children.size();
+	}
+
+	void Ast::insertChildren(const vector<Ast*> &newChildren)
+	{
+		for (Ast* newChild : newChildren)
+		{
+			newChild->setParent(this);
+			_children.push_back(newChild);
+		}
+
+		invalidateCode();
+
+		_childrenCount = _children.size();
+	}
+
+	void Ast::insertChildren(const vector<Ast*> &newChildren, int index)
+	{
+		for (Ast* newChild : newChildren)
+		{
+			newChild->setParent(this);
+		}
+
+		_children.insert(_children.begin() + index, newChildren.begin(), newChildren.end());
+
+		invalidateCode();
+	}
+
+	void Ast::deleteChild(int index)
+	{
+		Ast* toBeDeleted = _children[index];
+		_children.erase(_children.begin() + index);
+		delete toBeDeleted;
+
+		invalidateCode();
+
+		_childrenCount = _children.size();
+	}
+
+	void Ast::replaceChild(Ast* newChild, int index)
+	{
+		Ast* toBeDeleted = _children[index];
+		_children.erase(_children.begin() + index);
+		delete toBeDeleted;
+
+		newChild->setParent(this);
+		_children.insert(_children.begin() + index, newChild);
+
+		invalidateCode();
+
+		_childrenCount = _children.size();
+	}
+
+	void Ast::replaceChild(const vector<Ast*> &newChildren, int index)
+	{
+		Ast* toBeDeleted = _children[index];
+		_children.erase(_children.begin() + index);
+		delete toBeDeleted;
+
+		for (Ast* newChild : newChildren)
+		{
+			newChild->setParent(this);
+		}
+
+		_children.insert(_children.begin() + index, newChildren.begin(), newChildren.end());
+
+		invalidateCode();
+
+		_childrenCount = _children.size();
+	}
+
+	int Ast::getChildrenCount()
+	{
+		return _childrenCount;
+	}
+
+/* Public methods */
+	void Ast::invalidateCode()
+	{
+		_codeIsValid = false;
+
+		if (_parent != nullptr)
+		{
+			_parent->invalidateCode();
+		}
+	}
+
+	// Spawns a control flow visitor on the first statement of every process declaration statement block
+	void Ast::visitAllProgramPoints()
+	{
+		if (_name == literalCode::PROGRAM_DECLARATION_TOKEN_NAME)
+		{
+			Ast* currentProcessDeclarationStatements;
+			ControlFlowVisitor* newControlFlowVisitor;
+
+			for (int ctr = 1; ctr < _childrenCount; ctr++)
+			{
+				if (_children[ctr]->getName() == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
+				{
+					currentProcessDeclarationStatements = _children[ctr]->getChild(1);
+
+					if (currentProcessDeclarationStatements->getChildrenCount() > 0)
+					{
+						newControlFlowVisitor = new ControlFlowVisitor;
+						newControlFlowVisitor->traverseControlFlowGraph(currentProcessDeclarationStatements->getChild(0));
+					}
+				}
+			}
+		}
+	}
+
+/* Pseudo-constructors */
+	Ast* Ast::newAstFromParsedProgram(const string &parsedProgramString)
+	{
+		string name = "";
+		string currentlyRead = "";
+		vector<string> parsedChildStrings;
+		int parsedProgramStringLength = parsedProgramString.size();
+		int parenthesisBalance = 0;
+
+		for (int ctr = 0; ctr < parsedProgramStringLength; ctr++)
+		{
+			if (parsedProgramString[ctr] == literalCode::LEFT_PARENTHESIS)
+			{
+				if (parenthesisBalance == 0)
+				{
+					name = currentlyRead;
+					currentlyRead = "";
+				}
+				else
+				{
+					currentlyRead += parsedProgramString[ctr];
+				}
+
+				parenthesisBalance++;
+			}
+			else if (parsedProgramString[ctr] == literalCode::RIGHT_PARENTHESIS)
+			{
+				if (parenthesisBalance == 1)
+				{
+					parsedChildStrings.push_back(currentlyRead);
+					currentlyRead = "";
+				}
+				else
+				{
+					currentlyRead += parsedProgramString[ctr];
+				}
+
+				parenthesisBalance--;
+			}
+			else if (parsedProgramString[ctr] == literalCode::COMMA)
+			{
+				if (parenthesisBalance == 1)
+				{
+					parsedChildStrings.push_back(currentlyRead);
+					currentlyRead = "";
+				}
+				else
+				{
+					currentlyRead += parsedProgramString[ctr];
+				}
+			}
+			else
+			{
+				currentlyRead += parsedProgramString[ctr];
+			}
+		}
+
+		Ast* result = new Ast(name);
+
+		for (string parsedChildString : parsedChildStrings)
+		{
+			result->insertChild(newAstFromParsedProgram(parsedChildString));
+		}
+
+		return result;
+	}
+
+	// Initializes a localAssign(ID(variableName), INT(initialValue)) node
+	Ast* Ast::newLocalAssign(const string &variableName, int initialValue)
+	{
+		Ast* result = new Ast(literalCode::LOCAL_ASSIGN_TOKEN_NAME);
+		result->insertChild(newID(variableName));
+		result->insertChild(newINT(initialValue));
+		return result;
+	}
+
+	// Initializes a localAssign(ID(variableName), node) node
+	Ast* Ast::newLocalAssign(const string &variableName, Ast* assignmentNode)
+	{
+		Ast* result = new Ast(literalCode::LOCAL_ASSIGN_TOKEN_NAME);
+		result->insertChild(newID(variableName));
+		result->insertChild(assignmentNode);
+		return result;
+	}
+
+	// Initializes an ifElse(ifConditional, statements) node
+	Ast* Ast::newIfElse(Ast* ifConditionalNode, const vector<Ast*> &statements)
+	{
+		Ast* result = new Ast();
+		result->name = literalCode::IF_ELSE_TOKEN_NAME;
+		result->addChild(ifConditionalNode);
+		result->addChild(newStatements(statements));
+		result->addChild(newNone());
+		return result;
+	}
+
+	// Initializes an ifElse(ifConditional, ifStatements, elseStatements) node
+	Ast* Ast::newIfElse(Ast* ifConditionalNode, const vector<Ast*> &ifStatements, const vector<Ast*> &elseStatements)
+	{
+		Ast* result = new Ast();
+		result->name = literalCode::IF_ELSE_TOKEN_NAME;
+		result->addChild(ifConditionalNode);
+		result->addChild(newStatements(ifStatements));
+		result->addChild(newStatements(elseStatements));
+		return result;
+	}
+
+	// Initializes an ID node
+	Ast* Ast::newID(const string &variableName)
+	{
+		Ast* result = new Ast(literalCode::ID_TOKEN_NAME);
+		result->insertChild(new Ast(variableName));
+		return result;
+	}
+
+	// Initializes an INT node
+	Ast* Ast::newINT(int value)
+	{
+		Ast* result = new Ast(literalCode::INT_TOKEN_NAME);
+		result->insertChild(new Ast(to_string(value)));
+		return result;
+	}
+
+	Ast* Ast::newStatements(const vector<Ast*> &statements)
+	{
+		Ast* result = new Ast(literalCode::STATEMENTS_TOKEN_NAME);
+		result->insertChild(new Ast(to_string(value)));
+		return result;
+
+		Ast* result = new Ast();
+		result->name = literalCode::STATEMENTS_TOKEN_NAME;
+		result->addChildren(statements);
+		return result;
+	}
+
+	Ast* Ast::newNone()
+	{
+		Ast* result = new Ast();
+		result->name = literalCode::NONE_TOKEN_NAME;
+		return result;
+	}
+
+	Ast* Ast::newAbort(const string &abortMessage)
+	{
+		Ast* result = new Ast(literalCode::ABORT_TOKEN_NAME);
+		result->insertChild(new Ast(abortMessage));
+		return result;
+	}
+
+/* Cascading methods */
+	// Cascades from top to bottom. If for a read- or write-statement is encountered, the cascade stops and the IDs read and written by its children are gathered
+	void Ast::getCostsFromChildren()
+	{
+		if (config::currentLanguage == config::language::RMA)
+		{
+			if (_name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
+			{
+				vector<string> writtenVariables = _children.at(0)->getIDs();
+				vector<string> readVariables = _children.at(2)->getIDs();
+
+				for (string member : writtenVariables)
+				{
+					bsm::incrementCost(member, 1, &causedWriteCost);
+				}
+
+				for (string member : readVariables)
+				{
+					bsm::incrementCost(member, 1, &causedReadCost);
+				}
+			}
+			else if (_name == literalCode::RMA_PUT_TOKEN_NAME)
+			{
+				bsm::incrementCost(_children.at(2)->_name, 1, &causedWriteCost);
+				bsm::incrementCost(_children.at(4)->_name, 1, &causedReadCost);
+			}
+			else if (_name == literalCode::RMA_GET_TOKEN_NAME)
+			{
+				bsm::incrementCost(_children.at(0)->_name, 1, &causedWriteCost);
+				bsm::incrementCost(_children.at(3)->_name, 1, &causedReadCost);
+			}
+			else
+			{
+				for (Ast* child : _children)
+				{
+					child->getCostsFromChildren();
+				}
+			}
+		}
+		else	// TSO/PSO: critical statements are store and load
+		{
+			if (_name == literalCode::PSO_TSO_STORE_TOKEN_NAME || _name == literalCode::PSO_TSO_LOAD_TOKEN_NAME)
+			{
+				vector<string> writtenVariables = _children.at(0)->getIDs();
+				vector<string> readVariables = _children.at(1)->getIDs();
+
+				for (string member : writtenVariables)
+				{
+					bsm::incrementCost(member, 1, &causedWriteCost);
+				}
+
+				for (string member : readVariables)
+				{
+					bsm::incrementCost(member, 1, &causedReadCost);
+				}
+			}
+			else
+			{
+				for (Ast* child : _children)
+				{
+					child->getCostsFromChildren();
+				}
+			}
+		}
+	}
+
+	// Cascades from top to bottom and back. Returns a string vector containing all identifiers along the downward path, including the current node's own.
+	vector<string> Ast::getIDs()
+	{
+		vector<string> results;
+
+		if (_name == literalCode::ID_TOKEN_NAME)	// If this is an identifier, push it on the vector to return it upwards
+		{
+			results.push_back(_children.at(0)->getName());
+		}
+		else // If this isn't an identifier, gather all identifiers from the progeny
+		{
+			vector<string> subResults;
+
+			for (Ast* child : _children)
+			{
+				subResults = child->getIDs();
+
+				for (string subResult : subResults)
+				{
+					results.push_back(subResult);
+				}
+			}
+		}
+
+		return results;
+	}
+
+	// Cascades from top to bottom. Causes nodes to initialize the global variables initialized in the program's first block into their persistent maps
+	void Ast::initializePersistentCosts()
+	{
+		if (_name == literalCode::PROGRAM_DECLARATION_TOKEN_NAME)
+		{
+			// Collect all buffer costs caused by the variable initialization statements
+			if (config::currentLanguage == config::language::RMA)
+			{
+				for (int ctr = 0; ctr < _children[0]->getChildrenCount(); ctr++)
+				{
+					if (_children[0]->getChild(ctr)->getName() != literalCode::RMA_PROCESS_INITIALIZATION_TOKEN_NAME)
+					{
+						break;
+					}
+
+					for (int subCtr = 0; subCtr < _children[0]->getChild(ctr)->getChild(1)->getChildrenCount(); subCtr++)
+					{
+						bsm::additiveMergeBufferSizes(&(_children[0]->getChild(ctr)->getChild(1)->getChild(subCtr)->causedWriteCost),
+							&persistentWriteCost);
+						bsm::additiveMergeBufferSizes(&(_children[0]->getChild(ctr)->getChild(1)->getChild(subCtr)->causedWriteCost),
+							&persistentWriteCost);
+					}
+				}
+			}
+			else
+			{
+				for (int ctr = 0; ctr < _children[0]->getChildrenCount(); ctr++)
+				{
+					bsm::additiveMergeBufferSizes(&(_children[0]->getChild(ctr)->causedWriteCost), &persistentWriteCost);
+					bsm::additiveMergeBufferSizes(&(_children[0]->getChild(ctr)->causedWriteCost), &persistentReadCost);
+				}
+			}
+
+			// Sets the values of the recently initialized entries to 0
+			resetBufferSizes();
+
+			// Propagates the 0-initialized global variable map to the progeny of the process declarations
+			for (Ast* child : _children)
+			{
+				if (child->getName() == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
+				{
+					child->topDownCascadingCopyPersistentBufferSizes(this);
+					child->topDownCascadingAddInitializedCausedCostsToPersistentCosts();
+				}
+			}
+		}
+	}
+
+	// Cascades from top to bottom. Copies all persistent buffer size maps to the successors.
+	void Ast::topDownCascadingCopyPersistentBufferSizes(Ast* source)
+	{
+		copyPersistentBufferSizes(source);
+
+		for (Ast* child : _children)
+		{
+			child->topDownCascadingCopyPersistentBufferSizes(source);
+		}
+	}
+
+	// Cascades from top to bottom. Causes those nodes that have their own caused costs to add them to their persistent maps.
+	void Ast::topDownCascadingAddInitializedCausedCostsToPersistentCosts()
+	{
+		bsm::conditionalAdditiveMergeBufferSizes(&causedReadCost, &persistentReadCost);
+		bsm::conditionalAdditiveMergeBufferSizes(&causedWriteCost, &persistentWriteCost);
+
+		for (Ast* child : _children)
+		{
+			child->topDownCascadingAddInitializedCausedCostsToPersistentCosts();
+		}
+	}
+
+	// Cascades from top to bottom. Causes label nodes to register themselves with the global register.
+	void Ast::topDownCascadingRegisterLabels()
+	{
+		if (_name == literalCode::LABEL_TOKEN_NAME)
+		{
+			if (!config::tryRegisterLabel(stoi(_children[0]->getName()), this))
+			{
+				config::throwCriticalError("Couldn't register label " + _children[0]->getName() + " for " + getCode());
+			}
+		}
+
+		for (Ast* child : _children)
+		{
+			child->topDownCascadingRegisterLabels();
+		}
+	}
+
+	// Cascades from top to bottom. Causes label nodes to generate outgoing directional control flow edges, if applicable.
+	void Ast::topDownCascadingGenerateOutgoingEdges()
+	{
+		generateOutgoingEdges();
+
+		for (Ast* child : _children)
+		{
+			child->topDownCascadingGenerateOutgoingEdges();
+		}
+	}
+
+	void Ast::performBufferSizeAnalysisReplacements()
+	{
+		if (config::currentLanguage == config::language::RMA)
+		{
+			// TODO
+			config::throwError("Buffer size analysis not implemented for RMA");
+		}
+		else if (config::currentLanguage == config::language::PSO)
+		{
+			// TODO
+			config::throwError("Buffer size analysis not implemented for PSO");
+		}
+		else
+		{
+			if (_name == literalCode::PROGRAM_DECLARATION_TOKEN_NAME)
+			{
+				for (Ast* child : _children)
+				{
+					if (child->getName() == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
+					{
+						child->performBufferSizeAnalysisReplacements();
+					}
+				}
+			}
+			else if (_name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
+			{
+				vector<Ast*> toBeReplaced = _children[1]->reportBack();
+
+				for (Ast* statement : toBeReplaced)
+				{
+					bsm::additiveMergeBufferSizes(&(statement->persistentWriteCost), &persistentWriteCost);
+				}
+
+				int process = stoi(_children[0]->getChild(0)->getName());
+				int currentMaximum;
+				Ast* currentNode;
+				vector<string> globalVariableNames = bsm::getAllKeys(&persistentWriteCost);
+
+				for (string globalVariableName : globalVariableNames)
+				{
+					if (persistentWriteCost[globalVariableName] == bsm::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
+					{
+						currentMaximum = config::K;
+					}
+					else
+					{
+						currentMaximum = persistentWriteCost[globalVariableName];
+					}
+
+					for (int ctr = currentMaximum; ctr > 0; ctr--)
+					{
+						currentNode = newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)], 0);
+						currentNode->setParent(_children[1]);
+						_children[1]->insertChild(currentNode, 0);
+					}
+
+					currentNode = newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process], 0);
+					currentNode->setParent(_children[1]);
+					_children[1]->insertChild(currentNode, 0);
+
+					currentNode = newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process], 0);
+					currentNode->setParent(_children[1]);
+					_children[1]->insertChild(currentNode, 0);
+				}
+
+				for (Ast* statement : toBeReplaced)
+				{
+					statement->performBufferSizeAnalysisReplacements();
+				}
+			}
+			else if (_name == literalCode::PSO_TSO_STORE_TOKEN_NAME || _name == literalCode::PSO_TSO_LOAD_TOKEN_NAME ||
+				_name == literalCode::FENCE_TOKEN_NAME || _name == literalCode::FLUSH_TOKEN_NAME)
+			{
+				vector<Ast*> replacement;
+
+				if (_name == literalCode::PSO_TSO_STORE_TOKEN_NAME)
+				{
+					string globalVariableName = _children[0]->getChild(0)->getName();
+					int process = tryGetParentProcessNumber();
+					string x_fst_t = config::symbolMap[globalVariableName]->getAuxiliaryFirstPointerName(process);
+					string x_cnt_t = config::symbolMap[globalVariableName]->getAuxiliaryCounterName(process);
+
+					vector<Ast*> statements;
+
+					int s;
+					if (persistentWriteCost[globalVariableName] == bsm::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
+					{
+						s = config::K;
+
+						statements.push_back(newAbort(config::OVERFLOW_MESSAGE));
+
+						replacement.push_back(newIfElse(
+							newBinaryOp(
+							newID(x_cnt_t),
+							newINT(config::K),
+							literalCode::EQUALS
+							),
+							statements
+							));
+
+						statements.clear();
+					}
+					else
+					{
+						s = persistentWriteCost[globalVariableName];
+					}
+
+					config::globalVariables[globalVariableName]->setMaximumBufferSize(process, s);
+
+					if (persistentWriteCost[globalVariableName] == 1)
+					{
+						replacement.push_back(newLocalAssign(x_fst_t, 1));
+						replacement.push_back(newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, 1)], children.at(1)));
+					}
+					else
+					{
+						statements.push_back(newLocalAssign(x_fst_t, 1));
+						statements.push_back(newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, 1)], children.at(1)));
+
+						replacement.push_back(newIfElse(
+							newBinaryOp(
+							newID(x_fst_t),
+							newINT(0),
+							literalCode::EQUALS
+							),
+							statements
+							));
+					}
+
+					replacement.push_back(newLocalAssign(
+						x_cnt_t,
+						newBinaryOp(
+						newID(x_cnt_t),
+						newINT(1),
+						string(1, literalCode::PLUS)
+						)
+						));
+
+					for (int ctr = 2; ctr <= s; ctr++)
+					{
+						statements.clear();
+						statements.push_back(newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)], children.at(1)));
+
+						replacement.push_back(newIfElse(
+							newBinaryOp(
+							newID(x_cnt_t),
+							newINT(ctr),
+							literalCode::EQUALS
+							),
+							statements
+							));
+					}
+				}
+				else if (name == literalCode::PSO_TSO_LOAD_TOKEN_NAME)
+				{
+					string globalVariableName = children.at(1)->children.at(0)->name;
+					string processId;
+					tryGetParentProcessNumber(&processId);
+					int process = stoi(processId);
+					string x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
+
+					int s;
+					if (persistentWriteCost[globalVariableName] == bsm::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
+					{
+						s = config::K;
+					}
+					else
+					{
+						s = persistentWriteCost[globalVariableName];
+					}
+
+					config::globalVariables[globalVariableName]->setMaximumBufferSize(process, s);
+
+					vector<Ast*> statements;
+					statements.push_back(newBinaryOp(children.at(0), children.at(1), literalCode::PSO_TSO_LOAD_TOKEN_NAME));
+
+					replacement.push_back(newIfElse(
+						newBinaryOp(
+						newID(x_cnt_t),
+						newINT(0),
+						literalCode::EQUALS
+						),
+						statements
+						));
+
+					for (int ctr = 1; ctr <= s; ctr++)
+					{
+						statements.clear();
+						statements.push_back(newBinaryOp(
+							children.at(0),
+							newID(
+							config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)]
+							),
+							literalCode::LOCAL_ASSIGN_TOKEN_NAME
+							));
+
+						replacement.push_back(newIfElse(
+							newBinaryOp(
+							newID(x_cnt_t),
+							newINT(ctr),
+							literalCode::EQUALS
+							),
+							statements
+							));
+					}
+				}
+				else if (name == literalCode::FENCE_TOKEN_NAME)
+				{
+					string processId;
+					tryGetParentProcessNumber(&processId);
+					int process = stoi(processId);
+					vector<string> globalVariableNames = bsm::getAllKeys(&persistentWriteCost);
+					string x_cnt_t;
+					string x_fst_t;
+
+					for (string globalVariableName : globalVariableNames)
+					{
+						x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
+						x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
+
+						replacement.push_back(newAssume(
+							newBinaryOp(
+							newID(x_cnt_t),
+							newINT(0),
+							literalCode::EQUALS
+							)
+							));
+
+						replacement.push_back(newAssume(
+							newBinaryOp(
+							newID(x_fst_t),
+							newINT(0),
+							literalCode::EQUALS
+							)
+							));
+					}
+				}
+				else if (name == literalCode::FLUSH_TOKEN_NAME && numberOfVariablesInPersistentWriteBuffer() > 0)
+				{
+					string processId;
+					tryGetParentProcessNumber(&processId);
+					int process = stoi(processId);
+					vector<string> globalVariableNames = bsm::getAllKeys(&persistentWriteCost);
+					string x_cnt_t;
+					string x_fst_t;
+					srand(time(NULL));
+					int uniqueLabel = rand();
+					int s;
+					Ast* currentIfElse;
+
+					vector<Ast*> currentIfStatements;
+					vector<Ast*> oldIfStatements;
+					vector<Ast*> currentElseStatements;
+
+					vector<Ast*> flushStatements;
+					for (string globalVariableName : globalVariableNames)
+					{
+						if (persistentWriteCost[globalVariableName] == bsm::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
+						{
+							s = config::K;
+						}
+						else
+						{
+							s = persistentWriteCost[globalVariableName];
+						}
+
+						x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
+						x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
+
+						for (int ctr = s - 1; ctr >= 1; ctr--)
+						{
+							if (currentIfStatements.empty())
+							{
+								currentIfStatements.push_back(newStore(
+									globalVariableName,
+									newID(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr + 1)])
+									));
+							}
+							else
+							{
+								currentIfStatements.clear();
+								currentIfStatements.push_back(currentIfElse);
+							}
+
+							currentElseStatements.clear();
+
+							currentElseStatements.push_back(newStore(
+								globalVariableName,
+								newID(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)])
+								));
+
+							currentIfElse = newIfElse(
+								newBinaryOp(
+								newID(x_fst_t),
+								newINT(ctr),
+								string(1, literalCode::GREATER_THAN)
+								),
+								currentIfStatements,
+								currentElseStatements
+								);
+						}
+
+						if (s >= 1)
+						{
+							currentIfStatements.clear();
+
+							if (s > 1)
+							{
+								currentIfStatements.push_back(currentIfElse);
+							}
+
+							currentIfStatements.push_back(newLocalAssign(
+								x_fst_t,
+								newBinaryOp(
+								newID(x_fst_t),
+								newINT(1),
+								string(1, literalCode::PLUS)
+								)
+								));
+
+							if (numberOfVariablesInPersistentWriteBuffer() > 1)
+							{
+								currentIfElse = newIfElse(
+									newAsterisk(),
+									currentIfStatements
+									);
+
+								currentIfStatements.clear();
+								currentIfStatements.push_back(currentIfElse);
+							}
+
+							currentIfElse = newIfElse(
+								newBinaryOp(
+								newID(x_cnt_t),
+								newINT(0),
+								string(1, literalCode::GREATER_THAN)
+								),
+								currentIfStatements
+								);
+
+							flushStatements.push_back(currentIfElse);
+							currentIfStatements.clear();
+						}
+					}
+
+					if (!flushStatements.empty())
+					{
+						Ast* gotoNode = new Ast();
+						gotoNode->addChild(new Ast());
+						gotoNode->name = literalCode::GOTO_TOKEN_NAME;
+						gotoNode->children.at(0)->name = to_string(uniqueLabel);
+
+						flushStatements.push_back(gotoNode);
+
+						Ast* envelopingIfNode = newIfElse(
+							newAsterisk(),
+							flushStatements
+							);
+
+						Ast* labelAst = new Ast();
+						labelAst->name = literalCode::LABEL_TOKEN_NAME;
+						labelAst->addChild(new Ast());
+						labelAst->children.at(0)->name = to_string(uniqueLabel);
+						labelAst->addChild(envelopingIfNode);
+
+						replacement.push_back(labelAst);
+					}
+				}
+
+				Ast* replacedNode = this;
+
+				if (!replacement.empty())
+				{
+					bool isLabelled;
+
+					if (this->parent->name == literalCode::LABEL_TOKEN_NAME)
+					{
+						replacedNode = this->parent;
+						replacement.insert(replacement.begin(), newLabel(stoi(parent->children.at(0)->name), newNop()));
+					}
+
+					replacement.at(0)->startComment = literalCode::REPLACING_CAPTION + literalCode::SPACE + literalCode::QUOTATION + emitCode() + literalCode::QUOTATION;
+					replacement.at(replacement.size() - 1)->endComment = literalCode::FINISHED_REPLACING_CAPTION + literalCode::SPACE + literalCode::QUOTATION + emitCode() + literalCode::QUOTATION;
+				}
+
+				replaceNode(replacement, replacedNode);
+			}
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 	Ast::Ast()
 	{
 		// The index by which this node can be referred to from its parent's children vector. The root always has an index of -1
@@ -365,6 +1932,7 @@ using namespace std;
 	{
 		string result = "";
 		bool isBooleanProgramNode = false;
+		int childrenCount;
 
 		if (name == literalCode::BL_PROGRAM_DECLARATION_TOKEN_NAME)
 		{
@@ -590,7 +2158,26 @@ using namespace std;
 				}
 				else
 				{
-					if (children.at(0)->name == literalCode::ID_TOKEN_NAME || children.at(0)->name == literalCode::INT_TOKEN_NAME)
+					childrenCount = children.size();
+
+					for (int ctr = 0; ctr < childrenCount; ctr++)
+					{
+						if (children.at(ctr)->name == literalCode::ID_TOKEN_NAME || children.at(ctr)->name == literalCode::INT_TOKEN_NAME)
+						{
+							result += children.at(ctr)->emitCode();
+						}
+						else
+						{
+							result += literalCode::LEFT_PARENTHESIS + children.at(ctr)->emitCode() + literalCode::RIGHT_PARENTHESIS;
+						}
+
+						if (ctr < childrenCount - 1)
+						{
+							result += literalCode::SPACE + name + literalCode::SPACE;
+						}
+					}
+
+					/*if (children.at(0)->name == literalCode::ID_TOKEN_NAME || children.at(0)->name == literalCode::INT_TOKEN_NAME)
 					{
 						result += children.at(0)->emitCode();
 					}
@@ -608,7 +2195,7 @@ using namespace std;
 					else
 					{
 						result += literalCode::LEFT_PARENTHESIS + children.at(1)->emitCode() + literalCode::RIGHT_PARENTHESIS;
-					}
+					}*/
 				}
 			}
 			else if (name == literalCode::ABORT_TOKEN_NAME)
@@ -758,27 +2345,45 @@ using namespace std;
 				}
 				else
 				{
-					if (children.at(0)->name == literalCode::ID_TOKEN_NAME || children.at(0)->name == literalCode::INT_TOKEN_NAME)
+
+					childrenCount = children.size();
+
+					for (int ctr = 0; ctr < childrenCount; ctr++)
 					{
-						//result += children.at(0)->children.at(0)->name;
-						result += children.at(0)->emitCode();
+						if (children.at(ctr)->name == literalCode::ID_TOKEN_NAME || children.at(ctr)->name == literalCode::INT_TOKEN_NAME)
+						{
+							result += children.at(ctr)->emitCode();
+						}
+						else
+						{
+							result += literalCode::LEFT_PARENTHESIS + children.at(ctr)->emitCode() + literalCode::RIGHT_PARENTHESIS;
+						}
+
+						if (ctr < childrenCount - 1)
+						{
+							result += literalCode::SPACE + name + literalCode::SPACE;
+						}
+					}
+
+					/*if (children.at(0)->name == literalCode::ID_TOKEN_NAME || children.at(0)->name == literalCode::INT_TOKEN_NAME)
+					{
+					result += children.at(0)->emitCode();
 					}
 					else
 					{
-						result += literalCode::LEFT_PARENTHESIS + children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS;
+					result += literalCode::LEFT_PARENTHESIS + children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS;
 					}
 
 					result += literalCode::SPACE + name + literalCode::SPACE;
 
 					if (children.at(1)->name == literalCode::ID_TOKEN_NAME || children.at(1)->name == literalCode::INT_TOKEN_NAME)
 					{
-						//result += children.at(1)->children.at(0)->name;
-						result += children.at(1)->emitCode();
+					result += children.at(1)->emitCode();
 					}
 					else
 					{
-						result += literalCode::LEFT_PARENTHESIS + children.at(1)->emitCode() + literalCode::RIGHT_PARENTHESIS;
-					}
+					result += literalCode::LEFT_PARENTHESIS + children.at(1)->emitCode() + literalCode::RIGHT_PARENTHESIS;
+					}*/
 				}
 			}
 			else if (name == literalCode::ABORT_TOKEN_NAME)
@@ -845,33 +2450,6 @@ using namespace std;
 		return result;
 	}
 	
-	// Cascades from top to bottom and back. Returns a string vector containing all identifiers along the downward path, including the current node's own.
-	vector<string> Ast::getIDs()
-	{
-		vector<string> results;
-	
-		if (name == literalCode::ID_TOKEN_NAME)	// If this is an identifier, push it on the vector to return it upwards
-		{
-			results.push_back(children.at(0)->name);
-		}
-		else // If this isn't an identifier, gather all identifiers from the progeny
-		{
-			vector<string> subResults;
-	
-			for (Ast* child : children)
-			{
-				subResults = child->getIDs();
-	
-				for (string subResult : subResults)
-				{
-					results.push_back(subResult);
-				}
-			}
-		}
-	
-		return results;
-	}
-	
 	void Ast::cascadingUnifyVariableNames()
 	{
 		if (!unifyVariableNames())
@@ -883,166 +2461,7 @@ using namespace std;
 		}
 	}
 	
-	// Cascades from top to bottom. If for a read- or write-statement is encountered, the cascade stops and the IDs read and written by its children are gathered
-	void Ast::getCostsFromChildren()
-	{
-		if (config::currentLanguage == config::language::RMA)
-		{
-			if (name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
-			{
-				vector<string> writtenVariables = children.at(0)->getIDs();
-				vector<string> readVariables = children.at(2)->getIDs();
 	
-				for (string member : writtenVariables)
-				{
-					bsm::incrementCost(member, 1, &causedWriteCost);
-				}
-	
-				for (string member : readVariables)
-				{
-					bsm::incrementCost(member, 1, &causedReadCost);
-				}
-			}
-			else if (name == literalCode::RMA_PUT_TOKEN_NAME)
-			{
-				bsm::incrementCost(children.at(2)->name, 1, &causedWriteCost);
-				bsm::incrementCost(children.at(4)->name, 1, &causedReadCost);
-			}
-			else if (name == literalCode::RMA_GET_TOKEN_NAME)
-			{
-				bsm::incrementCost(children.at(0)->name, 1, &causedWriteCost);
-				bsm::incrementCost(children.at(3)->name, 1, &causedReadCost);
-			}
-			else
-			{
-				for (Ast* child : children)
-				{
-					child->getCostsFromChildren();
-				}
-			}
-		}
-		else	// TSO/PSO: critical statements are store and load
-		{
-			if (name == literalCode::PSO_TSO_STORE_TOKEN_NAME || name == literalCode::PSO_TSO_LOAD_TOKEN_NAME)
-			{
-				vector<string> writtenVariables = children.at(0)->getIDs();
-				vector<string> readVariables = children.at(1)->getIDs();
-	
-				for (string member : writtenVariables)
-				{
-					bsm::incrementCost(member, 1, &causedWriteCost);
-				}
-	
-				for (string member : readVariables)
-				{
-					bsm::incrementCost(member, 1, &causedReadCost);
-				}
-			}
-			else
-			{
-				for (Ast* child : children)
-				{
-					child->getCostsFromChildren();
-				}
-			}
-		}
-	}
-	
-	// Cascades from top to bottom. Causes nodes to initialize the global variables initialized in the program's first block into their persistent maps
-	void Ast::initializePersistentCosts()
-	{
-		if (name == literalCode::PROGRAM_DECLARATION_TOKEN_NAME)
-		{
-			// Collect all buffer costs caused by the variable initialization statements
-			if (config::currentLanguage == config::language::RMA)
-			{
-				for (Ast* processInitialization : children.at(0)->children)
-				{
-					if (processInitialization->name != literalCode::RMA_PROCESS_INITIALIZATION_TOKEN_NAME)
-					{
-						break;
-					}
-	
-					for (Ast* initializationStatement : processInitialization->children.at(1)->children)
-					{
-						bsm::additiveMergeBufferSizes(&(initializationStatement->causedWriteCost), &(persistentWriteCost));
-						bsm::additiveMergeBufferSizes(&(initializationStatement->causedWriteCost), &(persistentReadCost));
-					}
-				}
-			}
-			else
-			{
-				for (Ast* initializationStatement : children.at(0)->children)
-				{
-					bsm::additiveMergeBufferSizes(&(initializationStatement->causedWriteCost), &(persistentWriteCost));
-					bsm::additiveMergeBufferSizes(&(initializationStatement->causedWriteCost), &(persistentReadCost));
-				}
-			}
-	
-			// Sets the values of the recently initialized entries to 0
-			resetBufferSizes();
-	
-			// Propagates the 0-initialized global variable map to the progeny of the process declarations
-			for (Ast* child : children)
-			{
-				if (child->name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
-				{
-					child->topDownCascadingCopyPersistentBufferSizes(this);
-					child->topDownCascadingAddInitializedCausedCostsToPersistentCosts();
-				}
-			}
-		}
-	}
-	
-	// Cascades from top to bottom. Causes label nodes to register themselves with the global register.
-	void Ast::topDownCascadingRegisterLabels()
-	{
-		if (name == literalCode::LABEL_TOKEN_NAME)
-		{
-			registerLabel();
-		}
-	
-		for (Ast* child : children)
-		{
-			child->topDownCascadingRegisterLabels();
-		}
-	}
-	
-	// Cascades from top to bottom. Causes label nodes to generate outgoing directional control flow edges, if applicable.
-	void Ast::cascadingGenerateOutgoingEdges()
-	{
-		generateOutgoingEdges();
-		
-		for (Ast* child : children)
-		{
-			child->cascadingGenerateOutgoingEdges();
-		}
-	}
-	
-	// Spawns a control flow visitor on the first statement of every process declaration statement block
-	void Ast::visitAllProgramPoints()
-	{
-		if (name == literalCode::PROGRAM_DECLARATION_TOKEN_NAME)
-		{
-			int childrenCount = children.size();
-			Ast* currentProcessDeclarationStatements;
-			ControlFlowVisitor* newControlFlowVisitor;
-	
-			for (int ctr = 1; ctr < childrenCount; ctr++)
-			{
-				if (children.at(ctr)->name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
-				{
-					currentProcessDeclarationStatements = children.at(ctr)->children.at(1);
-
-					if (((int)currentProcessDeclarationStatements->children.size()) > 0)
-					{
-						newControlFlowVisitor = new ControlFlowVisitor;
-						newControlFlowVisitor->traverseControlFlowGraph(currentProcessDeclarationStatements->children.at(0));
-					}
-				}
-			}
-		}
-	}
 	
 	void Ast::cascadingInitializeAuxiliaryVariables()
 	{
@@ -1051,393 +2470,6 @@ using namespace std;
 		for (Ast* child : children)
 		{
 			child->cascadingInitializeAuxiliaryVariables();
-		}
-	}
-	
-	void Ast::carryOutReplacements()
-	{
-		if (config::currentLanguage == config::language::RMA)
-		{
-			// TODO
-			config::throwError("Auxiliary variable generation not implemented for RMA");
-		}
-		else
-		{
-			if (name == literalCode::PROGRAM_DECLARATION_TOKEN_NAME)
-			{
-				for (Ast* child : children)
-				{
-					if (child->name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
-					{
-						child->carryOutReplacements();
-					}
-				}
-			}
-			else if (name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
-			{
-				vector<Ast*> toBeReplaced = children.at(1)->reportBack();
-	
-				for (Ast* statement : toBeReplaced)
-				{
-					bsm::additiveMergeBufferSizes(&(statement->persistentWriteCost), &persistentWriteCost);
-				}
-				
-				int process = stoi(children.at(0)->children.at(0)->name);
-				int currentMaximum;
-				Ast* currentNode;
-				vector<string> globalVariableNames = bsm::getAllKeys(&persistentWriteCost);
-	
-				for (string globalVariableName : globalVariableNames)
-				{
-					if (persistentWriteCost[globalVariableName] == bsm::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
-					{
-						currentMaximum = config::K;
-					}
-					else
-					{
-						currentMaximum = persistentWriteCost[globalVariableName];
-					}
-	
-					for (int ctr = currentMaximum; ctr > 0; ctr--)
-					{
-						currentNode = newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)], 0);
-						currentNode->parent = children.at(1);
-						children.at(1)->children.insert(children.at(1)->children.begin(), currentNode);
-					}
-	
-					currentNode = newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process], 0);
-					currentNode->parent = children.at(1);
-					children.at(1)->children.insert(children.at(1)->children.begin(), currentNode);
-	
-					currentNode = newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process], 0);
-					currentNode->parent = children.at(1);
-					children.at(1)->children.insert(children.at(1)->children.begin(), currentNode);
-				}
-	
-				children.at(1)->refreshChildIndices();
-	
-				for (Ast* statement : toBeReplaced)
-				{
-					statement->carryOutReplacements();
-				}
-			}
-			else if (name == literalCode::PSO_TSO_STORE_TOKEN_NAME || name == literalCode::PSO_TSO_LOAD_TOKEN_NAME ||
-				name == literalCode::FENCE_TOKEN_NAME || name == literalCode::FLUSH_TOKEN_NAME)
-			{
-				vector<Ast*> replacement;
-	
-				if (name == literalCode::PSO_TSO_STORE_TOKEN_NAME)
-				{
-					string globalVariableName = children.at(0)->children.at(0)->name;
-					string processId;
-					tryGetParentProcessNumber(&processId);
-					int process = stoi(processId);
-					string x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
-					string x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
-	
-					vector<Ast*> statements;
-	
-					int s;
-					if (persistentWriteCost[globalVariableName] == bsm::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
-					{
-						s = config::K;
-	
-						Ast* abortAst = new Ast();
-						abortAst->name = literalCode::ABORT_TOKEN_NAME;
-						abortAst->addChild(new Ast());
-						abortAst->children.at(0)->name = config::OVERFLOW_MESSAGE;
-	
-						statements.push_back(abortAst);
-	
-						replacement.push_back(newIfElse(
-								newBinaryOp(
-										newID(x_cnt_t),
-										newINT(config::K),
-										literalCode::EQUALS
-									),
-								statements
-							));
-	
-						statements.clear();
-					}
-					else
-					{
-						s = persistentWriteCost[globalVariableName];
-					}
-	
-					if (persistentWriteCost[globalVariableName] == 1)
-					{
-						replacement.push_back(newLocalAssign(x_fst_t, 1));
-						replacement.push_back(newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, 1)], children.at(1)));
-					}
-					else
-					{
-						statements.push_back(newLocalAssign(x_fst_t, 1));
-						statements.push_back(newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, 1)], children.at(1)));
-	
-						replacement.push_back(newIfElse(
-								newBinaryOp(
-										newID(x_fst_t),
-										newINT(0),
-										literalCode::EQUALS
-									),
-								statements
-							));
-					}
-	
-					replacement.push_back(newLocalAssign(
-							x_cnt_t,
-							newBinaryOp(
-								newID(x_cnt_t),
-								newINT(1),
-								string(1, literalCode::PLUS)
-							)
-						));
-	
-					for (int ctr = 2; ctr <= s; ctr++)
-					{
-						statements.clear();
-						statements.push_back(newLocalAssign(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)], children.at(1)));
-	
-						replacement.push_back(newIfElse(
-								newBinaryOp(
-									newID(x_cnt_t),
-									newINT(ctr),
-									literalCode::EQUALS
-								),
-								statements
-							));
-					}
-				}
-				else if (name == literalCode::PSO_TSO_LOAD_TOKEN_NAME)
-				{
-					string globalVariableName = children.at(1)->children.at(0)->name;
-					string processId;
-					tryGetParentProcessNumber(&processId);
-					int process = stoi(processId);
-					string x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
-	
-					int s;
-					if (persistentWriteCost[globalVariableName] == bsm::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
-					{
-						s = config::K;
-					}
-					else
-					{
-						s = persistentWriteCost[globalVariableName];
-					}
-	
-					vector<Ast*> statements;
-					statements.push_back(newBinaryOp(children.at(0), children.at(1), literalCode::PSO_TSO_LOAD_TOKEN_NAME));
-	
-					replacement.push_back(newIfElse(
-							newBinaryOp(
-								newID(x_cnt_t),
-								newINT(0),
-								literalCode::EQUALS
-							),
-							statements
-						));
-	
-					for (int ctr = 1; ctr <= s; ctr++)
-					{
-						statements.clear();
-						statements.push_back(newBinaryOp(
-								children.at(0),
-								newID(
-									config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)]
-								),
-								literalCode::LOCAL_ASSIGN_TOKEN_NAME
-							));
-	
-						replacement.push_back(newIfElse(
-								newBinaryOp(
-									newID(x_cnt_t),
-									newINT(ctr),
-									literalCode::EQUALS
-								),
-								statements
-							));
-					}
-				}
-				else if (name == literalCode::FENCE_TOKEN_NAME)
-				{
-					string processId;
-					tryGetParentProcessNumber(&processId);
-					int process = stoi(processId);
-					vector<string> globalVariableNames = bsm::getAllKeys(&persistentWriteCost);
-					string x_cnt_t;
-					string x_fst_t;
-	
-					for (string globalVariableName : globalVariableNames)
-					{
-						x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
-						x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
-	
-						replacement.push_back(newAssume(
-								newBinaryOp(
-									newID(x_cnt_t),
-									newINT(0),
-									literalCode::EQUALS
-								)
-							));
-	
-						replacement.push_back(newAssume(
-								newBinaryOp(
-									newID(x_fst_t),
-									newINT(0),
-									literalCode::EQUALS
-								)
-							));
-					}
-				}
-				else if (name == literalCode::FLUSH_TOKEN_NAME && numberOfVariablesInPersistentWriteBuffer() > 0)
-				{
-					string processId;
-					tryGetParentProcessNumber(&processId);
-					int process = stoi(processId);
-					vector<string> globalVariableNames = bsm::getAllKeys(&persistentWriteCost);
-					string x_cnt_t;
-					string x_fst_t;
-					srand(time(NULL));
-					int uniqueLabel = rand();
-					int s;
-					Ast* currentIfElse;
-	
-					vector<Ast*> currentIfStatements;
-					vector<Ast*> oldIfStatements;
-					vector<Ast*> currentElseStatements;
-	
-					vector<Ast*> flushStatements;
-					for (string globalVariableName : globalVariableNames)
-					{
-						if (persistentWriteCost[globalVariableName] == bsm::TOP_VALUE || persistentWriteCost[globalVariableName] > config::K)
-						{
-							s = config::K;
-						}
-						else
-						{
-							s = persistentWriteCost[globalVariableName];
-						}
-	
-						x_fst_t = config::globalVariables[globalVariableName]->auxiliaryFirstPointerVariableNames[process];
-						x_cnt_t = config::globalVariables[globalVariableName]->auxiliaryCounterVariableNames[process];
-	
-						for (int ctr = s - 1; ctr >= 1; ctr--)
-						{
-							if (currentIfStatements.empty())
-							{
-								currentIfStatements.push_back(newStore(
-										globalVariableName,
-										newID(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr + 1)])
-									));
-							}
-							else
-							{
-								currentIfStatements.clear();
-								currentIfStatements.push_back(currentIfElse);
-							}
-	
-							currentElseStatements.clear();
-	
-							currentElseStatements.push_back(newStore(
-									globalVariableName,
-									newID(config::globalVariables[globalVariableName]->auxiliaryWriteBufferVariableNames[pair<int, int>(process, ctr)])
-								));
-	
-							currentIfElse = newIfElse(
-									newBinaryOp(
-										newID(x_fst_t),
-										newINT(ctr),
-										string(1, literalCode::GREATER_THAN)
-									),
-									currentIfStatements,
-									currentElseStatements
-								);
-						}
-	
-						if (s >= 1)
-						{
-							currentIfStatements.clear();
-	
-							if (s > 1)
-							{
-								currentIfStatements.push_back(currentIfElse);
-							}
-	
-							currentIfStatements.push_back(newLocalAssign(
-									x_fst_t,
-									newBinaryOp(
-										newID(x_fst_t),
-										newINT(1),
-										string(1, literalCode::PLUS)
-									)
-								));
-	
-							if (numberOfVariablesInPersistentWriteBuffer() > 1)
-							{
-								currentIfElse = newIfElse(
-										newAsterisk(),
-										currentIfStatements
-									);
-	
-								currentIfStatements.clear();
-								currentIfStatements.push_back(currentIfElse);
-							}
-	
-							currentIfElse = newIfElse(
-									newBinaryOp(
-										newID(x_cnt_t),
-										newINT(0),
-										string(1, literalCode::GREATER_THAN)
-									),
-									currentIfStatements
-								);
-	
-							flushStatements.push_back(currentIfElse);
-							currentIfStatements.clear();
-						}
-					}
-	
-					if (!flushStatements.empty())
-					{
-						Ast* gotoNode = new Ast();
-						gotoNode->addChild(new Ast());
-						gotoNode->name = literalCode::GOTO_TOKEN_NAME;
-						gotoNode->children.at(0)->name = to_string(uniqueLabel);
-	
-						flushStatements.push_back(gotoNode);
-	
-						Ast* envelopingIfNode = newIfElse(
-								newAsterisk(),
-								flushStatements
-							);
-	
-						Ast* labelAst = new Ast();
-						labelAst->name = literalCode::LABEL_TOKEN_NAME;
-						labelAst->addChild(new Ast());
-						labelAst->children.at(0)->name = to_string(uniqueLabel);
-						labelAst->addChild(envelopingIfNode);
-	
-						replacement.push_back(labelAst);
-					}
-				}
-	
-				if (!replacement.empty())
-				{
-					if (this->parent->name == literalCode::LABEL_TOKEN_NAME)
-					{
-						this->parent->startComment = literalCode::REPLACING_CAPTION + literalCode::SPACE + literalCode::QUOTATION + emitCode() + literalCode::QUOTATION;
-					}
-					else
-					{
-						replacement.at(0)->startComment = literalCode::REPLACING_CAPTION + literalCode::SPACE + literalCode::QUOTATION + emitCode() + literalCode::QUOTATION;
-					}
-					replacement.at(replacement.size() - 1)->endComment = literalCode::FINISHED_REPLACING_CAPTION + literalCode::SPACE + literalCode::QUOTATION + emitCode() + literalCode::QUOTATION;
-				}
-	
-				replaceNode(replacement, this);
-			}
 		}
 	}
 	
@@ -1590,29 +2622,6 @@ using namespace std;
 		}
 	}
 	
-	// Cascades from top to bottom. Copies all persistent buffer size maps to the successors.
-	void Ast::topDownCascadingCopyPersistentBufferSizes(Ast* source)
-	{
-		copyPersistentBufferSizes(source);
-	
-		for (Ast* child : children)
-		{
-			child->topDownCascadingCopyPersistentBufferSizes(source);
-		}
-	}
-	
-	// Cascades from top to bottom. Causes those nodes that have their own caused costs to add them to their persistent maps.
-	void Ast::topDownCascadingAddInitializedCausedCostsToPersistentCosts()
-	{
-		bsm::conditionalAdditiveMergeBufferSizes(&causedReadCost, &persistentReadCost);
-		bsm::conditionalAdditiveMergeBufferSizes(&causedWriteCost, &persistentWriteCost);
-	
-		for (Ast* child : children)
-		{
-			child->topDownCascadingAddInitializedCausedCostsToPersistentCosts();
-		}
-	}
-	
 	// Cascades down the control flow graph. If any successor node has a different persistent map, causes this to propagate its TOP values down the line.
 	void Ast::controlFlowDirectionCascadingPropagateTops()
 	{
@@ -1648,6 +2657,45 @@ using namespace std;
 		return emitCode().compare(otherAst->emitCode()) == 0;
 	}
 
+	vector<int> Ast::getAllProcessDeclarations()
+	{
+		vector<int> result;
+
+		if (name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
+		{
+			result.push_back(stoi(children.at(0)->children.at(0)->name));
+		}
+		else if (name == literalCode::BL_PROCESS_DECLARATION_TOKEN_NAME)
+		{
+			result.push_back(stoi(children.at(0)->name));
+		}
+		else
+		{
+			vector<int> subResult;
+
+			for (Ast* child : children)
+			{
+				subResult = child->getAllProcessDeclarations();
+				result.insert(result.end(), subResult.begin(), subResult.end());
+			}
+		}
+
+		return result;
+	}
+
+	void Ast::cascadingReplaceIDNames(const string &oldName, const string &newName)
+	{
+		replaceIDNames(oldName, newName);
+
+		if (name != literalCode::ID_TOKEN_NAME && name != literalCode::INT_TOKEN_NAME)
+		{
+			for (Ast* child : children)
+			{
+				child->cascadingReplaceIDNames(oldName, newName);
+			}
+		}
+	}
+
 /* Static operations */
 	void Ast::replaceNode(const vector<Ast*> &nodes, Ast* oldNode)
 	{
@@ -1681,25 +2729,6 @@ using namespace std;
 	}
 
 /* Static pseudo-constructors */
-	// Initializes an ID node
-	Ast* Ast::newID(const string &variableName)
-	{
-		Ast* result = new Ast();
-		result->name = literalCode::ID_TOKEN_NAME;
-		result->addChild(new Ast());
-		result->children.at(0)->name = variableName;
-		return result;
-	}
-	
-	// Initializes an INT node
-	Ast* Ast::newINT(int value)
-	{
-		Ast* result = new Ast();
-		result->name = literalCode::INT_TOKEN_NAME;
-		result->addChild(new Ast());
-		result->children.at(0)->name = to_string(value);
-		return result;
-	}
 	
 	// Initializes a binary operation node
 	Ast* Ast::newBinaryOp(Ast* leftOperand, Ast* rightOperand, const string &operation)
@@ -1717,7 +2746,15 @@ using namespace std;
 
 		if (operandCount > 1)
 		{
-			return newBinaryOp(operands[0], newMultipleOperation(vector<Ast*>(operands.begin() + 1, operands.end()), operation), operation);
+			//return newBinaryOp(operands[0], newMultipleOperation(vector<Ast*>(operands.begin() + 1, operands.end()), operation), operation);
+
+			Ast* result = new Ast();
+			
+			result->name = operation;
+			result->children = operands;
+			result->refreshChildIndices();
+			
+			return result;
 		}
 		else if (operandCount == 1)
 		{
@@ -1727,26 +2764,6 @@ using namespace std;
 		{
 			return NULL;
 		}
-	}
-	
-	// Initializes a localAssign(ID(variableName), INT(initialValue)) node
-	Ast* Ast::newLocalAssign(const string &variableName, int initialValue)
-	{
-		Ast* result = new Ast();
-		result->name = literalCode::LOCAL_ASSIGN_TOKEN_NAME;
-		result->addChild(newID(variableName));
-		result->addChild(newINT(initialValue));
-		return result;
-	}
-	
-	// Initializes a localAssign(ID(variableName), node) node
-	Ast* Ast::newLocalAssign(const string &variableName, Ast* assignmentNode)
-	{
-		Ast* result = new Ast();
-		result->name = literalCode::LOCAL_ASSIGN_TOKEN_NAME;
-		result->addChild(newID(variableName));
-		result->addChild(assignmentNode);
-		return result;
 	}
 	
 	Ast* Ast::newStore(const string &variableName, Ast* rightSide)
@@ -1764,43 +2781,6 @@ using namespace std;
 		result->name = literalCode::PSO_TSO_LOAD_TOKEN_NAME;
 		result->addChild(newID(variableName));
 		result->addChild(rightSide);
-		return result;
-	}
-	
-	// Initializes an ifElse(ifConditional, statements) node
-	Ast* Ast::newIfElse(Ast* ifConditionalNode, const vector<Ast*> &statements)
-	{
-		Ast* result = new Ast();
-		result->name = literalCode::IF_ELSE_TOKEN_NAME;
-		result->addChild(ifConditionalNode);
-		result->addChild(newStatements(statements));
-		result->addChild(newNone());
-		return result;
-	}
-	
-	// Initializes an ifElse(ifConditional, ifStatements, elseStatements) node
-	Ast* Ast::newIfElse(Ast* ifConditionalNode, const vector<Ast*> &ifStatements, const vector<Ast*> &elseStatements)
-	{
-		Ast* result = new Ast();
-		result->name = literalCode::IF_ELSE_TOKEN_NAME;
-		result->addChild(ifConditionalNode);
-		result->addChild(newStatements(ifStatements));
-		result->addChild(newStatements(elseStatements));
-		return result;
-	}
-	
-	Ast* Ast::newStatements(const vector<Ast*> &statements)
-	{
-		Ast* result = new Ast();
-		result->name = literalCode::STATEMENTS_TOKEN_NAME;
-		result->addChildren(statements);
-		return result;
-	}
-	
-	Ast* Ast::newNone()
-	{
-		Ast* result = new Ast();
-		result->name = literalCode::NONE_TOKEN_NAME;
 		return result;
 	}
 	
@@ -1893,57 +2873,6 @@ using namespace std;
 		result->name = literalCode::BL_IF_TOKEN_NAME;
 		result->addChild(ifConditionalNode);
 		result->addChild(statement);
-		return result;
-	}
-
-	Ast* Ast::newAstFromParsedProgram(const string &parsedProgramString)
-	{
-		// Parse through the AST representation string character by character
-		Ast* currentAst = new Ast();
-		Ast* result = currentAst;
-		char currentChar;
-		std::string currentName = "";
-		int parsedProgramStringLength = parsedProgramString.length();
-
-		for (int ctr = 0; ctr < parsedProgramStringLength; ctr++)
-		{
-			currentChar = parsedProgramString.at(ctr);
-
-			if (currentChar == literalCode::LEFT_PARENTHESIS)	// Create a new node with the word parsed so far as its name.
-			{													// Subsequently found nodes are to be added as this one's children
-				currentAst->name = currentName;					// until the corresponding ')' is found.
-				currentName = "";
-				currentAst->addChild(new Ast);
-				currentAst = currentAst->children.at(0);
-			}
-			else if (currentChar == literalCode::COMMA)			// Add the currently parsed node as the previous one's sibling
-			{
-				if (!currentName.empty())
-				{
-					currentAst->name = currentName;
-					currentName = "";
-				}
-
-				currentAst = currentAst->parent;
-				currentAst->addChild(new Ast);
-				currentAst = currentAst->children.at(currentAst->children.size() - 1);
-			}
-			else if (currentChar == literalCode::RIGHT_PARENTHESIS)	// Move up one level
-			{
-				if (!currentName.empty())
-				{
-					currentAst->name = currentName;
-					currentName = "";
-				}
-
-				currentAst = currentAst->parent;
-			}
-			else // Continue parsing the name of the next node
-			{
-				currentName += currentChar;
-			}
-		}
-
 		return result;
 	}
 	
@@ -2052,19 +2981,6 @@ using namespace std;
 	}
 
 /* Local access */
-	// Sets all buffer size map entry values to 0
-	void Ast::resetBufferSizes()
-	{
-		vector<bufferSizeMap*> containers = allBufferSizeContainers();
-	
-		for (bufferSizeMap* container : containers)
-		{
-			for (bufferSizeMapIterator iterator = container->begin(); iterator != container->end(); iterator++)
-			{
-				(*container)[iterator->first] = 0;
-			}
-		}
-	}
 	
 	// Outputs the number string of the superior process in the value of the out pointer and returns true if applicable, otherwise returns false
 	bool Ast::tryGetParentProcessNumber(string* out)
@@ -2106,24 +3022,6 @@ using namespace std;
 	bool Ast::isRoot()
 	{
 		return indexAsChild == -1;
-	}
-	
-	// Returns whether the node represents one of the program point types
-	bool Ast::isProgramPoint()
-	{
-		if (config::currentLanguage == config::language::RMA)
-		{
-			return name == literalCode::LABEL_TOKEN_NAME || name == literalCode::GOTO_TOKEN_NAME || name == literalCode::RMA_GET_TOKEN_NAME
-				|| name == literalCode::PSO_TSO_LOAD_TOKEN_NAME || name == literalCode::IF_ELSE_TOKEN_NAME || name == literalCode::FENCE_TOKEN_NAME
-				|| name == literalCode::RMA_PUT_TOKEN_NAME || name == literalCode::LOCAL_ASSIGN_TOKEN_NAME || name == literalCode::NOP_TOKEN_NAME
-				|| name == literalCode::FLUSH_TOKEN_NAME;
-		}
-		else
-		{
-			return name == literalCode::LABEL_TOKEN_NAME || name == literalCode::GOTO_TOKEN_NAME || name == literalCode::PSO_TSO_STORE_TOKEN_NAME
-				|| name == literalCode::PSO_TSO_LOAD_TOKEN_NAME || name == literalCode::IF_ELSE_TOKEN_NAME || name == literalCode::FENCE_TOKEN_NAME
-				|| name == literalCode::NOP_TOKEN_NAME || name == literalCode::FLUSH_TOKEN_NAME || name == literalCode::LOCAL_ASSIGN_TOKEN_NAME;
-		}
 	}
 	
 	// Returns whether the current node is an ifElse node with an Else statement block.
@@ -2195,72 +3093,7 @@ using namespace std;
 		}
 	}
 	
-	// Checks whether the node is a program point and has any control flow successors, and if so, creates control flow edges between this node and its successors.
-	bool Ast::generateOutgoingEdges()
-	{
-		if (isProgramPoint())	// Checks whether the node is a program point
-		{
-			ControlFlowEdge* newEdge;
-			Ast* nextStatement = NULL;
 	
-			if (name == literalCode::GOTO_TOKEN_NAME)	// Goto nodes only lead to their corresponding label
-			{
-				newEdge = new ControlFlowEdge(this, config::labelLookupMap[getGotoCode()]);
-				outgoingEdges.push_back(newEdge);
-			}
-			else if (name == literalCode::LABEL_TOKEN_NAME)	// Label nodes only lead to their corresponding statement
-			{
-				newEdge = new ControlFlowEdge(this, children.at(1));
-				outgoingEdges.push_back(newEdge);
-			}
-			else if (name == literalCode::IF_ELSE_TOKEN_NAME)	// IfElse nodes lead to their conditionals, which lead to both statement blocks' first statements,
-			{												// of which the last statements lead to the statement following the IfElse block, unless they're goto statements
-				Ast* lastChild = NULL;
-				nextStatement = tryGetNextStatement();
-				bool nextStatementExists = nextStatement != NULL;
-	
-				newEdge = new ControlFlowEdge(this, children.at(0));	// Create an edge to the conditional
-				outgoingEdges.push_back(newEdge);
-	
-				newEdge = new ControlFlowEdge(children.at(0), children.at(1)->children.at(0));	// Create an edge from the conditional to the first statement of the If block
-				children.at(0)->outgoingEdges.push_back(newEdge);
-	
-				lastChild = children.at(1)->tryGetLastStatement();		// If there is a statement after the IfElse block, connect to it from the last statement of the If block, if it's not a goto statement
-				if (nextStatementExists && lastChild != NULL && lastChild->name != literalCode::GOTO_TOKEN_NAME)
-				{
-					newEdge = new ControlFlowEdge(lastChild, nextStatement);
-					lastChild->outgoingEdges.push_back(newEdge);
-				}
-	
-				if (this->hasElse())	// If there is a non-empty Else block, connect to its first statement from the conditional
-				{
-					newEdge = new ControlFlowEdge(children.at(0), children.at(2)->children.at(0));
-					children.at(0)->outgoingEdges.push_back(newEdge);
-	
-					lastChild = children.at(2)->tryGetLastStatement();		// If there is a statement after the IfElse block, connect to it from the last statement of the Else block, if it's not a goto statement
-					if (nextStatementExists && lastChild != NULL && lastChild->name != literalCode::GOTO_TOKEN_NAME)
-					{
-						newEdge = new ControlFlowEdge(lastChild, nextStatement);
-						lastChild->outgoingEdges.push_back(newEdge);
-					}
-				}
-				else if (nextStatementExists)	// If there is no Else block, but there is a statement following the IfElse block, connect to it from the conditional
-				{
-					newEdge = new ControlFlowEdge(children.at(0), nextStatement);
-					children.at(0)->outgoingEdges.push_back(newEdge);
-				}
-			}
-			else if ((nextStatement = tryGetNextStatement()) != NULL)	// For other program points, follow the statement block if it continues
-			{
-				newEdge = new ControlFlowEdge(this, nextStatement);
-				outgoingEdges.push_back(newEdge);
-			}
-	
-			return true;
-		}
-	
-		return false;
-	}
 	
 	void Ast::initializeAuxiliaryVariables()
 	{
@@ -2560,13 +3393,6 @@ using namespace std;
 		return false;
 	}
 	
-	// Copies the contents of the persistent buffer size maps from another node
-	void Ast::copyPersistentBufferSizes(Ast* source)
-	{
-		bsm::copyBufferSizes(&(source->persistentWriteCost), &persistentWriteCost);
-		bsm::copyBufferSizes(&(source->persistentReadCost), &persistentReadCost);
-	}
-	
 	// Compares the persistent buffer size maps of those of the direct control flow successors, and if they don't match, it sets the locally TOP values
 	// remotely to TOP. If no changes have been made, returns false.
 	bool Ast::propagateTops()
@@ -2600,62 +3426,16 @@ using namespace std;
 	
 		return result;
 	}
-	
-	// Returns the next statement node of the current statements block if applicable, otherwise returns NULL
-	Ast* Ast::tryGetNextStatement()
+
+	void Ast::replaceIDNames(const string &oldName, const string &newName)
 	{
-		if (parent->name == literalCode::LABEL_TOKEN_NAME)
+		if (name == literalCode::ID_TOKEN_NAME)
 		{
-			return parent->tryGetNextSibling();
-		}
-		else if (parent->name == literalCode::STATEMENTS_TOKEN_NAME)
-		{
-			return tryGetNextSibling();
-		}
-	
-		return NULL;
-	}
-	
-	// Returns the last statement node of the current statements block if applicable, otherwise returns NULL
-	Ast* Ast::tryGetLastStatement()
-	{
-		if (name == literalCode::STATEMENTS_TOKEN_NAME)
-		{
-			Ast* lastChild = tryGetLastChild();
-	
-			if (lastChild->name == literalCode::LABEL_TOKEN_NAME)
+			if (children.at(0)->name == oldName)
 			{
-				lastChild = lastChild->children.at(1);
+				children.at(0)->name = newName;
 			}
-	
-			return lastChild;
 		}
-	
-		return NULL;
-	}
-	
-	// Returns the next child of the node's parent if it exists, otherwise returns NULL
-	Ast* Ast::tryGetNextSibling()
-	{
-		if (!isRoot() && ((int)parent->children.size()) > indexAsChild + 1)
-		{
-			return parent->children.at(indexAsChild + 1);
-		}
-	
-		return NULL;
-	}
-	
-	// Returns the last child node if it exists, otherwise returns NULL
-	Ast* Ast::tryGetLastChild()
-	{
-		int childrenCount = children.size();
-	
-		if (childrenCount > 0)
-		{
-			return children.at(childrenCount - 1);
-		}
-	
-		return NULL;
 	}
 
 	//

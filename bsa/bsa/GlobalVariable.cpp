@@ -1,4 +1,5 @@
 #include "GlobalVariable.h"
+#include "bufferSizeMap.h"
 #include "config.h"
 #include "literalCode.h"
 
@@ -49,4 +50,26 @@ string GlobalVariable::registerAuxiliaryVariable(const string &minimalName)
 		config::variableNames.push_back(minimalName + literalCode::AUXILIARY_VARIABLE_SEPARATOR + randomSuffix);
 		return minimalName + literalCode::AUXILIARY_VARIABLE_SEPARATOR + randomSuffix;
 	}
+}
+
+void GlobalVariable::setMaximumBufferSize(int process, int bufferSize)
+{
+	if (bufferSize > getMaximumBufferSize(process) && bufferSize < config::K && bufferSize > 0)
+	{
+		maximumBufferSizePerProcess[process] = bufferSize;
+	}
+	else if (bufferSize == bsm::TOP_VALUE || bufferSize >= config::K)
+	{
+		maximumBufferSizePerProcess[process] = config::K;
+	}
+}
+
+int GlobalVariable::getMaximumBufferSize(int process)
+{
+	if (maximumBufferSizePerProcess.find(process) == maximumBufferSizePerProcess.end())
+	{
+		maximumBufferSizePerProcess[process] = 0;
+	}
+
+	return maximumBufferSizePerProcess[process];
 }
