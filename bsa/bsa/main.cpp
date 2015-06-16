@@ -130,8 +130,9 @@ int main(int argc, char** argv)
 	Ast* rootAstRef = Ast::newAstFromParsedProgram(parsedProgramString);
 
 	cout << "Performing buffer size analysis...\n";
-	/*cout << "\n---\nParsed program:\n\n";
-	cout << rootAstRef->emitCode();*/
+	cout << "\n---\nParsed program:\n\n";
+	cout << rootAstRef->getCode();
+	//cout << rootAstRef->toString();
 
 	// Register all global variables
 	rootAstRef->getChild(0)->registerIDsAsGlobal();
@@ -157,21 +158,21 @@ int main(int argc, char** argv)
 	rootAstRef->topDownCascadingRegisterLabels();			// Send a cascading command to the root node that results in all label AST nodes registering themselves in a global map
 	rootAstRef->topDownCascadingGenerateOutgoingEdges();	// Send a cascading command to the root node that results in all program points estabilishing outgoing program flow edges to their possible successor nodes in the control flow graph
 	rootAstRef->visitAllProgramPoints();					// Generate one control flow visitor in the first program point nodes of each process declaration and prompt them to start traversing the AST
-	
-	rootAstRef->cascadingUnifyVariableNames();
-	rootAstRef->cascadingInitializeAuxiliaryVariables();
-	rootAstRef->carryOutReplacements();
+	rootAstRef->performBufferSizeAnalysisReplacements();
+	config::carryOutLazyReplacements();
+	config::lazyReplacements.clear();
+	//rootAstRef->cascadingUnifyVariableNames();
+	//rootAstRef->cascadingInitializeAuxiliaryVariables();
+	//rootAstRef->carryOutReplacements();
 
 	/*cout << "\n---\nCarried out buffer size analysis:\n\n";
-	cout << rootAstRef->emitCode();*/
+	cout << rootAstRef->toString();*/
 
 	// Generate the output
 	outputPath = fileNameStub + "." + BSA_EXTENSION + "." + extension;
 	ofstream programOut(outputPath);
-	programOut << rootAstRef->emitCode();
+	programOut << rootAstRef->getCode();
 	programOut.close();
-
-	config::lazyReplacements.clear();
 
 	ifstream parsedPredicateFile(fileNameStub + "." + PREDICATE_EXTENSION + "." + extension + "." + OUT_EXTENSION);
 	string parsedPredicateLine, parsedPredicateString;
@@ -190,16 +191,16 @@ int main(int argc, char** argv)
 		if (stringMatch.size() == 2)
 		{
 			predicateAstRef = Ast::newAstFromParsedProgram(stringMatch[1].str());
+			int predicateAstRefChildCount = predicateAstRef->getChildrenCount();
 
-			for (Ast* child : predicateAstRef->children)
+			for (int ctr = 0; ctr < predicateAstRefChildCount; ctr++)
 			{
-				config::globalPredicates.push_back(child);
+				config::globalPredicates.push_back(predicateAstRef->getChild(ctr));
 				config::globalPredicatesCount++;
 			}
 
 			if (config::generateAuxiliaryPredicates)
-			{
-				config::processes = rootAstRef->getAllProcessDeclarations();
+			{ 
 				config::initializeAuxiliaryPredicates();
 				config::globalPredicatesCount = config::globalPredicates.size();
 			}
@@ -218,9 +219,9 @@ int main(int argc, char** argv)
 			/*config::initializeImplicativeCubes();
 			config::getAllFalseImplyingCubes();*/
 
-			rootAstRef->cascadingUnfoldIfElses();
-			rootAstRef->cascadingPerformPredicateAbstraction();
-			rootAstRef->setVariableInitializations();
+			rootAstRef->topDownCascadingUnfoldIfElses();
+			rootAstRef->topDownCascadingPerformPredicateAbstraction();
+			rootAstRef->generateBooleanVariableInitializations();
 			config::carryOutLazyReplacements();
 			config::lazyReplacements.clear();
 
@@ -240,12 +241,12 @@ int main(int argc, char** argv)
 	/*cout << "\n---\n";
 	cout << rootAstRef->astToString();*/
 	cout << "\n---\nFinal state:\n\n";
-	cout << rootAstRef->emitCode();
+	cout << rootAstRef->getCode();
 
 	// Generate the output
 	string booleanOutputPath = fileNameStub + "." + BOOLEAN_EXTENSION;
 	ofstream booleanProgramOut(booleanOutputPath);
-	booleanProgramOut << rootAstRef->emitCode() << "\n";
+	booleanProgramOut << rootAstRef->getCode() << "\n";
 	//booleanProgramOut << rootAstRef->emitCode() << "\n\n" << endAssertion;
 	booleanProgramOut.close();
 

@@ -33,9 +33,9 @@ void ControlFlowVisitor::traverseControlFlowGraph(Ast* startNode)
 	}
 	else
 	{
-		if (startNode->name == literalCode::LABEL_TOKEN_NAME)	// If visiting a label for the first time, add it to the list of visited labels
+		if (startNode->getName() == literalCode::LABEL_TOKEN_NAME)	// If visiting a label for the first time, add it to the list of visited labels
 		{
-			visitedLabels.push_back(startNode->getLabelCode());
+			visitedLabels.insert(stoi(startNode->getChild(0)->getName()));
 		}
 
 		// Add the visitor's accumulated buffer sizes to the persistent buffer sizes of the node
@@ -46,7 +46,7 @@ void ControlFlowVisitor::traverseControlFlowGraph(Ast* startNode)
 		bsm::copyBufferSizes(&(startNode->persistentWriteCost), &writeBufferSizeMap);
 		bsm::copyBufferSizes(&(startNode->persistentReadCost), &readBufferSizeMap);
 
-		if (startNode->name == literalCode::FENCE_TOKEN_NAME)	// If visiting a fence, reset all buffer sizes to 0
+		if (startNode->getName() == literalCode::FENCE_TOKEN_NAME)	// If visiting a fence, reset all buffer sizes to 0
 		{
 			for (bufferSizeMapIterator iterator = writeBufferSizeMap.begin(); iterator != writeBufferSizeMap.end(); iterator++)
 			{
@@ -80,9 +80,9 @@ void ControlFlowVisitor::traverseControlFlowGraph(Ast* startNode)
 // Returns whether the currently visited node has already been visited by this visitor or one of its ancestors
 bool ControlFlowVisitor::isVisitingAlreadyVisitedLabel(Ast* currentNode)
 {
-	if (currentNode->name == literalCode::LABEL_TOKEN_NAME)	// Since the only possible closing points of cycles are labels, disregard any other node type
+	if (currentNode->getName() == literalCode::LABEL_TOKEN_NAME)	// Since the only possible closing points of cycles are labels, disregard any other node type
 	{
-		if (config::stringVectorContains(visitedLabels, currentNode->getLabelCode()))
+		if (visitedLabels.find(stoi(currentNode->getChild(0)->getName())) != visitedLabels.end())
 		{
 			return true;
 		}
@@ -97,9 +97,9 @@ ControlFlowVisitor* ControlFlowVisitor::clone()
 	ControlFlowVisitor * result = new ControlFlowVisitor;
 
 	// Copy the visited label vector content
-	for (string visitedLabel : visitedLabels)
+	for (int visitedLabel : visitedLabels)
 	{
-		result->visitedLabels.push_back(visitedLabel);
+		result->visitedLabels.insert(visitedLabel);
 	}
 
 	// Copy the contents of both buffer size maps

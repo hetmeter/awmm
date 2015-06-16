@@ -26,9 +26,7 @@ private:
 	std::string _endComment;
 
 /* Private fields */
-	const Ast* getParent();
-	int getIndexAsChild();
-	int tryGetParentProcessNumber();
+	int getParentProcessNumber();
 
 /* Local methods */
 	void resetBufferSizes();
@@ -39,6 +37,7 @@ private:
 	Ast* tryGetLastStatement();
 	Ast* tryGetNextSibling();
 	Ast* tryGetLastChild();
+	bool performPredicateAbstraction();
 
 public:
 
@@ -60,9 +59,11 @@ public:
 
 	const std::string getCode();
 
+	Ast* getParent();
 	void setParent(Ast* newParent);
 
 	Ast* getChild(int index);
+	const std::vector<Ast*> getChildren();
 	void insertChild(Ast* newChild);
 	void insertChild(Ast* newChild, int index);
 	void insertChildren(const std::vector<Ast*> &newChildren);
@@ -73,9 +74,23 @@ public:
 
 	int getChildrenCount();
 
+	const std::string getStartComment();
+	void setStartComment(const std::string &value);
+	const std::string getEndComment();
+	void setEndComment(const std::string &value);
+
+	int getIndexAsChild();
+	z3::expr getZ3Expression(z3::context* c);
+
 /* Public methods */
 	void invalidateCode();
 	void visitAllProgramPoints();
+	bool unfoldIfElses();
+	std::string toString();
+
+/* Replicators */
+	Ast* clone();
+	Ast* negate();
 
 /* Pseudo-constructors */
 	static Ast* newAstFromParsedProgram(const std::string &parsedProgramString);
@@ -86,11 +101,35 @@ public:
 	static Ast* newIfElse(Ast* ifConditionalNode, const std::vector<Ast*> &statements);
 	static Ast* newIfElse(Ast* ifConditionalNode, const std::vector<Ast*> &ifStatements, const std::vector<Ast*> &elseStatements);
 
+	static Ast* newBinaryOp(Ast* leftOperand, Ast* rightOperand, const std::string &operation);
+	static Ast* newMultipleOperation(const std::vector<Ast*> &operands, const std::string &operation);
+
 	static Ast* newID(const std::string &variableName);
 	static Ast* newINT(int value);
+	static Ast* newTrue();
+	static Ast* newFalse();
 	static Ast* newStatements(const std::vector<Ast*> &statements);
 	static Ast* newNone();
+	static Ast* newNop();
 	static Ast* newAbort(const std::string &abortMessage);
+	static Ast* newAsterisk();
+	static Ast* newAssume(Ast* assumeConditionalNode);
+	static Ast* newChoose(Ast* firstChoice, Ast* secondChoice);
+	static Ast* newStore(const std::string &variableName, Ast* rightSide);
+	static Ast* newLoad(const std::string &variableName, Ast* rightSide);
+	static Ast* newSharedVariables(const std::vector<std::string> &variableNames);
+	static Ast* newLocalVariables(const std::vector<std::string> &variableNames);
+	static Ast* newBeginAtomic();
+	static Ast* newEndAtomic();
+	static Ast* newLabel(int value, Ast* statement);
+	static Ast* newGoto(int value);
+	static Ast* newBooleanIf(Ast* ifConditionalNode, Ast* statement);
+
+	static Ast* newBooleanVariableCube(const std::string &definition, bool useTemporaryVariables);
+	static Ast* newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables = true);
+	static Ast* newReverseLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate);
+	static Ast* newAbstractAssignmentFragment(Ast* assignment, Ast* predicate);
+	static Ast* newWeakestLiberalPrecondition(Ast* assignment, Ast* predicate);
 
 /* Cascading methods */
 	void registerIDsAsGlobal();
@@ -102,7 +141,13 @@ public:
 	void topDownCascadingAddInitializedCausedCostsToPersistentCosts();
 	void topDownCascadingRegisterLabels();
 	void topDownCascadingGenerateOutgoingEdges();
+	void topDownCascadingUnfoldIfElses();
+	void topDownCascadingPerformPredicateAbstraction();
+	void topDownCascadingReplaceIDNames(const std::string &oldName, const std::string &newName);
+	void controlFlowDirectionCascadingPropagateTops();
 	void performBufferSizeAnalysisReplacements();
+	void generateBooleanVariableInitializations();
+	std::vector<Ast*> search(const std::string &soughtName);
 };
 
 
