@@ -91,6 +91,7 @@
     <ClCompile Include="GlobalVariable.cpp" />
     <ClCompile Include="literalCode.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PredicateData.cpp" />
     <ClCompile Include="VariableEntry.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +103,7 @@
     <ClInclude Include="CubeTreeNode.h" />
     <ClInclude Include="GlobalVariable.h" />
     <ClInclude Include="literalCode.h" />
+    <ClInclude Include="PredicateData.h" />
     <ClInclude Include="VariableEntry.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

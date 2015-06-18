@@ -5,6 +5,7 @@
 #include <time.h>
 #include <iostream>
 #include <map>
+#include <set>
 #include <regex>
 #include <z3++.h>
 
@@ -12,6 +13,7 @@ class Ast;
 class GlobalVariable;
 class VariableEntry;
 class CubeTreeNode;
+class PredicateData;
 
 namespace config
 {
@@ -19,7 +21,8 @@ namespace config
 	extern int K;
 	extern int globalCubeSizeLimit;
 	extern int globalPredicatesCount;
-	extern std::vector<Ast*> globalPredicates;
+	//extern std::vector<Ast*> globalPredicates;
+	extern std::vector<PredicateData*> globalPredicates;
 	extern bool generateAuxiliaryPredicates;
 	
 	enum language { PSO, TSO, RMA };
@@ -27,14 +30,15 @@ namespace config
 
 /* Global variables */
 	extern std::map<std::string, VariableEntry*> symbolMap;
-	extern std::map<int, Ast*> labelMap;
+	extern std::map<int, std::set<int>> labelMap;
 	extern std::vector<int> processes;
+	extern std::map<std::pair<std::string, std::string>, Ast*> weakestLiberalPreconditions;
 
 	extern std::map<Ast*, std::vector<Ast*>> lazyReplacements;
-	extern std::vector<std::string> variableNames;
-	extern std::vector<std::string> auxiliaryBooleanVariableNames;
-	extern std::vector<std::string> auxiliaryTemporaryVariableNames;
-	extern std::map<std::string, GlobalVariable*> globalVariables;
+	/*extern std::vector<std::string> variableNames;*/
+	/*extern std::vector<std::string> auxiliaryBooleanVariableNames;
+	extern std::vector<std::string> auxiliaryTemporaryVariableNames;*/
+	//extern std::map<std::string, GlobalVariable*> globalVariables;
 	extern int currentAuxiliaryLabel;
 	extern std::map<std::string, Ast*> labelLookupMap;
 	extern std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
@@ -44,15 +48,18 @@ namespace config
 	extern std::string emptyCubeRepresentation;
 	extern std::map<std::string, CubeTreeNode*> implicativeCubes;
 	extern std::vector<std::string> allFalseImplyingCubes;
-	extern std::map<std::string, std::pair<Ast*, Ast*>> predicateAstRepresentations;
+	//extern std::map<std::string, std::pair<Ast*, Ast*>> predicateAstRepresentations;
 
 /* Global variable handling */
+	extern PredicateData* getPredicateData(Ast* predicateAst);
+
 	extern bool tryRegisterGlobalSymbol(const std::string &name);
 	extern bool tryRegisterLocalSymbol(const std::string &name);
 	extern bool tryRegisterAuxiliarySymbol(const std::string &name, const std::string &globalName);
 	extern void generateAllAuxiliarySymbols();
+	extern const std::string forceRegisterSymbol(VariableEntry* desiredSymbol);
 
-	extern bool tryRegisterLabel(int label, Ast* node);
+	extern bool tryRegisterLabel(int process, int label);
 
 	extern bool tryRegisterProcess(int process);
 
@@ -69,9 +76,9 @@ namespace config
 	extern std::vector<std::string> getMinimalImplyingCubes(Ast* predicate, const std::vector<int> &relevantIndices);
 	extern std::vector<std::string> getAllFalseImplyingCubes();
 	extern CubeTreeNode* getImplicativeCube(const std::string &stringRepresentation);
-	extern std::pair<Ast*, Ast*> getPredicateAstRepresentationPair(Ast* predicate);
+	/*extern std::pair<Ast*, Ast*> getPredicateAstRepresentationPair(Ast* predicate);
 	extern Ast* getPredicateTemporaryAstRepresentation(Ast* predicate);
-	extern Ast* getPredicateBooleanAstRepresentation(Ast* predicate);
+	extern Ast* getPredicateBooleanAstRepresentation(Ast* predicate);*/
 	/*extern void initializeImplicativeCubes();
 	extern void registerImplicativeCube(CubeTreeNode* cube);
 	extern std::vector<int> getRelevantCubeIndices(const std::vector<int> &relevantIndices);
@@ -86,6 +93,13 @@ namespace config
 	extern bool intVectorVectorContains(const std::vector<std::vector<int>> &container, const std::vector<int> &element);
 	extern std::vector<std::vector<int>> intSetCartesianProduct(const std::vector<int> &first, const std::vector<int> &second);
 	extern std::vector<std::vector<int>> intSetCartesianProduct(const std::vector<std::vector<int>> &first, const std::vector<int> &second);
+
+/* Ast operations */
+	extern void prepareNodeForLazyReplacement(Ast* replacement, Ast* replacedNode);
+	extern void prepareNodeForLazyReplacement(const std::vector<Ast*> &replacement, Ast* replacedNode);
+	extern void replaceNode(Ast* replacement, Ast* replacedNode);
+	extern void replaceNode(const std::vector<Ast*> &replacement, Ast* replacedNode);
+	extern Ast* getWeakestLiberalPrecondition(Ast* assignment, Ast* predicate);
 
 /* Initializations */
 	extern void initializeAuxiliaryVariables();

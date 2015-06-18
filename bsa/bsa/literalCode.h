@@ -26,6 +26,8 @@ namespace literalCode
 	const extern char GREATER_THAN;
 	const extern char LABEL_SEPARATOR;
 	const extern char AUXILIARY_VARIABLE_SEPARATOR;
+	const extern char TEMPORARY_VARIABLE_PREFIX;
+	const extern char BOOLEAN_VARIABLE_PREFIX;
 
 	const extern std::string EQUALS;
 	const extern std::string NOT_EQUALS;

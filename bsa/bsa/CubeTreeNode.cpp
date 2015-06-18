@@ -1,4 +1,5 @@
 #include "CubeTreeNode.h"
+#include "PredicateData.h"
 #include "config.h"
 #include "Ast.h"
 
@@ -181,12 +182,12 @@ using namespace std;
 			{
 				if (_stringRepresentation[ctr] == CUBE_STATE_DECIDED_FALSE)
 				{
-					currentTerm = config::globalPredicates[ctr]->negate();
+					currentTerm = config::globalPredicates[ctr]->getPredicateAst()->negate();
 					_astVectorRepresentation.push_back(currentTerm);
 				}
 				else if (_stringRepresentation[ctr] == CUBE_STATE_DECIDED_TRUE)
 				{
-					currentTerm = config::globalPredicates[ctr]->clone();
+					currentTerm = config::globalPredicates[ctr]->getPredicateAst()->clone();
 					_astVectorRepresentation.push_back(currentTerm);
 				}
 			}

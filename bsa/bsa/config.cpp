@@ -8,6 +8,7 @@ Global variables, constants, and methods
 #include "CubeTreeNode.h"
 #include "GlobalVariable.h"
 #include "VariableEntry.h"
+#include "PredicateData.h"
 //#include "Cube.h"
 
 namespace config
@@ -16,13 +17,17 @@ namespace config
 	int K;
 	int globalCubeSizeLimit;
 	int globalPredicatesCount = 0;
-	std::vector<Ast*> globalPredicates;
+	std::vector<PredicateData*> globalPredicates;
+	//std::vector<Ast*> globalPredicates;
 	bool generateAuxiliaryPredicates = true;
 
 	language currentLanguage;
 
 /* Global variables */
 	std::map<std::string, VariableEntry*> symbolMap;
+	std::map<int, std::set<int>> labelMap;
+	std::vector<int> processes;
+	std::map<std::pair<std::string, std::string>, Ast*> weakestLiberalPreconditions;
 
 	std::map<Ast*, std::vector<Ast*>> lazyReplacements;
 	std::vector<std::string> variableNames;
@@ -38,13 +43,29 @@ namespace config
 	std::string emptyCubeRepresentation;
 	std::map<std::string, CubeTreeNode*> implicativeCubes;
 	std::vector<std::string> allFalseImplyingCubes;
-	std::vector<int> processes;
 	std::map<std::string, std::pair<Ast*, Ast*>> predicateAstRepresentations;
 	/*std::map<int, std::vector<CubeTreeNode*>> implicativeCubesPerLevel;
 	std::map<std::vector<int>, std::vector<int>> relevantCubeIndices;*/
 	//CubeTreeNode* implicativeCubes = nullptr;
 
 /* Global variable handling */
+	PredicateData* getPredicateData(Ast* predicateAst)
+	{
+		std::string soughtCode = predicateAst->getCode();
+
+		for (PredicateData* globalPredicate : globalPredicates)
+		{
+			if (globalPredicate->getPredicateCode().compare(soughtCode) == 0)
+			{
+				return globalPredicate;
+			}
+		}
+
+		globalPredicates.push_back(new PredicateData(predicateAst));
+		globalPredicatesCount++;
+		return globalPredicates[globalPredicatesCount - 1];
+	}
+
 	bool tryRegisterGlobalSymbol(const std::string &name)
 	{
 		if (symbolMap.find(name) != symbolMap.end())
@@ -99,18 +120,59 @@ namespace config
 		}
 	}
 
+	const std::string forceRegisterSymbol(VariableEntry* desiredSymbol)
+	{
+		std::string originalName = desiredSymbol->getName();
+		std::string currentName = originalName;
+		srand(time(NULL));
 
+		while (symbolMap.find(currentName) != symbolMap.end())
+		{
+			currentName = originalName + literalCode::AUXILIARY_VARIABLE_SEPARATOR + std::to_string(rand());
+		}
 
+		if (currentName.compare(originalName) != 0)
+		{
+			desiredSymbol->setName(currentName);
+		}
 
+		symbolMap.insert(std::pair<std::string, VariableEntry*>(currentName, desiredSymbol));
 
+		return currentName;
+	}
 
+	bool tryRegisterLabel(int process, int label)
+	{
+		if (labelMap.find(process) == labelMap.end())
+		{
+			labelMap.insert(std::pair<int, std::set<int>>(process, std::set<int>()));
+		}
 
+		if (labelMap[process].find(label) == labelMap[process].end())
+		{
+			labelMap[process].insert(label);
+			return true;
+		}
+
+		return false;
+	}
+
+	bool tryRegisterProcess(int process)
+	{
+		if (std::find(processes.begin(), processes.end(), process) == processes.end())
+		{
+			processes.push_back(process);
+			return true;
+		}
+
+		return false;
+	}
 
 	void carryOutLazyReplacements()
 	{
 		for (std::map<Ast*, std::vector<Ast*>>::iterator iterator = lazyReplacements.begin(); iterator != lazyReplacements.end(); iterator++)
 		{
-			Ast::replaceNode(iterator->second, iterator->first);
+			replaceNode(iterator->second, iterator->first);
 		}
 	}
 	
@@ -167,13 +229,11 @@ namespace config
 	
 	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate)
 	{
-		//return getPredicateVariableTransitiveClosure(indexOf(predicate));
 		std::vector<int> result;
-		int numberOfPredicates = globalPredicates.size();
 
-		if (predicate->name == literalCode::BOOL_TOKEN_NAME && predicate->children.at(0)->name == literalCode::FALSE_TAG_NAME)
+		if (predicate->getName() == literalCode::BOOL_TOKEN_NAME && predicate->getChild(0)->getName() == literalCode::FALSE_TAG_NAME)
 		{
-			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+			for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
 			{
 				result.push_back(ctr);
 			}
@@ -185,9 +245,9 @@ namespace config
 	
 		for (std::string id : relevantIDs)
 		{
-			for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+			for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
 			{
-				if (stringVectorContains(globalPredicates[ctr]->getIDs(), id))
+				if (stringVectorContains(globalPredicates[ctr]->getPredicateAst()->getIDs(), id))
 				{
 					result = intVectorUnion(result, getPredicateVariableTransitiveClosure(ctr));
 						
@@ -206,11 +266,10 @@ namespace config
 		std::vector<std::string> relevantIDs;
 		std::vector<int> relevantIDIndices;
 		std::vector<int> result;
-		int numberOfPredicates = globalPredicates.size();
 	
 		for (Ast* assignment : parallelAssignments)
 		{
-			relevantIDs = assignment->children.at(1)->children.at(1)->getIDs();
+			relevantIDs = assignment->getChild(1)->getChild(1)->getIDs();
 			relevantIDIndices.clear();
 	
 			for (std::string relevantID : relevantIDs)
@@ -220,7 +279,7 @@ namespace config
 	
 			result = intVectorUnion(result, relevantIDIndices);
 				
-			if (result.size() == numberOfPredicates)
+			if (result.size() == globalPredicatesCount)
 			{
 				break;
 			}
@@ -234,11 +293,13 @@ namespace config
 	std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(const std::string &variableName)
 	{
 		std::vector<int> result;
-		int numberOfPredicates = globalPredicates.size();
+		VariableEntry* varSymbol = symbolMap[variableName];
+		std::string usingVariableName = generateAuxiliaryPredicates && varSymbol->getType() == VariableEntry::AUXILIARY ?
+			varSymbol->getGlobalName() : variableName;
 	
-		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+		for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
 		{
-			if (stringVectorContains(globalPredicates[ctr]->getIDs(), variableName))
+			if (stringVectorContains(globalPredicates[ctr]->getPredicateAst()->getIDs(), variableName))
 			{
 				result.push_back(ctr);
 			}
@@ -258,10 +319,21 @@ namespace config
 			std::vector<std::string> currentTempClosure;
 			std::vector<int> handledClosureElements;
 	
-			unhandledClosureElements[index] = globalPredicates[index]->getIDs();
+			unhandledClosureElements[index] = globalPredicates[index]->getPredicateAst()->getIDs();
 	
 			int ctr = 0;
-			for (Ast* globalPredicate : globalPredicates)
+			Ast* currentPredicateAst;
+			for (PredicateData* globalPredicate : globalPredicates)
+			{
+				currentPredicateAst = globalPredicate->getPredicateAst();
+				if (ctr != index)
+				{
+					remainingGlobalPredicateTerms[ctr] = currentPredicateAst->getIDs();
+				}
+
+				ctr++;
+			}
+			/*for (Ast* globalPredicate : globalPredicates)
 			{
 				if (ctr != index)
 				{
@@ -269,7 +341,7 @@ namespace config
 				}
 	
 				ctr++;
-			}
+			}*/
 	
 			while (!unhandledClosureElements.empty())
 			{
@@ -318,7 +390,7 @@ namespace config
 			//std::vector<std::string> falseImplicativeCubeStrings = getImplicativeCubes()->getAllFalseImplyingCubes();
 			std::vector<std::string> falseImplicativeCubeStrings = getAllFalseImplyingCubes();
 
-			std::string falseString = getFalsePredicate()->emitCode();
+			std::string falseString = getFalsePredicate()->getCode();
 			std::vector<Ast*> falseImplicativeCubes;
 
 			for (std::string falseImplicativeCubeString : falseImplicativeCubeStrings)
@@ -380,8 +452,6 @@ namespace config
 
 		while (!pending.empty())
 		{
-			//std::cout << "|pending| = " << pending.size() << "\t\t\t\t\t \r";
-
 			currentCube = getImplicativeCube(pending[0]);
 			currentImplication = currentCube->getPredicateImplication(predicate, relevantIndices);
 
@@ -393,11 +463,6 @@ namespace config
 			{
 				currentCanonicalSupersetRepresentations = currentCube->getCanonicalSupersetStringRepresentations(relevantIndices);
 
-				/*for (std::string currentCanonicalSupersetRepresentation : currentCanonicalSupersetRepresentations)
-				{
-					std::cout << "\t" << currentCanonicalSupersetRepresentation << "\n";
-				}*/
-
 				pending.insert(pending.end(), currentCanonicalSupersetRepresentations.begin(),
 					currentCanonicalSupersetRepresentations.end());
 			}
@@ -406,8 +471,6 @@ namespace config
 		}
 
 		return result;
-
-		//return implicativeCubesPerLevel[0][0]->getMinimalImplyingCubes(predicate, relevantIndices);
 	}
 
 	std::vector<std::string> getAllFalseImplyingCubes()
@@ -447,8 +510,6 @@ namespace config
 		}
 
 		return allFalseImplyingCubes;
-
-		//return implicativeCubesPerLevel[0][0]->getAllFalseImplyingCubes();
 	}
 
 	CubeTreeNode* getImplicativeCube(const std::string &stringRepresentation)
@@ -462,7 +523,7 @@ namespace config
 		return implicativeCubes.at(stringRepresentation);
 	}
 
-	std::pair<Ast*, Ast*> getPredicateAstRepresentationPair(Ast* predicate)
+	/*std::pair<Ast*, Ast*> getPredicateAstRepresentationPair(Ast* predicate)
 	{
 		if (predicateAstRepresentations.find(predicate->getCode()) == predicateAstRepresentations.end())
 		{
@@ -470,36 +531,14 @@ namespace config
 		}
 	}
 	
-	Ast* getPredicateTemporaryAstRepresentation(Ast* predicate);
+	Ast* getPredicateTemporaryAstRepresentation(Ast* predicate)
 	{
 
 	}
 	
-	Ast* getPredicateBooleanAstRepresentation(Ast* predicate);
+	Ast* getPredicateBooleanAstRepresentation(Ast* predicate)
 	{
 
-	}
-
-	/*void initializeImplicativeCubes()
-	{
-		new CubeTreeNode(globalCubeSizeLimit);
-	}
-
-	void registerImplicativeCube(CubeTreeNode* cube)
-	{
-		std::string cubeStringRepresentation = cube->getStringRepresentation();
-
-		if (implicativeCubes.find(cubeStringRepresentation) == implicativeCubes.end())
-		{
-			implicativeCubes.insert(std::pair<std::string, CubeTreeNode*>(cubeStringRepresentation, cube));
-		}
-
-		int cubeVarCount = cube->getVarCount();
-
-		if (implicativeCubesPerLevel.find(cubeVarCount) == implicativeCubesPerLevel.end())
-		{
-			implicativeCubesPerLevel[cubeVarCount].push_back(cube);
-		}
 	}*/
 
 /* String operations */
@@ -595,13 +634,72 @@ namespace config
 		return result;
 	}
 
+/* Ast operations */
+	void prepareNodeForLazyReplacement(Ast* replacement, Ast* replacedNode)
+	{
+		if (lazyReplacements.find(replacedNode) == lazyReplacements.end())
+		{
+			std::vector<Ast*> replacementVector;
+			replacementVector.push_back(replacement);
+
+			lazyReplacements.insert(std::pair<Ast*, std::vector<Ast*>>(replacedNode, replacementVector));
+		}
+		else
+		{
+			throwCriticalError("Node \"" + replacedNode->getCode() + "\" is already scheduled for replacement.");
+		}
+	}
+
+	void prepareNodeForLazyReplacement(const std::vector<Ast*> &replacement, Ast* replacedNode)
+	{
+		if (lazyReplacements.find(replacedNode) == lazyReplacements.end())
+		{
+			lazyReplacements.insert(std::pair<Ast*, std::vector<Ast*>>(replacedNode, replacement));
+		}
+		else
+		{
+			throwCriticalError("Node \"" + replacedNode->getCode() + "\" is already scheduled for replacement.");
+		}
+	}
+
+	void replaceNode(Ast* replacement, Ast* replacedNode)
+	{
+		Ast* parent = replacedNode->getParent();
+		int index = replacedNode->getIndexAsChild();
+
+		parent->replaceChild(replacement, index);
+	}
+
+	void replaceNode(const std::vector<Ast*> &replacement, Ast* replacedNode)
+	{
+		Ast* parent = replacedNode->getParent();
+		int index = replacedNode->getIndexAsChild();
+
+		parent->replaceChild(replacement, index);
+	}
+
+	Ast* getWeakestLiberalPrecondition(Ast* assignment, Ast* predicate)
+	{
+		std::pair<std::string, std::string> key = std::pair<std::string, std::string>(assignment->getCode(), predicate->getCode());
+
+		if (weakestLiberalPreconditions.find(key) == weakestLiberalPreconditions.end())
+		{
+			weakestLiberalPreconditions.insert(
+					std::pair<std::pair<std::string, std::string>, Ast*>(
+						key, Ast::newWeakestLiberalPrecondition(assignment, predicate)
+					)
+				);
+		}
+
+		return weakestLiberalPreconditions[key];
+	}
+
 /* Initializations */
 	void initializeAuxiliaryVariables()
 	{
-		int globalPredicateCount = globalPredicates.size();
 		std::string currentVariableName;
 	
-		for (int ctr = 0; ctr < globalPredicateCount; ctr++)
+		for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
 		{
 			srand(time(NULL));
 			currentVariableName = "B" + std::to_string(ctr);
@@ -628,37 +726,55 @@ namespace config
 
 	void initializeAuxiliaryPredicates()
 	{
-		std::vector<Ast*> newPredicates;
-		int currentMaximumBufferSize;
-		Ast* currentCounter;
 		Ast* currentNewPredicate;
-		Ast* KAst = Ast::newINT(K);
-		Ast* nilAst = Ast::newINT(0);
+		Ast* currentPredicateAst;
+		std::vector<PredicateData*> newPredicates;
+		int currentMaximumBufferSize;
+		std::string currentCounterName;
+		std::string currentFirstPointerName;
+		std::vector<std::string> currentBufferVariables;
 
 		// for each x
-		for (std::map<std::string, GlobalVariable*>::iterator globalVariableIterator = globalVariables.begin();
-			globalVariableIterator != globalVariables.end(); ++globalVariableIterator)
+		for (std::pair<std::string, VariableEntry*> symbol : symbolMap)
 		{
-			// for each t
-			for (int processNumber : processes)
+			if (symbol.second->getType() == VariableEntry::GLOBAL)
 			{
-				currentCounter = Ast::newID(globalVariableIterator->second->auxiliaryCounterVariableNames[processNumber]);
-				currentMaximumBufferSize = globalVariableIterator->second->getMaximumBufferSize(processNumber);
-
-				newPredicates.push_back(Ast::newBinaryOp(currentCounter, KAst, literalCode::LESS_EQUALS));
-				newPredicates.push_back(Ast::newBinaryOp(currentCounter, nilAst, literalCode::GREATER_EQUALS));
-
-				for (int i = 1; i <= currentMaximumBufferSize; i++)
+				// for each t
+				for (int processNumber : processes)
 				{
-					for (Ast* predicate : config::globalPredicates)
+					currentMaximumBufferSize = symbol.second->getMaximumBufferSize(processNumber);
+					currentCounterName = symbol.second->getAuxiliaryCounterName(processNumber);
+					currentFirstPointerName = symbol.second->getAuxiliaryFirstPointerName(processNumber);
+					currentBufferVariables = symbol.second->getAuxiliaryBufferNames(processNumber);
+
+					newPredicates.push_back(new PredicateData(Ast::newBinaryOp(Ast::newID(currentCounterName), Ast::newINT(K), literalCode::LESS_EQUALS)));
+					newPredicates.push_back(new PredicateData(Ast::newBinaryOp(Ast::newID(currentCounterName), Ast::newINT(0), literalCode::GREATER_EQUALS)));
+					newPredicates.push_back(new PredicateData(Ast::newBinaryOp(Ast::newID(currentFirstPointerName), Ast::newINT(K), literalCode::LESS_EQUALS)));
+					newPredicates.push_back(new PredicateData(Ast::newBinaryOp(Ast::newID(currentFirstPointerName), Ast::newINT(0), literalCode::GREATER_EQUALS)));
+					newPredicates.push_back(new PredicateData(Ast::newBinaryOp(Ast::newID(currentFirstPointerName), Ast::newID(currentCounterName), literalCode::LESS_EQUALS)));
+
+					for (int i = 1; i <= currentMaximumBufferSize; i++)
 					{
-						if (stringVectorContains(predicate->getIDs(), globalVariableIterator->first))
+						for (PredicateData* globalPredicate : config::globalPredicates)
 						{
-							currentNewPredicate = predicate->clone();
-							currentNewPredicate->cascadingReplaceIDNames(globalVariableIterator->first,
-								globalVariableIterator->second->auxiliaryWriteBufferVariableNames[std::pair<int, int>(processNumber, i)]);
-							newPredicates.push_back(currentNewPredicate);
+							currentPredicateAst = globalPredicate->getPredicateAst();
+
+							if (stringVectorContains(currentPredicateAst->getIDs(), symbol.first))
+							{
+								currentNewPredicate = currentPredicateAst->clone();
+								currentNewPredicate->topDownCascadingReplaceIDNames(symbol.first, currentBufferVariables[i - 1]);
+								newPredicates.push_back(new PredicateData(currentNewPredicate));
+							}
 						}
+						/*for (Ast* predicate : config::globalPredicates)
+						{
+							if (stringVectorContains(predicate->getIDs(), symbol.first))
+							{
+								currentNewPredicate = predicate->clone();
+								currentNewPredicate->topDownCascadingReplaceIDNames(symbol.first, currentBufferVariables[i - 1]);
+								newPredicates.push_back(currentNewPredicate);
+							}
+						}*/
 					}
 				}
 			}
@@ -698,46 +814,29 @@ namespace config
 		{
 			return false;
 		}
-
-		/*z3::context c;
-	
-		std::cout << "\tCube: " + Ast::newMultipleOperation(cube, AND)->emitCode() + " -> " + predicate->emitCode() + " returns " +
-			(expressionImpliesPredicate(&c, (Ast::newMultipleOperation(cube, AND))->astToZ3Expression(&c), predicate) ? "TRUE" : "FALSE") + "\n";
-	
-		z3::expr cubeExpression = (Ast::newMultipleOperation(cube, AND))->astToZ3Expression(&c);
-		return expressionImpliesPredicate(&c, cubeExpression, predicate);*/
 	
 		z3::context c;
-	
-		/*std::cout << "\tCube: " + Ast::newMultipleOperation(cube, AND)->emitCode() + " -> " + predicate->emitCode() + " returns " +
-			(expressionImpliesPredicate(&c, (Ast::newMultipleOperation(cube, AND))->astToZ3Expression(&c), predicate) ? "TRUE" : "FALSE") + "\n";*/
-	
-		z3::expr cubeExpression = (Ast::newMultipleOperation(cube, literalCode::AND))->toZ3Expression(&c);
-		//std::cout << "Cube " << (Ast::newMultipleOperation(cube, AND))->emitCode() << ":\n";
-		//std::cout << "\t" << cube.size() << " - " << cubeExpression << "\n";
+		z3::expr cubeExpression = (Ast::newMultipleOperation(cube, literalCode::AND))->getZ3Expression(&c);
+
 		return expressionImpliesPredicate(cubeExpression, predicate);
 	}
 
 	bool expressionImpliesPredicate(z3::expr expression, Ast* predicate)
 	{
 		z3::context &c = expression.ctx();
-		z3::expr const & predicateExpression = predicate->toZ3Expression(&c);
+		z3::expr const & predicateExpression = predicate->getZ3Expression(&c);
 		z3::solver s(c);
 		z3::expr implication = impliesDuplicate(expression, predicateExpression);
 		s.add(!implication);
-
-		//std::cout << "\ts = {" << s << "}\n";
 	
 		z3::check_result satisfiability = s.check();
 	
 		if (satisfiability == z3::check_result::unsat)
 		{
-			//std::cout << expression << "\tIMPLIES\t" << predicateExpression << "\n";
 			return true;
 		}
 		else //if (satisfiability == z3::check_result::unknown)
 		{
-			//std::cout << expression << "\DOES NOT IMPLY\t" << predicateExpression << "\n";
 			return false;
 		}
 	}

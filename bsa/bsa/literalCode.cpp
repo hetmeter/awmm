@@ -29,6 +29,8 @@ namespace literalCode
 	const char GREATER_THAN = '>';
 	const char LABEL_SEPARATOR = '.';
 	const char AUXILIARY_VARIABLE_SEPARATOR = '_';
+	const char TEMPORARY_VARIABLE_PREFIX = 'T';
+	const char BOOLEAN_VARIABLE_PREFIX = 'B';
 
 	const std::string EQUALS = "==";
 	const std::string NOT_EQUALS = "!=";
