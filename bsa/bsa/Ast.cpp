@@ -2043,7 +2043,7 @@ using namespace std;
 		{
 			if (!config::tryRegisterGlobalSymbol(ID))
 			{
-				config::throwCriticalError("Couldn't register global symbol \"" + ID + "\"");
+				//config::throwCriticalError("Couldn't register global symbol \"" + ID + "\"");
 			}
 		}
 	}
