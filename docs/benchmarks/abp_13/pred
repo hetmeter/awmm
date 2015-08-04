@@ -1,0 +1,8 @@
+(msg = 0)
+(ack = 0)
+(lSSt = 0)
+(lAck = 0)
+(lMsg = 0)
+(lRSt = 0)
+(lRCnt = lSCnt)
+((lRCnt + 1) = lSCnt)

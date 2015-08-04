@@ -80,14 +80,20 @@ string processContent(string content, vector<token>* lexerTokens, vector<token>*
 	string result = content;
 	string temp;
 
-	cout << "\tApplying lexer tokens...\n";
+	if (!config::evaluationMode)
+	{
+		cout << "\tApplying lexer tokens...\n";
+	}
 
 	for (int ctr = 0; ctr < numberOfLexerTokens; ctr++)	// Apply each lexer token once
 	{
 		result = lexerTokens->at(ctr).applyToString(result);
 	}
 
-	cout << "\tApplying parser tokens...\n";
+	if (!config::evaluationMode)
+	{
+		cout << "\tApplying parser tokens...\n";
+	}
 
 	string oldInputContent = "";
 
@@ -138,7 +144,10 @@ void parse(string lexerPath, string programParserPath, string predicateParserPat
 	string predicateInputContentCopy = predicateInputContent;
 
 	// Processes program
-	cout << "Processing program...\n";
+	if (!config::evaluationMode)
+	{
+		cout << "Processing program...\n";
+	}
 	programInputContent = processContent(programInputContent, &lexerTokens, &programParserTokens);
 
 	// Checks if the program has an error and outputs the error line
@@ -153,7 +162,10 @@ void parse(string lexerPath, string programParserPath, string predicateParserPat
 	}
 
 	// Processes predicates
-	cout << "Processing predicates...\n";
+	if (!config::evaluationMode)
+	{
+		cout << "Processing predicates...\n";
+	}
 	predicateInputContent = processContent(predicateInputContent, &lexerTokens, &predicateParserTokens);
 
 	// Checks if the predicates has an error and outputs the error line

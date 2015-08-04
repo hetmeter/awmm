@@ -1,29 +1,33 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <time.h>
 #include <iostream>
 #include <map>
-#include <set>
 #include <regex>
+#include <set>
+#include <string>
+#include <time.h>
+#include <vector>
 #include <z3++.h>
 
 class Ast;
-class GlobalVariable;
-class VariableEntry;
 class CubeTreeNode;
 class PredicateData;
+class MergeableSetContainer;
+class VariableEntry;
 
 namespace config
 {
 /* Global parameters */
 	extern int K;
 	extern int globalCubeSizeLimit;
-	extern int globalPredicatesCount;
-	//extern std::vector<Ast*> globalPredicates;
-	extern std::vector<PredicateData*> globalPredicates;
+	extern int originalPredicatesCount;
+	extern int totalPredicatesCount;
+	extern std::vector<std::string> originalPredicateCodes;
+	extern std::map<std::string, PredicateData*> predicates;
 	extern bool generateAuxiliaryPredicates;
+	extern bool evaluationMode;
+	extern bool verboseMode;
+	extern int negatedLargestFalseImplicativeDisjunctionSizeThreshold;
 	
 	enum language { PSO, TSO, RMA };
 	extern language currentLanguage;
@@ -33,29 +37,23 @@ namespace config
 	extern std::map<int, std::set<int>> labelMap;
 	extern std::vector<int> processes;
 	extern std::map<std::pair<std::string, std::string>, Ast*> weakestLiberalPreconditions;
+	extern std::map<std::pair<std::pair<int, bool>, std::string>, Ast*> largestImplicativCubeDisjunctions;
 
 	extern std::map<Ast*, std::vector<Ast*>> lazyReplacements;
-	/*extern std::vector<std::string> variableNames;*/
-	/*extern std::vector<std::string> auxiliaryBooleanVariableNames;
-	extern std::vector<std::string> auxiliaryTemporaryVariableNames;*/
-	//extern std::map<std::string, GlobalVariable*> globalVariables;
 	extern int currentAuxiliaryLabel;
-	extern std::map<std::string, Ast*> labelLookupMap;
-	extern std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
-	extern bool falseImplicativeCubesIsInitialized;
+	extern std::map<std::pair<int, int>, Ast*> labelLookupMap;
 	extern Ast* assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes;
 	extern Ast* falsePredicate;
-	extern std::string emptyCubeRepresentation;
 	extern std::map<std::string, CubeTreeNode*> implicativeCubes;
-	extern std::vector<std::string> allFalseImplyingCubes;
-	//extern std::map<std::string, std::pair<Ast*, Ast*>> predicateAstRepresentations;
+	extern std::vector<std::string> allFalseImplyingCubeStringRepresentations;
+	extern MergeableSetContainer* variableTransitiveClosures;
 
 /* Global variable handling */
-	extern PredicateData* getPredicateData(Ast* predicateAst);
+
+	extern PredicateData* getPredicateDataByCode(const std::string &code);
 
 	extern bool tryRegisterGlobalSymbol(const std::string &name);
 	extern bool tryRegisterLocalSymbol(const std::string &name);
-	extern bool tryRegisterAuxiliarySymbol(const std::string &name, const std::string &globalName);
 	extern void generateAllAuxiliarySymbols();
 	extern const std::string forceRegisterSymbol(VariableEntry* desiredSymbol);
 
@@ -65,44 +63,29 @@ namespace config
 
 	extern void carryOutLazyReplacements();
 	extern int getCurrentAuxiliaryLabel();
-	extern int indexOf(const std::string &varName);
-	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate);
-	extern std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(const std::vector<Ast*> &parallelAssignments);
-	extern std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(const std::string &variableName);
-	extern std::vector<int> getPredicateVariableTransitiveClosure(int index);
+	extern std::vector<int> getVariableTransitiveClosureFromOriginalPredicates(std::set<std::string> variables);
+	extern std::vector<std::string> getOriginalPredicateCodesContainingSymbol(const std::string &symbol);
 	extern Ast* getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes();
 	extern Ast* getFalsePredicate();
 	extern std::string getEmptyCubeRepresentation();
-	extern std::vector<std::string> getMinimalImplyingCubes(Ast* predicate, const std::vector<int> &relevantIndices);
-	extern std::vector<std::string> getAllFalseImplyingCubes();
+	extern std::vector<std::string> getMinimalImplyingCubeStringRepresentations(Ast* predicate, const std::vector<int> &relevantIndices);
+	extern std::vector<std::string> getAllFalseImplyingCubeStringRepresentations();
 	extern CubeTreeNode* getImplicativeCube(const std::string &stringRepresentation);
-	/*extern std::pair<Ast*, Ast*> getPredicateAstRepresentationPair(Ast* predicate);
-	extern Ast* getPredicateTemporaryAstRepresentation(Ast* predicate);
-	extern Ast* getPredicateBooleanAstRepresentation(Ast* predicate);*/
-	/*extern void initializeImplicativeCubes();
-	extern void registerImplicativeCube(CubeTreeNode* cube);
-	extern std::vector<int> getRelevantCubeIndices(const std::vector<int> &relevantIndices);
-	extern void reportImplication(const std::string &representation, Ast* predicate);*/
 
 /* String operations */
 	extern std::string addTabs(const std::string &s, int numberOfTabs);
 
 /* Vector operations */
 	extern bool stringVectorContains(const std::vector<std::string> &container, const std::string &element);
-	extern std::vector<int> intVectorUnion(const std::vector<int> &first, const std::vector<int> &second);
-	extern bool intVectorVectorContains(const std::vector<std::vector<int>> &container, const std::vector<int> &element);
-	extern std::vector<std::vector<int>> intSetCartesianProduct(const std::vector<int> &first, const std::vector<int> &second);
-	extern std::vector<std::vector<int>> intSetCartesianProduct(const std::vector<std::vector<int>> &first, const std::vector<int> &second);
 
 /* Ast operations */
-	extern void prepareNodeForLazyReplacement(Ast* replacement, Ast* replacedNode);
 	extern void prepareNodeForLazyReplacement(const std::vector<Ast*> &replacement, Ast* replacedNode);
 	extern void replaceNode(Ast* replacement, Ast* replacedNode);
 	extern void replaceNode(const std::vector<Ast*> &replacement, Ast* replacedNode);
 	extern Ast* getWeakestLiberalPrecondition(Ast* assignment, Ast* predicate);
+	extern Ast* getLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables = true);
 
 /* Initializations */
-	extern void initializeAuxiliaryVariables();
 	extern void initializeAuxiliaryPredicates();
 
 /* Messages */

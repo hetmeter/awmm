@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <string>
 #include <vector>
 #include <z3++.h>
@@ -87,6 +88,7 @@ public:
 	void visitAllProgramPoints();
 	void unfoldIfElses();
 	void replaceNodeWithoutDeletions(Ast* newData);
+	void expandIDNodes(const std::string &bufferIdentifier, int process);
 	std::string toString();
 
 /* Replicators */
@@ -137,6 +139,8 @@ public:
 	void registerIDsAsLocal();
 	void getCostsFromChildren();
 	std::vector<std::string> getIDs();
+	std::set<std::string> getIDset();
+	std::vector<Ast*> fetchIDs();
 	void initializePersistentCosts();
 	void topDownCascadingCopyPersistentBufferSizes(Ast* source);
 	void topDownCascadingAddInitializedCausedCostsToPersistentCosts();
@@ -145,28 +149,9 @@ public:
 	void topDownCascadingUnfoldIfElses();
 	void topDownCascadingPerformPredicateAbstraction();
 	void topDownCascadingReplaceIDNames(const std::string &oldName, const std::string &newName);
+	void topDownCascadingReportBufferSizes(int process = -1);
 	void controlFlowDirectionCascadingPropagateTops();
 	void performBufferSizeAnalysisReplacements();
 	void generateBooleanVariableInitializations();
 	std::vector<Ast*> search(const std::string &soughtName);
 };
-
-
-//public:
-//
-//	std::string shortStringRepresentation;
-//	void updateShortStringRepresentation();
-//
-//	bool equals(Ast* other);
-//
-//	Ast(std::string initialName);
-//
-//	static std::vector<std::vector<Ast*>> allCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit);
-//	static Ast* newLargestImplicativeDisjunctionOfCubes(std::vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate);
-//
-//	static std::vector<std::vector<Ast*>> allNegationPatterns(std::vector<Ast*> idSet);
-//
-//private:
-//
-//	int toLabelCode(std::string processNumber, std::string labelNumber);
-//	int effectiveMaxWriteBufferSize(std::string variableName);

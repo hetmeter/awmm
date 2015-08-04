@@ -88,9 +88,9 @@
     <ClCompile Include="ControlFlowEdge.cpp" />
     <ClCompile Include="ControlFlowVisitor.cpp" />
     <ClCompile Include="CubeTreeNode.cpp" />
-    <ClCompile Include="GlobalVariable.cpp" />
     <ClCompile Include="literalCode.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MergeableSetContainer.cpp" />
     <ClCompile Include="PredicateData.cpp" />
     <ClCompile Include="VariableEntry.cpp" />
   </ItemGroup>
@@ -101,8 +101,8 @@
     <ClInclude Include="ControlFlowEdge.h" />
     <ClInclude Include="ControlFlowVisitor.h" />
     <ClInclude Include="CubeTreeNode.h" />
-    <ClInclude Include="GlobalVariable.h" />
     <ClInclude Include="literalCode.h" />
+    <ClInclude Include="MergeableSetContainer.h" />
     <ClInclude Include="PredicateData.h" />
     <ClInclude Include="VariableEntry.h" />
   </ItemGroup>

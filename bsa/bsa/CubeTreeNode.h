@@ -19,15 +19,11 @@ public:
 	enum Implication { IMPLIES, NOT_IMPLIES, SUPERSET_IMPLIES };
 
 /* Constructors and destructor */
-	CubeTreeNode(int upperLimit);
 	CubeTreeNode(const std::string &stringRepresentation, int upperLimit);
 	~CubeTreeNode();
 
 /* Public fields */
 	Implication getPredicateImplication(Ast* predicate, const std::vector<int> &relevantIndices);
-	void setPredicateImplication(const std::string &predicateCode, Implication predicateImplication);
-	void setPredicateImplication(const std::string &predicateCode, const std::vector<int> &relevantIndices);
-	std::vector<std::string> getSupersetStringRepresentations(const std::vector<int> &relevantIndices);
 	std::vector<std::string> getCanonicalSupersetStringRepresentations(const std::vector<int> &relevantIndices);
 
 private:
@@ -42,7 +38,9 @@ private:
 	std::map<std::vector<int>, std::vector<std::string>> _supersetStringRepresentations;
 	std::map<std::vector<int>, std::vector<std::string>> _canonicalSupersetStringRepresentations;
 
-
 /* Private fields */
+	void setPredicateImplication(const std::string &predicateCode, Implication predicateImplication);
+	void setPredicateImplication(const std::string &predicateCode, const std::vector<int> &relevantIndices);
 	std::vector<Ast*> getAstVectorRepresentation();
+	std::vector<std::string> getSupersetStringRepresentations(const std::vector<int> &relevantIndices);
 };

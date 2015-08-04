@@ -10,6 +10,9 @@ struct token;
 
 namespace config
 {
+	extern bool evaluationMode;
+	const extern std::string EVALUATION_MODE_PARAMETER;
+
 	const extern char DESCRIPTION_RULE_SEPARATOR;
 	const extern std::string WHITESPACES_WITHOUT_SPACE;
 	const extern std::string IDENTIFIER_RULE;

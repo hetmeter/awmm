@@ -32,6 +32,8 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	config::evaluationMode = argc > 2 && config::EVALUATION_MODE_PARAMETER.compare(argv[2]) == 0;
+
 	// Derive the input file paths from the input argument
 	regex fileNameRegex(config::EXTENSION_REGEX);
 	std::smatch stringMatch;

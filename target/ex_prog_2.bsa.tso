@@ -8,22 +8,25 @@ endinit
 
 process 1:
 
-	turn_fst_1 = 0;
-	turn_cnt_1 = 0;
-	flag1_fst_1 = 0;
-	flag1_cnt_1 = 0;
-	flag0_fst_1 = 0;
-	flag0_cnt_1 = 0;
-	flag0_1_1 = 0;
-	flag0_2_1 = 0;
-	flag0_3_1 = 0;
-	flag0_4_1 = 0;
-	flag0_5_1 = 0;
 	
 	/* Replacing "store flag0 = 1;" */
-	1: if (flag0_cnt_1 == 5)
+	1: if (flag0_cnt_1 == 1)
 		abort("overflow");
 	endif;
+	
+	
+	if (flag0_fst_1 == 0)
+		flag0_fst_1 = 1;
+		flag0_1_1 = 1;
+	endif;
+	
+	flag0_cnt_1 = flag0_cnt_1 + 1;
+	
+	if (flag0_cnt_1 == 2)
+		flag0_2_1 = 1;
+	endif;
+	/* Finished replacing "store flag0 = 1;" */
+	
 	
 	2: turn2 = 1;
 	
@@ -31,16 +34,16 @@ process 1:
 	3: if (flag1_cnt_1 == 0)
 		load f1 = flag1;
 	endif;
-	/* Finished replacing "load f1 = flag1;" */
 	
+	/* Finished replacing "load f1 = flag1;" */
 	
 	
 	/* Replacing "load t1 = turn;" */
 	4: if (turn_cnt_1 == 0)
 		load t1 = turn;
 	endif;
-	/* Finished replacing "load t1 = turn;" */
 	
+	/* Finished replacing "load t1 = turn;" */
 	
 	5: if ((t1 != 0) & (f1 != 0))
 		goto 3;
@@ -49,55 +52,83 @@ process 1:
 	6: nop;
 	
 	/* Replacing "store flag0 = 0;" */
-	7: if (flag0_cnt_1 == 5)
+	7: if (flag0_cnt_1 == 1)
 		abort("overflow");
 	endif;
+	
+	
+	if (flag0_fst_1 == 0)
+		flag0_fst_1 = 1;
+		flag0_1_1 = 0;
+	endif;
+	
+	flag0_cnt_1 = flag0_cnt_1 + 1;
+	
+	if (flag0_cnt_1 == 2)
+		flag0_2_1 = 0;
+	endif;
+	/* Finished replacing "store flag0 = 0;" */
+	
 	
 	goto 1;
 
 process 2:
 
-	turn_fst_2 = 0;
-	turn_cnt_2 = 0;
-	turn_1_2 = 0;
-	turn_2_2 = 0;
-	turn_3_2 = 0;
-	turn_4_2 = 0;
-	turn_5_2 = 0;
-	flag1_fst_2 = 0;
-	flag1_cnt_2 = 0;
-	flag1_1_2 = 0;
-	flag1_2_2 = 0;
-	flag1_3_2 = 0;
-	flag1_4_2 = 0;
-	flag1_5_2 = 0;
-	flag0_fst_2 = 0;
-	flag0_cnt_2 = 0;
 	
 	/* Replacing "store flag1 = 1;" */
-	1: if (flag1_cnt_2 == 5)
+	1: if (flag1_cnt_2 == 1)
 		abort("overflow");
 	endif;
+	
+	
+	if (flag1_fst_2 == 0)
+		flag1_fst_2 = 1;
+		flag1_1_2 = 1;
+	endif;
+	
+	flag1_cnt_2 = flag1_cnt_2 + 1;
+	
+	if (flag1_cnt_2 == 2)
+		flag1_2_2 = 1;
+	endif;
+	/* Finished replacing "store flag1 = 1;" */
+	
 	
 	
 	/* Replacing "store turn = 0;" */
-	2: if (turn_cnt_2 == 5)
+	2: if (turn_cnt_2 == 1)
 		abort("overflow");
 	endif;
+	
+	
+	if (turn_fst_2 == 0)
+		turn_fst_2 = 1;
+		turn_1_2 = 0;
+	endif;
+	
+	turn_cnt_2 = turn_cnt_2 + 1;
+	
+	if (turn_cnt_2 == 2)
+		turn_2_2 = 0;
+	endif;
+	/* Finished replacing "store turn = 0;" */
+	
 	
 	
 	/* Replacing "load f2 = flag0;" */
 	3: if (flag0_cnt_2 == 0)
 		load f2 = flag0;
 	endif;
-	/* Finished replacing "load f2 = flag0;" */
 	
+	/* Finished replacing "load f2 = flag0;" */
 	
 	
 	/* Replacing "load t2 = turn;" */
 	4: if (turn_cnt_2 == 0)
 		load t2 = turn;
 	endif;
+	
+	/* Finished replacing "load t2 = turn;" */
 	
 	5: if ((f2 != 0) & (t2 == 0))
 		goto 3;
@@ -106,9 +137,23 @@ process 2:
 	6: nop;
 	
 	/* Replacing "store flag1 = 0;" */
-	7: if (flag1_cnt_2 == 5)
+	7: if (flag1_cnt_2 == 1)
 		abort("overflow");
 	endif;
+	
+	
+	if (flag1_fst_2 == 0)
+		flag1_fst_2 = 1;
+		flag1_1_2 = 0;
+	endif;
+	
+	flag1_cnt_2 = flag1_cnt_2 + 1;
+	
+	if (flag1_cnt_2 == 2)
+		flag1_2_2 = 0;
+	endif;
+	/* Finished replacing "store flag1 = 0;" */
+	
 	
 	goto 1;
 

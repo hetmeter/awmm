@@ -1,0 +1,7 @@
+(h1 = head)
+(h1 < head)
+(h2 = head)
+(tail <= h2)
+(tail < head)
+(tail <= head)
+(tail <= h1)

@@ -8,6 +8,9 @@ Global variables, constants, and methods
 
 namespace config
 {
+	bool evaluationMode = false;
+	const std::string EVALUATION_MODE_PARAMETER = "-e";
+
 	const char DESCRIPTION_RULE_SEPARATOR = '\t';
 	const std::string WHITESPACES_WITHOUT_SPACE = "\t\r\n";
 	const std::string IDENTIFIER_RULE = "[identifier]";

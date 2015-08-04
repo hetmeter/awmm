@@ -6,66 +6,48 @@ Global variables, constants, and methods
 #include "literalCode.h"
 #include "Ast.h"
 #include "CubeTreeNode.h"
-#include "GlobalVariable.h"
 #include "VariableEntry.h"
 #include "PredicateData.h"
-//#include "Cube.h"
+#include "MergeableSetContainer.h"
 
 namespace config
 {
 /* Global parameters */
+
 	int K;
 	int globalCubeSizeLimit;
-	int globalPredicatesCount = 0;
-	std::vector<PredicateData*> globalPredicates;
-	//std::vector<Ast*> globalPredicates;
+	int originalPredicatesCount = 0;
+	int totalPredicatesCount = 0;
+	std::vector<std::string> originalPredicateCodes;
+	std::map<std::string, PredicateData*> predicates;
 	bool generateAuxiliaryPredicates = true;
+	bool evaluationMode = false;
+	bool verboseMode = false;
+	int negatedLargestFalseImplicativeDisjunctionSizeThreshold = 1000;
 
 	language currentLanguage;
 
 /* Global variables */
+
 	std::map<std::string, VariableEntry*> symbolMap;
 	std::map<int, std::set<int>> labelMap;
 	std::vector<int> processes;
 	std::map<std::pair<std::string, std::string>, Ast*> weakestLiberalPreconditions;
+	std::map<std::pair<std::pair<int, bool>, std::string>, Ast*> largestImplicativCubeDisjunctions;
 
 	std::map<Ast*, std::vector<Ast*>> lazyReplacements;
-	std::vector<std::string> variableNames;
-	std::vector<std::string> auxiliaryBooleanVariableNames;
-	std::vector<std::string> auxiliaryTemporaryVariableNames;
-	std::map<std::string, GlobalVariable*> globalVariables;
 	int currentAuxiliaryLabel = -1;
-	std::map<std::string, Ast*> labelLookupMap;
-	std::map<int, std::vector<int>> predicateVariableTransitiveClosures;
-	bool falseImplicativeCubesIsInitialized = false;
+	std::map<std::pair<int, int>, Ast*> labelLookupMap;
 	Ast* assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = nullptr;
 	Ast* falsePredicate = nullptr;
 	std::string emptyCubeRepresentation;
 	std::map<std::string, CubeTreeNode*> implicativeCubes;
-	std::vector<std::string> allFalseImplyingCubes;
-	std::map<std::string, std::pair<Ast*, Ast*>> predicateAstRepresentations;
-	/*std::map<int, std::vector<CubeTreeNode*>> implicativeCubesPerLevel;
-	std::map<std::vector<int>, std::vector<int>> relevantCubeIndices;*/
-	//CubeTreeNode* implicativeCubes = nullptr;
+	std::vector<std::string> allFalseImplyingCubeStringRepresentations;
+	MergeableSetContainer* variableTransitiveClosures;
 
 /* Global variable handling */
-	PredicateData* getPredicateData(Ast* predicateAst)
-	{
-		std::string soughtCode = predicateAst->getCode();
-
-		for (PredicateData* globalPredicate : globalPredicates)
-		{
-			if (globalPredicate->getPredicateCode().compare(soughtCode) == 0)
-			{
-				return globalPredicate;
-			}
-		}
-
-		globalPredicates.push_back(new PredicateData(predicateAst));
-		globalPredicatesCount++;
-		return globalPredicates[globalPredicatesCount - 1];
-	}
-
+	
+	// If there is no symbol registered under the desired name, registers it as global and returns true. Otherwise returns false.
 	bool tryRegisterGlobalSymbol(const std::string &name)
 	{
 		if (symbolMap.find(name) != symbolMap.end())
@@ -78,6 +60,7 @@ namespace config
 		return true;
 	}
 
+	// If there is no symbol registered under the desired name, registers it as local and returns true. Otherwise returns false.
 	bool tryRegisterLocalSymbol(const std::string &name)
 	{
 		if (symbolMap.find(name) != symbolMap.end())
@@ -89,19 +72,8 @@ namespace config
 
 		return true;
 	}
-
-	bool tryRegisterAuxiliarySymbol(const std::string &name, const std::string &globalName)
-	{
-		if (symbolMap.find(name) != symbolMap.end() || symbolMap.find(globalName) == symbolMap.end())
-		{
-			return false;
-		}
-
-		symbolMap.insert(std::pair<std::string, VariableEntry*>(name, new VariableEntry(name, globalName)));
-
-		return true;
-	}
-
+	
+	// Prompts each symbol to generate a counter-, a first pointer-, and K buffer variables per process
 	void generateAllAuxiliarySymbols()
 	{
 		std::vector<std::string> allSymbolNames;
@@ -120,6 +92,7 @@ namespace config
 		}
 	}
 
+	// Registers a symbol with the given name, if unique. Otherwise, registers is with the given name and a random suffix.
 	const std::string forceRegisterSymbol(VariableEntry* desiredSymbol)
 	{
 		std::string originalName = desiredSymbol->getName();
@@ -141,11 +114,13 @@ namespace config
 		return currentName;
 	}
 
+	// If the target label is not registered, registers it and returns true. Otherwise returns false.
 	bool tryRegisterLabel(int process, int label)
 	{
 		if (labelMap.find(process) == labelMap.end())
 		{
-			labelMap.insert(std::pair<int, std::set<int>>(process, std::set<int>()));
+			//labelMap.insert(std::pair<int, std::set<int>>(process, std::set<int>()));
+			labelMap[process] = std::set<int>();
 		}
 
 		if (labelMap[process].find(label) == labelMap[process].end())
@@ -157,6 +132,7 @@ namespace config
 		return false;
 	}
 
+	// If the target process is not registered, registers it and returns true. Otherwise returns false.
 	bool tryRegisterProcess(int process)
 	{
 		if (std::find(processes.begin(), processes.end(), process) == processes.end())
@@ -168,6 +144,7 @@ namespace config
 		return false;
 	}
 
+	// Prompts each entry in the lazy replacements map to carry out the scheduled replacements
 	void carryOutLazyReplacements()
 	{
 		for (std::map<Ast*, std::vector<Ast*>>::iterator iterator = lazyReplacements.begin(); iterator != lazyReplacements.end(); iterator++)
@@ -176,239 +153,173 @@ namespace config
 		}
 	}
 	
+	// Returns the highest non-existing label so far
 	int getCurrentAuxiliaryLabel()
 	{
 		if (currentAuxiliaryLabel == -1)
 		{
-			int maxLabel = -1;
-			int currentLabel = 1;
-	
-			for (std::map<std::string, Ast*>::iterator iterator = labelLookupMap.begin(); iterator != labelLookupMap.end(); iterator++)
+			for (int process : processes)
 			{
-				currentLabel = std::stoi(iterator->first);
-				if (currentLabel > maxLabel)
+				for (int label : labelMap[process])
 				{
-					maxLabel = currentLabel;
+					if (label > currentAuxiliaryLabel)
+					{
+						currentAuxiliaryLabel = label + 1;
+					}
 				}
 			}
-	
-			currentAuxiliaryLabel = currentLabel;
 		}
 	
 		return ++currentAuxiliaryLabel;
 	}
 	
-	int indexOf(const std::string &varName)
+	// Returns the indices of all original predicates that are in the union of the transitive closures of all parameter variables
+	std::vector<int> getVariableTransitiveClosureFromOriginalPredicates(std::set<std::string> variables)
 	{
-		int result = -1;
-	
-		for (std::string auxiliaryBooleanVariableName : auxiliaryBooleanVariableNames)
+		if (variableTransitiveClosures == nullptr)
 		{
-			result++;
-	
-			if (auxiliaryBooleanVariableName.compare(varName) == 0)
-			{
-				return result;
-			}
+			variableTransitiveClosures = new MergeableSetContainer();
 		}
-	
-		result = -1;
-	
-		for (std::string auxiliaryTemporaryVariableName : auxiliaryTemporaryVariableNames)
+
+		std::set<int> resultSet = variableTransitiveClosures->getSet(variables);
+		std::vector<int> resultVector;
+
+		for (std::set<int>::iterator it = resultSet.begin(); it != resultSet.end(); ++it)
 		{
-			result++;
-	
-			if (auxiliaryTemporaryVariableName.compare(varName) == 0)
-			{
-				return result;
-			}
+			resultVector.push_back(*it);
 		}
-	
-		return -1;
+
+		return resultVector;
 	}
-	
-	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(Ast* predicate)
+
+	// Returns the codes of all original predicates that contain the specified symbol
+	std::vector<std::string> getOriginalPredicateCodesContainingSymbol(const std::string &symbol)
 	{
-		std::vector<int> result;
+		std::vector<std::string> result;
+		std::set<std::string> subResult;
 
-		if (predicate->getName() == literalCode::BOOL_TOKEN_NAME && predicate->getChild(0)->getName() == literalCode::FALSE_TAG_NAME)
+		for (std::string originalPredicateCode : originalPredicateCodes)
 		{
-			for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
-			{
-				result.push_back(ctr);
-			}
+			subResult = predicates[originalPredicateCode]->getPredicateIDs();
 
-			return result;
-		}
-	
-		std::vector<std::string> relevantIDs = predicate->getIDs();
-	
-		for (std::string id : relevantIDs)
-		{
-			for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
+			if (subResult.find(symbol) != subResult.end())
 			{
-				if (stringVectorContains(globalPredicates[ctr]->getPredicateAst()->getIDs(), id))
-				{
-					result = intVectorUnion(result, getPredicateVariableTransitiveClosure(ctr));
-						
-					// The closures of two predicates sharing at least one term are equal,
-					// therefore once we've found one relevant predicate, we needn't find another one
-					break;
-				}
+				result.push_back(originalPredicateCode);
 			}
 		}
-	
+
 		return result;
 	}
-	
-	std::vector<int> getRelevantAuxiliaryTemporaryVariableIndices(const std::vector<Ast*> &parallelAssignments)
-	{
-		std::vector<std::string> relevantIDs;
-		std::vector<int> relevantIDIndices;
-		std::vector<int> result;
-	
-		for (Ast* assignment : parallelAssignments)
-		{
-			relevantIDs = assignment->getChild(1)->getChild(1)->getIDs();
-			relevantIDIndices.clear();
-	
-			for (std::string relevantID : relevantIDs)
-			{
-				relevantIDIndices.push_back(indexOf(relevantID));
-			}
-	
-			result = intVectorUnion(result, relevantIDIndices);
-				
-			if (result.size() == globalPredicatesCount)
-			{
-				break;
-			}
-		}
-	
-		std::sort(result.begin(), result.end());
-	
-		return result;
-	}
-	
-	std::vector<int> getRelevantAuxiliaryBooleanVariableIndices(const std::string &variableName)
-	{
-		std::vector<int> result;
-		VariableEntry* varSymbol = symbolMap[variableName];
-		std::string usingVariableName = generateAuxiliaryPredicates && varSymbol->getType() == VariableEntry::AUXILIARY ?
-			varSymbol->getGlobalName() : variableName;
-	
-		for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
-		{
-			if (stringVectorContains(globalPredicates[ctr]->getPredicateAst()->getIDs(), variableName))
-			{
-				result.push_back(ctr);
-			}
-		}
-	
-		return result;
-	}
-	
-	std::vector<int> getPredicateVariableTransitiveClosure(int index)
-	{
-		if (predicateVariableTransitiveClosures.find(index) == predicateVariableTransitiveClosures.end())
-		{
-			std::map<int, std::vector<std::string>> remainingGlobalPredicateTerms;
-			std::map<int, std::vector<std::string>> toBeTransferred;
-			std::map<int, std::vector<std::string>> unhandledClosureElements;
-			int currentClosureElement;
-			std::vector<std::string> currentTempClosure;
-			std::vector<int> handledClosureElements;
-	
-			unhandledClosureElements[index] = globalPredicates[index]->getPredicateAst()->getIDs();
-	
-			int ctr = 0;
-			Ast* currentPredicateAst;
-			for (PredicateData* globalPredicate : globalPredicates)
-			{
-				currentPredicateAst = globalPredicate->getPredicateAst();
-				if (ctr != index)
-				{
-					remainingGlobalPredicateTerms[ctr] = currentPredicateAst->getIDs();
-				}
 
-				ctr++;
-			}
-			/*for (Ast* globalPredicate : globalPredicates)
-			{
-				if (ctr != index)
-				{
-					remainingGlobalPredicateTerms[ctr] = globalPredicate->getIDs();
-				}
-	
-				ctr++;
-			}*/
-	
-			while (!unhandledClosureElements.empty())
-			{
-				currentClosureElement = unhandledClosureElements.begin()->first;
-				currentTempClosure = unhandledClosureElements.begin()->second;
-				toBeTransferred.clear();
-	
-				for (std::vector<std::string>::iterator termIterator = currentTempClosure.begin(); termIterator != currentTempClosure.end(); termIterator++)
-				{
-					for (std::map<int, std::vector<std::string>>::iterator predicateIterator = remainingGlobalPredicateTerms.begin(); predicateIterator != remainingGlobalPredicateTerms.end(); predicateIterator++)
-					{
-						if (stringVectorContains(predicateIterator->second, *termIterator))
-						{
-							toBeTransferred[predicateIterator->first] = predicateIterator->second;
-						}
-					}
-				}
-	
-				for (std::map<int, std::vector<std::string>>::iterator transferIterator = toBeTransferred.begin(); transferIterator != toBeTransferred.end(); transferIterator++)
-				{
-					unhandledClosureElements[transferIterator->first] = transferIterator->second;
-					remainingGlobalPredicateTerms.erase(transferIterator->first);
-				}
-	
-				handledClosureElements.push_back(currentClosureElement);
-				unhandledClosureElements.erase(currentClosureElement);
-			}
-	
-			predicateVariableTransitiveClosures[index] = handledClosureElements;
-		}
-	
-		return predicateVariableTransitiveClosures[index];
-	}
-
+	// Returns an ast node containing the assumption of the negation of the disjunction of all computable cubes implying false
 	Ast* getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes()
 	{
 		if (assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes == nullptr)
 		{
-			std::vector<int> allIndices;
-			for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
+			Ast* returnedNop = Ast::newNop();
+
+			if (getAllFalseImplyingCubeStringRepresentations().size() == 0)
 			{
-				allIndices.push_back(ctr);
+				returnedNop->setStartComment(literalCode::ASSUMPTION_MOOT_CAPTION);
+				assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = returnedNop;
+				return returnedNop;
 			}
 
-			//std::vector<std::string> falseImplicativeCubeStrings = getImplicativeCubes()->getMinimalImplyingCubes(getFalsePredicate(), allIndices);
-			//std::vector<std::string> falseImplicativeCubeStrings = getImplicativeCubes()->getAllFalseImplyingCubes();
-			std::vector<std::string> falseImplicativeCubeStrings = getAllFalseImplyingCubes();
+			int cubeCtr = 1;
+			int cubeSubCtr;
+			std::vector<Ast*> resultVector;
+			std::vector<std::pair<std::set<std::string>, Ast*>> originalCubes;
+			Ast* currentCube;
+			std::set<std::string> currentCubeIDs;
+			std::set<std::string> originalIDs;
 
-			std::string falseString = getFalsePredicate()->getCode();
-			std::vector<Ast*> falseImplicativeCubes;
-
-			for (std::string falseImplicativeCubeString : falseImplicativeCubeStrings)
+			for (std::string falseCube : allFalseImplyingCubeStringRepresentations)
 			{
-				falseImplicativeCubes.push_back(Ast::newBooleanVariableCube(falseImplicativeCubeString, false));
+				currentCube = Ast::newBooleanVariableCube(falseCube, false);
+				currentCubeIDs = currentCube->getIDset();
+				originalIDs.insert(currentCubeIDs.begin(), currentCubeIDs.end());
+				originalCubes.push_back(std::pair<std::set<std::string>, Ast*>(currentCubeIDs, currentCube));
+				resultVector.push_back(currentCube);
 			}
 
-			if (falseImplicativeCubes.size() == 0)
+			std::map<std::pair<std::string, int>, std::set<std::string>> replacementMap;
+			std::pair<std::string, int> currentKey;
+			PredicateData* currentPredicate;
+			std::vector<PredicateData*> currentVariants;
+
+			for (std::set<std::string>::iterator it = originalIDs.begin(); it != originalIDs.end(); ++it)
 			{
-				assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = Ast::newAssume(Ast::newTrue());
-			}
-			else
-			{
-				assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes =
-					Ast::newAssume(Ast::newMultipleOperation(falseImplicativeCubes, literalCode::DOUBLE_OR)->negate());
+				currentPredicate = config::symbolMap[*it]->getAssociatedPredicate();
+
+				for (int process : processes)
+				{
+					currentKey = std::pair<std::string, int>(*it, process);
+					currentVariants = currentPredicate->getAllReplacementVariants(process);
+
+					for (PredicateData* variant : currentVariants)
+					{
+						replacementMap[currentKey].insert(variant->getSingleBooleanVariableName());
+					}
+				}
 			}
 
-			std::cout << "\nAssumption of negated largest false implicative disjunction of cubes created.\n\n";
+			std::vector<std::pair<std::set<std::string>, Ast*>> subResult;
+			int subResultCount;
+			std::set<std::string> currentIDset;
+			std::set<std::string> newIDset;
+			std::set<std::string> currentReplacementSet;
+
+			for (int process : processes)
+			{
+				cubeSubCtr = 1;
+				subResult.clear();
+				subResult.insert(subResult.begin(), originalCubes.begin(), originalCubes.end());
+
+				for (std::set<std::string>::iterator it = originalIDs.begin(); it != originalIDs.end(); ++it)
+				{
+					subResultCount = subResult.size();
+
+					for (int ctr = 0; ctr < subResultCount; ++ctr)
+					{
+						currentIDset = subResult[ctr].first;
+
+						if (currentIDset.find(*it) != currentIDset.end())
+						{
+							currentReplacementSet = replacementMap[std::pair<std::string, int>(*it, process)];
+
+							for (std::set<std::string>::iterator subIt = currentReplacementSet.begin();
+								subIt != currentReplacementSet.end(); ++subIt)
+							{
+								currentCube = subResult[ctr].second->clone();
+								currentCube->topDownCascadingReplaceIDNames(*it, *subIt);
+								newIDset = currentCube->getIDset();
+								subResult.push_back(std::pair<std::set<std::string>, Ast*>(newIDset, currentCube));
+
+								if (++cubeSubCtr >= negatedLargestFalseImplicativeDisjunctionSizeThreshold)
+								{
+									returnedNop->setStartComment(literalCode::ASSUMPTION_EXCESSIVE_CAPTION);
+									assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = returnedNop;
+									return returnedNop;
+								}
+							}
+						}
+					}
+				}
+
+				for (std::pair<std::set<std::string>, Ast*> subResultEntry : subResult)
+				{
+					resultVector.push_back(subResultEntry.second);
+
+					if (++cubeCtr >= negatedLargestFalseImplicativeDisjunctionSizeThreshold)
+					{
+						returnedNop->setStartComment(literalCode::ASSUMPTION_EXCESSIVE_CAPTION);
+						assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes = returnedNop;
+						return returnedNop;
+					}
+				}
+			}
+
+			return Ast::newAssume(Ast::newMultipleOperation(resultVector, literalCode::DOUBLE_AND)->negate());
 		}
 
 		return assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes;
@@ -424,17 +335,19 @@ namespace config
 		return falsePredicate;
 	}
 
+	// Returns the string representation of an empty cube, i.e. all terms are omitted
 	std::string getEmptyCubeRepresentation()
 	{
 		if (emptyCubeRepresentation.empty())
 		{
-			emptyCubeRepresentation = std::string(globalPredicatesCount, CubeTreeNode::CUBE_STATE_OMIT);
+			emptyCubeRepresentation = std::string(originalPredicatesCount, CubeTreeNode::CUBE_STATE_OMIT);
 		}
 
 		return emptyCubeRepresentation;
 	}
 
-	std::vector<std::string> getMinimalImplyingCubes(Ast* predicate, const std::vector<int> &relevantIndices)
+	// Returns a vector containing the string representations of all cubes that imply the predicate, without any of the cubes implying eachother
+	std::vector<std::string> getMinimalImplyingCubeStringRepresentations(Ast* predicate, const std::vector<int> &relevantIndices)
 	{
 		std::vector<std::string> result;
 
@@ -473,9 +386,10 @@ namespace config
 		return result;
 	}
 
-	std::vector<std::string> getAllFalseImplyingCubes()
+	// Returns a vector containing the string representations of all cubes that imply false, without any of the cubes implying eachother
+	std::vector<std::string> getAllFalseImplyingCubeStringRepresentations()
 	{
-		if (allFalseImplyingCubes.empty() && globalPredicatesCount > 0)
+		if (allFalseImplyingCubeStringRepresentations.empty() && originalPredicatesCount > 0)
 		{
 			std::vector<std::string> pending;
 			pending.push_back(getEmptyCubeRepresentation());
@@ -485,7 +399,7 @@ namespace config
 			std::vector<std::string> currentCanonicalSupersetRepresentations;
 
 			std::vector<int> relevantIndices;
-			for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
+			for (int ctr = 0; ctr < originalPredicatesCount; ctr++)
 			{
 				relevantIndices.push_back(ctr);
 			}
@@ -497,7 +411,7 @@ namespace config
 
 				if (currentImplication == CubeTreeNode::IMPLIES || currentImplication == CubeTreeNode::SUPERSET_IMPLIES)
 				{
-					allFalseImplyingCubes.push_back(pending[0]);
+					allFalseImplyingCubeStringRepresentations.push_back(pending[0]);
 				}
 
 
@@ -509,9 +423,10 @@ namespace config
 			}
 		}
 
-		return allFalseImplyingCubes;
+		return allFalseImplyingCubeStringRepresentations;
 	}
 
+	// Returns the CubeTreeNode* associated with the given string representation of a cube
 	CubeTreeNode* getImplicativeCube(const std::string &stringRepresentation)
 	{
 		if (implicativeCubes.find(stringRepresentation) == implicativeCubes.end())
@@ -522,26 +437,10 @@ namespace config
 
 		return implicativeCubes.at(stringRepresentation);
 	}
-
-	/*std::pair<Ast*, Ast*> getPredicateAstRepresentationPair(Ast* predicate)
-	{
-		if (predicateAstRepresentations.find(predicate->getCode()) == predicateAstRepresentations.end())
-		{
-
-		}
-	}
 	
-	Ast* getPredicateTemporaryAstRepresentation(Ast* predicate)
-	{
-
-	}
-	
-	Ast* getPredicateBooleanAstRepresentation(Ast* predicate)
-	{
-
-	}*/
-
 /* String operations */
+
+	// Adds a tab character to the beginning of each line
 	std::string addTabs(const std::string &s, int numberOfTabs)
 	{
 		std::regex newLineRegex("\\n");
@@ -555,11 +454,14 @@ namespace config
 	}
 
 /* Vector operations */
+
+	// Returns whether the container has the specified element
 	bool stringVectorContains(const std::vector<std::string> &container, const std::string &element)
 	{
 		return find(container.begin(), container.end(), element) != container.end();
 	}
 	
+	// Performs a set union operation on two vectors
 	std::vector<int> intVectorUnion(const std::vector<int> &first, const std::vector<int> &second)
 	{
 		std::vector<int> result(first);
@@ -577,78 +479,7 @@ namespace config
 		return result;
 	}
 	
-	bool intVectorVectorContains(const std::vector<std::vector<int>> &container, const std::vector<int> &element)
-	{
-		return find(container.begin(), container.end(), element) != container.end();
-	}
-	
-	std::vector<std::vector<int>> intSetCartesianProduct(const std::vector<int> &first, const std::vector<int> &second)
-	{
-		std::vector<std::vector<int>> result;
-		std::vector<int> currentProduct;
-	
-		for (int elementOfFirst : first)
-		{
-			for (int elementOfSecond : second)
-			{
-				if (elementOfFirst != elementOfSecond)
-				{
-					currentProduct = std::vector<int>();
-					currentProduct.push_back(std::min(elementOfFirst, elementOfSecond));
-					currentProduct.push_back(std::max(elementOfFirst, elementOfSecond));
-	
-					if (!intVectorVectorContains(result, currentProduct))
-					{
-						result.push_back(currentProduct);
-					}
-				}
-			}
-		}
-	
-		return result;
-	}
-		
-	std::vector<std::vector<int>> intSetCartesianProduct(const std::vector<std::vector<int>> &first, const std::vector<int> &second)
-	{
-		std::vector<std::vector<int>> result;
-		std::vector<int> currentProduct;
-	
-		for (std::vector<int> elementOfFirst : first)
-		{
-			for (int elementOfSecond : second)
-			{
-				if (find(elementOfFirst.begin(), elementOfFirst.end(), elementOfSecond) == elementOfFirst.end())
-				{
-					currentProduct = std::vector<int>(elementOfFirst);
-					currentProduct.push_back(elementOfSecond);
-					std::sort(currentProduct.begin(), currentProduct.end());
-	
-					if (!intVectorVectorContains(result, currentProduct))
-					{
-						result.push_back(currentProduct);
-					}
-				}
-			}
-		}
-	
-		return result;
-	}
-
 /* Ast operations */
-	void prepareNodeForLazyReplacement(Ast* replacement, Ast* replacedNode)
-	{
-		if (lazyReplacements.find(replacedNode) == lazyReplacements.end())
-		{
-			std::vector<Ast*> replacementVector;
-			replacementVector.push_back(replacement);
-
-			lazyReplacements.insert(std::pair<Ast*, std::vector<Ast*>>(replacedNode, replacementVector));
-		}
-		else
-		{
-			throwCriticalError("Node \"" + replacedNode->getCode() + "\" is already scheduled for replacement.");
-		}
-	}
 
 	void prepareNodeForLazyReplacement(const std::vector<Ast*> &replacement, Ast* replacedNode)
 	{
@@ -694,93 +525,69 @@ namespace config
 		return weakestLiberalPreconditions[key];
 	}
 
-/* Initializations */
-	void initializeAuxiliaryVariables()
+	Ast* getLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables)
 	{
-		std::string currentVariableName;
-	
-		for (int ctr = 0; ctr < globalPredicatesCount; ctr++)
-		{
-			srand(time(NULL));
-			currentVariableName = "B" + std::to_string(ctr);
-	
-			while (stringVectorContains(variableNames, currentVariableName))
-			{
-				currentVariableName = "B" + std::to_string(ctr) + "_" + std::to_string(rand());
-			}
-	
-			auxiliaryBooleanVariableNames.push_back(currentVariableName);
-			variableNames.push_back(currentVariableName);
-	
-			currentVariableName = "T" + std::to_string(ctr);
-	
-			while (stringVectorContains(variableNames, currentVariableName))
-			{
-				currentVariableName = "T" + std::to_string(ctr) + "_" + std::to_string(rand());
-			}
-	
-			auxiliaryTemporaryVariableNames.push_back(currentVariableName);
-			variableNames.push_back(currentVariableName);
-		}
-	}
+		std::string predicateCode = predicate->getCode();
+		std::pair<std::pair<int, bool>, std::string> key = std::pair<std::pair<int, bool>, std::string>(
+			std::pair<int, bool>(cubeSizeUpperLimit, useTemporaryVariables), predicateCode);
 
-	void initializeAuxiliaryPredicates()
-	{
-		Ast* currentNewPredicate;
-		Ast* currentPredicateAst;
-		std::vector<PredicateData*> newPredicates;
-		int currentMaximumBufferSize;
-		std::string currentCounterName;
-		std::string currentFirstPointerName;
-		std::vector<std::string> currentBufferVariables;
-
-		// for each x
-		for (std::pair<std::string, VariableEntry*> symbol : symbolMap)
+		if (largestImplicativCubeDisjunctions.find(key) == largestImplicativCubeDisjunctions.end())
 		{
-			if (symbol.second->getType() == VariableEntry::GLOBAL)
+			std::pair<std::pair<int, bool>, std::string> alternateKey = std::pair<std::pair<int, bool>, std::string>(
+				std::pair<int, bool>(cubeSizeUpperLimit, !useTemporaryVariables), predicateCode);
+
+			if (largestImplicativCubeDisjunctions.find(alternateKey) == largestImplicativCubeDisjunctions.end())
 			{
-				// for each t
-				for (int processNumber : processes)
+				if (isTautology(predicate))
 				{
-					currentMaximumBufferSize = symbol.second->getMaximumBufferSize(processNumber);
-					currentCounterName = symbol.second->getAuxiliaryCounterName(processNumber);
-					currentFirstPointerName = symbol.second->getAuxiliaryFirstPointerName(processNumber);
-					currentBufferVariables = symbol.second->getAuxiliaryBufferNames(processNumber);
+					largestImplicativCubeDisjunctions[key] = Ast::newTrue();
+				}
+				else if (isTautology(predicate->negate()))
+				{
+					largestImplicativCubeDisjunctions[key] = Ast::newFalse();
+				}
+				else
+				{
+					largestImplicativCubeDisjunctions[key] = Ast::newLargestImplicativeDisjunctionOfCubes(
+						cubeSizeUpperLimit, predicate, useTemporaryVariables);
+				}
+			}
+			else
+			{
+				largestImplicativCubeDisjunctions[key] = largestImplicativCubeDisjunctions[alternateKey]->clone();
+				std::set<std::string> IDset = largestImplicativCubeDisjunctions[key]->getIDset();
 
-					newPredicates.push_back(new PredicateData(Ast::newBinaryOp(Ast::newID(currentCounterName), Ast::newINT(K), literalCode::LESS_EQUALS)));
-					newPredicates.push_back(new PredicateData(Ast::newBinaryOp(Ast::newID(currentCounterName), Ast::newINT(0), literalCode::GREATER_EQUALS)));
-					newPredicates.push_back(new PredicateData(Ast::newBinaryOp(Ast::newID(currentFirstPointerName), Ast::newINT(K), literalCode::LESS_EQUALS)));
-					newPredicates.push_back(new PredicateData(Ast::newBinaryOp(Ast::newID(currentFirstPointerName), Ast::newINT(0), literalCode::GREATER_EQUALS)));
-					newPredicates.push_back(new PredicateData(Ast::newBinaryOp(Ast::newID(currentFirstPointerName), Ast::newID(currentCounterName), literalCode::LESS_EQUALS)));
-
-					for (int i = 1; i <= currentMaximumBufferSize; i++)
-					{
-						for (PredicateData* globalPredicate : config::globalPredicates)
-						{
-							currentPredicateAst = globalPredicate->getPredicateAst();
-
-							if (stringVectorContains(currentPredicateAst->getIDs(), symbol.first))
-							{
-								currentNewPredicate = currentPredicateAst->clone();
-								currentNewPredicate->topDownCascadingReplaceIDNames(symbol.first, currentBufferVariables[i - 1]);
-								newPredicates.push_back(new PredicateData(currentNewPredicate));
-							}
-						}
-						/*for (Ast* predicate : config::globalPredicates)
-						{
-							if (stringVectorContains(predicate->getIDs(), symbol.first))
-							{
-								currentNewPredicate = predicate->clone();
-								currentNewPredicate->topDownCascadingReplaceIDNames(symbol.first, currentBufferVariables[i - 1]);
-								newPredicates.push_back(currentNewPredicate);
-							}
-						}*/
-					}
+				for (std::set<std::string>::iterator it = IDset.begin(); it != IDset.end(); ++it)
+				{
+					largestImplicativCubeDisjunctions[key]->topDownCascadingReplaceIDNames(*it, useTemporaryVariables ?
+						symbolMap[*it]->getTemporaryVariantName() : symbolMap[*it]->getBooleanVariantName());
 				}
 			}
 		}
 
-		globalPredicates.insert(globalPredicates.end(), newPredicates.begin(), newPredicates.end());
+		return largestImplicativCubeDisjunctions[key];
+	}
+
+/* Initializations */
+
+	void initializeAuxiliaryPredicates()
+	{
+		if (!config::evaluationMode)
+		{
+			std::cout << "Generating auxiliary predicates...\n";
+		}
+
+		std::set<std::string> currentPredicateIDs;
+
+		for (std::string originalPredicateCode : originalPredicateCodes)
+		{
+			currentPredicateIDs = predicates[originalPredicateCode]->getPredicateIDs();
+
+			for (int process : processes)
+			{
+				predicates[originalPredicateCode]->getAllReplacementVariants(process);
+			}
+		}
 	}
 
 /* Messages */
@@ -850,229 +657,3 @@ namespace config
 		return z3::expr(a.ctx(), r);
 	}
 }
-
-
-//
-//
-//
-//
-//
-//
-//	int indexOf(Ast* predicate)
-//	{
-//		int result = -1;
-//
-//		for (Ast* globalPredicate : globalPredicates)
-//		{
-//			result++;
-//
-//			if (predicate->astToString().compare(globalPredicate->astToString()) == 0)
-//			{
-//				break;
-//			}
-//		}
-//
-//		return result;
-//	}
-//
-//
-//
-//	std::string replicateString(std::string s, int n)
-//	{
-//		std::string result = "";
-//
-//		for (int ctr = 0; ctr < n; ctr++)
-//		{
-//			result += s;
-//		}
-//
-//		return result;
-//	}
-//
-//
-//	bool stringVectorIsSubset(std::vector<std::string> possibleSubset, std::vector<std::string> possibleSuperset)
-//	{
-//		for (std::string member : possibleSubset)
-//		{
-//			if (!stringVectorContains(possibleSuperset, member))
-//			{
-//				return false;
-//			}
-//		}
-//
-//		return true;
-//	}
-//
-//
-//	booleanOperator stringToBooleanOperator(std::string operatorString)
-//	{
-//		if (operatorString == EQUALS)
-//		{
-//			return booleanOperator::BOP_EQUALS;
-//		}
-//		else if (operatorString == LESS_THAN)
-//		{
-//			return booleanOperator::BOP_LESS_THAN;
-//		}
-//		else if (operatorString == LESS_EQUALS)
-//		{
-//			return booleanOperator::BOP_LESS_EQUALS;
-//		}
-//		else if (operatorString == std::string(1, GREATER_THAN))
-//		{
-//			return booleanOperator::BOP_GREATER_THAN;
-//		}
-//		else if (operatorString == GREATER_EQUALS)
-//		{
-//			return booleanOperator::BOP_GREATER_EQUALS;
-//		}
-//		else if (operatorString == NOT_EQUALS)
-//		{
-//			return booleanOperator::BOP_NOT_EQUALS;
-//		}
-//		else if (operatorString == NOT)
-//		{
-//			return booleanOperator::BOP_NOT;
-//		}
-//		else if (operatorString == AND)
-//		{
-//			return booleanOperator::BOP_AND;
-//		}
-//		else if (operatorString == OR)
-//		{
-//			return booleanOperator::BOP_OR;
-//		}
-//		else
-//		{
-//			return booleanOperator::BOP_INVALID;
-//		}
-//	}
-//
-//	std::string booleanOperatorToString(booleanOperator boolOp)
-//	{
-//		if (boolOp == booleanOperator::BOP_EQUALS)
-//		{
-//			return EQUALS;
-//		}
-//		else if (boolOp == booleanOperator::BOP_LESS_THAN)
-//		{
-//			return LESS_THAN;
-//		}
-//		else if (boolOp == booleanOperator::BOP_LESS_EQUALS)
-//		{
-//			return LESS_EQUALS;
-//		}
-//		else if (boolOp == booleanOperator::BOP_GREATER_THAN)
-//		{
-//			return std::string(1, GREATER_THAN);
-//		}
-//		else if (boolOp == booleanOperator::BOP_GREATER_EQUALS)
-//		{
-//			return GREATER_EQUALS;
-//		}
-//		else if (boolOp == booleanOperator::BOP_NOT_EQUALS)
-//		{
-//			return NOT_EQUALS;
-//		}
-//		else if (boolOp == booleanOperator::BOP_NOT)
-//		{
-//			return NOT;
-//		}
-//		else if (boolOp == booleanOperator::BOP_AND)
-//		{
-//			return AND;
-//		}
-//		else if (boolOp == booleanOperator::BOP_OR)
-//		{
-//			return OR;
-//		}
-//		else
-//		{
-//			return "INVALID";
-//		}
-//	}
-//
-//	std::vector<std::vector<Ast*>> allSubsetsOfLengthK(std::vector<Ast*> superset, int K)
-//	{
-//		std::vector<std::vector<Ast*>> result;
-//		std::vector<Ast*> subResult;
-//		int superSetCardinality = superset.size();
-//
-//		if (superSetCardinality >= K)
-//		{
-//			std::string currentMask = std::string(K, '0') + std::string(superSetCardinality - K, '1');
-//			//std::cout << currentMask << "\n";
-//
-//			// For debug purposes
-//			int iterCtr = 0;
-//
-//			do {
-//				subResult.clear();
-//
-//				for (int ctr = 0; ctr < superSetCardinality; ctr++)
-//				{
-//					if (currentMask[ctr] == '1')
-//					{
-//						subResult.push_back(superset[ctr]);
-//					}
-//				}
-//
-//				std::cout << iterCtr++ << ": " << currentMask << "\n";
-//
-//				result.push_back(subResult);
-//			} while (std::next_permutation(currentMask.begin(), currentMask.end()));
-//		}
-//
-//		return result;
-//	}
-//
-//	std::vector<std::vector<Ast*>> powerSetOfLimitedCardinality(std::vector<Ast*> superset, int cardinalityLimit)
-//	{
-//		std::vector<std::vector<Ast*>> result;
-//		std::vector<std::vector<Ast*>> subResult;
-//
-//		int minimumLimit = std::min((int)superset.size(), cardinalityLimit);
-//
-//		for (int ctr = 1; ctr <= cardinalityLimit; ctr++)
-//		{
-//			subResult = allSubsetsOfLengthK(superset, ctr);
-//			result.insert(result.end(), subResult.begin(), subResult.end());
-//		}
-//
-//		return result;
-//	}
-//
-//	std::string nextBinaryRepresentation(std::string currentBinaryRepresentation, int length)
-//	{
-//		char** endptr = NULL;
-//		unsigned long long number = strtoull(currentBinaryRepresentation.c_str(), endptr, 2);
-//		std::string result = std::bitset<sizeof(unsigned long long)>(number).to_string();
-//		return result.substr(sizeof(unsigned long long) - length, std::string::npos);
-//	}
-//
-//
-//
-//
-//
-//	std::vector<Ast*> cubeStringRepresentationToAstRef(std::string pool)
-//	{
-//		int numberOfPredicates = globalPredicates.size();
-//		std::vector<Ast*> cubeTerms;
-//		Ast* currentTerm;
-//
-//		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
-//		{
-//			if (pool[ctr] == CUBE_STATE_DECIDED_FALSE)
-//			{
-//				currentTerm = globalPredicates[ctr]->negate();
-//				cubeTerms.push_back(currentTerm);
-//			}
-//			else if (pool[ctr] == CUBE_STATE_DECIDED_TRUE)
-//			{
-//				currentTerm = globalPredicates[ctr]->clone();
-//				cubeTerms.push_back(currentTerm);
-//			}
-//		}
-//
-//		return cubeTerms;
-//	}

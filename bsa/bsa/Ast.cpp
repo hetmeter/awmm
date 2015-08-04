@@ -7,15 +7,13 @@ Cascading operations may go top to bottom or bottom to top in the tree, or down 
 */
 
 #include "Ast.h"
-#include "literalCode.h"
 #include "config.h"
-#include "ControlFlowVisitor.h"
-#include "GlobalVariable.h"
-#include "VariableEntry.h"
 #include "ControlFlowEdge.h"
-#include "PredicateData.h"
-//#include "Cube.h"
+#include "ControlFlowVisitor.h"
 #include "CubeTreeNode.h"
+#include "literalCode.h"
+#include "PredicateData.h"
+#include "VariableEntry.h"
 
 using namespace std;
 
@@ -72,7 +70,8 @@ using namespace std;
 
 			if (_name == literalCode::GOTO_TOKEN_NAME)	// Goto nodes only lead to their corresponding label
 			{
-				newEdge = new ControlFlowEdge(this, config::labelLookupMap[_children[0]->getName()]);
+				newEdge = new ControlFlowEdge(this, config::labelLookupMap[pair<int, int>(getParentProcessNumber(),
+					stoi(_children[0]->getName()))]);
 				outgoingEdges.push_back(newEdge);
 			}
 			else if (_name == literalCode::LABEL_TOKEN_NAME)	// Label nodes only lead to their corresponding statement
@@ -134,11 +133,21 @@ using namespace std;
 	{
 		if (config::currentLanguage == config::language::RMA)
 		{
-			return config::stringVectorContains(literalCode::RMA_PROGRAM_POINT_TOKENS, _name);
+			return _name.compare(literalCode::LABEL_TOKEN_NAME) == 0 || _name.compare(literalCode::GOTO_TOKEN_NAME) == 0 ||
+				_name.compare(literalCode::RMA_GET_TOKEN_NAME) == 0 || _name.compare(literalCode::PSO_TSO_LOAD_TOKEN_NAME) == 0 ||
+				_name.compare(literalCode::IF_ELSE_TOKEN_NAME) == 0 || _name.compare(literalCode::FENCE_TOKEN_NAME) == 0 ||
+				_name.compare(literalCode::RMA_PUT_TOKEN_NAME) == 0 || _name.compare(literalCode::LOCAL_ASSIGN_TOKEN_NAME) == 0 ||
+				_name.compare(literalCode::NOP_TOKEN_NAME) == 0 || _name.compare(literalCode::FLUSH_TOKEN_NAME) == 0 ||
+				_name.compare(literalCode::BEGIN_ATOMIC_TOKEN_NAME) == 0 || _name.compare(literalCode::END_ATOMIC_TOKEN_NAME) == 0;
 		}
 		else
 		{
-			return config::stringVectorContains(literalCode::PSO_TSO_PROGRAM_POINT_TOKENS, _name);
+			return _name.compare(literalCode::LABEL_TOKEN_NAME) == 0 || _name.compare(literalCode::GOTO_TOKEN_NAME) == 0 ||
+				_name.compare(literalCode::PSO_TSO_STORE_TOKEN_NAME) == 0 || _name.compare(literalCode::PSO_TSO_LOAD_TOKEN_NAME) == 0 ||
+				_name.compare(literalCode::IF_ELSE_TOKEN_NAME) == 0 || _name.compare(literalCode::FENCE_TOKEN_NAME) == 0 ||
+				_name.compare(literalCode::NOP_TOKEN_NAME) == 0 || _name.compare(literalCode::FLUSH_TOKEN_NAME) == 0 ||
+				_name.compare(literalCode::LOCAL_ASSIGN_TOKEN_NAME) == 0 || _name.compare(literalCode::BEGIN_ATOMIC_TOKEN_NAME) == 0 ||
+				_name.compare(literalCode::END_ATOMIC_TOKEN_NAME) == 0;
 		}
 	}
 
@@ -151,6 +160,11 @@ using namespace std;
 		}
 		else if (_parent->getName() == literalCode::STATEMENTS_TOKEN_NAME)
 		{
+			/*if (_parent->getParent()->getName().compare(literalCode::IF_ELSE_TOKEN_NAME) == 0)
+			{
+				return _parent->getParent()->tryGetNextSibling();
+			}*/
+
 			return tryGetNextSibling();
 		}
 
@@ -224,10 +238,10 @@ using namespace std;
 				vector<string> auxiliaryBooleanVariableNames;
 				vector<string> auxiliaryTemporaryVariableNames;
 
-				for (PredicateData* globalPredicate : config::globalPredicates)
+				for (map<string, PredicateData*>::iterator it = config::predicates.begin(); it != config::predicates.end(); ++it)
 				{
-					auxiliaryBooleanVariableNames.push_back(globalPredicate->getSingleBooleanVariableName());
-					auxiliaryTemporaryVariableNames.push_back(globalPredicate->getSingleTemporaryVariableName());
+					auxiliaryBooleanVariableNames.push_back(it->second->getSingleBooleanVariableName());
+					auxiliaryTemporaryVariableNames.push_back(it->second->getSingleTemporaryVariableName());
 				}
 
 				Ast* sharedVars = newSharedVariables(auxiliaryBooleanVariableNames);
@@ -247,66 +261,120 @@ using namespace std;
 			else if (_name == literalCode::PSO_TSO_STORE_TOKEN_NAME || _name == literalCode::PSO_TSO_LOAD_TOKEN_NAME
 				|| _name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
 			{
-				cout << "\tPerforming predicate abstraction on: " << getCode() << "\t\t\t \n\n";
-
-				vector<int> relevantPredicateIndices = config::getRelevantAuxiliaryBooleanVariableIndices(_children[0]->
-					getChild(0)->getName());
-				vector<Ast*> replacementStatements;
-
-				replacementStatements.push_back(newLabel(firstLabel, newNop()));
-
-				if (relevantPredicateIndices.size() > 0)
+				if (config::verboseMode)
 				{
-					int numberOfPredicates = config::globalPredicates.size();
-					Ast* positiveWeakestLiberalPrecondition;
-					Ast* negativeWeakestLiberalPrecondition;
-					vector<Ast*> parallelAssignments;
-					vector<string> usedVariables;
-					vector<string> currentIDs;
-
-					for (int ctr : relevantPredicateIndices)
-					{
-						positiveWeakestLiberalPrecondition = config::getWeakestLiberalPrecondition(this,
-							config::globalPredicates[ctr]->getPredicateAst());
-						negativeWeakestLiberalPrecondition = config::getWeakestLiberalPrecondition(this,
-							config::globalPredicates[ctr]->getPredicateAst()->negate());
-
-						parallelAssignments.push_back(
-							newStore(
-									config::globalPredicates[ctr]->getSingleBooleanVariableName(),
-									newAbstractAssignmentFragment(this, config::globalPredicates[ctr]->getPredicateAst())
-								)
-							);
-					}
-
-					relevantPredicateIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(parallelAssignments);
-
-					replacementStatements.push_back(newBeginAtomic());
-
-					for (int ctr : relevantPredicateIndices)
-					{
-						replacementStatements.push_back(
-								newLoad(
-									config::globalPredicates[ctr]->getSingleTemporaryVariableName(),
-									newID(config::globalPredicates[ctr]->getSingleBooleanVariableName())
-								)
-							);
-					}
-
-					replacementStatements.insert(replacementStatements.end(), parallelAssignments.begin(),
-						parallelAssignments.end());
-
-					for (int ctr : relevantPredicateIndices)
-					{
-						replacementStatements.push_back(
-								newLocalAssign(config::globalPredicates[ctr]->getSingleTemporaryVariableName(), newINT(0))
-							);
-					}
-
-					replacementStatements.push_back(
-						config::getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes());
-					replacementStatements.push_back(Ast::newEndAtomic());
+					cout << "\tPerforming predicate abstraction on: " << getCode() << "\t\t\t \n\n";
 				}
+				
+				vector<Ast*> replacementStatements;
+				vector<Ast*> parallelAssignments;
+				vector<string> LHSidentifers = _children[0]->getIDs();
+				int process = getParentProcessNumber();
+
+				if (LHSidentifers.size() != 1)
+				{
+					config::throwCriticalError("Invalid number of left-hand-side identifiers in " + getCode());
+				}
+
+				string LHSidentifier = LHSidentifers[0];
+				string effectiveLHSidentifier;
+				VariableEntry* LHSsymbol = config::symbolMap[LHSidentifier];
+
+				if (LHSsymbol->getType() == VariableEntry::AUXILIARY && LHSsymbol->getAuxiliaryType() == VariableEntry::BUFFER)
+				{
+					effectiveLHSidentifier = LHSsymbol->getGlobalName();
+				}
+				else
+				{
+					effectiveLHSidentifier = LHSidentifier;
+				}
+
+				Ast* effectiveAssignment = newBinaryOp(newID(effectiveLHSidentifier), _children[1]->clone(), literalCode::EQUALS);
+				vector<string> phis = config::getOriginalPredicateCodesContainingSymbol(effectiveLHSidentifier);
+				Ast* WP_phi;
+				Ast* WP_notPhi;
+				vector<PredicateData*> currentParallelLHS;
+				PredicateData* currentPhiPredicate;
+				PredicateData* originalReplacement;
+				Ast* chooseExpression;
+
+				for (string phi : phis)
+				{
+					currentParallelLHS.clear();
+					currentPhiPredicate = config::predicates[phi];
+
+					if (getCode() == "y2_2_2 = 0;")
+					{
+						int d = 5;
+						d++;
+					}
+
+					WP_phi = config::getWeakestLiberalPrecondition(effectiveAssignment, currentPhiPredicate->getPredicateAst());
+					WP_notPhi = config::getWeakestLiberalPrecondition(effectiveAssignment, currentPhiPredicate->getPredicateAst()->negate());
+
+					if (LHSidentifier.compare(effectiveLHSidentifier) == 0)
+					{
+						currentParallelLHS.push_back(currentPhiPredicate);
+					}
+					else
+					{
+						originalReplacement = config::predicates[currentPhiPredicate->getXReplacedByYCode(effectiveLHSidentifier, LHSidentifier)];
+						currentParallelLHS = originalReplacement->getAllReplacementVariants(process);
+						currentParallelLHS.insert(currentParallelLHS.begin(), originalReplacement);
+					}
+
+					chooseExpression = newChoose(
+							config::getLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, WP_phi),
+							config::getLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, WP_notPhi)
+						);
+
+					if (getCode() == "y2_2_2 = 0;")
+					{
+						int c = 5;
+						string s = chooseExpression->getCode();
+						c++;
+					}
+
+					if (LHSidentifier.compare(effectiveLHSidentifier) != 0)
+					{
+						chooseExpression->expandIDNodes(LHSidentifier, process);
+					}
+
+					for (PredicateData* LHS : currentParallelLHS)
+					{
+						parallelAssignments.push_back(newStore(LHS->getSingleBooleanVariableName(), chooseExpression));
+					}
+				}
+
+				replacementStatements.push_back(newBeginAtomic());
+
+				string currentBooleanVariableName;
+
+				for (Ast* parallelAssignment : parallelAssignments)
+				{
+					currentBooleanVariableName = parallelAssignment->getChild(0)->getChild(0)->getName();
+					replacementStatements.push_back(
+							newLoad(
+								config::symbolMap[currentBooleanVariableName]->getTemporaryVariantName(),
+								newID(currentBooleanVariableName)
+							)
+						);
+				}
+
+				replacementStatements.insert(replacementStatements.end(), parallelAssignments.begin(),
+					parallelAssignments.end());
+
+				for (Ast* parallelAssignment : parallelAssignments)
+				{
+					replacementStatements.push_back(
+							newLocalAssign(config::symbolMap[parallelAssignment->getChild(0)->getChild(0)->getName()]->getTemporaryVariantName(),
+							newINT(0))
+						);
+				}
+
+				replacementStatements.push_back(
+					config::getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes());
+				replacementStatements.push_back(Ast::newEndAtomic());
 
 				replacementStatements[0]->setStartComment(literalCode::PREDICATE_ABSTRACTION_COMMENT_PREFIX + getCode());
 
@@ -365,7 +433,7 @@ using namespace std;
 				for (Ast* nonPcAssertion : nonPcAssertions)
 				{
 					currentReplacement.clear();
-					currentReplacement.push_back(newLargestImplicativeDisjunctionOfCubes(
+					currentReplacement.push_back(config::getLargestImplicativeDisjunctionOfCubes(
 						config::globalCubeSizeLimit, nonPcAssertion, false));
 					config::prepareNodeForLazyReplacement(currentReplacement, nonPcAssertion);
 				}
@@ -974,9 +1042,7 @@ using namespace std;
 
 	void Ast::deleteChild(int index)
 	{
-		//Ast* toBeDeleted = _children[index];
 		_children.erase(_children.begin() + index);
-		//delete toBeDeleted;
 
 		invalidateCode();
 
@@ -985,11 +1051,7 @@ using namespace std;
 
 	void Ast::replaceChild(Ast* newChild, int index)
 	{
-		//cout << "\tReplacing \"" << getCode() << "\" by \"" << newChild->getCode() << "\"\n";
-
-		//Ast* toBeDeleted = _children[index];
 		_children.erase(_children.begin() + index);
-		//delete toBeDeleted;
 
 		newChild->setParent(this);
 		_children.insert(_children.begin() + index, newChild);
@@ -1001,16 +1063,7 @@ using namespace std;
 
 	void Ast::replaceChild(const vector<Ast*> &newChildren, int index)
 	{
-		/*cout << "\tReplacing \"" << getCode() << "\" by \"";
-		for (Ast* newChild : newChildren)
-		{
-			cout << "\n\t" << newChild->getCode();
-		}
-		cout << "\"\n";*/
-
-		//Ast* toBeDeleted = _children[index];
 		_children.erase(_children.begin() + index);
-		//delete toBeDeleted;
 
 		for (Ast* newChild : newChildren)
 		{
@@ -1319,6 +1372,124 @@ using namespace std;
 		invalidateCode();
 	}
 
+	void Ast::expandIDNodes(const std::string &bufferIdentifier, int process)
+	{
+		set<string> IDs;
+		set<string> currentIDs;
+		VariableEntry* currentVariable;
+		vector<PredicateData*> currentPredicates;
+		int currentPredicatesCount;
+		int currentBufferSize;
+		map<string, vector<string>> replacementsMap;
+		vector<string> IDvector = getIDs();
+		vector<string> currentBufferVariableNames;
+		PredicateData* currentPredicate;
+		string globalIdentifier = config::symbolMap[bufferIdentifier]->getGlobalName();
+		bool usingTemporaryVariables = false;
+
+		for (string ID : IDvector)
+		{
+			IDs.insert(ID);
+		}
+
+		if (IDvector.size() > 0)
+		{
+			usingTemporaryVariables = IDvector[0][0] == literalCode::TEMPORARY_VARIABLE_PREFIX;
+		}
+
+		for (set<string>::iterator it = IDs.begin(); it != IDs.end(); ++it)
+		{
+			currentPredicate = config::symbolMap[*it]->getAssociatedPredicate();
+			currentIDs = currentPredicate->getPredicateIDs();
+
+			if (currentIDs.find(globalIdentifier) != currentIDs.end())
+			{
+				currentPredicates.clear();
+
+				currentPredicate = config::predicates[currentPredicate->getXReplacedByYCode(globalIdentifier, bufferIdentifier)];
+
+				currentPredicates.push_back(currentPredicate);
+
+				currentIDs = currentPredicate->getPredicateIDs();
+				currentIDs.erase(bufferIdentifier);
+
+				for (set<string>::iterator subIt = currentIDs.begin(); subIt != currentIDs.end(); ++subIt)
+				{
+					currentVariable = config::symbolMap[*subIt];
+
+					if (currentVariable->getType() == VariableEntry::GLOBAL)
+					{
+						currentBufferSize = currentVariable->getMaximumBufferSize(process);
+						currentBufferVariableNames = currentVariable->getAuxiliaryBufferNames(process);
+						currentBufferVariableNames.erase(currentBufferVariableNames.begin() + currentBufferSize, currentBufferVariableNames.end());
+						currentPredicatesCount = currentPredicates.size();
+
+						for (int ctr = 0; ctr < currentPredicatesCount; ++ctr)
+						{
+							for (string bufferVariableName : currentBufferVariableNames)
+							{
+								currentPredicates.push_back(config::predicates[currentPredicates[ctr]->getXReplacedByYCode(*subIt, bufferVariableName)]);
+							}
+						}
+					}
+				}
+
+				for (PredicateData* predicate : currentPredicates)
+				{
+					replacementsMap[*it].push_back(usingTemporaryVariables ? predicate->getSingleTemporaryVariableName() :
+						predicate->getSingleBooleanVariableName());
+				}
+			}
+		}
+
+		vector<Ast*> toBeChecked;
+		vector<Ast*> currentChildren;
+		vector<Ast*> currentReplacements;
+		toBeChecked.insert(toBeChecked.begin(), _children.begin(), _children.end());
+		Ast* currentlyChecked;
+		string currentIdentifier;
+		string currentOperator;
+
+		while (!toBeChecked.empty())
+		{
+			currentlyChecked = toBeChecked[0];
+
+			if (currentlyChecked->getName() == literalCode::EQUALS || currentlyChecked->getName() == literalCode::NOT_EQUALS)
+			{
+				currentIdentifier = currentlyChecked->getChild(0)->getChild(0)->getName();
+
+				if (replacementsMap.find(currentIdentifier) != replacementsMap.end())
+				{
+					IDvector = replacementsMap[currentIdentifier];
+
+					if (IDvector.size() == 1)
+					{
+						currentlyChecked->getChild(0)->getChild(0)->setName(IDvector[0]);
+					}
+					else
+					{
+						currentOperator = currentlyChecked->getName();
+						
+						currentReplacements.clear();
+						for (string ID : IDvector)
+						{
+							currentReplacements.push_back(newBinaryOp(newID(ID), newINT(0), currentOperator));
+						}
+
+						currentlyChecked->getParent()->replaceChild(currentReplacements, currentlyChecked->getIndexAsChild());
+					}
+				}
+			}
+			else
+			{
+				currentChildren = currentlyChecked->getChildren();
+				toBeChecked.insert(toBeChecked.end(), currentChildren.begin(), currentChildren.end());
+			}
+
+			toBeChecked.erase(toBeChecked.begin());
+		}
+	}
+
 	// Returns a string representation of the node and its children
 	string Ast::toString()
 	{
@@ -1339,15 +1510,6 @@ using namespace std;
 		{
 			result += "\tpersistentReadCost = (" + bsm::toString(&persistentReadCost) + ")";
 			result += "\tpersistentWriteCost = (" + bsm::toString(&persistentWriteCost) + ")";
-		
-			/*result += "\t";
-			string startName, endName;
-			for (ControlFlowEdge* edge : outgoingEdges)
-			{
-				startName = edge->start->name == config::LABEL_TOKEN_NAME ? edge->start->name + " " + edge->start->children.at(0)->name : edge->start->name;
-				endName = edge->end->name == config::LABEL_TOKEN_NAME ? edge->end->name + " " + edge->end->children.at(0)->name : edge->end->name;
-				result += "(" + startName + ", " + endName + ") ";
-			}*/
 		}
 		
 		int childrenCount = _children.size();
@@ -1729,34 +1891,21 @@ using namespace std;
 
 	Ast* Ast::newBooleanVariableCube(const string &definition, bool useTemporaryVariables)
 	{
-		int numberOfPredicates = config::globalPredicates.size();
 		vector<Ast*> cubeTerms;
-		string currentVariableName;
+		PredicateData* currentPredicate;
+		bool currentDecision;
+		int originalPredicatesCount = config::originalPredicateCodes.size();
 
-		for (int ctr = 0; ctr < numberOfPredicates; ctr++)
+		for (int ctr = 0; ctr < originalPredicatesCount; ctr++)
 		{
-			currentVariableName = useTemporaryVariables ? config::globalPredicates[ctr]->getSingleTemporaryVariableName() :
-				config::globalPredicates[ctr]->getSingleBooleanVariableName();
+			if (definition[ctr] == CubeTreeNode::CUBE_STATE_DECIDED_FALSE ||
+				definition[ctr] == CubeTreeNode::CUBE_STATE_DECIDED_TRUE)
+			{
+				currentDecision = definition[ctr] == CubeTreeNode::CUBE_STATE_DECIDED_TRUE;
+				currentPredicate = config::predicates[config::originalPredicateCodes[ctr]];
 
-			if (definition[ctr] == CubeTreeNode::CUBE_STATE_DECIDED_FALSE)
-			{
-				cubeTerms.push_back(
-						newBinaryOp(
-							newID(currentVariableName),
-							newINT(0),
-							literalCode::EQUALS
-						)
-					);
-			}
-			else if (definition[ctr] == CubeTreeNode::CUBE_STATE_DECIDED_TRUE)
-			{
-				cubeTerms.push_back(
-						newBinaryOp(
-							newID(currentVariableName),
-							newINT(0),
-							literalCode::NOT_EQUALS
-						)
-					);
+				cubeTerms.push_back(useTemporaryVariables ? currentPredicate->getTemporaryRHS(currentDecision) :
+					currentPredicate->getBooleanRHS(currentDecision));
 			}
 		}
 
@@ -1765,12 +1914,32 @@ using namespace std;
 
 	Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables)
 	{
-		cout << "\t\tComputing F(" << predicate->getCode() << ")\t\t\t \n";
-		int numberOfPredicates = config::globalPredicates.size();
-		vector<int> relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
+		time_t startedAt;
+		time_t finishedAt;
+		double elapsedSeconds;
+
+		if (config::verboseMode)
+		{
+			startedAt = time(0);
+		}
 
 		vector<Ast*> implicativeCubes;
-		vector<string> implicativeCubeStringRepresentations = config::getMinimalImplyingCubes(predicate, relevantIndices);
+		set<string> predicateIDs;
+
+		if (config::verboseMode)
+		{
+			cout << "\t\tComputing F(" << predicate->getCode() << ")";
+		}
+
+		vector<string> predicateIDvector = predicate->getIDs();
+
+		for (string id : predicateIDvector)
+		{
+			predicateIDs.insert(id);
+		}
+
+		vector<int> indices = config::getVariableTransitiveClosureFromOriginalPredicates(predicateIDs);
+		vector<string> implicativeCubeStringRepresentations = config::getMinimalImplyingCubeStringRepresentations(predicate, indices);
 
 		for (string implicativeCubeStringRepresentation : implicativeCubeStringRepresentations)
 		{
@@ -1781,12 +1950,33 @@ using namespace std;
 		{
 			if (config::isTautology(predicate))
 			{
+				if (config::verboseMode)
+				{
+					finishedAt = time(0);
+					elapsedSeconds = difftime(finishedAt, startedAt);
+					cout << "\t" << elapsedSeconds << "s\t\t \n";
+				}
+
 				return newTrue();
 			}
 			else
 			{
+				if (config::verboseMode)
+				{
+					finishedAt = time(0);
+					elapsedSeconds = difftime(finishedAt, startedAt);
+					cout << "\t" << elapsedSeconds << "s\t\t \n";
+				}
+
 				return newFalse();
 			}
+		}
+
+		if (config::verboseMode)
+		{
+			finishedAt = time(0);
+			elapsedSeconds = difftime(finishedAt, startedAt);
+			cout << "\t" << elapsedSeconds << "s\t\t \n";
 		}
 
 		return newMultipleOperation(implicativeCubes, literalCode::DOUBLE_OR);
@@ -1794,15 +1984,15 @@ using namespace std;
 
 	Ast* Ast::newReverseLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate)
 	{
-		return newLargestImplicativeDisjunctionOfCubes(cubeSizeUpperLimit, predicate->negate(), false)->negate();
+		return config::getLargestImplicativeDisjunctionOfCubes(cubeSizeUpperLimit, predicate->negate(), false)->negate();
 	}
 
 	Ast* Ast::newAbstractAssignmentFragment(Ast* assignment, Ast* predicate)
 	{
 		return newChoose(
-				newLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit,
+				config::getLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit,
 					config::getWeakestLiberalPrecondition(assignment, predicate)),
-				newLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit,
+				config::getLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit,
 					config::getWeakestLiberalPrecondition(assignment, predicate->negate()))
 			);
 	}
@@ -1818,9 +2008,13 @@ using namespace std;
 		}
 		else
 		{
-			cout << "\t\tComputing WP(" << assignment->getCode() << ", " << predicate->getCode() << ")\t\t\t \n";
+			if (config::verboseMode)
+			{
+				cout << "\t\tComputing WP(" << assignment->getCode() << ", " << predicate->getCode() << ")\t\t\t \n";
+			}
 	
-			if (assignment->getName() == literalCode::PSO_TSO_STORE_TOKEN_NAME ||
+			if (assignment->getName() == literalCode::EQUALS ||
+				assignment->getName() == literalCode::PSO_TSO_STORE_TOKEN_NAME ||
 				assignment->getName() == literalCode::PSO_TSO_LOAD_TOKEN_NAME ||
 				assignment->getName() == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
 			{
@@ -1832,8 +2026,6 @@ using namespace std;
 
 				for (int ctr = 0; ctr < toBeReplacedCount; ctr++)
 				{
-					/*cout << "\t\tconfig::replaceNode(" + rightExpression->clone()->getCode() + ", " +
-						toBeReplaced[ctr]->getParent()->getCode() + ")\t\t\t \n";*/
 					config::replaceNode(rightExpression->clone(), toBeReplaced[ctr]->getParent());
 				}
 			}
@@ -1947,11 +2139,53 @@ using namespace std;
 			for (Ast* child : _children)
 			{
 				subResults = child->getIDs();
+				results.insert(results.begin(), subResults.begin(), subResults.end());
+			}
+		}
 
-				for (string subResult : subResults)
-				{
-					results.push_back(subResult);
-				}
+		return results;
+	}
+
+	// Cascades from top to bottom and back. Returns a string set containing all identifiers along the downward path, including the current node's own.
+	set<string> Ast::getIDset()
+	{
+		set<string> results;
+
+		if (_name == literalCode::ID_TOKEN_NAME)	// If this is an identifier, push it on the vector to return it upwards
+		{
+			results.insert(_children.at(0)->getName());
+		}
+		else // If this isn't an identifier, gather all identifiers from the progeny
+		{
+			set<string> subResults;
+
+			for (Ast* child : _children)
+			{
+				subResults = child->getIDset();
+				results.insert(subResults.begin(), subResults.end());
+			}
+		}
+
+		return results;
+	}
+
+	// Cascades from top to bottom and back. Returns an Ast* vector containing all identifier nodes along the downward path, including the current node's own.
+	vector<Ast*> Ast::fetchIDs()
+	{
+		vector<Ast*> results;
+
+		if (_name == literalCode::ID_TOKEN_NAME)	// If this is an identifier, push it on the vector to return it upwards
+		{
+			results.push_back(this);
+		}
+		else // If this isn't an identifier, gather all identifiers from the progeny
+		{
+			vector<Ast*> subResults;
+
+			for (Ast* child : _children)
+			{
+				subResults = child->fetchIDs();
+				results.insert(results.begin(), subResults.begin(), subResults.end());
 			}
 		}
 
@@ -2034,9 +2268,16 @@ using namespace std;
 	{
 		if (_name == literalCode::LABEL_TOKEN_NAME)
 		{
-			if (!config::tryRegisterLabel(getParentProcessNumber(), stoi(_children[0]->getName())))
+			int process = getParentProcessNumber();
+			int label = stoi(_children[0]->getName());
+
+			if (!config::tryRegisterLabel(process, label))
 			{
 				config::throwCriticalError("Couldn't register label " + _children[0]->getName() + " for " + getCode());
+			}
+			else
+			{
+				config::labelLookupMap[pair<int, int>(process, label)] = this;
 			}
 		}
 
@@ -2078,7 +2319,7 @@ using namespace std;
 		{
 			Ast* child;
 
-			for (int ctr = 0; ctr < _children.size(); ctr++)
+			for (int ctr = 0; ctr < (int)_children.size(); ctr++)
 			{
 				child = _children[ctr];
 
@@ -2108,6 +2349,24 @@ using namespace std;
 			{
 				child->topDownCascadingReplaceIDNames(oldName, newName);
 			}
+		}
+	}
+
+	void Ast::topDownCascadingReportBufferSizes(int process)
+	{
+		int effectiveProcess = process == -1 ? getParentProcessNumber() : process;
+
+		if (effectiveProcess != -1)
+		{
+			for (bufferSizeMapIterator it = persistentWriteCost.begin(); it != persistentWriteCost.end(); it++)
+			{
+				config::symbolMap[it->first]->increaseMaximumBufferSize(effectiveProcess, it->second);
+			}
+		}
+
+		for (Ast* child : _children)
+		{
+			child->topDownCascadingReportBufferSizes(effectiveProcess);
 		}
 	}
 		
@@ -2192,7 +2451,8 @@ using namespace std;
 					}
 					else
 					{
-						s = persistentWriteCost[globalVariableName];
+						// For statement replacement purposes, the initialization assignments count as one buffer write
+						s = max(1, persistentWriteCost[globalVariableName]);
 					}
 
 					currentStatements.push_back(newAbort(config::OVERFLOW_MESSAGE));
@@ -2213,7 +2473,7 @@ using namespace std;
 					for (int i = 1; i <= s; i++)
 					{
 						currentStatements.clear();
-						currentStatements.push_back(newLocalAssign(bufferVariables[i], _children[1]->clone()));
+						currentStatements.push_back(newLocalAssign(bufferVariables[i - 1], _children[1]->clone()));
 
 						// Adding if (x_cnt_t == i + 1) { x_(i+1)_t = r; }
 						replacement.push_back(newIfElse(newBinaryOp(newID(x_cnt_t), newINT(i + 1), literalCode::EQUALS), currentStatements));
@@ -2234,7 +2494,8 @@ using namespace std;
 					}
 					else
 					{
-						s = persistentWriteCost[globalVariableName];
+						// For statement replacement purposes, the initialization assignments count as one buffer write
+						s = max(1, persistentWriteCost[globalVariableName]);
 					}
 
 					currentStatements.push_back(newLoad(r, _children[1]));
@@ -2289,7 +2550,8 @@ using namespace std;
 							}
 							else
 							{
-								s = persistentWriteCost[globalVariableName];
+								// For statement replacement purposes, the initialization assignments count as one buffer write
+								s = max(1, persistentWriteCost[globalVariableName]);
 							}
 
 							currentThenStatements.push_back(newStore(globalVariableName, newID(bufferVariables[s - 1])));
@@ -2385,45 +2647,40 @@ using namespace std;
 	{
 		if (_name == literalCode::BL_PROGRAM_DECLARATION_TOKEN_NAME)
 		{
-			int numberOfGlobalPredicates = config::globalPredicates.size();
+			vector<Ast*> assignmentBlock;
 
-			for (int ctr = numberOfGlobalPredicates - 1; ctr >= 0; ctr--)
+			for (map<string, PredicateData*>::iterator it = config::predicates.begin(); it != config::predicates.end(); ++it)
 			{
-				_children[2]->insertChild(
+				assignmentBlock.push_back(
 						newLabel(
 							config::getCurrentAuxiliaryLabel(),
-							newLoad(
-								config::globalPredicates[ctr]->getSingleTemporaryVariableName(),
-								newID(config::globalPredicates[ctr]->getSingleBooleanVariableName())
+							newStore(it->second->getSingleBooleanVariableName(), newAsterisk())
+						)
+					);
+			}
+
+			for (map<string, PredicateData*>::iterator it = config::predicates.begin(); it != config::predicates.end(); ++it)
+			{
+				assignmentBlock.push_back(
+						newLabel(
+								config::getCurrentAuxiliaryLabel(),
+								newLoad(it->second->getSingleTemporaryVariableName(), newID(it->second->getSingleBooleanVariableName()))
 							)
-						),
-						0
 					);
 			}
 
-			for (int ctr = numberOfGlobalPredicates - 1; ctr >= 0; ctr--)
-			{
-				_children[2]->insertChild(
-						newLabel(
-							config::getCurrentAuxiliaryLabel(),
-							newStore(config::globalPredicates[ctr]->getSingleBooleanVariableName(), newAsterisk())
-						),
-						0
-					);
-			}
-
+			_children[2]->insertChildren(assignmentBlock, 0);
+			assignmentBlock.clear();
 			_children[2]->getChild(0)->setStartComment("Initializing local variables");
 
-			vector<Ast*> postFix;
-
-			for (int ctr = 0; ctr < numberOfGlobalPredicates; ctr++)
+			for (map<string, PredicateData*>::iterator it = config::predicates.begin(); it != config::predicates.end(); ++it)
 			{
-				postFix.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
-					newLocalAssign(config::globalPredicates[ctr]->getSingleTemporaryVariableName(), newINT(0))));
+				assignmentBlock.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
+					newLocalAssign(it->second->getSingleTemporaryVariableName(), newINT(0))));
 			}
 
-			postFix[0]->setStartComment("Resetting local variables");
-			_children[2]->insertChildren(postFix);
+			assignmentBlock[0]->setStartComment("Resetting local variables");
+			_children[2]->insertChildren(assignmentBlock);
 
 			Ast* maxCube = config::getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes();
 
@@ -2461,1169 +2718,3 @@ using namespace std;
 		
 		return results;
 	}
-
-
-
-
-
-
-
-
-
-
-//
-//
-//	Ast::Ast()
-//	{
-//		// The index by which this node can be referred to from its parent's children vector. The root always has an index of -1
-//		indexAsChild = -1;
-//		name = "";
-//		parent = nullptr;
-//
-//		//updateShortStringRepresentation();
-//	}
-//
-//	Ast::~Ast()
-//	{
-//	}
-//
-///* Access */
-//	// Adds a child node and sets its variables connecting it to this node
-//	void Ast::addChild(Ast* child)
-//	{
-//		child->parent = this;
-//		child->indexAsChild = children.size();
-//		children.push_back(child);
-//	
-//		//updateShortStringRepresentation();
-//	}
-//	
-//	// Adds a child node at a specific index and sets its variables connecting it to this node
-//	void Ast::addChild(Ast* child, int index)
-//	{
-//		child->parent = this;
-//		child->indexAsChild = index;
-//
-//		if (index == children.size())
-//		{
-//			children.insert(children.end(), child);
-//		}
-//		else if (index < children.size())
-//		{
-//			children.insert(children.begin() + index, child);
-//		}
-//		else
-//		{
-//			/*config::throwCriticalError("Error trying to insert: " + child->emitCode() + " on the index " + to_string(index) +
-//				". The current vector size is " + to_string(children.size()) + ".");*/
-//			children.insert(children.begin() + index, child);
-//		}
-//	
-//		refreshChildIndices();
-//		//updateShortStringRepresentation();
-//	}
-//	
-//	void Ast::addChildren(const vector<Ast*> &newChildren)
-//	{
-//		for (Ast* child : newChildren)
-//		{
-//			child->parent = this;
-//			child->indexAsChild = children.size();
-//			children.push_back(child);
-//		}
-//	}
-//	
-//	void Ast::refreshChildIndices()
-//	{
-//		int childCount = children.size();
-//	
-//		for (int ctr = 0; ctr < childCount; ctr++)
-//		{
-//			children.at(ctr)->indexAsChild = ctr;
-//		}
-//	}
-//	
-//	// Gets the qualified name representing this label
-//	string Ast::getLabelCode()
-//	{
-//		if (name == literalCode::LABEL_TOKEN_NAME)
-//		{
-//			string parentProcessNumber;
-//			string label = children.at(0)->name;
-//	
-//			if (tryGetParentProcessNumber(&parentProcessNumber))
-//			{
-//				return parentProcessNumber + literalCode::LABEL_SEPARATOR + label;
-//			}
-//		}
-//	
-//		return "";
-//	}
-//	
-//
-//	const string Ast::getCode()
-//	{
-//		if (_code.empty())
-//		{
-//			_code = emitCode();
-//		}
-//
-//		return _code;
-//	}
-//
-///* Cascading operations */
-//	string Ast::emitCode()
-//	{
-//		string result = "";
-//		bool isBooleanProgramNode = false;
-//		int childrenCount;
-//
-//		if (name == literalCode::BL_PROGRAM_DECLARATION_TOKEN_NAME)
-//		{
-//			for (Ast* child : children)
-//			{
-//				result += child->emitCode() + "\n\n";
-//			}
-//
-//			isBooleanProgramNode = true;
-//		}
-//		else if (name == literalCode::BL_INITIALIZATION_BLOCK_TOKEN_NAME)
-//		{
-//			string subResult = "";
-//
-//			for (Ast* child : children)
-//			{
-//				subResult += child->emitCode() + "\n";
-//			}
-//
-//			if (!subResult.empty())
-//			{
-//				subResult = subResult.substr(0, subResult.length() - 1);
-//			}
-//
-//			result += literalCode::INIT_TAG_NAME + "\n\n" + config::addTabs(subResult, 1) + "\n\n";
-//
-//			isBooleanProgramNode = true;
-//		}
-//		else if (name == literalCode::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME)
-//		{
-//			result += literalCode::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME;
-//
-//			for (Ast* child : children)
-//			{
-//				result += " " + child->emitCode() + ",";
-//			}
-//
-//			if (result.size() > literalCode::BL_SHARED_VARIABLES_BLOCK_TOKEN_NAME.size())
-//			{
-//				result[result.size() - 1] = literalCode::SEMICOLON;
-//			}
-//			else
-//			{
-//				result += literalCode::SEMICOLON;
-//			}
-//
-//			isBooleanProgramNode = true;
-//		}
-//		else if (name == literalCode::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME)
-//		{
-//			result += literalCode::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME;
-//
-//			for (Ast* child : children)
-//			{
-//				result += " " + child->emitCode() + ",";
-//			}
-//
-//			if (result.size() > literalCode::BL_LOCAL_VARIABLES_BLOCK_TOKEN_NAME.size())
-//			{
-//				result[result.size() - 1] = literalCode::SEMICOLON;
-//			}
-//			else
-//			{
-//				result += literalCode::SEMICOLON;
-//			}
-//
-//			isBooleanProgramNode = true;
-//		}
-//		else if (name == literalCode::BL_PROCESS_DECLARATION_TOKEN_NAME)
-//		{
-//			result += literalCode::PROCESS_TAG_NAME + " " + children.at(0)->children.at(0)->name + "\n\n" + config::addTabs(children.at(1)->emitCode(), 1);
-//
-//			isBooleanProgramNode = true;
-//		}
-//		else if (name == literalCode::BL_IF_TOKEN_NAME)
-//		{
-//			result += literalCode::IF_TAG_NAME + literalCode::SPACE + literalCode::LEFT_PARENTHESIS +
-//				children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS + literalCode::SPACE + children.at(1)->emitCode();
-//
-//			isBooleanProgramNode = true;
-//		}
-//		else if (name == literalCode::ASSERT_TOKEN_NAME)
-//		{
-//			result += literalCode::ASSERT_TOKEN_NAME + literalCode::SPACE + literalCode::BL_ALWAYS_TOKEN_NAME +
-//				literalCode::LEFT_PARENTHESIS +	children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS +
-//				literalCode::SEMICOLON;
-//
-//			isBooleanProgramNode = true;
-//		}
-//
-//		if (!startComment.empty())
-//		{
-//			result += "\n" + literalCode::MULTILINE_COMMENT_PREFIX + literalCode::SPACE + startComment + literalCode::SPACE + literalCode::MULTILINE_COMMENT_SUFFIX + "\n";
-//		}
-//
-//		/*if (!startComment.empty())
-//		{
-//		result += literalCode::COMMENT_PREFIX + literalCode::SPACE + startComment + "\n";
-//		}*/
-//
-//		if (config::currentLanguage == config::language::RMA)
-//		{
-//			if (name == literalCode::PROGRAM_DECLARATION_TOKEN_NAME)
-//			{
-//				for (Ast* child : children)
-//				{
-//					result += child->emitCode() + "\n\n";
-//				}
-//			}
-//			else if (name == literalCode::INITIALIZATION_BLOCK_TOKEN_NAME)
-//			{
-//				result += literalCode::BEGINIT_TAG_NAME + "\n\n";
-//
-//				for (Ast* child : children)
-//				{
-//					result += config::addTabs(child->emitCode(), 1) + "\n";
-//				}
-//
-//				result += "\n" + literalCode::ENDINIT_TAG_NAME;
-//			}
-//			else if (name == literalCode::RMA_PROCESS_INITIALIZATION_TOKEN_NAME)
-//			{
-//				result += children.at(0)->emitCode() + "\n" + config::addTabs(children.at(1)->emitCode(), 1);
-//			}
-//			else if (name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
-//			{
-//				result += children.at(0)->emitCode() + "\n\n" + config::addTabs(children.at(1)->emitCode(), 1);
-//			}
-//			else if (name == literalCode::PROCESS_HEADER_TOKEN_NAME)
-//			{
-//				result += literalCode::PROCESS_TAG_NAME + literalCode::SPACE + children.at(0)->name + literalCode::COLON;
-//			}
-//			else if (name == literalCode::STATEMENTS_TOKEN_NAME)
-//			{
-//				for (Ast* child : children)
-//				{
-//					result += child->emitCode() + "\n";
-//				}
-//
-//				if (!result.empty())
-//				{
-//					result = result.substr(0, result.length() - 1);
-//				}
-//			}
-//			else if (name == literalCode::LABEL_TOKEN_NAME)
-//			{
-//				if (children.at(0)->name == literalCode::IF_ELSE_TOKEN_NAME)
-//				{
-//					result.insert(result.begin(), '\n');
-//				}
-//
-//				result += children.at(0)->name + literalCode::COLON + literalCode::SPACE + children.at(1)->emitCode();
-//			}
-//			else if (name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
-//			{
-//				result += children.at(0)->emitCode() + literalCode::SPACE + literalCode::ASSIGN_OPERATOR + literalCode::LEFT_PARENTHESIS +
-//					children.at(1)->name + literalCode::RIGHT_PARENTHESIS + literalCode::SPACE +
-//					children.at(2)->emitCode() + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::ID_TOKEN_NAME)
-//			{
-//				if (children.at(0)->name == literalCode::PC_TOKEN_NAME)
-//				{
-//					result += literalCode::PC_TOKEN_NAME + literalCode::LEFT_CURLY_BRACKET + children.at(0)->children.at(0)->name +
-//						literalCode::RIGHT_CURLY_BRACKET;
-//				}
-//				else
-//				{
-//					result += children.at(0)->name;
-//				}
-//			}
-//			else if (name == literalCode::INT_TOKEN_NAME)
-//			{
-//				result += children.at(0)->name;
-//			}
-//			else if (name == literalCode::BOOL_TOKEN_NAME)
-//			{
-//				result += children.at(0)->name;
-//			}
-//			else if (name == literalCode::RMA_PUT_TOKEN_NAME)
-//			{
-//				result += literalCode::RMA_PUT_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + children.at(0)->name +
-//					literalCode::COMMA + literalCode::SPACE + children.at(1)->name + literalCode::RIGHT_PARENTHESIS +
-//					literalCode::SPACE + literalCode::LEFT_PARENTHESIS + children.at(2)->name + literalCode::COMMA +
-//					literalCode::SPACE + children.at(3)->name + literalCode::COMMA + literalCode::SPACE + children.at(4)->name +
-//					literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::RMA_GET_TOKEN_NAME)
-//			{
-//				result += children.at(0)->name + literalCode::SPACE + literalCode::EQUALS + literalCode::SPACE +
-//					literalCode::RMA_GET_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + children.at(1)->name +
-//					literalCode::COMMA + literalCode::SPACE + children.at(2)->name + literalCode::RIGHT_PARENTHESIS +
-//					literalCode::SPACE + literalCode::LEFT_PARENTHESIS + children.at(3)->name + literalCode::COMMA +
-//					literalCode::SPACE + children.at(4)->name + literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::IF_ELSE_TOKEN_NAME)
-//			{
-//				if (parent->name != literalCode::LABEL_TOKEN_NAME)
-//				{
-//					result.insert(result.begin(), '\n');
-//				}
-//
-//				result += literalCode::IF_TAG_NAME + literalCode::SPACE + literalCode::LEFT_PARENTHESIS +
-//					children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS + "\n" +
-//					config::addTabs(children.at(1)->emitCode(), 1) + "\n";
-//
-//				if (children.at(2)->name != literalCode::NONE_TOKEN_NAME)
-//				{
-//					result += literalCode::ELSE_TAG_NAME + "\n" + config::addTabs(children.at(2)->emitCode(), 1) + "\n";
-//				}
-//
-//				result += literalCode::ENDIF_TAG_NAME + literalCode::SEMICOLON;
-//			}
-//			else if (find(literalCode::UNARY_OPERATORS.begin(), literalCode::UNARY_OPERATORS.end(), name) != literalCode::UNARY_OPERATORS.end())
-//			{
-//				result += name + literalCode::LEFT_PARENTHESIS + children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS;
-//			}
-//			else if (find(literalCode::BINARY_OPERATORS.begin(), literalCode::BINARY_OPERATORS.end(), name) != literalCode::BINARY_OPERATORS.end())
-//			{
-//				if (name == literalCode::ASTERISK_TOKEN_NAME && children.size() == 0)
-//				{
-//					result += name;
-//				}
-//				else
-//				{
-//					childrenCount = children.size();
-//
-//					for (int ctr = 0; ctr < childrenCount; ctr++)
-//					{
-//						if (children.at(ctr)->name == literalCode::ID_TOKEN_NAME || children.at(ctr)->name == literalCode::INT_TOKEN_NAME)
-//						{
-//							result += children.at(ctr)->emitCode();
-//						}
-//						else
-//						{
-//							result += literalCode::LEFT_PARENTHESIS + children.at(ctr)->emitCode() + literalCode::RIGHT_PARENTHESIS;
-//						}
-//
-//						if (ctr < childrenCount - 1)
-//						{
-//							result += literalCode::SPACE + name + literalCode::SPACE;
-//						}
-//					}
-//
-//					/*if (children.at(0)->name == literalCode::ID_TOKEN_NAME || children.at(0)->name == literalCode::INT_TOKEN_NAME)
-//					{
-//						result += children.at(0)->emitCode();
-//					}
-//					else
-//					{
-//						result += literalCode::LEFT_PARENTHESIS + children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS;
-//					}
-//
-//					result += literalCode::SPACE + name + literalCode::SPACE;
-//
-//					if (children.at(1)->name == literalCode::ID_TOKEN_NAME || children.at(1)->name == literalCode::INT_TOKEN_NAME)
-//					{
-//						result += children.at(1)->emitCode();
-//					}
-//					else
-//					{
-//						result += literalCode::LEFT_PARENTHESIS + children.at(1)->emitCode() + literalCode::RIGHT_PARENTHESIS;
-//					}*/
-//				}
-//			}
-//			else if (name == literalCode::ABORT_TOKEN_NAME)
-//			{
-//				result += literalCode::ABORT_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + literalCode::QUOTATION +
-//					children.at(0)->name + literalCode::QUOTATION + literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::FLUSH_TOKEN_NAME)
-//			{
-//				result += literalCode::FLUSH_TOKEN_NAME + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::FENCE_TOKEN_NAME)
-//			{
-//				result += literalCode::FENCE_TOKEN_NAME + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::GOTO_TOKEN_NAME)
-//			{
-//				result += literalCode::GOTO_TOKEN_NAME + literalCode::SPACE + children.at(0)->name + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::NOP_TOKEN_NAME)
-//			{
-//				result += literalCode::NOP_TOKEN_NAME + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::ASSUME_TOKEN_NAME)
-//			{
-//				result += literalCode::ASSUME_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + children.at(0)->emitCode() +
-//					literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
-//			}
-//			else if (!isBooleanProgramNode)
-//			{
-//				config::throwError("Can't emit node: " + name);
-//			}
-//		}
-//		else
-//		{
-//			if (name == literalCode::PROGRAM_DECLARATION_TOKEN_NAME)
-//			{
-//				for (Ast* child : children)
-//				{
-//					result += child->emitCode() + "\n\n";
-//				}
-//			}
-//			else if (name == literalCode::INITIALIZATION_BLOCK_TOKEN_NAME)
-//			{
-//				result += literalCode::BEGINIT_TAG_NAME + "\n\n";
-//
-//				for (Ast* child : children)
-//				{
-//					result += "\t" + child->emitCode() + "\n";
-//				}
-//
-//				result += "\n" + literalCode::ENDINIT_TAG_NAME;
-//			}
-//			else if (name == literalCode::PSO_TSO_STORE_TOKEN_NAME)
-//			{
-//				result += literalCode::PSO_TSO_STORE_TOKEN_NAME + literalCode::SPACE +
-//					children.at(0)->emitCode() + literalCode::SPACE + literalCode::ASSIGN_OPERATOR +
-//					literalCode::SPACE + children.at(1)->emitCode() + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::PSO_TSO_LOAD_TOKEN_NAME)
-//			{
-//				result += literalCode::PSO_TSO_LOAD_TOKEN_NAME + literalCode::SPACE +
-//					children.at(0)->emitCode() + literalCode::SPACE + literalCode::ASSIGN_OPERATOR +
-//					literalCode::SPACE + children.at(1)->emitCode() + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
-//			{
-//				result += children.at(0)->emitCode() + literalCode::SPACE + literalCode::ASSIGN_OPERATOR +
-//					literalCode::SPACE + children.at(1)->emitCode() + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::ID_TOKEN_NAME)
-//			{
-//				if (children.at(0)->name == literalCode::PC_TOKEN_NAME)
-//				{
-//					result += literalCode::PC_TOKEN_NAME + literalCode::LEFT_CURLY_BRACKET + children.at(0)->children.at(0)->name +
-//						literalCode::RIGHT_CURLY_BRACKET;
-//				}
-//				else
-//				{
-//					result += children.at(0)->name;
-//				}
-//			}
-//			else if (name == literalCode::INT_TOKEN_NAME)
-//			{
-//				result += children.at(0)->name;
-//			}
-//			else if (name == literalCode::BOOL_TOKEN_NAME)
-//			{
-//				result += children.at(0)->name;
-//			}
-//			else if (name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
-//			{
-//				result += children.at(0)->emitCode() + "\n\n" + config::addTabs(children.at(1)->emitCode(), 1);
-//			}
-//			else if (name == literalCode::PROCESS_HEADER_TOKEN_NAME)
-//			{
-//				result += literalCode::PROCESS_TAG_NAME + literalCode::SPACE + children.at(0)->name + literalCode::COLON;
-//			}
-//			else if (name == literalCode::STATEMENTS_TOKEN_NAME)
-//			{
-//				for (Ast* child : children)
-//				{
-//					result += child->emitCode() + "\n";
-//				}
-//
-//				if (!result.empty())
-//				{
-//					result = result.substr(0, result.length() - 1);
-//				}
-//			}
-//			else if (name == literalCode::LABEL_TOKEN_NAME)
-//			{
-//				if (children.at(0)->name == literalCode::IF_ELSE_TOKEN_NAME)
-//				{
-//					result.insert(result.begin(), '\n');
-//				}
-//
-//				result += children.at(0)->name + literalCode::COLON + literalCode::SPACE + children.at(1)->emitCode();
-//			}
-//			else if (name == literalCode::IF_ELSE_TOKEN_NAME)
-//			{
-//				if (parent->name != literalCode::LABEL_TOKEN_NAME)
-//				{
-//					result.insert(result.begin(), '\n');
-//				}
-//
-//				result += literalCode::IF_TAG_NAME + literalCode::SPACE + literalCode::LEFT_PARENTHESIS +
-//					children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS + "\n" +
-//					config::addTabs(children.at(1)->emitCode(), 1) + "\n";
-//
-//				if (children.at(2)->name != literalCode::NONE_TOKEN_NAME)
-//				{
-//					result += literalCode::ELSE_TAG_NAME + "\n" + config::addTabs(children.at(2)->emitCode(), 1) + "\n";
-//				}
-//
-//				result += literalCode::ENDIF_TAG_NAME + literalCode::SEMICOLON;
-//			}
-//			else if (find(literalCode::UNARY_OPERATORS.begin(), literalCode::UNARY_OPERATORS.end(), name) != literalCode::UNARY_OPERATORS.end())
-//			{
-//				result += name + literalCode::LEFT_PARENTHESIS + children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS;
-//			}
-//			else if (find(literalCode::BINARY_OPERATORS.begin(), literalCode::BINARY_OPERATORS.end(), name) != literalCode::BINARY_OPERATORS.end())
-//			{
-//				if (name == literalCode::ASTERISK_TOKEN_NAME && children.size() == 0)
-//				{
-//					result += name;
-//				}
-//				else
-//				{
-//
-//					childrenCount = children.size();
-//
-//					for (int ctr = 0; ctr < childrenCount; ctr++)
-//					{
-//						if (children.at(ctr)->name == literalCode::ID_TOKEN_NAME || children.at(ctr)->name == literalCode::INT_TOKEN_NAME)
-//						{
-//							result += children.at(ctr)->emitCode();
-//						}
-//						else
-//						{
-//							result += literalCode::LEFT_PARENTHESIS + children.at(ctr)->emitCode() + literalCode::RIGHT_PARENTHESIS;
-//						}
-//
-//						if (ctr < childrenCount - 1)
-//						{
-//							result += literalCode::SPACE + name + literalCode::SPACE;
-//						}
-//					}
-//
-//					/*if (children.at(0)->name == literalCode::ID_TOKEN_NAME || children.at(0)->name == literalCode::INT_TOKEN_NAME)
-//					{
-//					result += children.at(0)->emitCode();
-//					}
-//					else
-//					{
-//					result += literalCode::LEFT_PARENTHESIS + children.at(0)->emitCode() + literalCode::RIGHT_PARENTHESIS;
-//					}
-//
-//					result += literalCode::SPACE + name + literalCode::SPACE;
-//
-//					if (children.at(1)->name == literalCode::ID_TOKEN_NAME || children.at(1)->name == literalCode::INT_TOKEN_NAME)
-//					{
-//					result += children.at(1)->emitCode();
-//					}
-//					else
-//					{
-//					result += literalCode::LEFT_PARENTHESIS + children.at(1)->emitCode() + literalCode::RIGHT_PARENTHESIS;
-//					}*/
-//				}
-//			}
-//			else if (name == literalCode::ABORT_TOKEN_NAME)
-//			{
-//				result += literalCode::ABORT_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + literalCode::QUOTATION +
-//					children.at(0)->name + literalCode::QUOTATION + literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::FLUSH_TOKEN_NAME)
-//			{
-//				result += literalCode::FLUSH_TOKEN_NAME + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::FENCE_TOKEN_NAME)
-//			{
-//				result += literalCode::FENCE_TOKEN_NAME + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::GOTO_TOKEN_NAME)
-//			{
-//				result += literalCode::GOTO_TOKEN_NAME + literalCode::SPACE + children.at(0)->name + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::NOP_TOKEN_NAME)
-//			{
-//				result += literalCode::NOP_TOKEN_NAME + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::ASSUME_TOKEN_NAME)
-//			{
-//				result += literalCode::ASSUME_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + children.at(0)->emitCode() +
-//					literalCode::RIGHT_PARENTHESIS + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::BEGIN_ATOMIC_TOKEN_NAME)
-//			{
-//				result += literalCode::BEGIN_ATOMIC_TOKEN_NAME + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::END_ATOMIC_TOKEN_NAME)
-//			{
-//				result += literalCode::END_ATOMIC_TOKEN_NAME + literalCode::SEMICOLON;
-//			}
-//			else if (name == literalCode::CHOOSE_TOKEN_NAME)
-//			{
-//				result += literalCode::CHOOSE_TOKEN_NAME + literalCode::LEFT_PARENTHESIS + children.at(0)->emitCode() +
-//					literalCode::COMMA + literalCode::SPACE + children.at(1)->emitCode() +
-//					literalCode::RIGHT_PARENTHESIS;
-//			}
-//			else if (!isBooleanProgramNode)
-//			{
-//				config::throwError("Can't emit node: " + name);
-//			}
-//		}
-//
-//		/*if (!endComment.empty())
-//		{
-//		result += "\n" + literalCode::COMMENT_PREFIX + literalCode::SPACE + endComment;
-//		}*/
-//
-//		if (!endComment.empty())
-//		{
-//			result += "\n" + literalCode::MULTILINE_COMMENT_PREFIX + literalCode::SPACE + endComment + literalCode::SPACE + literalCode::MULTILINE_COMMENT_SUFFIX + "\n";
-//		}
-//
-//		if (name == literalCode::IF_ELSE_TOKEN_NAME)
-//		{
-//			result += "\n";
-//		}
-//
-//		return result;
-//	}
-//	
-//	void Ast::cascadingUnifyVariableNames()
-//	{
-//		if (!unifyVariableNames())
-//		{
-//			for (Ast* child : children)
-//			{
-//				child->cascadingUnifyVariableNames();
-//			}
-//		}
-//	}
-//	
-//	
-//	
-//	void Ast::cascadingInitializeAuxiliaryVariables()
-//	{
-//		initializeAuxiliaryVariables();
-//	
-//		for (Ast* child : children)
-//		{
-//			child->cascadingInitializeAuxiliaryVariables();
-//		}
-//	}
-//
-//	void Ast::labelAllStatements()
-//	{
-//		if (name == literalCode::STATEMENTS_TOKEN_NAME)
-//		{
-//			vector<Ast*> replacementVector;
-//
-//			for (Ast* child : children)
-//			{
-//				if (child->name != literalCode::LABEL_TOKEN_NAME)
-//				{
-//					replacementVector.clear();
-//					replacementVector.push_back(newLabel(config::getCurrentAuxiliaryLabel(), child));
-//					config::lazyReplacements[child] = replacementVector;
-//				}
-//			}
-//		}
-//	}
-//
-//	bool Ast::isEquivalent(Ast* otherAst)
-//	{
-//		return emitCode().compare(otherAst->emitCode()) == 0;
-//	}
-//
-//	vector<int> Ast::getAllProcessDeclarations()
-//	{
-//		vector<int> result;
-//
-//		if (name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
-//		{
-//			result.push_back(stoi(children.at(0)->children.at(0)->name));
-//		}
-//		else if (name == literalCode::BL_PROCESS_DECLARATION_TOKEN_NAME)
-//		{
-//			result.push_back(stoi(children.at(0)->name));
-//		}
-//		else
-//		{
-//			vector<int> subResult;
-//
-//			for (Ast* child : children)
-//			{
-//				subResult = child->getAllProcessDeclarations();
-//				result.insert(result.end(), subResult.begin(), subResult.end());
-//			}
-//		}
-//
-//		return result;
-//	}
-//
-//	void Ast::cascadingReplaceIDNames(const string &oldName, const string &newName)
-//	{
-//		replaceIDNames(oldName, newName);
-//
-//		if (name != literalCode::ID_TOKEN_NAME && name != literalCode::INT_TOKEN_NAME)
-//		{
-//			for (Ast* child : children)
-//			{
-//				child->cascadingReplaceIDNames(oldName, newName);
-//			}
-//		}
-//	}
-//
-///* Static operations */
-//	void Ast::replaceNode(const vector<Ast*> &nodes, Ast* oldNode)
-//	{
-//		Ast* newParent = oldNode->parent;
-//		int newIndex = oldNode->indexAsChild;
-//		int nodesCount = nodes.size();
-//		int parentChildrenCount = newParent->children.size();
-//	
-//		newParent->children.erase(newParent->children.begin() + newIndex);
-//	
-//		for (int ctr = newIndex + nodesCount - 1; ctr >= newIndex; ctr--)
-//		{
-//			nodes[ctr - newIndex]->parent = newParent;
-//			newParent->children.insert(newParent->children.begin() + newIndex, nodes[ctr - newIndex]);
-//		}
-//	
-//		newParent->refreshChildIndices();
-//	}
-//	
-//	void Ast::replaceNode(Ast* newNode, Ast* oldNode)
-//	{
-//		Ast* newParent = oldNode->parent;
-//		int newIndex = oldNode->indexAsChild;
-//	
-//		newParent->children.erase(newParent->children.begin() + newIndex);
-//		newParent->children.insert(newParent->children.begin() + newIndex, newNode);
-//	
-//		newParent->refreshChildIndices();
-//	
-//		//newParent->updateShortStringRepresentation();
-//	}
-//
-///* Static pseudo-constructors */
-//
-///* Local access */
-//	
-//	// Outputs the number string of the superior process in the value of the out pointer and returns true if applicable, otherwise returns false
-//	bool Ast::tryGetParentProcessNumber(string* out)
-//	{
-//		bool result = false;
-//	
-//		if (!isRoot())
-//		{
-//			if (parent->name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
-//			{
-//				(*out) = parent->children.at(0)->children.at(0)->name;
-//				result = true;
-//			}
-//			else
-//			{
-//				result = parent->tryGetParentProcessNumber(out);
-//			}
-//		}
-//	
-//		return result;
-//	}
-//	
-//	int Ast::numberOfVariablesInPersistentWriteBuffer()
-//	{
-//		int result = 0;
-//	
-//		for (bufferSizeMapIterator iterator = persistentWriteCost.begin(); iterator != persistentWriteCost.end(); iterator++)
-//		{
-//			if (iterator->second > 0 || iterator->second == bsm::TOP_VALUE)
-//			{
-//				result++;
-//			}
-//		}
-//	
-//		return result;
-//	}
-//	
-//	// Returns whether the node has no parent
-//	bool Ast::isRoot()
-//	{
-//		return indexAsChild == -1;
-//	}
-//	
-//	// Returns whether the current node is an ifElse node with an Else statement block.
-//	bool Ast::hasElse()
-//	{
-//		if (name == literalCode::IF_ELSE_TOKEN_NAME)
-//		{
-//			return children.at(2)->name != literalCode::NONE_TOKEN_NAME;
-//		}
-//	
-//		return false;
-//	}
-//	
-//	// Gets the qualified name representing the label to which this goto node links
-//	string Ast::getGotoCode()
-//	{
-//		if (name == literalCode::GOTO_TOKEN_NAME)
-//		{
-//			string parentProcessNumber;
-//			string label = children.at(0)->name;
-//	
-//			if (tryGetParentProcessNumber(&parentProcessNumber))
-//			{
-//				return parentProcessNumber + literalCode::LABEL_SEPARATOR + label;
-//			}
-//		}
-//	
-//		return "";
-//	}
-//	
-//	// Contains all buffer size maps
-//	vector<bufferSizeMap*> Ast::allBufferSizeContainers()
-//	{
-//		if (_allBufferSizeContainers.empty())
-//		{
-//			_allBufferSizeContainers.push_back(&causedWriteCost);
-//			_allBufferSizeContainers.push_back(&causedReadCost);
-//			_allBufferSizeContainers.push_back(&persistentWriteCost);
-//			_allBufferSizeContainers.push_back(&persistentReadCost);
-//		}
-//	
-//		return _allBufferSizeContainers;
-//	}
-//
-///* Cascade elements */
-//	bool Ast::unifyVariableNames()
-//	{
-//		if (name == literalCode::ID_TOKEN_NAME)
-//		{
-//			string variableName = children.at(0)->name;
-//	
-//			if (find(config::variableNames.begin(), config::variableNames.end(), children.at(0)->name) == config::variableNames.end())
-//			{
-//				config::variableNames.push_back(variableName);
-//			}
-//	
-//			return true;
-//		}
-//	
-//		return false;
-//	}
-//	
-//	// Registers this label node with the global label container
-//	void Ast::registerLabel()
-//	{
-//		if (name == literalCode::LABEL_TOKEN_NAME)
-//		{
-//			config::labelLookupMap[getLabelCode()] = this;
-//		}
-//	}
-//	
-//	
-//	
-//	void Ast::initializeAuxiliaryVariables()
-//	{
-//		if (config::currentLanguage == config::language::RMA)
-//		{
-//			// TODO
-//			config::throwError("Auxiliary variable generation not implemented for RMA");
-//		}
-//		else
-//		{
-//			if (name == literalCode::PROGRAM_DECLARATION_TOKEN_NAME)
-//			{
-//				vector<string> globalVariableNames = bsm::getAllKeys(&persistentWriteCost);
-//				vector<int> processes;
-//	
-//				for (Ast* child : children)
-//				{
-//					if (child->name == literalCode::PROCESS_DECLARATION_TOKEN_NAME)
-//					{
-//						processes.push_back(stoi(child->children.at(0)->children.at(0)->name));
-//					}
-//				}
-//	
-//				for (string globalVariableName : globalVariableNames)
-//				{
-//					config::globalVariables[globalVariableName] = new GlobalVariable(globalVariableName, processes);
-//				}
-//			}
-//		}
-//	}
-//	
-//	vector<Ast*> Ast::reportBack()
-//	{
-//		vector<Ast*> result;
-//		vector<Ast*> subResult;
-//	
-//		if (name == literalCode::PSO_TSO_STORE_TOKEN_NAME || name == literalCode::PSO_TSO_LOAD_TOKEN_NAME ||
-//			name == literalCode::FENCE_TOKEN_NAME || name == literalCode::FLUSH_TOKEN_NAME)
-//		{
-//			result.push_back(this);
-//		}
-//		else if (children.size() > 0)
-//		{
-//			for (Ast* child : children)
-//			{
-//				subResult = child->reportBack();
-//	
-//				for (Ast* reported : subResult)
-//				{
-//					result.push_back(reported);
-//				}
-//			}
-//		}
-//	
-//		return result;
-//	}
-//	
-//	// Compares the persistent buffer size maps of those of the direct control flow successors, and if they don't match, it sets the locally TOP values
-//	// remotely to TOP. If no changes have been made, returns false.
-//	bool Ast::propagateTops()
-//	{
-//	}
-//
-//	//
-//	//
-//	//// Initializes a unary operation node
-//	//Ast* Ast::newUnaryOp(Ast* operand, string operation)
-//	//{
-//	//	Ast* result = new Ast();
-//	//	result->name = operation;
-//	//	result->addChild(operand);
-//	//	return result;
-//	//}
-////
-////void Ast::updateShortStringRepresentation()
-////{
-////	if (children.size() > 0)
-////	{
-////		string result = name + "(";
-////
-////		for (Ast* child : children)
-////		{
-////			child->updateShortStringRepresentation();
-////			result += child->shortStringRepresentation + ", ";
-////		}
-////
-////		shortStringRepresentation = result.substr(0, result.size() - 2) + ")";
-////	}
-////	else
-////	{
-////		shortStringRepresentation = name;
-////	}
-////
-////	/*if (name == "")
-////	{
-////		shortStringRepresentation = name;
-////	}
-////	else
-////	{
-////		shortStringRepresentation = emitCode();
-////	}*/
-////}
-////
-////Ast::Ast(string initialName)
-////{
-////	// The index by which this node can be referred to from its parent's children vector. The root always has an index of -1
-////	indexAsChild = -1;
-////	name = initialName;
-////}
-////
-////vector<vector<Ast*>> Ast::allCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit)
-////{
-////	int numberOfVariables = relevantAuxiliaryTemporaryVariableIndices.size();
-////	vector<Ast*> allPredicates;
-////
-////	for (int ctr = 0; ctr < numberOfVariables; ctr++)
-////	{
-////		allPredicates.push_back(config::globalPredicates[relevantAuxiliaryTemporaryVariableIndices[ctr]]->clone());
-////		//allVariables.push_back(newID(config::auxiliaryTemporaryVariableNames[relevantAuxiliaryTemporaryVariableIndices[ctr]]));
-////	}
-////
-////	vector<vector<Ast*>> limitedPowerSet = config::powerSetOfLimitedCardinality(allPredicates, cubeSizeUpperLimit);
-////	vector<vector<Ast*>> negationPatterns;
-////	vector<vector<Ast*>> allCubeSets;
-////
-////	for (vector<Ast*> subset : limitedPowerSet)
-////	{
-////		negationPatterns = allNegationPatterns(subset);
-////		allCubeSets.insert(allCubeSets.end(), negationPatterns.begin(), negationPatterns.end());
-////	}
-////
-////	return allCubeSets;
-////}
-////
-//////Ast* Ast::newLargestImplicativeDisjunctionOfCubes(int cubeSizeUpperLimit, Ast* predicate, bool useTemporaryVariables)
-//////{
-//////	int numberOfPredicates = config::globalPredicates.size();
-//////	vector<int> relevantIndices;
-//////	string emptyPool = config::getCubeStatePool(relevantIndices);
-//////	relevantIndices = config::getRelevantAuxiliaryTemporaryVariableIndices(predicate);
-//////	string pool = config::getCubeStatePool(relevantIndices);
-//////	vector<string> implicativeCubeStates;
-//////	vector<string> unmaskedImplicativeCubeStates;
-//////	vector<string> cubeStateCombinations;
-//////	vector<Ast*> implicativeCubes;
-//////
-//////	if (relevantIndices.size() > 0)
-//////	{
-//////		for (int ctr = 1; ctr <= cubeSizeUpperLimit; ctr++)
-//////		{
-//////			implicativeCubeStates.clear();
-//////			cubeStateCombinations = config::getNaryCubeStateCombinations(relevantIndices, ctr);
-//////			
-//////			for (string cubeStateCombination : cubeStateCombinations)
-//////			{
-//////				unmaskedImplicativeCubeStates = config::getImplicativeCubeStates(config::applyDecisionMask(cubeStateCombination, pool), predicate);
-//////				implicativeCubeStates.insert(implicativeCubeStates.end(), unmaskedImplicativeCubeStates.begin(), unmaskedImplicativeCubeStates.end());
-//////			}
-//////
-//////			//cout << pool << "\t";
-//////			pool = config::removeDecisionsFromPool(pool, implicativeCubeStates);
-//////			//cout << pool << "\n";
-//////			
-//////			relevantIndices.clear();
-//////
-//////			for (int subCtr = 0; subCtr < numberOfPredicates; subCtr++)
-//////			{
-//////				if (pool[subCtr] != config::CUBE_STATE_OMIT)
-//////				{
-//////					relevantIndices.push_back(subCtr);
-//////				}
-//////			}
-//////
-//////			for (string implicativeCubeState : implicativeCubeStates)
-//////			{
-//////				implicativeCubes.push_back(newBooleanVariableCube(implicativeCubeState, useTemporaryVariables));
-//////			}
-//////
-//////			if (pool.compare(emptyPool) == 0)
-//////			{
-//////				break;
-//////			}
-//////		}
-//////	}
-//////
-//////	if (implicativeCubes.size() == 0)
-//////	{
-//////		z3::context c;
-//////		z3::expr trueConstant = c.bool_val(true);
-//////
-//////		if (config::expressionImpliesPredicate(trueConstant, predicate))
-//////		{
-//////			return newTrue();
-//////		}
-//////		else
-//////		{
-//////			return newFalse();
-//////		}
-//////	}
-//////
-//////	return newMultipleOperation(implicativeCubes, config::DOUBLE_OR);
-//////}
-////
-////Ast* Ast::newLargestImplicativeDisjunctionOfCubes(vector<int> relevantAuxiliaryTemporaryVariableIndices, int cubeSizeUpperLimit, Ast* predicate)
-////{
-////	vector<vector<Ast*>> cubes = allCubes(relevantAuxiliaryTemporaryVariableIndices, cubeSizeUpperLimit);
-////	vector<Ast*> implicativeCubeNodes;
-////
-////	for (vector<Ast*> cube : cubes)
-////	{
-////		if (config::cubeImpliesPredicate(cube, predicate))
-////		{
-////			implicativeCubeNodes.push_back(newMultipleOperation(cube, config::AND));
-////		}
-////	}
-////
-////	return newMultipleOperation(implicativeCubeNodes, config::OR);
-////}
-////
-////bool Ast::equals(Ast* other)
-////{
-////	if (name.compare(other->name) == 0)
-////	{
-////		int childrenCount = children.size();
-////
-////		for (int ctr = 0; ctr < childrenCount; ctr++)
-////		{
-////			if (!(children.at(ctr)->equals(other->children.at(ctr))))
-////			{
-////				return false;
-////			}
-////		}
-////
-////		return true;
-////	}
-////
-////	return false;
-////}
-////
-////// Returns the qualified name described by the process- and label numbers
-////int Ast::toLabelCode(string processNumber, string labelNumber)
-////{
-////	hash<string> labelHash;
-////	return labelHash(processNumber + config::LABEL_SEPARATOR + labelNumber);
-////}
-////
-////int Ast::effectiveMaxWriteBufferSize(string variableName)
-////{
-////	if (bufferSizeMapContains(&persistentWriteCost, variableName))
-////	{
-////		int maxBufferSize = persistentWriteCost[variableName];
-////
-////		if (maxBufferSize == config::TOP_VALUE || maxBufferSize > config::K)
-////		{
-////			return config::K;
-////		}
-////		else
-////		{
-////			return maxBufferSize;
-////		}
-////	}
-////	else
-////	{
-////		return config::UNDEFINED_VALUE;
-////	}
-////}
-////
-////vector<vector<Ast*>> Ast::allNegationPatterns(std::vector<Ast*> idSet)
-////{
-////	int numberOfVariables = idSet.size();
-////	vector<vector<Ast*>> result;
-////
-////	if (numberOfVariables > 0)
-////	{
-////		string firstMask = string('0', numberOfVariables);
-////		string mask = string(firstMask);
-////		vector<Ast*> subResult;
-////
-////		do {
-////			subResult.clear();
-////
-////			for (int ctr = 0; ctr < numberOfVariables; ctr++)
-////			{
-////				if (mask[ctr] == '0')
-////				{
-////					subResult.push_back(idSet[ctr]->clone());
-////				}
-////				else
-////				{
-////					subResult.push_back(idSet[ctr]->negate());
-////				}
-////			}
-////
-////			result.push_back(subResult);
-////			mask = config::nextBinaryRepresentation(mask, numberOfVariables);
-////		} while (mask.compare(firstMask) != 0);
-////	}
-////
-////	return result;
-//	//}

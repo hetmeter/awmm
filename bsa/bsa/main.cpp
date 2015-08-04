@@ -19,6 +19,8 @@ Buffer Size Analysis:
 #include "literalCode.h"
 #include "Ast.h"
 #include "PredicateData.h"
+#include "MergeableSetContainer.h"
+#include "VariableEntry.h"
 
 using namespace std;
 
@@ -39,7 +41,6 @@ int main(int argc, char** argv)
 
 	string parsedProgramPath;
 	string outputPath;
-	//string endAssertion;
 
 	// Read arguments
 	if (argc > 1)
@@ -69,7 +70,8 @@ int main(int argc, char** argv)
 		config::throwCriticalError("No cube size limit specified");
 	}
 
-	config::generateAuxiliaryPredicates = !(argc > 4 && literalCode::OMIT_AUXILIARY_PREDICATES_PARAMETER.compare(argv[4]) == 0);
+	config::evaluationMode = argc > 4 && literalCode::EVALUATION_MODE_PARAMETER.compare(argv[4]) == 0;
+	config::verboseMode = argc > 4 && literalCode::VERBOSE_MODE_PARAMETER.compare(argv[4]) == 0;
 
 	// Parse input file (no line breaks are expected)
 	ifstream parsedProgramFile(parsedProgramPath);
@@ -127,13 +129,19 @@ int main(int argc, char** argv)
 		config::throwCriticalError("Invalid parsed program extension");
 	}
 
-	cout << "Parsing program...\n";
+	if (!config::evaluationMode)
+	{
+		cout << "Parsing program...\n";
+	}
+
 	Ast* rootAstRef = Ast::newAstFromParsedProgram(parsedProgramString);
 
-	cout << "Performing buffer size analysis...\n";
-	cout << "\n---\nParsed program:\n\n";
-	cout << rootAstRef->getCode();
-	//cout << rootAstRef->toString();
+	if (!config::evaluationMode)
+	{
+		cout << "Performing buffer size analysis...\n";
+	}
+	/*cout << "\n---\nParsed program:\n\n";
+	cout << rootAstRef->getCode();*/
 
 	// Register all global variables
 	rootAstRef->getChild(0)->registerIDsAsGlobal();
@@ -151,25 +159,16 @@ int main(int argc, char** argv)
 	// Register all auxiliary variables
 	config::generateAllAuxiliarySymbols();
 
-
-	//rootAstRef->cascadingUnifyVariableNames();		// Send a cascading command to the root node that results in all variable identifiers registering their variable names in a global vector
-
 	rootAstRef->getCostsFromChildren();						// Send a cascading command to the root node that results in all program points storing the buffer size increases they cause
 	rootAstRef->initializePersistentCosts();				// Prompt the AST to gather all globally initialized variables and have all program point nodes keep track of their buffer sizes
 	rootAstRef->topDownCascadingRegisterLabels();			// Send a cascading command to the root node that results in all label AST nodes registering themselves in a global map
 	rootAstRef->topDownCascadingGenerateOutgoingEdges();	// Send a cascading command to the root node that results in all program points estabilishing outgoing program flow edges to their possible successor nodes in the control flow graph
 	rootAstRef->visitAllProgramPoints();					// Generate one control flow visitor in the first program point nodes of each process declaration and prompt them to start traversing the AST
-	//cout << "\n" << rootAstRef->toString() << "\n";
+	rootAstRef->topDownCascadingReportBufferSizes();
 	rootAstRef->performBufferSizeAnalysisReplacements();
+	
 	config::carryOutLazyReplacements();
-	//cout << "\n" << rootAstRef->toString() << "\n";
 	config::lazyReplacements.clear();
-	//rootAstRef->cascadingUnifyVariableNames();
-	//rootAstRef->cascadingInitializeAuxiliaryVariables();
-	//rootAstRef->carryOutReplacements();
-
-	/*cout << "\n---\nCarried out buffer size analysis:\n\n";
-	cout << rootAstRef->toString();*/
 
 	// Generate the output
 	outputPath = fileNameStub + "." + BSA_EXTENSION + "." + extension;
@@ -195,48 +194,60 @@ int main(int argc, char** argv)
 		{
 			predicateAstRef = Ast::newAstFromParsedProgram(stringMatch[1].str());
 			int predicateAstRefChildCount = predicateAstRef->getChildrenCount();
+			Ast* currentPredicateAst;
 
 			for (int ctr = 0; ctr < predicateAstRefChildCount; ctr++)
 			{
-				config::globalPredicates.push_back(new PredicateData(predicateAstRef->getChild(ctr)));
-				//config::globalPredicates.push_back(predicateAstRef->getChild(ctr));
-				config::globalPredicatesCount++;
+				currentPredicateAst = predicateAstRef->getChild(ctr);
+				config::predicates[currentPredicateAst->getCode()] = new PredicateData(currentPredicateAst);
+				config::originalPredicateCodes.push_back(currentPredicateAst->getCode());
+				++config::originalPredicatesCount;
+				++config::totalPredicatesCount;
+			}
+
+			config::variableTransitiveClosures = new MergeableSetContainer();
+			set<string> currentIDs;
+
+			for (int ctr = 0; ctr < config::originalPredicatesCount; ++ctr)
+			{
+				currentIDs = config::predicates[config::originalPredicateCodes[ctr]]->getPredicateIDs();
+
+				for (set<string>::iterator it = currentIDs.begin(); it != currentIDs.end(); ++it)
+				{
+					config::variableTransitiveClosures->insert(*it, ctr);
+				}
 			}
 
 			if (config::generateAuxiliaryPredicates)
 			{ 
 				config::initializeAuxiliaryPredicates();
-				config::globalPredicatesCount = config::globalPredicates.size();
+				config::totalPredicatesCount = config::predicates.size();
 			}
 
-			config::initializeAuxiliaryVariables();
+			/*cout << "\nSymbols:\n";
+
+			for (map<string, VariableEntry*>::iterator it = config::symbolMap.begin(); it != config::symbolMap.end(); it++)
+			{
+				cout << "\n" << config::addTabs(it->second->toString(), 1) << "\n";
+			}
 
 			cout << "\nUsing global predicates:\n";
-			
-			for (PredicateData* globalPredicate : config::globalPredicates)
+
+			for (map<string, PredicateData*>::iterator it = config::predicates.begin(); it != config::predicates.end(); it++)
 			{
-				cout << globalPredicate->getPredicateAst()->getCode() << "\n";
-			}
-			/*for (Ast* globalPredicate : config::globalPredicates)
-			{
-				cout << globalPredicate->getCode() << "\n";
+				cout << "\t" << it->first << "\n" << config::addTabs(it->second->toString(), 2) << "\n";
 			}*/
 
-			cout << "\nPerforming predicate abstraction...\n";
+			if (!config::evaluationMode)
+			{
+				cout << "Performing predicate abstraction...\n";
+			}
 
-			/*config::initializeImplicativeCubes();
-			config::getAllFalseImplyingCubes();*/
-
-			//cout << "\n" << rootAstRef->toString() << "\n";
 			rootAstRef->topDownCascadingUnfoldIfElses();
-			//cout << "\n" << rootAstRef->toString() << "\n";
 			rootAstRef->topDownCascadingPerformPredicateAbstraction();
 			rootAstRef->generateBooleanVariableInitializations();
 			config::carryOutLazyReplacements();
 			config::lazyReplacements.clear();
-
-			/*cout << "\n---\nCarried out predicate abstraction:\n\n";
-			cout << rootAstRef->emitCode();*/
 		}
 		else
 		{
@@ -248,28 +259,33 @@ int main(int argc, char** argv)
 
 	parsedPredicateFile.close();
 
-	/*cout << "\n---\n";
-	cout << rootAstRef->astToString();*/
-	cout << "\n---\nFinal state:\n\n";
-	cout << rootAstRef->getCode();
+	/*cout << "\n---\nFinal state:\n\n";
+	cout << rootAstRef->getCode();*/
 
 	// Generate the output
 	string booleanOutputPath = fileNameStub + "." + BOOLEAN_EXTENSION;
 	ofstream booleanProgramOut(booleanOutputPath);
 	booleanProgramOut << rootAstRef->getCode() << "\n";
-	//booleanProgramOut << rootAstRef->emitCode() << "\n\n" << endAssertion;
 	booleanProgramOut.close();
 
 	// Output elapsed time
 	time_t finishedAt = time(0);
-	double elapsedSeconds = difftime(finishedAt, startedAt);
+	double totalElapsedSeconds = difftime(finishedAt, startedAt);
 
-	int elapsedHours = elapsedSeconds / (60 * 60);
-	elapsedSeconds -= elapsedHours * 60 * 60;
+	int elapsedHours = totalElapsedSeconds / (60 * 60);
+	int elapsedSeconds = totalElapsedSeconds - elapsedHours * 60 * 60;
 	int elapsedMinutes = elapsedSeconds / 60;
 	elapsedSeconds -= elapsedMinutes * 60;
 
-	cout << "\nElapsed time: " << elapsedHours << "h " << elapsedMinutes << "min " << elapsedSeconds << "s\n";
+	if (config::evaluationMode)
+	{
+		cout << fileNameStub << "." << PREDICATE_EXTENSION << "." << extension << "\t" << elapsedHours << "h " << elapsedMinutes << "min "
+			<< elapsedSeconds << "s\t" << totalElapsedSeconds << "\n";
+	}
+	else
+	{
+		cout << "\nElapsed time: " << elapsedHours << "h " << elapsedMinutes << "min " << elapsedSeconds << "s\n";
+	}
 
 	return 0;
 }
