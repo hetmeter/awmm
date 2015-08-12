@@ -319,7 +319,7 @@ namespace config
 				}
 			}
 
-			return Ast::newAssume(Ast::newMultipleOperation(resultVector, literalCode::DOUBLE_AND)->negate());
+			return Ast::newAssume(Ast::newMultipleOperation(resultVector, literalCode::DOUBLE_OR)->negate());
 		}
 
 		return assumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes;
@@ -409,7 +409,8 @@ namespace config
 				currentCube = getImplicativeCube(pending[0]);
 				currentImplication = currentCube->getPredicateImplication(getFalsePredicate(), relevantIndices);
 
-				if (currentImplication == CubeTreeNode::IMPLIES || currentImplication == CubeTreeNode::SUPERSET_IMPLIES)
+				//if (currentImplication == CubeTreeNode::IMPLIES || currentImplication == CubeTreeNode::SUPERSET_IMPLIES)
+				if (currentImplication == CubeTreeNode::IMPLIES)
 				{
 					allFalseImplyingCubeStringRepresentations.push_back(pending[0]);
 				}
