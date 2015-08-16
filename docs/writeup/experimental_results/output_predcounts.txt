@@ -1,0 +1,36 @@
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>parser.exe eval\abp.sal -pso -e 
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>bsa.exe eval\abp.sal.out 5 1 -pso -e 
+eval\abp.predicate.sal	0h 0min 1s	1
+eval\abp	cubes: 17	predicates: 12
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>parser.exe eval\bakery.sal -pso -e 
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>bsa.exe eval\bakery.sal.out 5 1 -pso -e 
+eval\bakery.predicate.sal	0h 0min 7s	7
+eval\bakery	cubes: 31	predicates: 75
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>parser.exe eval\dekker.sal -pso -e 
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>bsa.exe eval\dekker.sal.out 5 1 -pso -e 
+eval\dekker.predicate.sal	0h 0min 3s	3
+eval\dekker	cubes: 15	predicates: 27
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>parser.exe eval\peterson.sal -pso -e 
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>bsa.exe eval\peterson.sal.out 5 1 -pso -e 
+eval\peterson.predicate.sal	0h 0min 2s	2
+eval\peterson	cubes: 15	predicates: 27
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>parser.exe eval\queue.sal -pso -e 
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>bsa.exe eval\queue.sal.out 5 1 -pso -e 
+eval\queue.predicate.sal	0h 0min 3s	3
+eval\queue	cubes: 15	predicates: 32
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>parser.exe eval\szymanski.sal -pso -e 
+
+C:\Users\Aldhissla\Source\Repos\awmm\target>bsa.exe eval\szymanski.sal.out 5 1 -pso -e 
+eval\szymanski.predicate.sal	0h 0min 5s	5
+eval\szymanski	cubes: 41	predicates: 70

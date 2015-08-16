@@ -1,0 +1,7 @@
+TSO lexer rule file = rules\SALPL_lexer_rules.txt
+TSO program parser rule file = rules\SALPL_program_parser_rules.txt
+TSO predicate parser rule file = rules\SALPL_predicate_parser_rules.txt
+
+PSO lexer rule file = rules\SALPL_lexer_rules.txt
+PSO program parser rule file = rules\SALPL_program_parser_rules.txt
+PSO predicate parser rule file = rules\SALPL_predicate_parser_rules.txt

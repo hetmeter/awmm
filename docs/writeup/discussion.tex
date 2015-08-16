@@ -74,19 +74,3 @@ Comparing the measurements in \cite{danetal13} with ours, we first note that we 
 Another fact we notice is that SROTOGAP generates about 100 times as many cubes as CUPEX \cite{danetal13} for low cube sizes, but less cubes for high cube sizes. This result should be observed with caution however, as in all cases with the cube size limit being $> 2$, the largest cube disjunction, the disjunction of cubes implying $false$, has timed out in SROTOGAP, which has triggered a halt in that computation, thus preventing the inception of a number of cubes possibly orders of magnitude larger than their counterparts in \danetal{13}. This comes as no surprise, as even without SMT calls, the cubes generated using heuristics grows with the number of total predicates $|E \cup E'|$.\\
 
 The numbers of model checker states are markably lower in our work than they were in \cite{danetal13}. This metric however, along with the other two model checker metrics, is possibly the least significant for our intended comparison, as the model checker has obviously received erroneous outputs from SROTOGAP.
-
-\subsection{Conclusion}
-
-We were unsuccessful in determining whether this work has improved on the methods in \cite{danetal13}. Though the theories on which this work is built are sound, as proven by \cite{danetal13} and \cite{balletal01}, and the expansions thereon are few and simple, the program output is vast, and there can be little information extracted therefrom. This leads us to the first possibility of future development: to write a working implementation of the principles discussed in this work, preferable one that extends SALPL to allow for atomic blocks. Possible further developments in this field are plentiful. We list some of the most apparent aspects that may be improved upon:
-
-\paragraph{TSO implementation}
-
-Though we did describe the procedure of abstracting programs running under TSO, an efficient implementation would complement the findings of this work and \cite{danetal13}.
-
-\paragraph{RMA implementation}
-
-With some modifications to the parsing, and code abstraction phases of this work, the same analysis method can be adapted for programs running under the Remote Memory Access model, a powerful WMM conceived for buffer-free memory access over the network.
-
-\paragraph{Parallelisation}
-
-The entire tool, and all its measurements were ran in a sequential manner. While there are some parallelisation chokepoints in the procedure described in this work, e.g. buffer size analysis, code replacement, other, more important parts, such as the computations necessary for the predicate abstraction, are highly parallelisable. With this in mind, the run time of this tool can be further reduced.

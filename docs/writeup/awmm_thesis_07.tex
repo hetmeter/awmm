@@ -1,0 +1,78 @@
+\documentclass{article}
+
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{placeins}
+
+\usepackage{multicol}
+\setlength{\columnsep}{1cm}
+
+\lstset
+{
+	basicstyle = \ttfamily,
+	tabsize = 4
+}
+
+\begin{document}
+
+\title{Program Analysis for Weak Memory Models}
+
+\author
+{
+	Attila Zolt\'an Printz \\
+	printza@student.ethz.ch \\
+	\\
+	Supervisor: Andrei Dan \\
+	Professor: Martin Vechev \\
+	\\
+	Software Reliability Lab \\
+	Department of Computer Science \\
+	ETH Zurich
+}
+
+\date{August 2015}
+\maketitle
+
+\begin{abstract}
+
+	We present an approach to convert a program running under weak memory models (henceforth referred to as WMM) with possible non-deterministic qualities depending on the current memory ordering into a boolean program verifiable by our model checker. We will consider partial store order (PSO), and total store order (TSO) as possible WMMs. Abstracting our program to one operating on boolean variables representing our predicates, and then inputting this boolean program into a model checker, along with the correctness requirements specified for each program, is a feasible method to prove correctness, as shown by Ball et al. \cite{balletal01}. If we consider our program to apply a weak memory model however, this abstraction alone doesn't cover the additional complex behaviour exhibited by WMM. Because of this, we employ a method called buffer size analysis, combined with the technique described by Dan et al. \cite{danetal13}, in order to achieve a sound boolean program abstraction of any program employing one of the memory ordering methods we consider.
+
+\end{abstract}
+
+\input{introduction}
+
+\input{language}
+
+\input{ba}
+
+\input{pa}
+
+\input{discussion}
+
+\input{related_work}
+
+\input{conclusion}
+
+\pagebreak
+
+\begin{thebibliography}{9}
+
+	\bibitem{danetal13}
+		A. Dan, Y. Meshman, M. Vechev, and E. Yahav. Predicate Abstraction for Relaxed Memory Models. In Static Analysis Symposium '13 (2013)
+	
+	\bibitem{balletal01}
+		T. Ball, R. Majumdar, T. Millstein, and S. K. Rajamani. Automatic Predicate Abstraction of C Programs. In PLDI '01 (2001)
+	
+	\bibitem{kupersteinetal10}
+		M. Kuperstein, M. Vechev, and E. Yahav. Automatic Inference of Memory Fences. In Formal Methods in Computer Aided Design (2010)
+		
+	\bibitem{fender}
+		Fender. Model checking, abstract interpretation, and dynamic analysis. ETH Zurich and Technion. http://www.practicalsynthesis.org/fender/
+		
+	\bibitem{z3}
+		Z3. Theorem prover. Microsoft Research. https://github.com/Z3Prover/z3
+
+\end{thebibliography}
+
+\end{document}

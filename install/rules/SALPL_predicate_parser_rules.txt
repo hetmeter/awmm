@@ -1,0 +1,20 @@
+ {integerTerm,ID($1)} 	\{ID,(\S+)\}
+ {integerTerm,INT($1)} 	\{INT,(\d+)\}
+ {binaryIntegerOperation,+} 	\{PLUS\}
+ {binaryIntegerOperation,-} 	\{MINUS\}
+ {binaryIntegerOperation,*} 	\{ASTERISK\}
+ {binaryIntegerOperation,/} 	\{SLASH\}
+ {integerTerm,$1} 	\{LEFTPARENTHESIS\}\s*\{integerTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
+ {integerTerm,ID($1)} 	\{ID,(\S+)\}
+ {integerTerm,INT($1)} 	\{INT,(\d+)\}
+ {integerTerm,$2($1,$3)} 	\{integerTerm,(\S+)\}\s*\{binaryIntegerOperation,(\S)\}\s*\{integerTerm,(\S+)\}
+ {binaryIntegerComparison,<=} 	\{LESS_OR_EQUAL\}
+ {binaryIntegerComparison,>=} 	\{GREATER_OR_EQUAL\}
+ {binaryIntegerComparison,<} 	\{LESS\}
+ {binaryIntegerComparison,>} 	\{GREATER\}
+ {binaryIntegerComparison,!=} 	\{NOT_EQUAL\}
+ {binaryIntegerComparison,==} 	\{EQUALS\}
+ {predicate,$2($1,$3)} 	\{LEFTPARENTHESIS\}\s*\{integerTerm,(\S+)\}\s*\{binaryIntegerComparison,(\S+)\}\s*\{integerTerm,(\S+)\}\s*\{RIGHTPARENTHESIS\}
+ {predicateList,$1} {EOF}	\{predicate,(\S+)\}\s*\{EOF\}
+ {predicateList,$1,$2} 	\{predicate,(\S+)\}\s*\{predicateList,(\S+)\}
+{ACCEPTING_STATE,predicateList($1)}	\{predicateList,(\S+)\}\s*\{EOF\}

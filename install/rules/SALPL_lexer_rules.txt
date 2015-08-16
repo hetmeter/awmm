@@ -1,0 +1,49 @@
+ {COMMENT} 	//.*\n
+ 	\r
+ 	\n
+ 	\s+
+ {COMMENT} 	/\*.*?\*/
+ {BEGINIT_KEYWORD} 	beginit
+ {ENDINIT_KEYWORD} 	endinit
+ {PROCESS_KEYWORD} 	process
+ {STORE_KEYWORD} 	store
+ {LOAD_KEYWORD} 	load
+ {NOP_KEYWORD} 	nop
+ {GOTO_KEYWORD} 	goto
+ {ELSE_KEYWORD} 	else
+ {ENDIF_KEYWORD} 	endif
+ {WHILE_KEYWORD} 	while
+ {ENDWHILE_KEYWORD} 	endwhile
+ {FENCE_KEYWORD} 	fence
+ {ABORT_KEYWORD} 	abort
+ {FLUSH_KEYWORD} 	flush
+ {IF_KEYWORD} 	if
+ {BEGIN_ATOMIC_KEYWORD} 	begin_atomic
+ {END_ATOMIC_KEYWORD} 	end_atomic
+ {PC_KEYWORD} 	pc
+ {ASSERT_KEYWORD} 	assert
+ {ALWAYS_KEYWORD} 	always
+ {PLUS} 	\+
+ {MINUS} 	-
+ {ASTERISK} 	\*
+ {SLASH} 	/
+ {PIPE} 	\|
+ {AMPERSAND} 	&
+ {LESS_OR_EQUAL} 	<=
+ {GREATER_OR_EQUAL} 	>=
+ {NOT_EQUAL} 	!=
+ {LESS} 	<
+ {GREATER} 	>
+ {EQUALS} 	==
+ {ASSIGN_OPERATOR} 	=
+ {EXCLAMATION} 	!
+ {COLON} 	\:
+ {SEMICOLON} 	;
+ {COMMA} 	,
+ {LEFTPARENTHESIS} 	\(
+ {RIGHTPARENTHESIS} 	\)
+ {STRING_LITERAL,$1} 	\"(.*?)\"
+} {	\}\{
+ {ID} 	[identifier]
+ {INT,$1} 	\s+(\d+)\s+
+ 	\s+

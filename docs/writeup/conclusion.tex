@@ -1,0 +1,23 @@
+\section{Conclusion and future work}
+
+We were unsuccessful in determining whether this work has improved on the methods in \cite{danetal13}. Though the theories on which this work is built are sound, as proven by \cite{danetal13} and \cite{balletal01}, and the expansions thereon are few and simple, the program output is vast, and there can be little information extracted therefrom. This leads us to the first possibility of future development: to write a working implementation of the principles discussed in this work, preferable one that extends SALPL to allow for atomic blocks.
+
+\subsection{Future work}
+
+Possible further developments in this field are plentiful. We list some of the most apparent aspects that may be improved upon:
+
+\paragraph{TSO implementation}
+
+Though we did describe the procedure of abstracting programs running under TSO, an efficient implementation would complement the findings of this work and \cite{danetal13}.
+
+\paragraph{RMA implementation}
+
+With some modifications to the parsing, and code abstraction phases of this work, the same analysis method can be adapted for programs running under the Remote Memory Access model, a powerful WMM conceived for buffer-free memory access over the network.
+
+\paragraph{Parallelisation}
+
+The entire tool, and all its measurements were ran in a sequential manner. While there are some parallelisation chokepoints in the procedure described in this work, e.g. buffer size analysis, code replacement, other, more important parts, such as the computations necessary for the predicate abstraction, are highly parallelisable. With this in mind, the run time of this tool can be further reduced.
+
+\subsection{Acknowledgements}
+
+I would like to express my thanks to my advisor, Andrei Marian Dan, who has provided me with crucial help, support, and advice during the writing of this work and the design of the prototype tool. Furthermore, I would also like to thank Prof. Dr. Martin Vechev for giving me the opportunity to contribute to this fascinating field of research at his group.
