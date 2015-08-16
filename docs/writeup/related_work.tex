@@ -1,0 +1,15 @@
+\section{Related work}
+
+This work is based on the work of Dan, Meshman, Vechev, and Yahav on predicate abstraction for relaxed memory models \cite{danetal13}, and it implements most of the techniques derived by the same. It also borrows heavily from the predicate abstraction rules defined by Ball, Majumdar, Millstein, and Rajamani \cite{balletal01}. Below, we describe these publications and the nature of their influence on this work, apart from general inspiration.
+
+\subsection{Predicate Abstraction for Relaxed Memory Models}
+
+The work by Dan et al. \cite{danetal13} has presented the two abstraction steps this work also employs. It has handled the problem of verifying a program $P$ running on an arbitrary memory model $M$ by embedding a description of said memory model into a program $P_M$, which is in its behaviour equivalent to $P$. The resulting abstraction $P_M$ has then been analysed for predicates to be generated in order to be used as correctness criteria for a successive predicate abstraction, which would then describe the conversion of $P_M$ into a boolean program ready to be verified by a model checker. Furthermore, the aforementioned methods have been implemented for TSO and PSO.\\
+
+It is safe to say that this work primarily seeks to implement the ideas and concepts described in \cite{danetal13}, to reproduce its success in achieving feasibility in its implementation, and to improve on its performance and complexity wherever possible.
+
+\subsection{Automatic Predicate Abstraction of C Programs}
+
+The work by Ball et al. \cite{balletal01} has laid the foundation on which predicate abstraction in this work is implemented. It has described the difficulties model checkers face when confronted with systems with large state spaces, such as software, which is infinite-space. The authors have described the first algorithm to automatically construct a predicate abstraction of programs in C, and they have implemented it in a toolkit, which combined it with other methods such as model checking to statically verify input programs.\\
+
+The final stage of this work, predicate abstraction, implements the algorithm defined by Ball et al., adjusted for the PSO/TSO language we use, and employs some of the optimizations described by the authors.

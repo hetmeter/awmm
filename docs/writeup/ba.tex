@@ -1,0 +1,373 @@
+\section{Buffer abstraction}
+
+As we have seen, some of the statements available to the programmer make use of a write buffer. Since depending on the memory model chosen, we may encounter different behaviours when running the same program using different memory models, we face the challenge of rewriting the program in a way that its behaviour will be conclusively defined, independent of the memory model chosen. We will do this by completely eliminating any buffer access by abstracting the buffers as sets of local variables. In order for us to be able to assume the lack of buffer operations, we will need to eliminate fence- and flush statements. As for remote stores and loads, we can replace them with code that simulates their buffer-related behaviours using non-WMM statements, retaining the use of store and load statements to represent assignment statements involving global variables without the involvement of the buffer. Since this intermediary code will never be run, but instead will be further abstracted in the predicate abstraction stage, we may safely ignore any regular WMM-behaviour such statements might have, as we will handle store- and load statements like local assignments for predicate abstraction purposes. The reason we refrain from using local assignment statements instead of store- or load statements in our abstracted program is our desire to preserve syntactic correctness even in our intermediary program, and to highlight the fact, that at certain points, load statements will actually perform a remote read, and that flush statements may at one point actually perform remote writes.\\
+
+\subsection{Buffer size analysis}
+
+For the purpose of determining the maximum buffer space needed by any global variable, we count the number of store statements in the control flow of the program within each process $i$. In case there are less store statements on a variable than the user-specified maximum buffer size $K$, we will only allocate the necessary number of buffer variables, which is the minimum of $K$ and the number of stores on that variable in the process $i$. We will refer to this number as $s_{x,i}$ for any global variable \lstinline$x$ when employing PSO, and $s_i$ for TSO.\\
+
+In detail, we first take the AST representing the program, and cascade through it from the root to the leaves. Whenever we encounter a program point, we draw one control flow edge from that program point to any other program point that might directly follow in a possible sequential execution order. As shown in Figure 1, keywords such as \lstinline$else$ and \lstinline$endif$ are not program points, yet \lstinline$nop$ or unlabelled statements are.\\
+
+Once we have the control flow graph, we start at the first program point in every process $i$ with a visitor having $s_i$ or $s_{x, i}$ for all global variables \lstinline$x$ set to $0$, and traverse the entire graph until we encounter a dead end, or an already visited node (which is the case for cyclic control flow graphs). Every time we visit a program point, we take the maxima of the visitor's $s_{x, i}$ or $s_i$, depending on the current store order, and the current node's corresponding values, and store them in both the node and the visitor. If the visited node is a store, we increment the corresponding values by 1 beforehand. Figure 2. shows the snapshot of the state of the program with a visitor just having visited the third node from the top.\\
+
+Note that all buffer size entries are initialized to $0$. The visitor propagates the accumulated values to every subsequent node visited. If a visitor encounters a node with more than one outgoing edge, it spawns a copy of itself for every additional edge. These copies carry the same values as their predecessors, and they have the same record of visited nodes, i.e. if a visitor comes upon a node that had already been visited by any one of its ancestors, it will also regard that node as visited. Conversely, if a visitor encounters a node which had been visited by at least one other visitor, but none of its direct ancestors, it will not regard that node as visited, and it will continue down the control flow graph as usual.\\
+
+If a visitor encounters a node it regards to be visited, it still increments the corresponding value as needed. At this point, if there is any value stored in the node that is smaller than its counterpart stored by the visitor, an arbitrary increase of that value is detected and that value is set to TOP (which is regarded as infinitely large for comparison reasons). The node communicates this change in the direction of the control flow, and every node that is situated downward of this current node also gets its corresponding value set to TOP. At this point, the visitor stops. Figure 3. shows the snapshot of the state of the program with a visitor just having revisited the third node from the top, Figure 4. shows the aftermath of the TOP values cascading along the control flow edges, and finally, Figure 5. shows the state after the last visitor reaches the bottom most node after having been spawned in the fourth node from the top.\\
+
+Note that while the order of evaluating the path of multiple visitors is irrelevant, their affecting each other by node value editing creates a race condition on nodes that are potentially visited by more than one visitor. Thus, the buffer size analysis is not parallelizable on the same process. However, different processes may be examined in parallel.
+
+\begin{figure}[h]
+
+	\caption{Control flow example}
+	\centering
+	\includegraphics[width=5cm]{png/controlflow_01.png}
+
+\end{figure}
+
+\pagebreak
+
+\begin{figure}[h]
+
+	\caption{Visitor reached 3rd node}
+	\centering
+	\includegraphics[width=12cm]{png/controlflow_02.png}
+
+\end{figure}
+
+\begin{figure}[h]
+
+	\caption{Visitor reached 3rd node again}
+	\centering
+	\includegraphics[width=12cm]{png/controlflow_03.png}
+
+\end{figure}
+
+\pagebreak
+
+\begin{figure}[h]
+
+	\caption{TOP values cascaded}
+	\centering
+	\includegraphics[width=12cm]{png/controlflow_04.png}
+
+\end{figure}
+
+\begin{figure}[h]
+
+	\caption{Visitor reached last node}
+	\centering
+	\includegraphics[width=12cm]{png/controlflow_05.png}
+
+\end{figure}
+
+\FloatBarrier
+
+\pagebreak
+
+\subsection{PSO abstraction}
+
+Using PSO, every global variable has a separate buffer per process of the size $s_{x,i}$. Therefore, for each process $i$, for each global variable \lstinline$x$, there are $s_{x,i}$ buffer variables of the form \lstinline$x_j_i$, where $j \in [1, s_{x,i}]$. Since flushes are non-deterministic, we cannot keep track of occupied buffer spaces. Therefore, we declare 2 additional auxiliary variables for each global variable in each process: \lstinline$x_cnt_i$, which is initialised to 0 and otherwise has the value of the last buffer index to which a value of \lstinline$x$ was written, and \lstinline$x_fst_i$, which is analogous to \lstinline$x_cnt_i$ with the difference that it points to the first such index. Figure 6. illustrates the buffer allocation abstraction we apply for PSO programs.\\
+
+\begin{figure}[h]
+
+	\caption{PSO buffer abstraction approach}
+	\centering
+	\includegraphics[width=13cm]{png/pso_buffer.png}
+
+\end{figure}
+
+\pagebreak
+
+\subsection{TSO abstraction}
+
+Using TSO, every process has a separate buffer of the size $K$, which all global variables share. The buffer holds all values in an order-preserving manner: A value $v_{1}$ that is stored in the buffer before another value $v_{2}$ will also be written to memory before $v_{2}$. Therefore, the store order of values must be preserved in the program.\\
+
+An economic way to do this is to keep track of the last element inserted into the buffer, and store the next value in the following slot. Since we cannot know the actual run-time allocation of the buffer, we will only be able to analyse the maximum buffer size of the entire process (which we express by $s_{i}$), but not of the individual variables. For each buffer slot, we will declare two variables of the form \lstinline$buf_j_i$, and \lstinline$own_j_i$, where $j \in [1, s_{i}]$.\\
+
+We will also statically build an allocator table, which will pair every global variable to a unique numeric value which will allow us to identify the values stored in the buffer as belonging to its owner variable at run-time. We will use the notation $\rho(v)$ to denote the numeric allocator key of the variable \lstinline$v$. Thus, for every buffer slot with the number $j \in [1, s_{i}]$ in every process $i$, we will have a variable \lstinline$buf_j_i$ (which we will call a buffer variable) containing the value currently held by that buffer slot, and a variable \lstinline$own_j_i$ (which we will call a buffer allocator) containing the allocator key of the variable whose value is stored there. If the allocator is set to $0$, the buffer is marked to be free, and if it is set to $-1$, it is marked as invalidated by a flush. Figure 7. illustrates the buffer allocation abstraction we apply for TSO programs.\\
+
+\begin{figure}[h]
+
+	\caption{TSO buffer abstraction approach}
+	\centering
+	\includegraphics[width=13cm]{png/tso_buffer_02.png}
+
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Replacement rules}
+
+After we compute all $s_{x,i}$ or $s_{i}$ for each global variable \lstinline$x$ and for each process $i$, we have enough data to statically perform all necessary replacements in our program to allow predicate abstraction. We will define different replacement rules for each store order.
+
+\subsubsection{Replacing store statements}
+
+Assuming \lstinline$x$ is a global variable, \lstinline$r$ is an integer expression, and we encounter \lstinline$store x = r$ in a process $i$, we will replace this statement with the code blocks listed below. Note, that the variable symbol is appended to every corresponding if-else statement in the case of TSO. This is done in order to allow us a fast context analysis on buffer variable assignments within these if-else blocks, which we will use later on.
+
+\begin{multicols}{2}
+
+PSO approach:
+
+\begin{lstlisting}[frame=single, mathescape]
+if (x_cnt_$i$ = $s_{x,i}$)
+	abort("overflow");
+endif;
+
+if (x_fst_$i$ = 0)
+	x_fst_$i$ = 1;
+	x_1_$i$ = r;
+endif;
+
+x_cnt_$i$ = x_cnt_$i$ + 1; 
+
+if (x_cnt_$i$ = 2)
+	x_2_$i$ = r;
+endif;
+$...$
+if (x_cnt_$i$ = $j$)
+	x_$j$_$i$ = r;
+endif;
+$...$
+if (x_cnt_$i$ = $s_{x,i}$)
+	x_$s_{x,i}$_$i$ = r;
+endif;
+\end{lstlisting}
+
+\columnbreak
+
+TSO approach:
+
+\begin{lstlisting}[frame=single, mathescape]
+if (own_1_$i$ = 0)    // x
+    buf_1_$i$ = r;
+    own_1_$i$ = $\rho($x$)$;
+    goto $SEL$;
+endif;
+
+if (own_2_$i$ = 0)    // x
+    buf_2_$i$ = r;
+    own_2_$i$ = $\rho($x$)$;
+    goto $SEL$;
+endif;
+$...$
+if (own_$j$_$i$ = 0)    // x
+    buf_$j$_$i$ = r;
+    own_$j$_$i$ = $\rho($x$)$;
+    goto $SEL$;
+endif;
+$...$
+if (own_$s_{i}$_$i$ = 0)    // x
+    buf_$s_{i}$_$i$ = r;
+    own_$s_{i}$_$i$ = $\rho($x$)$;
+    goto $SEL$;
+endif;
+abort("overflow");
+$SEL$: nop;
+\end{lstlisting}
+
+\end{multicols}
+
+\pagebreak
+
+\subsubsection{Replacing load statements}
+
+Assuming \lstinline$x$ is a global variable, \lstinline$l$ is a local variable, and we encounter \lstinline$load l = x$ in a process $i$, we will replace this statement with:
+
+\begin{multicols}{2}
+
+PSO approach:
+
+\begin{lstlisting}[frame=single, mathescape]
+if (x_cnt_$i$ = 0)
+	load l = x;
+endif;
+
+if (x_cnt_$i$ = $s_{x,i}$)
+	l = x_$s_{x,i}$_$i$;
+endif;
+$...$
+if (x_cnt_$i$ = $j$)
+	l = x_$j$_$i$;
+endif;
+$...$
+if (x_cnt_$i$ = 2)
+	l = x_2_$i$;
+endif;
+
+if (x_cnt_$i$ = 1)
+	l = x_1_$i$;
+endif;
+\end{lstlisting}
+
+\columnbreak
+
+TSO approach:
+
+\begin{lstlisting}[frame=single, mathescape]
+if (own_$s_{i}$_$i$ = $\rho($x$)$)	// x
+    l = buf_$s_{i}$_$i$;
+    goto $LEL$;
+endif;
+$...$
+if (own_$j$_$i$ = $\rho($x$)$)	// x
+    l = buf_$j$_$i$;
+    goto $LEL$;
+endif;
+$...$
+if (own_2_$i$ = $\rho($x$)$)	// x
+    l = buf_2_$i$;
+    goto $LEL$;
+endif;
+
+if (own_1_$i$ = $\rho($x$)$)	// x
+    l = buf_1_$i$;
+    goto $LEL$;
+endif;
+load l = V;
+$LEL$: nop;
+\end{lstlisting}
+
+\end{multicols}
+
+\subsubsection{Replacing fence statements}
+
+Assuming we encounter \lstinline$fence;$ in a process $i$, we will replace this statement with the following block for every global variable \lstinline$x$:
+
+\begin{multicols}{2}
+
+PSO approach:
+
+\begin{lstlisting}[frame=single, mathescape]
+assume (x_cnt_$i$ = 0);
+assume (x_fst_$i$ = 0);
+\end{lstlisting}
+
+\columnbreak
+
+TSO approach:
+
+\begin{lstlisting}[frame=single, mathescape]
+assume (own_1_$i$ < 1);
+assume (own_2_$i$ < 1);
+$...$
+assume (own_$j$_$i$ < 1);
+$...$
+assume (own_$s_{i}$_$i$ < 1);
+own_1_$i$ = 0;
+own_2_$i$ = 0;
+$...$
+own_$j$_$i$ = 0;
+$...$
+own_$s_{i}$_$i$ = 0;
+\end{lstlisting}
+
+\end{multicols}
+
+\subsubsection{Replacing flush statements}
+
+Let $\beta$ be the number of global variables in $P$ and $\rho^{-1}$ be the inverse function of $\rho$, i.e. it returns the variable symbol belonging to the input number. Assuming we encounter \lstinline$flush;$ in a process $i$, we will replace this statement with:
+
+\begin{multicols}{2}
+
+TSO approach:
+
+\begin{lstlisting}[frame=single, mathescape]
+if (*)
+    goto $FEL$;
+endif;
+if (own_1_$i$ > 0)
+    $[flush\:1]$
+endif;
+if (*)
+    goto $FEL$;
+endif;
+if (own_2_$i$ > 0)
+    $[flush\:2]$
+endif;
+$...$
+if (*)
+    goto $FEL$;
+endif;
+if (own_$j$_$i$ > 0)
+    $[flush\:j]$
+endif;
+$...$
+if (*)
+    goto $FEL$;
+endif;
+if (own_$s_{i}$_$i$ > 0)
+    $[flush\:s_{i}]$
+endif;
+$FEL$: nop;
+\end{lstlisting}
+
+\columnbreak
+
+The placeholder $[flush\:\alpha]$ describes the following code block for a number $\alpha$:
+
+\begin{lstlisting}[frame=single, mathescape]
+if (own_$\alpha$_$i$ = 1)	// $\rho^{-1}(1)$
+    store $\rho^{-1}(1)$ = buf_$\alpha$_$i$;
+    goto $SubFEL$;
+endif;
+if (own_$\alpha$_$i$ = 2)	// $\rho^{-1}(2)$
+    store $\rho^{-1}(2)$ = buf_$\alpha$_$i$;
+    goto $SubFEL$;
+endif;
+$...$
+if (own_$\alpha$_$i$ = $j$)	// $\rho^{-1}(j)$
+    store $\rho^{-1}(j)$ = buf_$\alpha$_$i$;
+    goto $SubFEL$;
+endif;
+$...$
+if (own_$\alpha$_$i$ = $\beta$)	// $\rho^{-1}(\beta)$
+    store $\rho^{-1}(\beta)$ = buf_$\alpha$_$i$;
+    goto $SubFEL$;
+endif;
+$SubFEL$: own_$\alpha$_$i$ = -1;
+\end{lstlisting}
+
+\end{multicols}
+
+\pagebreak
+
+PSO approach:
+
+\begin{lstlisting}[frame=single, mathescape]
+p: if (*)
+	$[global\:variable\:flushes]$
+	goto p;
+endif;
+\end{lstlisting}
+
+The placeholder $[global\:variable\:flushes]$ describes the following code block for each global variable \lstinline$x$:
+
+\begin{lstlisting}[frame=single, mathescape]
+if (x_cnt_$i$ > 0)
+	if (*)
+		if (x_fst_$i$ > 1)
+			if (x_fst_$i$ > 2)
+				$...$
+				if (x_fst_$i$ > $j$)
+					$...$
+					if (x_fst_$i$ > $s_{x,i} - 1$)
+						store x = x_$s_{x,i}$_$i$;
+					else
+						store x = x_$(s_{x,i} - 1)$_$i$;
+					endif;
+					$...$
+				else
+					store x = x_$j$_$i$;
+				endif;
+				$...$
+			else
+				store x = x_2_$i$;
+			endif;
+		else
+			store x = x_1_$i$;
+		endif;
+
+		x_fst_$i$ = x_fst_$i$ + 1;
+	endif;
+endif;
+\end{lstlisting}

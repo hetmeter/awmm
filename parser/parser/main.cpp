@@ -16,6 +16,7 @@ int main(int argc, char** argv)
 	string programParserPath;
 	string predicateParserPath;
 	string inputArgument;
+	string memoryOrder;
 	string fileName;
 
 	// Get the persistent configuration settings from a configuration file
@@ -32,7 +33,17 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	config::evaluationMode = argc > 2 && config::EVALUATION_MODE_PARAMETER.compare(argv[2]) == 0;
+	if (argc > 2)
+	{
+		memoryOrder = argv[2];
+	}
+	else
+	{
+		config::throwError("No memory order specified");
+		return 1;
+	}
+
+	config::evaluationMode = argc > 3 && config::EVALUATION_MODE_PARAMETER.compare(argv[3]) == 0;
 
 	// Derive the input file paths from the input argument
 	regex fileNameRegex(config::EXTENSION_REGEX);
@@ -45,13 +56,13 @@ int main(int argc, char** argv)
 		programParserPath = configVariables[config::RMA_PROGRAM_PARSER_RULE_FILE_PROPERTY];
 		predicateParserPath = configVariables[config::RMA_PREDICATE_PARSER_RULE_FILE_PROPERTY];
 	}
-	else if (stringMatch[2] == config::TSO_EXTENSION)
+	else if (stringMatch[2] == config::SALPL_EXTENSION && memoryOrder == config::TSO_PARAMETER)
 	{
 		lexerPath = configVariables[config::TSO_LEXER_RULE_FILE_PROPERTY];
 		programParserPath = configVariables[config::TSO_PROGRAM_PARSER_RULE_FILE_PROPERTY];
 		predicateParserPath = configVariables[config::TSO_PREDICATE_PARSER_RULE_FILE_PROPERTY];
 	}
-	else if (stringMatch[2] == config::PSO_EXTENSION)
+	else if (stringMatch[2] == config::SALPL_EXTENSION && memoryOrder == config::PSO_PARAMETER)
 	{
 		lexerPath = configVariables[config::PSO_LEXER_RULE_FILE_PROPERTY];
 		programParserPath = configVariables[config::PSO_PROGRAM_PARSER_RULE_FILE_PROPERTY];

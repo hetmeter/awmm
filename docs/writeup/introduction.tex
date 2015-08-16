@@ -1,0 +1,45 @@
+\section{Introduction}
+
+A vital use of program analysis is correctness proving. Assuming we have a program and a set of criteria our program has to meet under any circumstance, proving that our program meets all of our criteria is an important task for critical software components. Additionally, if we expand our validity requirements to concurrent runs of one or more instances of the program, which itself might have several concurrent processes, our analysis threatens to become untractably complex. When we relax the constraints of sequential consistency to those defined by total store ordering (TSO) and partial store ordering (PSO) for programs employing weak memory models (WMM), we face a seemingly untractable problem when trying to perform program analysis.
+
+\subsection{Proof of correctness}
+
+Let $P$ be a multi-process program using a WMM instruction set, let $E$ be a list of predicates on the variables of $P$, and let $a$ be a boolean expression describing the correctness assertions for $P$ using the predicates provided in $E$ and the program counter. We consider $P$ to be correct as defined by $E$, iff for every possible run scenario of any number of concurrent instances of $P$, in which any number of processes of $P$ may run concurrently, the assertion $a$ holds true in every program point of $P$. Terms involving the program counter are used to limit the necessity for $a$ (or parts thereof) to hold true. By abstracting $P$ as a boolean program using $E$, such a proof becomes feasible using a model checker.
+
+\subsection{Weak memory models}
+
+In all of our programs, we will differentiate between local resources, declared as local variables, and their remote counterparts. The main feature of WMM languages is the differentiation between local assignments and remote reads and writes. We consider local variables as being local both in the semantic sense (i.e. a process constitutes the scope of a local variable) and the technical sense (i.e. a local variable is stored in fast-access memory, such as a register or local cache space). In contrast, remote variables are globally shared across all processes and are assumed to be stored in shared memory, that's more time-consuming to access. We will continue using the words ``local'' and ``remote'' in this manner throughout this work.\\
+
+Thus, the main advantage of WMM programming becomes clear, as the programmer will now be able to avoid costly remote memory accesses for operations restricted to one process, along with any adverse side-effects depending on the caching policy. This does not, however, mean that a remote statement will always access remote memory. For practical reasons, remote writes are immediately stored in a buffer, and only committed to remote memory in the case of a flush statement, which, as apparent from its definition, is inherently non-deterministic. In the same vein, remote reads will read from the local buffer if possible, and only access remote memory if the local buffer is empty. In this work, we will abstract the buffer as a series of local variables representing a FIFO queue. The buffering method depends on the memory model. In the case of PSO, every global variable in every process will have a dedicated buffer, whereas in the case of TSO, every process will have one buffer shared by all global variables.
+
+\subsection{Difficulties of WMM}
+
+Our program behaves differently depending on the memory ordering chosen, without this difference being readily apparent from the code. More precisely, when using PSO, the available buffer size defines a set maximum buffer size for every global variable per process, whereas when using TSO, it only defines the sum of the buffer sizes of every global variable per process. To illustrate this with an example, if we have a program with 2 global variables $x$ and $y$, with 4 remote writes in $x$ and 2 remote writes in $y$ before flushing, a per-process buffer size of 6 wouldn't result in a buffer overflow, as the sum of the maximum buffer sizes of $x$ and $y$ does not exceed 6. However, the same code results in an overflow if we define a maximum per-process per-variable buffer size of 3, since the 4th write in $x$ would exceed the maximum buffer size allocated to $x$ in that process.\\
+
+We tackle this problem by converting our program $P$ from one generally exploiting all the features available in WMM into another program $P'$ that lacks any ``true'' WMM statements. I.e., our resulting program will only contain local assignments, remote reads, and remote writes, with no fences or flushes (we will redefine flushes as statements later on). Though remote reads and writes will still be featured in $P'$, they will simply describe immediate and deterministic remote access statements, without any of the advantages or pitfalls of their WMM counterparts. Finally, we can convert $P'$ into a boolean program using predicate abstraction, which, as described in 1.1, can be used to prove the correctness of $P$ regarding $a$.\\
+
+Flushing is a part of WMMs. It describes an operation triggered by memory management at times usually out of the programmer's reach. In essence, flushing writes the buffer content to memory, deleting it from the buffer. Since the behaviour of flushing is an important aspect of WMMs to consider when attempting to analyse programs running under them, we need to be able to simulate its behaviour in a non-WMM environment. To this end, we define \lstinline$flush;$ to be an explicit statement in our program, and we will place this statement once wherever a flush might occur.
+
+\subsection{Main contributions}
+
+This work describes the implementation of a software tool that takes a program written in SALPL as input, a language we define below, and outputs a boolean program parsable by the Fender \cite{fender} model checker for verification. The components of this tool break down as follows:
+
+\paragraph{Parser}
+
+We have built a lightweight parser that takes a syntactically correct SALPL program and a language definition of SALPL as input, and outputs an abstract semantic tree representation into a file. This specific form of AST representation is then used to perform further operations on the program.
+
+\paragraph{Buffer size analysis}
+
+We traverse the control flow tree of the program, and record the number of store and fence statements we encounter on our path. For every store statement, we increment the buffer size needed to accomodate all stores so far. For PSO programs, this is stored separately for each process and each variable in a value to which we will refer as $s_{x, i}$ for the variable \lstinline$x$ and the process $i$. For TSO programs, this value is only kept by process, independent of variables. Analogously to its PSO counterpart, we will refer to this value as $s_i$. For buffer sizes exceeding $K$, as well as for values that may be arbitrarily high (which we will indicate by assigning the value ``TOP''), we will store the value $K$.
+
+\paragraph{Program rewriting}
+
+Converting the WMM program to one lacking buffer behaviour influence is done by visiting every program point of the type store, load, fence, or flush. For every program point, we will have already computed all parameters needed to generate the replacement code. In this phase, we carry out the replacements we define in 3.3.
+
+\paragraph{Predicate abstraction}
+
+We take our rewritten program, which is now devoid of any operations on the buffer. In this phase, our tool generates tables for every weakest liberal precondition and implicative cube disjunction we use for the predicate abstraction of our program. These components and techniques are expanded upon in section 4. We use Z3 \cite{z3} as a theorem prover to prove or disprove implications. As a general rule, we try to minimize the calls to the theorem prover, and we do this with a combination of storing all computed results for later use, omitting cubes that form supersets of already found implicative cubes, and renaming heuristics, with which we reduce the problem of finding cube disjunctions for predicates involving derived variables to the same problem involving the global variables from which they were derived.
+
+\paragraph{Model checking}
+
+While not strictly a part of this work, our output is tailored to be used with the model checker Fender \cite{fender}. Our output can be directly fed into the input of Fender for analysis.

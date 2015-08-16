@@ -59,6 +59,8 @@ namespace literalCode
 		const extern char BOOLEAN_VARIABLE_PREFIX;
 		const extern char TEMPORARY_VARIABLE_PREFIX;
 
+		const extern std::string ABORT_VARIABLE_NAME;
+
 /* Token names */
 
 	/* Boolean program language */
@@ -147,6 +149,8 @@ namespace literalCode
 
 /* Parameters */
 
+	const extern std::string MEMORY_ORDER_PSO;
+	const extern std::string MEMORY_ORDER_TSO;
 	const extern std::string EVALUATION_MODE_PARAMETER;
 	const extern std::string VERBOSE_MODE_PARAMETER;
 }

@@ -1,0 +1,188 @@
+\section{Predicate abstraction}
+
+After the replacements carried out in the buffer size analysis section, we have a program that both encapsulates the behaviour of the chosen WMM, and that can be abstracted according to the rules described in section 4 up and until 4.4 of \cite{balletal01}. As our program is not written in C, but in SALPL, and the output language must be recognized by our model checker, Fender, we state the following alterations to the aforementioned rules: there are no procedure calls, pointers, arrays, or any variables of a type other than integer in our input program, and no variables of a type other than boolean in the output. In this section, we define the components, and lastly, the overall structure of our output boolean program. We will use the notation $\sigma[\lstinline$a$ / \lstinline$b$]$ to denote $\sigma$ with all occurences of \lstinline$b$ replaced by \lstinline$a$.\\
+
+For the predicate abstraction itself, we declare two boolean variables for each predicate $\varphi_i \in E$: \lstinline$B_$$i$ (boolean variables) and \lstinline$T_$$i$ (temporary variables). Both of them hold the truth value of $\varphi_i$, albeit at different times. We can guarantee however, that \lstinline$B_$$i$ is always the truth value of $\varphi_i$. \lstinline$T_$$i$ on the other hand is used during parallel assignments, where we simultaneously assign values to more than one boolean variable, while still needing to read values thereof from before the commencing of the parallel assignments. These variables are also declared for the additional predicates defined below. Also, keeping in line with the notation in the paper by Ball et al. \cite{balletal01}, we will use the notation $WP(\lstinline$s$, \varphi)$ for the weakest liberal precondition of the predicate $\varphi$ with respect to the statement $s$, and $\mathcal{F}_{V}(\varphi)$ for the largest disjunction of implicative cubes for a predicate $\varphi$ over a set of boolean variables $V$.
+
+\subsection{Variables and predicates}
+
+Our program has a set of variables $H$, as declared in the original input program, and a set of predicates $E$ over $H$. The predicates in $E$ are sufficient to verify the program under sequential consistency constraints (i.e. without WMM-related effects). Among the newly declared local variables, i.e. all variables that weren't part of the original program, but since have been declared during the buffer size analysis stage, we differentiate between auxiliary variables, which encompass all first pointers, counters, and buffer allocators of the forms \lstinline$x_fst_$$i$, \lstinline$x_cnt_$$i$, and \lstinline$own_x_$$i$, respectively, and buffer variables, which describe all variables abstracting WMM write buffer data. All buffer variables are assigned to a single global variable at any program point. This follows from the buffer variables' inherent association with a single global variable in the case of PSO, and TSO buffer variables' only being used after allocation to a global variable. With this information, for each global variable \lstinline$x$ and each valid process number $i$, we extend our predicate set by the following predicates:
+
+\begin{multicols}{2}
+
+In the case of PSO:
+
+\begin{lstlisting}[frame=single, mathescape]
+(x_cnt_$i$ >= 0)
+(x_cnt_$i$ <= $K$)
+(x_fst_$i$ >= 0)
+(x_fst_$i$ <= $K$)
+\end{lstlisting}
+
+\columnbreak
+
+In the case of TSO:
+
+\begin{lstlisting}[frame=single, mathescape]
+(own_1_$i$ = $\rho($x$)$)
+(own_1_$i$ = $\rho($x$)$)
+$...$
+(own_$j$_$i$ = $\rho($x$)$)
+$...$
+(own_$s_{i}$_$i$ = $\rho($x$)$)
+\end{lstlisting}
+
+\end{multicols}
+
+We will handle these new predicates as we would handle the original ones. Furthermore, for every process $i$, we define the following extended predicate set for PSO:
+
+\[E':=\{\varphi' := \varphi[\lstinline$x_$j\lstinline$_$i / \lstinline$x$] \: | \: \lstinline$x$ \in \varphi \in E \cup E' \wedge \lstinline$x$ \in H \wedge j \in [1, s_{x,i}]\},\]
+
+while in the case of TSO, our extended predicate set is defined as follows:
+
+\[E':=\{\varphi' := \varphi[\lstinline$buf_$j\lstinline$_$i / \lstinline$x$] \: | \: \lstinline$x$ \in \varphi \in E \cup E' \wedge \lstinline$x$ \in H \wedge j \in [1, s_{x,i}]\}.\]
+
+Though we will handle the latter predicates the same way we would handle the others, unless stated otherwise, we will make note of them being \textit{buffer predicates} and copies of certain different predicates $\in E$.
+
+\subsection{The choose statement}
+
+The \lstinline$choose($$pos$\lstinline$, $$neg$\lstinline$);$ statement is defined in subsection 4.3. We will make use of it during our predicate abstraction of assignments. Paraphrased, it states for two boolean variables \lstinline$A$ and \lstinline$B$:
+
+\begin{lstlisting}[frame=single, mathescape]
+if (A $\equiv true$)
+	choose(A, B) $\equiv true$
+else if (B $\equiv true$)
+	choose(A, B) $\equiv false$
+else
+	choose(A, B) $\equiv$ *
+endif;
+\end{lstlisting}
+
+Note that boolean variables in Fender may have the value \lstinline$*$, i.e. indecisive.
+
+\subsection{Weakest liberal preconditions}
+
+As defined in subsection 4.1 of \cite{balletal01}, $WP(\lstinline$s$, \varphi)$ is defined as the weakest predicate whose truth before $s$ entails the truth of $\varphi$ after $s$ terminates (if $s$ terminates), and in the case of $s$ being an assignment statement of the form \lstinline$x = e$, it equals $\varphi[\lstinline$e$ / \lstinline$x$]$. In this work, we will only compute the weakest liberal preconditions of assignment statements.
+
+\subsection{Largest implicative cubes}
+
+Paraphrasing the definitions in subsection 4.1 of \cite{balletal01} to better suit the semantics of this work, we define a cube over a boolean variable set $V$ as follows: an implicative cube for a predicate $\varphi$ is a conjunction of boolean variables $\in V$ (negated or not) representing different predicates $\in E$, which implies $\varphi$. We say for a cube $C$ to be the "superset" of another cube $D$ iff $D$ can be expressed as the conjunction of $C$ and a different non-empty cube $C'$ lacking any variable appearing in $C$. Continuing with our paraphrasing, we define $\mathcal{F_V}(\varphi)$ with the size limit $L$ as the disjunction of all cubes over $V$ implying $\varphi$ with $L$ or less literals, and $\mathcal{G_V}(\varphi) := \neg\mathcal{F_V}(\neg\varphi)$. For practicality reasons, and without loss of generality, we can redefine the largest disjunction of implicative cubes as lacking any two cubes of which one is the superset of another. We construct such cube disjunctions conservatively, i.e. once we find that a cube $c$ implies a predicate, we will omit any supersets of $c$ from our disjunction, as described in subsection 5.2 of \cite{balletal01}.
+
+\subsection{Replacement rules}
+
+We use the replacement rules defined in section 4 of \cite{balletal01}, albeit in a reduced and slightly adapted form, as we need not consider the caveats of the C language.
+
+\subsubsection{Local assignment-, store-, and load statements}
+
+We reduce all three types of assignment statements to the same form \lstinline$l = r$. First, we examine the left-hand side of the assignment. If it is a buffer variable, it will be regarded as the global variable it represents for all purposes with the exception of determining the left-hand sides of all initialization-, assignment- and reset statements. Next, we build the set of relevant predicates $R$ out of any predicate that contains \lstinline$l$, save for buffer predicates. As long as we encounter predicates containing non-buffer variables, we extend $R$ by all predicates containing the new variables, which will result in the extended set of relevant predicates $R'$. All the while, we keep ignoring and omitting buffer variables and buffer predicates. Once this closure has been computed, we have all we need to replace the assignment with:
+
+\begin{lstlisting}[frame=single, mathescape]
+begin_atomic;
+$[initialization\:of\:temporary\:variables]$
+$[assignment\:of\:boolean\:variables]$
+$[reset\:of\:temporary\:variables]$
+assume(!($\mathcal{F}_{V}($false$)$));
+end_atomic;
+\end{lstlisting}
+
+In this atomic block, we simulate the parallel assignment of the new boolean values to their variables. We define the \textit{initialization of temporary variables} for each predicate $\in R$ with the index $j$ as: \lstinline$load T_$$j$\lstinline$ = B_$$j$\lstinline$;$. Analogously, we define the \textit{reset of temporary variables} as: \lstinline$T_$$j$\lstinline$ = 0;$, which leaves us with the \textit{assignment of boolean variables}, which is also done for each predicate $\in R$ with the index $j$, and in accordance to subsection 4.3 of \cite{balletal01} as follows:
+
+\begin{lstlisting}[frame=single, mathescape]
+store B_$j$ = choose($\mathcal{F}_{R'}(WP($l = r$, \: \varphi_j))$, $\mathcal{F}_{R'}(WP($l = r$, \: \neg\varphi_j))$);
+\end{lstlisting}
+
+If the initial left-hand side \lstinline$l$ was a buffer variable, we proceed differently for each store order.
+
+\pagebreak
+
+\paragraph{PSO approach}
+
+We scan through every cube in every disjunction, and we extend the corresponding cube disjunction
+
+\[C \in \{\mathcal{F}_{R'}(WP(\lstinline$l = r$, \: \varphi_j)), \mathcal{F}_{R'}(WP(\lstinline$l = r$, \: \neg\varphi_j))\}\]
+
+with the following cubes:
+
+\[C' := \{c' := c[b'/b]\: | \: \lstinline$l$ \in b' \wedge b \mapsto b' \wedge b \in c \in C \cup C'\},\]
+
+where by $b \mapsto b'$, we denote the fact that we can perform repeated replacements of any global variable by one of their buffer representations in a boolean term $b$, which may be a negated, or non-negated representation of a certain predicate $\varphi \in E \cup E'$, in order to receive an equivalent boolean term $b'$ with the same negation property as $b$, representing a predicate $\varphi' \in E'$, with all buffer variables in $\varphi$ and $\varphi'$ replaced by their global counterparts resulting in the same predicate. To illustrate this relation, consider the following example:\\
+
+If \lstinline$B_1$ represents the predicate $\varphi_1 := ($\lstinline$x $$>$\lstinline$ y$$)$, \lstinline$B_2$ represents the predicate $\varphi_1' := ($\lstinline$x_1_1 $$>$\lstinline$ y$$)$, \lstinline$B_3$ represents the predicate $\varphi_1'' := ($\lstinline$x_2_1 $$>$\lstinline$ y$$)$, and \lstinline$B_4$ represents the predicate $\varphi_1''' := ($\lstinline$x_1_1 $$>$\lstinline$ y_1_1$$)$, then only the following expressions are correct over these boolean variables: \lstinline$B_1$ $\mapsto$ \lstinline$B_2$, \lstinline$!B_1$ $\mapsto$ \lstinline$!B_2$, \lstinline$B_1$ $\mapsto$ \lstinline$B_3$, \lstinline$!B_1$ $\mapsto$ \lstinline$!B_3$, \lstinline$B_1$ $\mapsto$ \lstinline$B_4$, \lstinline$!B_1$ $\mapsto$ \lstinline$!B_4$, \lstinline$B_2$ $\mapsto$ \lstinline$B_4$, \lstinline$!B_2$ $\mapsto$ \lstinline$!B_4$.
+
+\paragraph{TSO approach}
+
+We fetch the global variable represented by \lstinline$l $ $\equiv$ \lstinline$ buf_$$j$\lstinline$_$$i$ by climbing one step up the abstract semantic tree, which invariably brings us to an if-else statement containing the global variable \lstinline$x$ represented by \lstinline$l$ in the current program point. We have previously illustrated this information deposition by commenting the if-statement.
+In the resulting pair of cube disjunctions, we first replace every boolean term containing $b$ with 
+%\lstinline$choose($$b[l/x]$\lstinline$ && (own_$$j$\lstinline$_$$i$\lstinline$ = $$\rho($\lstinline$x$$)$\lstinline$), own_$$j$\lstinline$_$$i$\lstinline$ = $$\rho($\lstinline$x$$)$)$
+\begin{lstlisting}[frame=single, mathescape]
+choose($b[$l$/$x$]$ && $\mathcal{B}($own_$j$_$i$ = $\rho($x$))$, $\mathcal{B}($own_$j$_$i$ = $\rho($x$))$)
+\end{lstlisting}
+
+$\mathcal{B}(\varphi)$ denotes the boolean variable representing $\varphi$. Then, all cubes with boolean expressions containing global variables are replicated once for every possible combination of buffer variables replacing any occurence of a global variable, with the replacements carried out the same way as above. The following example illustrates this round of extension:\\
+
+\pagebreak
+
+Let \lstinline$choose($$\mathcal{B}($\lstinline$buf_1_1 < y$$)$\lstinline$ && $$\mathcal{B}($\lstinline$own_1_1 = 5$$)$\lstinline$, $$\mathcal{B}($\lstinline$own_1_1 = 5$$)$\lstinline$)$ be one of the replacements made with the above step. Assume $s_{i} = 3$. Therefore, there are 3 buffer variables, 2 of which might be containing a value of \lstinline$y$ with $\rho($\lstinline$y$$) = 7$. Because of this, 2 replicas of the same cube containing this example term are generated, with this term replaced by the following two terms, respectively:
+
+\begin{lstlisting}[frame=single, mathescape]
+choose($\mathcal{B}($buf_1_1 < choose(
+  $\mathcal{B}($buf_1_1 < buf_2_1$)$ && $\mathcal{B}($own_2_1 = 7$)$, $\mathcal{B}($own_2_1 = 7$)$
+)$)$ && $\mathcal{B}($own_1_1 = 5$)$, $\mathcal{B}($own_1_1 = 5$)$)
+
+choose($\mathcal{B}($buf_1_1 < choose(
+  $\mathcal{B}($buf_1_1 < buf_3_1$)$ && $\mathcal{B}($own_3_1 = 7$)$, $\mathcal{B}($own_3_1 = 7$)$
+)$)$ && $\mathcal{B}($own_1_1 = 5$)$, $\mathcal{B}($own_1_1 = 5$)$)
+\end{lstlisting}
+
+Both replica cubes are added to the cube disjunction.
+
+\subsubsection{Conditionals}
+
+We consider conditionals of the form \lstinline$if ($$\varphi$\lstinline$) $[\textit{if block}]\lstinline$ else $[\textit{else block}]\lstinline$ endif;$ and replace them as follows, using the extended relevant predicate set $R'$ of all variables featured in $\varphi$, computed the same way as described in the previous subsection:
+
+\begin{lstlisting}[frame=single, mathescape]
+if (*) goto $else\:label$;
+assume($\mathcal{G}_{R'}(\varphi)$);
+$[if\:block]$
+goto $end\:label$;
+$else\:label$: assume($\mathcal{G}_{R'}(\neg\varphi)$);
+$[else\:block]$
+$end\:label$: nop;
+\end{lstlisting}
+
+\subsubsection{Assertions}
+
+For any predicate $\varphi$ in the assertion clause that doesn't contain a \lstinline$pc($$i$\lstinline$)$ counter, we compute its extended relevant predicate set $R'$, as described above, and replace those predicates with $\mathcal{F}_{R'}(\varphi)$.
+
+\pagebreak
+
+\subsubsection{Overall boolean program structure}
+
+We build our final program to be verified with our model checker the following way:
+
+\begin{lstlisting}[frame=single, mathescape]
+shared B_0, $...$, B_$|E'| - 1$;
+local T_0, $...$, T_$|E'| - 1$;
+
+init
+	store B_0 = *;
+	$...$
+	store B_$|E'| - 1$ = *;
+	load T_0 = B_0;
+	$...$
+	load T_$|E'| - 1$ = B_$|E'| - 1$;
+	
+	$[predicate\:abstractions\:of\:initialization\:stores]$
+
+	T_0 = 0;
+	$...$
+	T_$|E'| - 1$ = 0;
+	
+	assume(!($\mathcal{F}_V($false$)$));
+
+process 1
+	assume(!($\mathcal{F}_V($false$)$));
+	$[predicate\:abstraction\:of\:the\:process\:block]$
+$...$
+$[predicate\:abstraction\:of\:the\:assertion]$
+\end{lstlisting}

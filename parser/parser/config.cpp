@@ -10,6 +10,8 @@ namespace config
 {
 	bool evaluationMode = false;
 	const std::string EVALUATION_MODE_PARAMETER = "-e";
+	const std::string TSO_PARAMETER = "-tso";
+	const std::string PSO_PARAMETER = "-pso";
 
 	const char DESCRIPTION_RULE_SEPARATOR = '\t';
 	const std::string WHITESPACES_WITHOUT_SPACE = "\t\r\n";
@@ -27,8 +29,7 @@ namespace config
 	const std::string PREDICATE_EXTENSION = "predicate";
 	const std::string OUT_EXTENSION = "out";
 	const std::string RMA_EXTENSION = "rma";
-	const std::string TSO_EXTENSION = "tso";
-	const std::string PSO_EXTENSION = "pso";
+	const std::string SALPL_EXTENSION = "sal";
 
 	const std::string RMA_LEXER_RULE_FILE_PROPERTY = "RMA lexer rule file";
 	const std::string RMA_PROGRAM_PARSER_RULE_FILE_PROPERTY = "RMA program parser rule file";

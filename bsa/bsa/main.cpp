@@ -1,3 +1,26 @@
+/*The MIT License(MIT)
+
+Copyright(c) 2015 Attila Zoltán Printz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions :
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 /*
 Buffer Size Analysis:
 	Takes the path of a parsed program and the path of the would-be output file as input. The parsed program must be of the format:
@@ -27,8 +50,7 @@ using namespace std;
 /* Local constants */
 const string ACCEPTING_STATE_REGEX = "\\{ACCEPTING_STATE,(\\S+)\\}";
 const string EXTENSION_REGEX = "(.*)\\.(\\S\\S\\S)\\.out";
-const string PSO_EXTENSION = "pso";
-const string TSO_EXTENSION = "tso";
+const string SALPL_EXTENSION = "sal";
 const string RMA_EXTENSION = "rma";
 const string BSA_EXTENSION = "bsa";
 const string OUT_EXTENSION = "out";
@@ -70,8 +92,28 @@ int main(int argc, char** argv)
 		config::throwCriticalError("No cube size limit specified");
 	}
 
-	config::evaluationMode = argc > 4 && literalCode::EVALUATION_MODE_PARAMETER.compare(argv[4]) == 0;
-	config::verboseMode = argc > 4 && literalCode::VERBOSE_MODE_PARAMETER.compare(argv[4]) == 0;
+	if (argc > 4)
+	{
+		if (literalCode::MEMORY_ORDER_PSO.compare(argv[4]) == 0)
+		{
+			config::memoryOrdering = config::PSO;
+		}
+		else if (literalCode::MEMORY_ORDER_TSO.compare(argv[4]) == 0)
+		{
+			config::memoryOrdering = config::TSO;
+		}
+		else
+		{
+			config::throwCriticalError("Invalid memory ordering scheme");
+		}
+	}
+	else
+	{
+		config::throwCriticalError("No memory ordering scheme specified");
+	}
+
+	config::evaluationMode = argc > 5 && literalCode::EVALUATION_MODE_PARAMETER.compare(argv[5]) == 0;
+	config::verboseMode = argc > 5 && literalCode::VERBOSE_MODE_PARAMETER.compare(argv[5]) == 0;
 
 	// Parse input file (no line breaks are expected)
 	ifstream parsedProgramFile(parsedProgramPath);
@@ -111,13 +153,9 @@ int main(int argc, char** argv)
 		fileNameStub = stringMatch[1].str();
 		extension = stringMatch[2].str();
 
-		if (extension == PSO_EXTENSION)
+		if (extension == SALPL_EXTENSION)
 		{
-			config::currentLanguage = config::language::PSO;
-		}
-		else if (extension == TSO_EXTENSION)
-		{
-			config::currentLanguage = config::language::TSO;
+			config::currentLanguage = config::language::SALPL;
 		}
 		else if (extension == RMA_EXTENSION)
 		{
@@ -259,6 +297,8 @@ int main(int argc, char** argv)
 
 	parsedPredicateFile.close();
 
+	rootAstRef->topDownCascadingLabelAllStatements();
+
 	/*cout << "\n---\nFinal state:\n\n";
 	cout << rootAstRef->getCode();*/
 
@@ -286,6 +326,8 @@ int main(int argc, char** argv)
 	{
 		cout << "\nElapsed time: " << elapsedHours << "h " << elapsedMinutes << "min " << elapsedSeconds << "s\n";
 	}
+
+	cout << fileNameStub << "\tcubes: " << config::implicativeCubes.size() << "\tpredicates: " << config::predicates.size() << "\n";
 
 	return 0;
 }

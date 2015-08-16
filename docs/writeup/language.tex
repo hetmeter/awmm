@@ -1,0 +1,119 @@
+\section{Programming language}
+
+We define a programming language that is both simple and powerful enough to conclusively describe weak memory models to the extent they may be available to the programmer. Throughout this work, we will refer to this language as SALPL, abbreviating the first description of the ``simple assembly-like programming language'' \cite{kupersteinetal10} defined by Kuperstein, Vechev and Yahav in \cite{kupersteinetal10}, on which SALPL is based. A SALPL program has only integer-type variables, but it can perform comparisons that return boolean values, which in turn can be operated on using boolean operators. Boolean values are used in conditionals and may have the values $true$, $false$, or $*$, all of which are also valid literals. Comments are defined as in C, with \lstinline{//} prepending line comments and \lstinline{/*} and \lstinline{*/} enclosing block comments.\\
+
+In this section, we will group code placeholders using $[\:]$-brackets, which might have a * appended for an arbitrary number of the code specified.
+
+\paragraph{Accepting program state}
+
+A valid SALPL program must have the following structure:
+
+\begin{lstlisting}[frame=single, mathescape]
+beginit
+	$[store\:statement]*$
+endinit
+
+$[process\:declaration]*$
+
+$[assertion]$
+\end{lstlisting}
+
+\paragraph{Assertion}
+
+The assertion may be appended to the end of the program. Its syntax is derived from the boolean program syntax used by the Fender \cite{fender} model checker. The boolean expression therein may only refer to global variables, constants, or program counters of the form \lstinline$pc($$i$\lstinline$)$, with $i$ being a valid process index. The value of a program counter may be that of any valid label of the process $i$.
+
+\begin{lstlisting}[frame=single, mathescape]
+assert(always($boolean\:expression$))
+\end{lstlisting}
+
+\paragraph{Process declaration}
+
+Every process must have a unique integer identifier $i$.
+
+\begin{lstlisting}[frame=single, mathescape]
+process $i$:
+	$[statement]*$
+\end{lstlisting}
+
+\paragraph{Statement}
+A $statement$ can be any of the following: \emph{store statement}, \emph{load statement}, \emph{local assignment statement}, \emph{label}, \emph{goto statement}, \emph{flush statement}, \emph{fence statement}, \emph{abort statement}, \emph{nop statement}, \emph{if-else block}.
+
+\paragraph{Store statement}
+Generally, the store statement writes the right-hand side expression to the buffer, pending commitment to remote memory. In the special case where flushes are to be excluded, as it will be the case later on in this work, the store statement may be viewed as an immediate and deterministic remote write operation. The left-hand side identifier must be a global variable.
+
+\begin{lstlisting}[frame=single, mathescape]
+store $variable\:identifier$ = $integer\:expression$;
+\end{lstlisting}
+
+\paragraph{Load statement}
+Generally, the load statement reads the most recent relevant value from the buffer, and it only reads from remote memory if the buffer doesn't contain any values of the desired variable. In the special case where flushes are to be excluded, as it will be the case later on in this work, the load statement may be viewed as an unconditional remote read operation. The left-hand side identifier must be a local variable, while the right-hand side identifier must be a global variable.
+
+\begin{lstlisting}[frame=single, mathescape]
+load $variable\:identifier$ = $variable\:identifier$;
+\end{lstlisting}
+
+\paragraph{Local assignment statement}
+The left-hand side identifier must be a local variable. The \emph{integer expression} may be an integer literal, an integer variable symbol, or any integer operation on them.
+
+\begin{lstlisting}[frame=single, mathescape]
+$variable\:identifier$ = $integer\:expression$;
+\end{lstlisting}
+
+\paragraph{Label}
+The statement following the colon may not be another label. The label value $i$ must be unique within its process.
+
+\begin{lstlisting}[frame=single, mathescape]
+$i$: $statement$
+\end{lstlisting}
+
+\paragraph{Goto statement}
+The label value $i$ must be a valid label within the calling process.
+
+\begin{lstlisting}[frame=single, mathescape]
+goto $i$;
+\end{lstlisting}
+
+\paragraph{Flush statement}
+Flushing will iterate through all global variables and non-deterministically commit the first value of the respective variable to remote memory and remove that value from the buffer. If a variable does not have any values to be committed, it will be ignored.
+
+\begin{lstlisting}[frame=single, mathescape]
+flush;
+\end{lstlisting}
+
+\paragraph{Fence statement}
+Without any operations on the buffer or memory, fences just assume the buffer to be empty from then on. If the buffer is not empty, the fence blocks until it becomes empty.
+
+\begin{lstlisting}[frame=single, mathescape]
+fence;
+\end{lstlisting}
+
+\paragraph{Abort statement}
+Aborts the program with the $message$ argument as the error message.
+
+\begin{lstlisting}[frame=single, mathescape]
+abort("$message$");
+\end{lstlisting}
+
+\paragraph{Nop statement}
+Does nothing.
+
+\begin{lstlisting}[frame=single, mathescape]
+nop;
+\end{lstlisting}
+
+\paragraph{If-else block}
+If the \emph{boolean expression} evaluates to \emph{true}, the \emph{statement} block right after the conditional is carried out, omitting the \emph{else block}, if it exists. If it evaluates to \emph{false}, jumps to the point after the first \emph{statement} block. If it evaluates to \lstinline$*$, i.e. \emph{undecided}, it will non-deterministically simulate an evaluation to either \emph{true}, or \emph{false}.
+
+\begin{lstlisting}[frame=single, mathescape]
+if ($boolean\:expression$)
+	$[statement]*$
+$[else\:block]?$
+endif;
+\end{lstlisting}
+
+with the \emph{else block} being:
+
+\begin{lstlisting}[frame=single, mathescape]
+else
+	$[statement]*$
+\end{lstlisting}

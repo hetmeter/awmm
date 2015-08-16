@@ -1,0 +1,92 @@
+\section{Discussion}
+
+We have implemented a prototype of the tool described above. Out of the features we had envised, the alotted time for this thesis allowed us to build a working prototype that can abstract programs running under PSO. In this section, we discuss our expectations of the tool's behaviour and performance. We also show the results of run time measurements made with the tool and we compare it to the implementation of Dan et al. \cite{danetal13}.
+
+\subsection{Complexity}
+
+We examine the time- and space complexities of the individual phases of our computation:
+
+\subsubsection{Buffer size analysis}
+
+Computing the buffer size increases caused by each program point has a time complexity linear to the number of program points. For PSO programs, computing the actual buffer sizes needed at each program point requires a comparison of all buffer sizes per variable per program point. For TSO programs however, differentiating between variables is not needed. Therefore, the overall time complexity for the buffer size analysis in itself is $\mathcal{O}(mn)$ in PSO, and $\mathcal{O}(m)$ in TSO, with $m$ being the number of program points in $P$, and $n$ being the number of global variables in $P$.\\
+
+Examining the replacement codes of both PSO and TSO, we see that the time we need to generate replacement code blocks is mainly the time of the actual output, as there is no more complex computation necessary to be able to output the code, than the output itself needs. Therefore, generating the replacement codes has the following complexity by statement and store order: store statements: $\mathcal{O}(K)$ in both TSO and PSO; load statements: $\mathcal{O}(K)$ in both TSO and PSO; fence statements: $\mathcal{O}(n)$ in PSO, $\mathcal{O}(K)$ in TSO; flush statements: $\mathcal{O}(nK)$ for TSO and PSO. Therefore, we can conclude that the code replacements following the buffer size analysis are bounded by the $\mathcal{O}(nK)$-complex flush replacement. Since all replaceable statements are program points, the entire process of replacing them is multiplied by $m$ in complexity.\\
+
+Therefore, the buffer size analysis stage has a time complexity of $\mathcal{O}(mnK)$
+
+\subsubsection{Predicate abstraction}
+
+Our implementation of the predicate abstraction performed in accordance with our expectation of the Z3 \cite{z3} calls being by far the most time-consuming, with run time percentages ranging from an average of 43.5\% for Dekker's algorithm, to an average of 76.3\% for the alternating bit protocol, as shown in Table 1. This shows that while complexity reduction is always an issue as long as we have problems of an untractable complexity, reducing the number of satisfiability modulo theory (SMT) solver calls has the most potential for speedup.\\
+
+The complexity of all function calls in the predicate abstraction phase is therefore much less significant than the complexity of the number of SMT calls. Employing the optimisations described in section 4., the number of SMT solver calls is bounded by $|E|$ to the power of the maximum number of terms in a cube. This bound is in practice significantly lower when implicative cubes are found that are below the specified size limit, but this number is highly specific to the algorithm and the corresponding predicates.
+
+\subsection{Evaluation}
+
+We have implemented the procedures as described so far in a tool we call SROTOGAP. Then, we have run numerous tests on the following concurrent algorithms: the alternating bit protocol, Lamport's Bakery Algorithm, Dekker's Algorithm, Peterson's Algorithm, a lock-free queue, and Szyma\'nski's Mutual Exclusion Algorithm. All experiments were conducted on an Intel(R) Core(TM) i7-3770 3.40GHz with 8GB RAM. The key questions were whether the buffer size analysis has significantly shortened the time needed to perform a correct predicate abstraction, and whether the replacement techniques employed in the predicate abstraction stage have warded off the complexity explosion that would have resulted from the na\"ive execution of current predicate analysis methods on the additional predicates spawned from the buffer abstraction.\\
+
+We compare our results to those of Dan et al. \cite{danetal13}, as the measurements had been done on the same algorithms, and the methods were similar. To be more precise: this work seeks to improve on the methods described in \cite{danetal13}, and we hope to show that our modifications have helped to improve the performance of those methods. The modifications done are as follows:\\
+
+\paragraph{Buffer size analysis}
+
+As opposed to Dan et al. \cite{danetal13}, we perform a buffer size analysis on the program in order to be able to minimise the lines of code generated during our replacement phase by seeking to omit parts which we know never to be reached during run-time. We approach this task by statically analising the input, and performing replacements which can be generated in polynomial time.\\
+
+\paragraph{Flush abstraction optimisation}
+
+In \cite{danetal13}, flushes have been modeled in a way that caused each iteration to shift at most $K$ variables, which would have effectively increased the run time of a flush, and the number of program states for each flush operation. In our implementation, the buffer is modelled to be ``immobile'', i.e. a value stored in the buffer is considered to remain in place until it has been flushed or otherwise deleted. This provides us with the following advantages: each flush iteration only adds one state to the set of program states; the time complexity of flushes is dominated by finding the value to be flushed, not iterating over every value in the buffer; and finally, if the buffer size is exceeded at run time, an immobile buffer tail will always trigger an overflow error at the $K + 1$st consecutive store, while the approach in \cite{danetal13} would non-deterministically cause the buffer tail to recede from the buffer size limit with each flush - though this might be beneficial from an efficient resource allocation point of view, we would like to simplify reaching possible erroneous states for purposes of error detection.\\
+
+\pagebreak
+
+\begin{center}
+\textbf{Table 1.} Boolean program generation\\
+\begin{tabular}{|r|r|r|r|r|r|r|}
+	
+	\hline
+	algorithm & \vtop{\hbox{\strut \# input}\hbox{\strut predicates}} & \vtop{\hbox{\strut \# total}\hbox{\strut predicates}} & \vtop{\hbox{\strut \# unique}\hbox{\strut cubes}} & \vtop{\hbox{\strut \# SMT}\hbox{\strut calls}} & time (s) & \vtop{\hbox{\strut maximum}\hbox{\strut cube size}}	\\ \hline
+	Dekker		&	7	&	27	&	15		&	566		&	6.01	&	1	\\ \hline
+	Peterson	&	7	&	27	&	99		&	572		&	4.40	&	2	\\ \hline
+	ABP			&	8	&	12	&	129		&	488		&	2.36	&	2	\\ \hline
+	Szyma\'nski	&	20	&	70	&	801		&	1257	&	10.05	&	2	\\ \hline
+	LF Queue	&	7	&	32	&	939		&	2556	&	15.24	&	4	\\ \hline
+	Bakery		&	15	&	75	&	25931	&	85268	&	974.71	&	4	\\ \hline
+	
+\end{tabular}\\
+
+\paragraph{}
+\textbf{Table 2.} Model checking until error state found\\
+\begin{tabular}{|r|r|r|r|}
+	
+	\hline
+	algorithm & \vtop{\hbox{\strut \# states}\hbox{\strut before error}} & memory used (MB) & evaluation time (s) \\ \hline
+	Dekker		&	98	&	5	&	0.030	\\ \hline
+	Peterson	&	98	&	5	&	0.034	\\ \hline
+	ABP			&	327	&	4	&	0.045	\\ \hline
+	Szyma\'nski	&	247	&	7	&	0.043	\\ \hline
+	LF Queue	&	157	&	24	&	0.388	\\ \hline
+	Bakery		&	310	&	36	&	0.323	\\ \hline
+	
+\end{tabular}
+\end{center}
+
+All measurements were done under PSO with $K = 5$, i.e. the implementation of the principles discussed for TSO is not included in this work. Furthermore, the model checker has judged all abstractions to be incorrect. This proves that the boolean programs generated by our prototype are not yet verifiable by Fender. Though there was no time to completely debug our code, we can still compare the overall performance of the tool, to get an idea of the potential changes in performance and complexity. Note that we omitted evaluating the ticket locking algorithm, although it had been tested in \cite{danetal13}, as our definition of SALPL does not include blocks of atomic code.\\
+
+Comparing the measurements in \cite{danetal13} with ours, we first note that we have worked the sequential consistency predicates although we have abstracted programs under PSO, as it was our goal to abstract programs using only the predicates needed to prove correctness under sequential consistency constraints. The predicates actually generated by our program are far more numerous and their numbers are less expressive, as their number increases with the multitude of variables and the newly generated predicates do not cause any additional SMT calls.\\
+
+Another fact we notice is that SROTOGAP generates about 100 times as many cubes as CUPEX \cite{danetal13} for low cube sizes, but less cubes for high cube sizes. This result should be observed with caution however, as in all cases with the cube size limit being $> 2$, the largest cube disjunction, the disjunction of cubes implying $false$, has timed out in SROTOGAP, which has triggered a halt in that computation, thus preventing the inception of a number of cubes possibly orders of magnitude larger than their counterparts in \danetal{13}. This comes as no surprise, as even without SMT calls, the cubes generated using heuristics grows with the number of total predicates $|E \cup E'|$.\\
+
+The numbers of model checker states are markably lower in our work than they were in \cite{danetal13}. This metric however, along with the other two model checker metrics, is possibly the least significant for our intended comparison, as the model checker has obviously received erroneous outputs from SROTOGAP.
+
+\subsection{Conclusion}
+
+We were unsuccessful in determining whether this work has improved on the methods in \cite{danetal13}. Though the theories on which this work is built are sound, as proven by \cite{danetal13} and \cite{balletal01}, and the expansions thereon are few and simple, the program output is vast, and there can be little information extracted therefrom. This leads us to the first possibility of future development: to write a working implementation of the principles discussed in this work, preferable one that extends SALPL to allow for atomic blocks. Possible further developments in this field are plentiful. We list some of the most apparent aspects that may be improved upon:
+
+\paragraph{TSO implementation}
+
+Though we did describe the procedure of abstracting programs running under TSO, an efficient implementation would complement the findings of this work and \cite{danetal13}.
+
+\paragraph{RMA implementation}
+
+With some modifications to the parsing, and code abstraction phases of this work, the same analysis method can be adapted for programs running under the Remote Memory Access model, a powerful WMM conceived for buffer-free memory access over the network.
+
+\paragraph{Parallelisation}
+
+The entire tool, and all its measurements were ran in a sequential manner. While there are some parallelisation chokepoints in the procedure described in this work, e.g. buffer size analysis, code replacement, other, more important parts, such as the computations necessary for the predicate abstraction, are highly parallelisable. With this in mind, the run time of this tool can be further reduced.

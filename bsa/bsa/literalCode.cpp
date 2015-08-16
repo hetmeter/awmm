@@ -1,3 +1,26 @@
+/*The MIT License(MIT)
+
+Copyright(c) 2015 Attila Zoltán Printz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions :
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 #include "literalCode.h"
 
 namespace literalCode
@@ -61,6 +84,8 @@ namespace literalCode
 		const char AUXILIARY_VARIABLE_SEPARATOR = '_';
 		const char BOOLEAN_VARIABLE_PREFIX = 'B';
 		const char TEMPORARY_VARIABLE_PREFIX = 'T';
+
+		const std::string ABORT_VARIABLE_NAME = "B_ABORT";
 
 /* Token names */
 
@@ -150,6 +175,8 @@ namespace literalCode
 
 /* Parameters */
 
+		const std::string MEMORY_ORDER_PSO = "-pso";
+		const std::string MEMORY_ORDER_TSO = "-tso";
 		const std::string EVALUATION_MODE_PARAMETER = "-e";
 		const std::string VERBOSE_MODE_PARAMETER = "-v";
 }

@@ -28,9 +28,12 @@ namespace config
 	extern bool evaluationMode;
 	extern bool verboseMode;
 	extern int negatedLargestFalseImplicativeDisjunctionSizeThreshold;
-	
-	enum language { PSO, TSO, RMA };
+
+	enum language { SALPL, RMA };
 	extern language currentLanguage;
+
+	enum ordering { PSO, TSO };
+	extern ordering memoryOrdering;
 
 /* Global variables */
 	extern std::map<std::string, VariableEntry*> symbolMap;

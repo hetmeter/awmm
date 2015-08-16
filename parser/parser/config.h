@@ -12,6 +12,8 @@ namespace config
 {
 	extern bool evaluationMode;
 	const extern std::string EVALUATION_MODE_PARAMETER;
+	const extern std::string TSO_PARAMETER;
+	const extern std::string PSO_PARAMETER;
 
 	const extern char DESCRIPTION_RULE_SEPARATOR;
 	const extern std::string WHITESPACES_WITHOUT_SPACE;
@@ -29,9 +31,8 @@ namespace config
 	const extern std::string PREDICATE_EXTENSION;
 	const extern std::string OUT_EXTENSION;
 	const extern std::string RMA_EXTENSION;
-	const extern std::string TSO_EXTENSION;
-	const extern std::string PSO_EXTENSION;
-
+	const extern std::string SALPL_EXTENSION;
+	
 	const extern std::string RMA_LEXER_RULE_FILE_PROPERTY;
 	const extern std::string RMA_PROGRAM_PARSER_RULE_FILE_PROPERTY;
 	const extern std::string RMA_PREDICATE_PARSER_RULE_FILE_PROPERTY;

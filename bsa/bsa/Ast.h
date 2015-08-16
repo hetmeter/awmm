@@ -150,6 +150,7 @@ public:
 	void topDownCascadingPerformPredicateAbstraction();
 	void topDownCascadingReplaceIDNames(const std::string &oldName, const std::string &newName);
 	void topDownCascadingReportBufferSizes(int process = -1);
+	void topDownCascadingLabelAllStatements();
 	void controlFlowDirectionCascadingPropagateTops();
 	void performBufferSizeAnalysisReplacements();
 	void generateBooleanVariableInitializations();

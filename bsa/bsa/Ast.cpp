@@ -1,3 +1,26 @@
+/*The MIT License(MIT)
+
+Copyright(c) 2015 Attila Zoltán Printz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions :
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 /*
 A node of the abstract semantic tree. Its type is contained in the name variable, unless it's an identifier's name or an integer value.
 It can hold buffer size maps containing the buffer size increases caused by the program point it's representing, and the buffer size
@@ -245,6 +268,7 @@ using namespace std;
 				}
 
 				Ast* sharedVars = newSharedVariables(auxiliaryBooleanVariableNames);
+				sharedVars->insertChild(newID(literalCode::ABORT_VARIABLE_NAME));
 				Ast* localVars = newLocalVariables(auxiliaryTemporaryVariableNames);
 
 				insertChild(localVars, 0);
@@ -303,12 +327,6 @@ using namespace std;
 					currentParallelLHS.clear();
 					currentPhiPredicate = config::predicates[phi];
 
-					if (getCode() == "y2_2_2 = 0;")
-					{
-						int d = 5;
-						d++;
-					}
-
 					WP_phi = config::getWeakestLiberalPrecondition(effectiveAssignment, currentPhiPredicate->getPredicateAst());
 					WP_notPhi = config::getWeakestLiberalPrecondition(effectiveAssignment, currentPhiPredicate->getPredicateAst()->negate());
 
@@ -328,13 +346,6 @@ using namespace std;
 							config::getLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, WP_notPhi)
 						);
 
-					if (getCode() == "y2_2_2 = 0;")
-					{
-						int c = 5;
-						string s = chooseExpression->getCode();
-						c++;
-					}
-
 					if (LHSidentifier.compare(effectiveLHSidentifier) != 0)
 					{
 						chooseExpression->expandIDNodes(LHSidentifier, process);
@@ -346,7 +357,13 @@ using namespace std;
 					}
 				}
 
-				replacementStatements.push_back(newBeginAtomic());
+				bool isInInitializationBlock = _parent->getName() != literalCode::INITIALIZATION_BLOCK_TOKEN_NAME ||
+					_parent->getName() != literalCode::BL_INITIALIZATION_BLOCK_TOKEN_NAME;
+
+				if (!isInInitializationBlock)
+				{
+					replacementStatements.push_back(newBeginAtomic());
+				}
 
 				string currentBooleanVariableName;
 
@@ -374,7 +391,10 @@ using namespace std;
 
 				replacementStatements.push_back(
 					config::getAssumptionOfNegatedLargestFalseImplicativeDisjunctionOfCubes());
-				replacementStatements.push_back(Ast::newEndAtomic());
+				if (!isInInitializationBlock)
+				{
+					replacementStatements.push_back(Ast::newEndAtomic());
+				}
 
 				replacementStatements[0]->setStartComment(literalCode::PREDICATE_ABSTRACTION_COMMENT_PREFIX + getCode());
 
@@ -391,6 +411,13 @@ using namespace std;
 			}
 			else if (_name == literalCode::ASSERT_TOKEN_NAME)
 			{
+				Ast* newConjunction = newBinaryOp(_children[0], newBinaryOp(newID(literalCode::ABORT_VARIABLE_NAME), newINT(0), literalCode::EQUALS),
+					literalCode::DOUBLE_AND);
+				_children[0]->setParent(newConjunction);
+				newConjunction->setParent(this);
+				_children.erase(_children.begin());
+				_children.push_back(newConjunction);
+
 				vector<Ast*> nonPcAssertions;
 				vector<Ast*> currentReplacement;
 				Ast* leftSide;
@@ -430,13 +457,32 @@ using namespace std;
 					}
 				}
 
+				set<string> tempSet;
+
 				for (Ast* nonPcAssertion : nonPcAssertions)
 				{
-					currentReplacement.clear();
-					currentReplacement.push_back(config::getLargestImplicativeDisjunctionOfCubes(
-						config::globalCubeSizeLimit, nonPcAssertion, false));
-					config::prepareNodeForLazyReplacement(currentReplacement, nonPcAssertion);
+					tempSet = nonPcAssertion->getIDset();
+
+					if (tempSet.find(literalCode::ABORT_VARIABLE_NAME) == tempSet.end())
+					{
+						currentReplacement.clear();
+						currentReplacement.push_back(config::getLargestImplicativeDisjunctionOfCubes(
+							config::globalCubeSizeLimit, nonPcAssertion, false));
+						config::prepareNodeForLazyReplacement(currentReplacement, nonPcAssertion);
+					}
 				}
+
+				result = true;
+			}
+			else if (_name == literalCode::ABORT_TOKEN_NAME)
+			{
+				replaceNodeWithoutDeletions(newStore(literalCode::ABORT_VARIABLE_NAME, newINT(1)));
+
+				result = true;
+			}
+			else if (_name == literalCode::GOTO_TOKEN_NAME && _parent->getName() != literalCode::BL_IF_TOKEN_NAME)
+			{
+				replaceNodeWithoutDeletions(newBooleanIf(newTrue(), clone()));
 
 				result = true;
 			}
@@ -484,6 +530,20 @@ using namespace std;
 	{
 		if (!_codeIsValid)
 		{
+			if (_name == literalCode::LABEL_TOKEN_NAME && (!_children[0]->getStartComment().empty() || _children[0]->getEndComment().empty()))
+			{
+				_startComment = _children[0]->getStartComment();
+				_endComment = _children[0]->getEndComment();
+				_children[0]->setStartComment("");
+				_children[0]->setEndComment("");
+			}
+
+			if (_name == literalCode::LABEL_TOKEN_NAME && _children[0]->getName() == "6680")
+			{
+				int c = 25;
+				//config::throwCriticalError("");
+			}
+
 			string result = "";
 			bool isBooleanProgramNode = false;
 			int childrenCount;
@@ -635,7 +695,14 @@ using namespace std;
 						result.insert(result.begin(), '\n');
 					}
 
-					result += _children.at(0)->getName() + literalCode::COLON + literalCode::SPACE + _children.at(1)->getCode();
+					string interjection = "";
+
+					if (_children.at(1)->getName() == literalCode::LABEL_TOKEN_NAME)
+					{
+						interjection = literalCode::NOP_TOKEN_NAME + literalCode::SEMICOLON + "\n";
+					}
+
+					result += _children.at(0)->getName() + literalCode::COLON + literalCode::SPACE + interjection + _children.at(1)->getCode();
 				}
 				else if (_name == literalCode::LOCAL_ASSIGN_TOKEN_NAME)
 				{
@@ -848,7 +915,14 @@ using namespace std;
 						result.insert(result.begin(), '\n');
 					}
 
-					result += _children.at(0)->getName() + literalCode::COLON + literalCode::SPACE + _children.at(1)->getCode();
+					string interjection = "";
+
+					if (_children.at(1)->getName() == literalCode::LABEL_TOKEN_NAME)
+					{
+						interjection = literalCode::NOP_TOKEN_NAME + literalCode::SEMICOLON + "\n";
+					}
+
+					result += _children.at(0)->getName() + literalCode::COLON + literalCode::SPACE + interjection + _children.at(1)->getCode();
 				}
 				else if (_name == literalCode::IF_ELSE_TOKEN_NAME)
 				{
@@ -1009,7 +1083,16 @@ using namespace std;
 	void Ast::insertChild(Ast* newChild, int index)
 	{
 		newChild->setParent(this);
-		_children.insert(_children.begin() + index, newChild);
+
+		if (index < _children.size())
+		{
+			_children.insert(_children.begin() + index, newChild);
+		}
+		else
+		{
+			_children.push_back(newChild);
+		}
+
 		invalidateCode();
 
 		_childrenCount = _children.size();
@@ -1090,6 +1173,7 @@ using namespace std;
 	void Ast::setStartComment(const string &value)
 	{
 		_startComment = value;
+		invalidateCode();
 	}
 
 	const string Ast::getEndComment()
@@ -1100,6 +1184,7 @@ using namespace std;
 	void Ast::setEndComment(const string &value)
 	{
 		_endComment = value;
+		invalidateCode();
 	}
 
 	int Ast::getIndexAsChild()
@@ -1244,6 +1329,7 @@ using namespace std;
 		vector<Ast*> replacementStatements;
 		vector<Ast*> currentStatements;
 		Ast* conditional;
+		bool conditionalIsAsterisk;
 		Ast* firstStatement;
 		int elseLabel;
 		int endLabel;
@@ -1300,15 +1386,19 @@ using namespace std;
 			label = ifElseStatementData.second.second;
 
 			conditional = currentIfElseStatement->getChild(0);
+			conditionalIsAsterisk = conditional->getName() == literalCode::ASTERISK_TOKEN_NAME;
 			elseLabel = hasElse ? config::getCurrentAuxiliaryLabel() : -1;
 			endLabel = config::getCurrentAuxiliaryLabel();
 
 			replacementStatements.clear();
 			currentStatements.clear();
 
-			replacementStatements.push_back(newAssume(
-					newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional))
-				);
+			if (!conditionalIsAsterisk)
+			{
+				replacementStatements.push_back(newAssume(
+						newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional))
+					);
+			}
 
 			currentStatements = currentIfElseStatement->getChild(1)->getChildren();
 			replacementStatements.insert(replacementStatements.end(), currentStatements.begin(), currentStatements.end());
@@ -1320,12 +1410,9 @@ using namespace std;
 				replacementStatements.push_back(
 						newLabel(
 							elseLabel,
-							newAssume(
-								newReverseLargestImplicativeDisjunctionOfCubes(
-									config::globalCubeSizeLimit,
-									conditional->negate()
-								)
-							)
+							conditionalIsAsterisk ? newAssume(
+								newReverseLargestImplicativeDisjunctionOfCubes(config::globalCubeSizeLimit, conditional->negate())
+							) : newNop()
 						)
 					);
 
@@ -1800,9 +1887,18 @@ using namespace std;
 
 	Ast* Ast::newLabel(int value, Ast* statement)
 	{
+		string startComment = statement->getStartComment();
+		statement->setStartComment("");
+		string endComment = statement->getEndComment();
+		statement->setEndComment("");
+
 		Ast* result = new Ast(literalCode::LABEL_TOKEN_NAME);
 		result->insertChild(new Ast(to_string(value)));
 		result->insertChild(statement);
+
+		result->setStartComment(startComment);
+		result->setEndComment(endComment);
+
 		return result;
 	}
 
@@ -2409,6 +2505,36 @@ using namespace std;
 		}
 	}
 
+	void Ast::topDownCascadingLabelAllStatements()
+	{
+		if (_name == literalCode::STATEMENTS_TOKEN_NAME || _name == literalCode::INITIALIZATION_BLOCK_TOKEN_NAME ||
+			_name == literalCode::BL_INITIALIZATION_BLOCK_TOKEN_NAME)
+		{
+			Ast* currentLabel;
+
+			for (int ctr = 0; ctr < _childrenCount; ++ctr)
+			{
+				if (_children[ctr]->getName() != literalCode::LABEL_TOKEN_NAME)
+				{
+					currentLabel = newLabel(config::getCurrentAuxiliaryLabel(), _children[ctr]);
+					currentLabel->setStartComment(_children[ctr]->getStartComment());
+					currentLabel->setEndComment(_children[ctr]->getEndComment());
+					_children[ctr]->setStartComment("");
+					_children[ctr]->setEndComment("");
+					_children[ctr]->setParent(currentLabel);
+					_children.erase(_children.begin() + ctr);
+					_children.insert(_children.begin() + ctr, currentLabel);
+					_children[ctr]->invalidateCode();
+				}
+			}
+		}
+
+		for (int ctr = 0; ctr < _childrenCount; ++ctr)
+		{
+			_children[ctr]->topDownCascadingLabelAllStatements();
+		}
+	}
+
 	void Ast::performBufferSizeAnalysisReplacements()
 	{
 		if (config::currentLanguage == config::language::RMA)
@@ -2416,12 +2542,12 @@ using namespace std;
 			// TODO
 			config::throwError("Buffer size analysis not implemented for RMA");
 		}
-		else if (config::currentLanguage == config::language::PSO)
+		else if (config::currentLanguage == config::language::SALPL && config::memoryOrdering == config::TSO)
 		{
 			// TODO
-			config::throwError("Buffer size analysis not implemented for PSO");
+			config::throwError("Buffer size analysis not implemented for TSO");
 		}
-		else
+		else if (config::currentLanguage == config::language::SALPL && config::memoryOrdering == config::PSO)
 		{
 			if (_name == literalCode::PSO_TSO_STORE_TOKEN_NAME ||
 				_name == literalCode::PSO_TSO_LOAD_TOKEN_NAME ||
@@ -2554,15 +2680,22 @@ using namespace std;
 								s = max(1, persistentWriteCost[globalVariableName]);
 							}
 
-							currentThenStatements.push_back(newStore(globalVariableName, newID(bufferVariables[s - 1])));
-							currentElseStatements.push_back(newStore(globalVariableName, newID(bufferVariables[s - 2])));
-							currentIfElse = newIfElse(
-									newBinaryOp(newID(x_fst_t), newINT(s - 1), string(1, literalCode::GREATER_THAN)),
-									currentThenStatements,
-									currentElseStatements
-								);
+							if (s > 1)
+							{
+								currentThenStatements.push_back(newStore(globalVariableName, newID(bufferVariables[s - 1])));
+								currentElseStatements.push_back(newStore(globalVariableName, newID(bufferVariables[s - 2])));
+								currentIfElse = newIfElse(
+										newBinaryOp(newID(x_fst_t), newINT(s - 1), string(1, literalCode::GREATER_THAN)),
+										currentThenStatements,
+										currentElseStatements
+									);
+							}
+							else
+							{
+								currentIfElse = newStore(globalVariableName, newID(bufferVariables[s - 1]));
+							}
 
-							for (int i = s - 2; i >= 0; i++)
+							for (int i = s - 1; i > 0; --i)
 							{
 								currentThenStatements.clear();
 								currentElseStatements.clear();
@@ -2678,6 +2811,8 @@ using namespace std;
 				assignmentBlock.push_back(newLabel(config::getCurrentAuxiliaryLabel(),
 					newLocalAssign(it->second->getSingleTemporaryVariableName(), newINT(0))));
 			}
+
+			assignmentBlock.push_back(newLabel(config::getCurrentAuxiliaryLabel(), newStore(literalCode::ABORT_VARIABLE_NAME, newINT(0))));
 
 			assignmentBlock[0]->setStartComment("Resetting local variables");
 			_children[2]->insertChildren(assignmentBlock);
